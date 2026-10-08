@@ -63,7 +63,7 @@ For each coding-phase handoff, list tests added/updated or existing coverage reu
 
 ### Phase 1 — App foundation (2026-10-08)
 
-Status: **IMPLEMENTED — VERIFICATION PENDING**. Phase 0 was rechecked before changes. Phase 2 is **NOT STARTED**. Android build and automated foundation checks pass; iOS and the complete native visual/accessibility matrix remain pending.
+Status: **IMPLEMENTED — VERIFICATION PENDING**. Phase 0 was rechecked before changes. The results below describe the Phase 1 handoff; current Phase 2 status is recorded separately. Android build and automated foundation checks pass; iOS and the complete native visual/accessibility matrix remain pending.
 
 - `App.tsx` wires the existing SafeAreaProvider to LanguageProvider, ThemeProvider, and AppNavigator. `src/app/` defines four tabs plus native-stack Details/Edit routes. These routes contain explicit unfinished notices, no sample transactions or successful writes. Transaction route parameters are deferred to the real history flow.
 - `src/theme/` centralizes the documented light/dark semantic palettes, typography, spacing, radii, and sizing. The additional `contentMaxWidth` token is 640 logical units to constrain readable content on wider screens. `useAppTheme` resolves a session-only mode against the existing reactive React Native `useColorScheme` hook; system/null resolves to light. Status bar text and navigator surfaces use the resolved theme. Foundation transitions are static, including when Reduce Motion is enabled.
@@ -95,6 +95,40 @@ One read-only subagent reviewed changed code/tests against the documentation. No
 Outstanding decisions/limitations: final bundle/application identifiers are not agreed; keep existing identifiers. The undo window remains `MUST_BE_DEFINED_BEFORE_IMPLEMENTATION` for Phase 5. The repository ignore rules include `docs/`. This handoff is explicitly included in the Phase 1 commit at the user's request; ignore rules were not changed. Persisted theme/language/default-platform preferences remain Phase 3 work.
 
 Phase 2 prerequisites: a separate user assignment; preserve this foundation and its passing checks; implement only pure transaction types, parsing/validation, change/tip/quick-value calculations, calendar boundaries, and summary arithmetic with meaningful money/invariant/DST tests. Do not introduce SQL, payment screens, or persistence. Carry forward iOS/native acceptance limitations; no full cross-platform completion claim until the required checks pass.
+
+### Phase 2 — Pure domain logic (2026-10-08)
+
+Status: **COMPLETE** for the assigned pure-domain scope. Phase 3 is **NOT STARTED**. Phase 1 native acceptance limitations remain pending; this status does not imply full MVP or cross-platform acceptance. The working tree was clean at the start, on Phase 1 commit `28599c8`; no prerequisite blocked independent domain work.
+
+Implemented files and flow:
+
+- `src/features/transactions/types.ts`: documented Platform and CashTransaction types, stable platform list, and explicit numeric payment inputs. No IDs or timestamps are generated here; Phase 3 owns pending-operation ID reuse and persistence.
+- `src/features/transactions/money.ts`: comma/period parser with incomplete/invalid/focused-draft/valid results, trailing separator handling after blur, integer-cent conversion, safe-integer validation, positive fare rule, and the documented 999,999-cent input maximum. A `draft` result is not confirmation-ready even though it includes parsed cents. No display formatting is passed back to the parser.
+- `src/features/transactions/payment.ts`: validation and derived change/tip/retained cash, separate insufficient-payment results without clamping, pure monetary edit handling that clears tip when amounts change, the documented ascending quick candidates (up to three), quick replacement with tip reset, and Exacto for any valid fare. Invalid quick selections throw; Exacto returns null for an invalid fare. All inputs are explicit and are not mutated.
+- `src/features/summary/periods.ts`: explicit reference Date, period, and IANA timeZone inputs; caller will pass the current device zone during later integration. Gregorian calendar construction uses Date/Intl and resolves each boundary independently to UTC, including DST offsets, midnight gaps, and repeated midnights. Fixed internal locale/numbering prevents UI language from changing calendar arithmetic. No Date.now, default current date, process timezone mutation, UI, or state is used. `isWithinPeriod` implements start-inclusive/end-exclusive membership. Invalid dates/zones/bounds fail visibly.
+- `src/features/summary/summary.ts`: aggregates explicitly supplied records (already selected for the requested period/platform) into count, fare, tip, retained cash, rounded fare average, and fare by platform. It reuses payment validation to reject inconsistent monetary rows; summaries do not count received cash as revenue or add tips twice. Empty input returns zeros. Average uses integer quotient/remainder rounding; half-cent ties round upward. Safe-integer addition is guarded.
+- `__tests__/money.test.ts`, `payment.test.ts`, `summary.test.ts`, `periods.test.ts`: documented parser examples and malformed/boundary input; exact/change/insufficient/full-tip cases; monetary invariants; quick/Exacto and immutable edits; empty/mixed summaries, all platforms, rounding and corrupt arithmetic; Monday/Sunday weeks, year/month/leap-day transitions, half-open membership, explicit zones, DST 23/25-hour days, DST week/month changes, midnight gap and repeated midnight.
+
+Dependencies: none added or changed. Custom hooks: none added; the calculations are ordinary TypeScript functions. Existing UI, navigation, providers, configurations, and Phase 1 tests were preserved. No SQLite, services/repositories, saved settings, payment/history screen flows, or native changes were introduced.
+
+Verification:
+
+| Check | Actual result |
+| --- | --- |
+| `node node_modules/typescript/bin/tsc --noEmit` | PASS |
+| `node node_modules/eslint/bin/eslint.js . --no-cache` | PASS |
+| Full existing Jest command: `node node_modules/jest/bin/jest.js --runInBand --no-cache --watch=false`, command-scoped `TZ=UTC` | PASS: 8 suites, 100 tests, including Phase 1 regression coverage |
+| Domain-only Jest run with command-scoped `TZ=America/Los_Angeles` and a temporary config under ignored `node_modules/.cache/cash-driver/domain-jest.json` | PASS: 4 suites, 90 tests; Node test environment, Babel transform, no React Native preset or setup. Date tests themselves pass explicit zones and fixed ISO references, independently of the host zone/time |
+| `git diff --check` and source review | PASS; domain sources have no React Native/UI/storage imports or current-time/global-state reads |
+| Android/iOS native checks | No new native build or device acceptance run in this pure phase. Phase 1 Android build/emulator results stand; **iOS NOT VERIFIED** and broader native acceptance remain pending |
+
+Jest used the previously verified command-scoped workspace TEMP/TMP and approved execution mechanism for the sandbox Windows realpath restriction. No runtime patches, test suppressions, forced exits, or changes to shared test configuration were needed. The temporary domain-only test config is not a project configuration change and is not tracked.
+
+One subagent performed a read-only calculation/test review against the documentation. No confirmed defect was found. Its repeated-midnight coverage gap was addressed with the America/Havana fixed-date case and both relevant and full tests were rerun successfully. Pure tests validate domain results, not native Intl behavior; device calendar/formatting integration remains part of later native acceptance.
+
+Blockers: none for Phase 2. Carry-forward decisions: final app identifiers remain unagreed; undo duration remains a Phase 5 owner decision. Do not reinterpret Phase 2 completion as Phase 1 iOS acceptance or full MVP completion.
+
+Phase 3 prerequisites: a separate user assignment; verify a SQLite candidate against the installed RN/native architecture on Android/iOS before adoption; define versioned non-destructive transaction/preference migrations; reuse these pure validators/calculations in services; verify integer bindings, atomic writes, duplicate-ID retries, failure preservation, preference restoration, refresh behavior, and native restart persistence. The model comment requires one ID per pending operation, reused on retries. Do not silently reset corrupt storage or move SQL into screens. Phase 3 has not begun.
 
 ## Required automated checks
 
