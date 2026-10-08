@@ -1,5 +1,11 @@
-import React, { createContext, useContext, useState } from 'react';
-import { Language, locales, translate, TranslationKey } from './translations';
+import React, { createContext, useContext } from 'react';
+import {
+  Language,
+  locales,
+  translate,
+  TranslationKey,
+} from './translations';
+import { usePersistence } from '../app/PersistenceProvider';
 interface LanguageContextValue {
   language: Language;
   locale: string;
@@ -10,7 +16,11 @@ const LanguageContext = createContext<LanguageContextValue | undefined>(
   undefined,
 );
 export function LanguageProvider({ children }: React.PropsWithChildren) {
-  const [language, setLanguage] = useState<Language>('es');
+  const { preferences, updatePreferences } = usePersistence();
+  const language = preferences.language;
+  const setLanguage = (nextLanguage: Language) => {
+    updatePreferences({ language: nextLanguage });
+  };
   return (
     <LanguageContext.Provider
       value={{

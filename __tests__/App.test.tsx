@@ -7,10 +7,21 @@ import { AppNavigator } from '../src/app/AppNavigator';
 import { RootStackParamList } from '../src/app/navigationTypes';
 import { LanguageProvider } from '../src/i18n/LanguageProvider';
 import { ThemeProvider } from '../src/theme/ThemeProvider';
+import { PersistenceProvider } from '../src/app/PersistenceProvider';
+import { Persistence } from '../src/app/persistence';
+import { SqlConnection } from '../src/database/sqlite';
+import { openTestDatabase, testPersistence } from './sqliteTestDatabase';
 
 let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
 
-beforeEach(() => jest.useFakeTimers());
+let db: SqlConnection;
+let initialize: () => Promise<Persistence>;
+beforeEach(async () => {
+  jest.useFakeTimers();
+  db = openTestDatabase();
+  const services = await testPersistence(db);
+  initialize = async () => services;
+});
 afterEach(async () => {
   await act(async () => {
     renderer?.unmount();
@@ -18,6 +29,7 @@ afterEach(async () => {
   });
   renderer = undefined;
   jest.useRealTimers();
+  db.close();
 });
 
 async function mount(element: React.ReactElement) {
@@ -55,17 +67,19 @@ function foundation(
 ) {
   return (
     <SafeAreaProvider>
-      <LanguageProvider>
-        <ThemeProvider>
-          <AppNavigator navigationRef={ref} />
-        </ThemeProvider>
-      </LanguageProvider>
+      <PersistenceProvider initialize={initialize}>
+        <LanguageProvider>
+          <ThemeProvider>
+            <AppNavigator navigationRef={ref} />
+          </ThemeProvider>
+        </LanguageProvider>
+      </PersistenceProvider>
     </SafeAreaProvider>
   );
 }
 
 test('boots in Spanish with four accessible tabs and an explicit unfinished screen', async () => {
-  const app = await mount(<App />);
+  const app = await mount(<App initialize={initialize} />);
   const tabs = app.root
     .findAll(node => typeof node.props.onPress === 'function')
     .filter(node => node.props.accessibilityRole === 'tab');
@@ -115,7 +129,9 @@ test('language and theme changes preserve navigation and localize the mounted UI
   const routeKey = ref.getCurrentRoute()?.key;
   await press(app, 'radio', 'English');
   expect(ref.getCurrentRoute()?.key).toBe(routeKey);
-  expect(JSON.stringify(app.toJSON())).toContain('They are not saved.');
+  expect(JSON.stringify(app.toJSON())).toContain(
+    'Language and theme are saved on this device.',
+  );
   await press(app, 'radio', 'Dark');
   expect(ref.getCurrentRoute()?.key).toBe(routeKey);
   expect(JSON.stringify(app.toJSON())).toContain('#101714');

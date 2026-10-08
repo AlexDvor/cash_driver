@@ -5,6 +5,7 @@ import { radii, sizing, spacing } from '../theme/tokens';
 import { AppText } from './AppText';
 
 interface ChoiceGroupProps<Value extends string> {
+  disabled?: boolean;
   label: string;
   options: { value: Value; label: string }[];
   value: Value;
@@ -12,6 +13,7 @@ interface ChoiceGroupProps<Value extends string> {
 }
 
 export function ChoiceGroup<Value extends string>({
+  disabled = false,
   label,
   options,
   value,
@@ -31,7 +33,8 @@ export function ChoiceGroup<Value extends string>({
               key={option.value}
               accessibilityRole="radio"
               accessibilityLabel={option.label}
-              accessibilityState={{ selected }}
+              accessibilityState={{ selected, disabled }}
+              disabled={disabled}
               onPress={() => onChange(option.value)}
               style={({ pressed }) => [
                 styles.choice,

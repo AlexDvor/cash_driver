@@ -4,6 +4,8 @@ import ReactTestRenderer, { act } from 'react-test-renderer';
 import { ThemeProvider, useAppTheme } from '../src/theme/ThemeProvider';
 import { ChoiceGroup } from '../src/components/ChoiceGroup';
 import { ThemeMode } from '../src/theme/resolveTheme';
+import { PersistenceProvider } from '../src/app/PersistenceProvider';
+import { openTestDatabase, testPersistence } from './sqliteTestDatabase';
 
 // Exercise the real subscription hook instead of the preset's fixed light mock.
 jest.unmock('react-native/Libraries/Utilities/useColorScheme');
@@ -43,12 +45,17 @@ test('reacts to system changes, keeps explicit override, and unsubscribes on unm
     });
   let app: ReactTestRenderer.ReactTestRenderer | undefined;
   let subscriptionCount = 0;
+  const db = openTestDatabase();
+  const services = await testPersistence(db);
+  const initialize = async () => services;
   try {
     await act(async () => {
       app = ReactTestRenderer.create(
-        <ThemeProvider>
-          <ThemeProbe />
-        </ThemeProvider>,
+        <PersistenceProvider initialize={initialize}>
+          <ThemeProvider>
+            <ThemeProbe />
+          </ThemeProvider>
+        </PersistenceProvider>,
       );
     });
     if (!app) {
@@ -93,6 +100,7 @@ test('reacts to system changes, keeps explicit override, and unsubscribes on unm
     await act(async () => app?.unmount());
     getScheme.mockRestore();
     subscribe.mockRestore();
+    db.close();
   }
   expect(subscriptionCount).toBeGreaterThan(0);
   expect(remove).toHaveBeenCalledTimes(subscriptionCount);

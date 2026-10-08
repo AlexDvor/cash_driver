@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext } from 'react';
 import { StatusBar, useColorScheme } from 'react-native';
 import { palettes, Palette } from './tokens';
 import { EffectiveTheme, resolveTheme, ThemeMode } from './resolveTheme';
+import { usePersistence } from '../app/PersistenceProvider';
 interface ThemeContextValue {
   mode: ThemeMode;
   appearance: EffectiveTheme;
@@ -10,8 +11,11 @@ interface ThemeContextValue {
 }
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 export function ThemeProvider({ children }: React.PropsWithChildren) {
-  // Session-only foundation. SQLite preference restoration belongs to Phase 3.
-  const [mode, setMode] = useState<ThemeMode>('system');
+  const { preferences, updatePreferences } = usePersistence();
+  const mode = preferences.themeMode;
+  const setMode = (nextMode: ThemeMode) => {
+    updatePreferences({ themeMode: nextMode });
+  };
   const appearance = resolveTheme(mode, useColorScheme());
   const colors = palettes[appearance];
   return (

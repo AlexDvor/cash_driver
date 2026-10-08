@@ -1,6 +1,15 @@
 export type Language = 'es' | 'en' | 'uk';
 export const es = {
   appName: 'Cash Driver',
+  storageLoading: 'Cargando datos locales',
+  storageFailed:
+    'No se pueden abrir los datos locales. No se han borrado. Reintenta.',
+  retry: 'Reintentar',
+  preferencesSaved: 'El idioma y el tema se guardan en este dispositivo.',
+  preferencesWriteFailed:
+    'No se pudo guardar la preferencia. Se conserva la selección anterior. Reintenta.',
+  themeWriteFailed:
+    'No se pudo guardar el tema. Se conserva el tema anterior. Reintenta.',
   home: 'Inicio',
   history: 'Historial',
   summary: 'Resumen',
@@ -13,16 +22,13 @@ export const es = {
   homePending:
     'El formulario de cobro estará disponible en una fase posterior.',
   historyPending: 'El historial y sus filtros todavía no están implementados.',
-  summaryPending:
-    'Los totales estarán disponibles cuando se implemente el almacenamiento local.',
+  summaryPending: 'La pantalla de totales todavía no está implementada.',
   detailsPending:
     'La ruta de detalles está preparada. Todavía no se cargan operaciones.',
   editPending:
     'La ruta de edición está preparada. Todavía no se pueden modificar operaciones.',
   settingsPending:
-    'Las preferencias persistentes y las demás opciones se añadirán en una fase posterior.',
-  sessionOnly:
-    'Vista previa: el idioma y el tema solo se aplican durante esta sesión. No se guardan.',
+    'Los controles de plataforma, vibración y las demás opciones se añadirán en una fase posterior.',
   language: 'Idioma',
   theme: 'Tema',
   light: 'Claro',
@@ -35,6 +41,14 @@ export type TranslationKey = keyof typeof es;
 type Dictionary = Record<TranslationKey, string>;
 export const en: Dictionary = {
   appName: 'Cash Driver',
+  storageLoading: 'Loading local data',
+  storageFailed: 'Cannot open local data. It has not been deleted. Retry.',
+  retry: 'Retry',
+  preferencesSaved: 'Language and theme are saved on this device.',
+  preferencesWriteFailed:
+    'Could not save the preference. The previous selection is retained. Retry.',
+  themeWriteFailed:
+    'Could not save the theme. The previous theme is retained. Retry.',
   home: 'Home',
   history: 'History',
   summary: 'Summary',
@@ -46,15 +60,13 @@ export const en: Dictionary = {
   unfinished: 'In development',
   homePending: 'The payment form will be available in a later phase.',
   historyPending: 'History and its filters are not implemented yet.',
-  summaryPending: 'Totals will be available once local storage is implemented.',
+  summaryPending: 'The totals screen is not implemented yet.',
   detailsPending:
     'The details route is ready. Transactions are not loaded yet.',
   editPending:
     'The editing route is ready. Transactions cannot be changed yet.',
   settingsPending:
-    'Persistent preferences and other settings will be added in a later phase.',
-  sessionOnly:
-    'Preview: language and theme apply only during this session. They are not saved.',
+    'Platform, haptics and other settings controls will be added in a later phase.',
   language: 'Language',
   theme: 'Theme',
   light: 'Light',
@@ -65,6 +77,15 @@ export const en: Dictionary = {
 };
 export const uk: Dictionary = {
   appName: 'Cash Driver',
+  storageLoading: 'Завантаження локальних даних',
+  storageFailed:
+    'Не вдалося відкрити локальні дані. Їх не видалено. Повторіть спробу.',
+  retry: 'Повторити',
+  preferencesSaved: 'Мова й тема зберігаються на цьому пристрої.',
+  preferencesWriteFailed:
+    'Не вдалося зберегти налаштування. Залишено попередній вибір. Повторіть спробу.',
+  themeWriteFailed:
+    'Не вдалося зберегти тему. Залишено попередню тему. Повторіть спробу.',
   home: 'Головна',
   history: 'Історія',
   summary: 'Підсумки',
@@ -76,16 +97,13 @@ export const uk: Dictionary = {
   unfinished: 'У розробці',
   homePending: 'Форма оплати буде доступна на наступному етапі.',
   historyPending: 'Історія та її фільтри ще не реалізовані.',
-  summaryPending:
-    'Підсумки будуть доступні після реалізації локального сховища.',
+  summaryPending: 'Екран підсумків ще не реалізовано.',
   detailsPending:
     'Маршрут деталей підготовлено. Операції ще не завантажуються.',
   editPending:
     'Маршрут редагування підготовлено. Змінювати операції ще неможливо.',
   settingsPending:
-    'Збереження налаштувань та інші параметри з’являться на наступному етапі.',
-  sessionOnly:
-    'Попередній перегляд: мова й тема діють лише протягом цього сеансу та не зберігаються.',
+    'Елементи вибору платформи, вібровідгуку та інші параметри з’являться на наступному етапі.',
   language: 'Мова',
   theme: 'Тема',
   light: 'Світла',
