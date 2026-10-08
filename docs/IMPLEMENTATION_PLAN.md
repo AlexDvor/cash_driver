@@ -240,6 +240,43 @@ One subagent reviewed docs/code/tests read-only. It found Undo/error notice inac
 
 Remaining blockers: no unresolved duration or domain decision blocks this implementation. iOS/exhaustive native verification prevents COMPLETE. Initial haptics choice and final identifiers remain carry-forward owner decisions for their assigned scope. Phase 6 prerequisites: a separate assignment; reuse persisted transactions, existing period/summary calculations and successful-mutation subscriptions, keeping pending rows included until delete commit; implement summary loading/error/empty/refresh without double-counting tips. No full Resumen/Ajustes, delete-all, backup or Phase 6 work was added.
 
+### Phase 6 — Resumen (2026-10-08)
+
+Status: **IMPLEMENTED / VERIFICATION PENDING — not COMPLETE**. Resumen and its automated checks are implemented; Android build and selected native scenarios pass. **iOS NOT VERIFIED** because this Windows host has no macOS/Xcode or iOS runtime. Phase 7 is **NOT STARTED**.
+
+Prerequisites: reread AGENTS and its linked specifications/standards, inspected screen.png and current Phase 5 code/Progress on commit `9100411`. No unresolved domain rule blocks Resumen. Reused persisted transaction services/repositories, successful-commit notifications, existing integer-cent summary and DST-aware calendar functions, local clock, translations, navigation and themed primitives. The unrelated whitespace-only `src/theme/resolveTheme.ts` change present before this phase was preserved. No dependencies, identifiers, schema, SQL repositories, monetary formulas or completed payment/history infrastructure were changed.
+
+Changed files:
+
+- `src/features/summary/SummaryScreen.tsx`: Hoy/Semana/Mes, visible local date range, saved operation count, trip fares, tips, retained cash, fare-only average and fare totals for Uber/Cabify/Bolt/Otro. Primary/onPrimary hero card, wrapping metric rows and scrollable safe-area layout; loading/error/retry show no fabricated totals, genuine empty periods show zero metrics and an empty explanation.
+- `src/features/summary/usePeriodSummary.ts`: focused period loading through the existing transaction service and pure calculations. Refresh on successful transaction notifications, focus, foreground entry, local date and device timezone changes. Request generation and period/date/zone keys reject stale successes/errors and hide the previous period before the next effect runs. Subscriptions and outstanding response acceptance are cleaned up on unmount. Pending deletion/Undo never subtract a row; only successful delete commit refreshes the stored totals.
+- `src/i18n/formatting.ts`, `translations.ts`: inclusive visible date ranges derived from the existing half-open bounds, explicit locale/device zone, and matching new es/en/uk labels. Subtracting one millisecond from the exclusive end is only for the last included date's display, not boundary arithmetic. Platform names remain unchanged in every language.
+- `src/components/Card.tsx`: optional style support for the existing reusable card, used by the summary hero; existing callers retain their default behavior.
+- `__tests__/Resumen.test.tsx`, `formatting.test.ts`: real SQLite/service/navigation integration with fixed times and controlled zones. Cover empty/mixed platforms, distinct fares/tips/retained cash, half-cent average rounding, half-open inclusions/exclusions, Monday/year/month and short/long DST boundaries, focused week/month rollover, create/edit/delete refresh, original-date membership after edit, pending/Undo/delete failure/retry, loading/error without zeros, obsolete success/error after rapid period switching, locale/theme independence, focus/resume/local midnight/timezone refresh and subscription cleanup.
+- `__tests__/nativeResumenEntry.tsx`: device acceptance entry with an isolated `cash-driver-resumen-test.sqlite` database and saved fixture operations; production `index.js` never imports it. Test data is not installed in the production database.
+- `docs/IMPLEMENTATION_PLAN.md`: this handoff only.
+
+Verification:
+
+| Check | Actual result |
+| --- | --- |
+| `node node_modules/typescript/bin/tsc --noEmit` | PASS |
+| `node node_modules/eslint/bin/eslint.js . --no-cache` | PASS |
+| Final full Jest run, `--runInBand --no-cache --watch=false`, `TZ=UTC` | PASS: **17 suites, 170 tests**; includes 15 Resumen tests and 3 formatting tests. SQLite is the actual Node SQLite engine, not mocked repository SQL |
+| `git diff --check` | PASS |
+| `android/gradlew.bat -p android assembleDebug --console=plain` | PASS: **214 tasks**, JDK 17.0.18, existing SDK/NDK and all configured ABIs. Existing AGP/dependency deprecation warnings remain |
+| Android emulator Resumen periods | PASS: fixture Hoy has 4 operations, fares 4,501 cents, tips 499, retained 5,000 and average fare 1,125; Semana has 5 operations/fares 5,001, Mes has 6/fares 5,501/average 917. Visible day/week/month date ranges and four platform totals match the saved fixture rows |
+| Android selected visual acceptance | PASS: all **six combinations of es/en/uk and light/dark**, on a **360 × 800 logical screen with font scale 1.3**; period chips/long metric labels wrap and all amounts/platform rows remain reachable by scrolling. Original 448 × 997 size/text scale 1.0 also checked. Hermes Ukrainian EUR notation remains EUR currency |
+| Android pending/Undo/committed delete/resume | PASS: pending Cabify remains in the 4-operation summary with its 499-cent tip; Undo preserves the totals. Active expiry successfully deletes only Cabify and refreshes to 3 operations, fares/retained 3,000, tips 0, average 1,000 and Cabify fare 0. Returning from background retains these actual totals |
+| iOS build/native acceptance | **iOS NOT VERIFIED** — no macOS/Xcode |
+| Native read/write fault injection, device timezone/DST rollover, physical-device, extreme text/landscape and complete accessibility acceptance | **NOT VERIFIED**; deterministic integration tests and selected emulator observations do not replace these checks |
+
+Checks reused command-scoped workspace TEMP/TMP through approved execution for the existing Windows EPERM issue, without permission bypasses or test/runtime patches. Device acceptance used a temporary ignored Metro config on port 8083. The disposable database/debug host were removed, original screen/font settings restored, and production Metro on 8081 preserved after verification; production SQLite was not edited for acceptance.
+
+One subagent reviewed documentation, calculations, refresh guards, tests and the isolated native entry read-only. Two confirmed presentation issues were corrected: Otro now uses the shared platform labels in all languages, and the retained-cash hero uses primary/onPrimary tokens. Follow-up review found no further confirmed defect; the reviewer did not claim independently executed checks or native acceptance.
+
+Remaining blockers: no domain/owner decision blocks Phase 6 code; unavailable iOS and the explicitly unverified native acceptance prevent COMPLETE. Phase 7 prerequisites: a separate owner assignment; reuse the existing preference service/provider, preserve active payment drafts and transaction notifications, resolve the initial haptics choice (**OWNER DECISION REQUIRED**) before implementing its default/feedback, and verify any haptics adapter against the actual native setup. Final bundle/application identifiers still require concrete owner values. No charts, export, arbitrary calendar, profit/expense metrics, full Ajustes, backup or Phase 7 behavior were added.
+
 ## Required automated checks
 
 - Language: matching translation keys for es/en/uk; initial Spanish, persistence/restart, localized date/money displays, unchanged integer-cent values and period boundaries, draft preservation, and preference write failure.

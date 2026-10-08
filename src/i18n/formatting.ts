@@ -39,3 +39,20 @@ export function formatLocalDateTime(
     hourCycle: 'h23',
   }).format(date);
 }
+
+export function formatPeriodRange(
+  bounds: { start: Date; end: Date },
+  locale: string,
+  timeZone: string,
+): string {
+  const formatter = new Intl.DateTimeFormat(locale, {
+    timeZone,
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+  const first = formatter.format(bounds.start);
+  // Display the last included local date; this does not calculate boundaries.
+  const last = formatter.format(new Date(bounds.end.getTime() - 1));
+  return first === last ? first : `${first} – ${last}`;
+}

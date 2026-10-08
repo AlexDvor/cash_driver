@@ -1,17 +1,127 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { useLocalClock } from '../../app/useLocalClock';
+import { ActionButton } from '../../components/ActionButton';
 import { AppText } from '../../components/AppText';
-import { PendingFeature } from '../../components/PendingFeature';
+import { Card } from '../../components/Card';
+import { ChoiceGroup } from '../../components/ChoiceGroup';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { useTranslation } from '../../i18n/LanguageProvider';
+import { formatMoney, formatPeriodRange } from '../../i18n/formatting';
+import { useAppTheme } from '../../theme/ThemeProvider';
+import { spacing, typography } from '../../theme/tokens';
+import { platformLabels } from '../transactions/history';
+import { platforms } from '../transactions/types';
+import { SummaryPeriod } from './periods';
+import { usePeriodSummary } from './usePeriodSummary';
 
 export function SummaryScreen() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const { colors } = useAppTheme();
+  const [period, setPeriod] = useState<SummaryPeriod>('day');
+  const clock = useLocalClock();
+  const { state, bounds, refresh } = usePeriodSummary(period, clock);
   return (
     <ScreenContainer>
       <AppText variant="title" accessibilityRole="header">
         {t('summary')}
       </AppText>
-      <PendingFeature message={t('summaryPending')} />
+      <ChoiceGroup
+        label={t('period')}
+        value={period}
+        onChange={setPeriod}
+        options={[
+          { value: 'day', label: t('today') },
+          { value: 'week', label: t('week') },
+          { value: 'month', label: t('month') },
+        ]}
+      />
+      <AppText testID="summary-range" secondary>
+        {formatPeriodRange(bounds, locale, clock.timeZone)}
+      </AppText>
+      {state.status === 'loading' ? (
+        <ActivityIndicator
+          accessibilityLabel={t('summaryLoading')}
+          color={colors.primary}
+        />
+      ) : state.status === 'error' ? (
+        <Card>
+          <AppText
+            accessibilityRole="alert"
+            style={{ color: colors.errorText }}
+          >
+            {t('summaryFailed')}
+          </AppText>
+          <ActionButton label={t('retry')} onPress={refresh} />
+        </Card>
+      ) : (
+        <>
+          {state.summary.operationCount === 0 && (
+            <AppText testID="summary-empty">{t('summaryEmpty')}</AppText>
+          )}
+          <Card style={{ backgroundColor: colors.primary }}>
+            <AppText variant="heading" style={{ color: colors.onPrimary }}>
+              {t('retainedCash')}
+            </AppText>
+            <AppText
+              testID="summary-retained"
+              style={[styles.money, { color: colors.onPrimary }]}
+            >
+              {formatMoney(state.summary.netCashTotalCents, locale)}
+            </AppText>
+            <AppText testID="summary-count" style={{ color: colors.onPrimary }}>
+              {t('operationCount')}: {state.summary.operationCount}
+            </AppText>
+          </Card>
+          <Card>
+            {(
+              [
+                { label: 'fareTotal', cents: state.summary.fareTotalCents },
+                { label: 'tipsTotal', cents: state.summary.tipTotalCents },
+                { label: 'averageFare', cents: state.summary.averageFareCents },
+              ] as const
+            ).map(item => (
+              <View key={item.label} style={styles.row}>
+                <AppText secondary>{t(item.label)}</AppText>
+                <AppText testID={`summary-${item.label}`} style={styles.value}>
+                  {formatMoney(item.cents, locale)}
+                </AppText>
+              </View>
+            ))}
+          </Card>
+          <Card>
+            <AppText variant="heading" accessibilityRole="header">
+              {t('byPlatform')}
+            </AppText>
+            {platforms.map(platform => (
+              <View key={platform} style={styles.row}>
+                <AppText>{platformLabels[platform]}</AppText>
+                <AppText testID={`summary-${platform}`} style={styles.value}>
+                  {formatMoney(
+                    state.summary.fareByPlatformCents[platform],
+                    locale,
+                  )}
+                </AppText>
+              </View>
+            ))}
+          </Card>
+        </>
+      )}
     </ScreenContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  money: {
+    fontSize: typography.money,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+  },
+  value: { fontWeight: '600', fontVariant: ['tabular-nums'] },
+  row: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+});

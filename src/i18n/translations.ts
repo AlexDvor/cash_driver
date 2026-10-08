@@ -1,5 +1,10 @@
 export type Language = 'es' | 'en' | 'uk';
 export const es = {
+  averageFare: 'Promedio por operación',
+  byPlatform: 'Por plataforma',
+  summaryLoading: 'Cargando resumen…',
+  summaryFailed: 'No se pudo cargar el resumen. Reintenta.',
+  summaryEmpty: 'No hay operaciones en este período',
   historySubtitle: 'Tus cobros en efectivo',
   period: 'Período',
   week: 'Semana',
@@ -98,6 +103,11 @@ export const es = {
 export type TranslationKey = keyof typeof es;
 type Dictionary = Record<TranslationKey, string>;
 export const en: Dictionary = {
+  averageFare: 'Average trip fare per operation',
+  byPlatform: 'By platform',
+  summaryLoading: 'Loading summary…',
+  summaryFailed: 'Could not load the summary. Retry.',
+  summaryEmpty: 'No operations in this period',
   historySubtitle: 'Your cash payments',
   period: 'Period',
   week: 'Week',
@@ -190,6 +200,11 @@ export const en: Dictionary = {
     'Uses the device theme. To switch between day and night, configure the schedule in system settings.',
 };
 export const uk: Dictionary = {
+  averageFare: 'Середня вартість поїздки',
+  byPlatform: 'За платформами',
+  summaryLoading: 'Завантаження підсумків…',
+  summaryFailed: 'Не вдалося завантажити підсумки. Повторіть спробу.',
+  summaryEmpty: 'За цей період операцій немає',
   historySubtitle: 'Ваші готівкові оплати',
   period: 'Період',
   week: 'Тиждень',
