@@ -7,9 +7,8 @@ export type TabParamList = {
   Settings: undefined;
 };
 
-// Transaction params will be defined with the actual history flow, not sample data.
 export type RootStackParamList = {
   Tabs: NavigatorScreenParams<TabParamList> | undefined;
-  Details: undefined;
-  Edit: undefined;
+  Details: { id: string };
+  Edit: { id: string };
 };

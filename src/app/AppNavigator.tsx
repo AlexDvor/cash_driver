@@ -1,4 +1,6 @@
 import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BottomTabBarProps,
   createBottomTabNavigator,
@@ -23,6 +25,10 @@ import { useTranslation } from '../i18n/LanguageProvider';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { AppTabBar } from './AppTabBar';
 import { RootStackParamList, TabParamList } from './navigationTypes';
+import { DeletionProvider } from '../features/transactions/DeletionProvider';
+import { useDeletion } from '../features/transactions/DeletionProvider';
+import { DeletionNotice } from '../features/transactions/DeletionNotice';
+import { spacing } from '../theme/tokens';
 
 const Tabs = createBottomTabNavigator<TabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -66,6 +72,30 @@ interface AppNavigatorProps {
   navigationRef?: React.Ref<NavigationContainerRef<RootStackParamList>>;
 }
 
+function DeletionFooter() {
+  const { state } = useDeletion();
+  const insets = useSafeAreaInsets();
+  const { colors } = useAppTheme();
+  if (state.status === 'idle') {
+    return null;
+  }
+  return (
+    <View
+      style={[
+        styles.notice,
+        {
+          backgroundColor: colors.background,
+          paddingLeft: spacing.xl + insets.left,
+          paddingRight: spacing.xl + insets.right,
+          paddingBottom: spacing.sm + insets.bottom,
+        },
+      ]}
+    >
+      <DeletionNotice />
+    </View>
+  );
+}
+
 export function AppNavigator({ navigationRef }: AppNavigatorProps) {
   const { appearance, colors } = useAppTheme();
   const { t } = useTranslation();
@@ -83,33 +113,42 @@ export function AppNavigator({ navigationRef }: AppNavigatorProps) {
     },
   };
   return (
-    <NavigationContainer ref={navigationRef} theme={navigationTheme}>
-      <Stack.Navigator
-        screenOptions={{
-          // Static foundation transitions also respect Reduce Motion.
-          animation: 'none',
-          headerTintColor: colors.primary,
-          headerBackTitle: t('back'),
-          headerStyle: { backgroundColor: colors.card },
-          contentStyle: { backgroundColor: colors.background },
-        }}
-      >
-        <Stack.Screen
-          name="Tabs"
-          component={TabNavigator}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Details"
-          component={DetailsScreen}
-          options={{ title: t('details') }}
-        />
-        <Stack.Screen
-          name="Edit"
-          component={EditScreen}
-          options={{ title: t('edit') }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <DeletionProvider>
+      <NavigationContainer ref={navigationRef} theme={navigationTheme}>
+        <View style={styles.fill}>
+          <Stack.Navigator
+            screenOptions={{
+              // Static foundation transitions also respect Reduce Motion.
+              animation: 'none',
+              headerTintColor: colors.primary,
+              headerBackTitle: t('back'),
+              headerStyle: { backgroundColor: colors.card },
+              contentStyle: { backgroundColor: colors.background },
+            }}
+          >
+            <Stack.Screen
+              name="Tabs"
+              component={TabNavigator}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="Details"
+              component={DetailsScreen}
+              options={{ title: t('details') }}
+            />
+            <Stack.Screen
+              name="Edit"
+              component={EditScreen}
+              options={{ title: t('edit') }}
+            />
+          </Stack.Navigator>
+          <DeletionFooter />
+        </View>
+      </NavigationContainer>
+    </DeletionProvider>
   );
 }
+const styles = StyleSheet.create({
+  fill: { flex: 1 },
+  notice: { paddingTop: spacing.sm },
+});

@@ -9,6 +9,7 @@ interface ActionButtonProps {
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
+  variant?: 'primary' | 'secondary' | 'destructive';
 }
 
 export function ActionButton({
@@ -16,8 +17,21 @@ export function ActionButton({
   onPress,
   disabled = false,
   loading = false,
+  variant = 'primary',
 }: ActionButtonProps) {
   const { colors } = useAppTheme();
+  const backgroundColor =
+    variant === 'destructive'
+      ? colors.errorSurface
+      : variant === 'secondary'
+      ? colors.softGreen
+      : colors.primary;
+  const textColor =
+    variant === 'destructive'
+      ? colors.errorText
+      : variant === 'secondary'
+      ? colors.primary
+      : colors.onPrimary;
   return (
     <Pressable
       accessibilityRole="button"
@@ -27,14 +41,12 @@ export function ActionButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor: colors.primary },
+        { backgroundColor },
         (pressed || disabled) && styles.dimmed,
       ]}
     >
-      {loading && <ActivityIndicator color={colors.onPrimary} />}
-      <AppText style={[styles.label, { color: colors.onPrimary }]}>
-        {label}
-      </AppText>
+      {loading && <ActivityIndicator color={textColor} />}
+      <AppText style={[styles.label, { color: textColor }]}>{label}</AppText>
     </Pressable>
   );
 }

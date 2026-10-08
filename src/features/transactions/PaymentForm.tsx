@@ -25,12 +25,14 @@ interface PaymentFormProps {
   preferenceSaving?: boolean;
   title: string;
   confirmLabel: string;
+  mode?: 'create' | 'edit';
 }
 export function PaymentForm({
   form,
   preferenceSaving = false,
   title,
   confirmLabel,
+  mode = 'create',
 }: PaymentFormProps) {
   const { t, locale } = useTranslation();
   const { colors } = useAppTheme();
@@ -213,7 +215,7 @@ export function PaymentForm({
       </Pressable>
       {form.failed && (
         <AppText accessibilityRole="alert" style={{ color: colors.errorText }}>
-          {t('paymentFailed')}
+          {t(mode === 'edit' ? 'editFailed' : 'paymentFailed')}
         </AppText>
       )}
       <ActionButton
@@ -222,7 +224,7 @@ export function PaymentForm({
           form.saving
             ? t('savingPayment')
             : form.failed
-            ? t('retryPayment')
+            ? t(mode === 'edit' ? 'retryEdit' : 'retryPayment')
             : confirmLabel
         }
         disabled={!form.canConfirm || preferenceSaving}
@@ -238,10 +240,19 @@ export function PaymentForm({
           accessibilityLiveRegion="polite"
           style={{ color: colors.primary }}
         >
-          {t(success.tipCents > 0 ? 'savedPaymentWithTip' : 'savedPayment', {
-            fare: formatMoney(success.fareAmountCents, locale),
-            tip: formatMoney(success.tipCents, locale),
-          })}
+          {t(
+            mode === 'edit'
+              ? success.tipCents > 0
+                ? 'updatedPaymentWithTip'
+                : 'updatedPayment'
+              : success.tipCents > 0
+              ? 'savedPaymentWithTip'
+              : 'savedPayment',
+            {
+              fare: formatMoney(success.fareAmountCents, locale),
+              tip: formatMoney(success.tipCents, locale),
+            },
+          )}
         </AppText>
       )}
     </Card>

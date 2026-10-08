@@ -13,6 +13,7 @@ import { TransactionInput } from './transactionService';
 interface PaymentFormOptions {
   initialPlatform: Platform;
   initialValues?: TransactionInput;
+  clearAfterSave?: boolean;
   onSubmit: (input: TransactionInput) => Promise<CashTransaction>;
   onPlatformChange?: (platform: Platform) => Promise<boolean>;
 }
@@ -20,6 +21,7 @@ interface PaymentFormOptions {
 export function usePaymentForm({
   initialPlatform,
   initialValues,
+  clearAfterSave = true,
   onSubmit,
   onPlatformChange,
 }: PaymentFormOptions) {
@@ -40,6 +42,7 @@ export function usePaymentForm({
   const [failed, setFailed] = useState(false);
   const [saved, setSaved] = useState<CashTransaction | null>(null);
   const busy = useRef(false);
+  const committedDraft = useRef(false);
   const completedSaves = useRef(0);
   const renderedSaveCount = completedSaves.current;
   const choosing = useRef(false);
@@ -92,6 +95,7 @@ export function usePaymentForm({
       return;
     }
     dirty.current = true;
+    committedDraft.current = false;
     (field === 'fare' ? setFare : setReceived)(raw);
     setChangeAsTip(false);
     setFailed(false);
@@ -137,6 +141,7 @@ export function usePaymentForm({
     try {
       const success = onPlatformChange ? await onPlatformChange(next) : true;
       if (success && mounted.current) {
+        committedDraft.current = false;
         dirty.current = true;
         setPlatform(next);
         setFailed(false);
@@ -149,6 +154,7 @@ export function usePaymentForm({
   async function submit(): Promise<boolean> {
     if (
       busy.current ||
+      (!clearAfterSave && committedDraft.current) ||
       choosing.current ||
       payment?.status !== 'valid' ||
       fareParsed.status !== 'valid' ||
@@ -168,15 +174,20 @@ export function usePaymentForm({
     };
     try {
       const committed = await onSubmit(input);
+      committedDraft.current = !clearAfterSave;
       completedSaves.current++;
       if (mounted.current) {
         setSaved(committed);
-        setFare('');
-        setReceived('');
-        setChangeAsTip(false);
+        setFare(clearAfterSave ? '' : centsToInput(committed.fareAmountCents));
+        setReceived(
+          clearAfterSave ? '' : centsToInput(committed.cashReceivedCents),
+        );
+        setChangeAsTip(!clearAfterSave && committed.tipCents > 0);
         setFocused(null);
-        dirty.current = false;
-        setPlatform(latestDefault.current);
+        dirty.current = !clearAfterSave;
+        setPlatform(
+          clearAfterSave ? latestDefault.current : committed.platform,
+        );
       }
       return true;
     } catch {
@@ -204,7 +215,8 @@ export function usePaymentForm({
     saving,
     failed,
     saved,
-    canConfirm: payment?.status === 'valid' && !saving,
+    canConfirm:
+      payment?.status === 'valid' && !saving && !committedDraft.current,
     quickAmounts:
       validFare && fareParsed.status === 'valid'
         ? getQuickAmounts(fareParsed.cents)
@@ -217,6 +229,7 @@ export function usePaymentForm({
     submit,
     toggleTip: (enabled: boolean) => {
       if (!busy.current && canTip) {
+        committedDraft.current = false;
         dirty.current = true;
         setChangeAsTip(enabled);
         setFailed(false);

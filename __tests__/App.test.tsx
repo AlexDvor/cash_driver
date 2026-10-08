@@ -104,15 +104,15 @@ test('tab presses change routes; details and editing return to the previous tab'
     await press(app, 'tab', label);
     expect(ref.getCurrentRoute()?.name).toBe(name);
   }
-  await act(async () => ref.navigate('Details'));
+  await act(async () => ref.navigate('Details', { id: 'missing' }));
   expect(ref.getCurrentRoute()?.name).toBe('Details');
   expect(JSON.stringify(app.toJSON())).toContain(
-    'Todavía no se cargan operaciones',
+    'Esta operación ya no está disponible.',
   );
-  await act(async () => ref.navigate('Edit'));
+  await act(async () => ref.navigate('Edit', { id: 'missing' }));
   expect(ref.getCurrentRoute()?.name).toBe('Edit');
   expect(JSON.stringify(app.toJSON())).toContain(
-    'Todavía no se pueden modificar operaciones',
+    'Esta operación ya no está disponible.',
   );
   await act(async () => ref.goBack());
   expect(ref.getCurrentRoute()?.name).toBe('Details');
