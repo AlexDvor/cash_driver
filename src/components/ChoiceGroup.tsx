@@ -5,6 +5,7 @@ import { radii, sizing, spacing } from '../theme/tokens';
 import { AppText } from './AppText';
 
 interface ChoiceGroupProps<Value extends string> {
+  columns?: 2 | 4;
   disabled?: boolean;
   label: string;
   options: { value: Value; label: string }[];
@@ -13,6 +14,7 @@ interface ChoiceGroupProps<Value extends string> {
 }
 
 export function ChoiceGroup<Value extends string>({
+  columns,
   disabled = false,
   label,
   options,
@@ -38,6 +40,10 @@ export function ChoiceGroup<Value extends string>({
               onPress={() => onChange(option.value)}
               style={({ pressed }) => [
                 styles.choice,
+                columns !== undefined && {
+                  flexBasis: columns === 2 ? '40%' : '20%',
+                  flexGrow: 1,
+                },
                 {
                   backgroundColor: selected ? colors.softGreen : colors.card,
                   borderColor: selected ? colors.primary : colors.border,

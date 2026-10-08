@@ -4,18 +4,7 @@ import { PendingFeature } from '../../components/PendingFeature';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { useTranslation } from '../../i18n/LanguageProvider';
 
-export function HomeScreen() {
-  const { t } = useTranslation();
-  return (
-    <ScreenContainer>
-      <AppText variant="title" accessibilityRole="header">
-        {t('appName')}
-      </AppText>
-      <AppText secondary>{t('subtitle')}</AppText>
-      <PendingFeature message={t('homePending')} />
-    </ScreenContainer>
-  );
-}
+export { HomeScreen } from './HomeScreen';
 
 export function HistoryScreen() {
   const { t } = useTranslation();

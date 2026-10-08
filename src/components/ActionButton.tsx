@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { radii, sizing, spacing } from '../theme/tokens';
 import { AppText } from './AppText';
@@ -8,19 +8,21 @@ interface ActionButtonProps {
   label: string;
   onPress: () => void;
   disabled?: boolean;
+  loading?: boolean;
 }
 
 export function ActionButton({
   label,
   onPress,
   disabled = false,
+  loading = false,
 }: ActionButtonProps) {
   const { colors } = useAppTheme();
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
-      accessibilityState={{ disabled }}
+      accessibilityState={{ disabled, busy: loading }}
       disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [
@@ -29,6 +31,7 @@ export function ActionButton({
         (pressed || disabled) && styles.dimmed,
       ]}
     >
+      {loading && <ActivityIndicator color={colors.onPrimary} />}
       <AppText style={[styles.label, { color: colors.onPrimary }]}>
         {label}
       </AppText>
@@ -38,12 +41,14 @@ export function ActionButton({
 
 const styles = StyleSheet.create({
   button: {
+    flexDirection: 'row',
+    gap: spacing.sm,
     minHeight: sizing.primaryButton,
     borderRadius: radii.button,
     padding: spacing.lg,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  label: { fontWeight: '600', textAlign: 'center' },
+  label: { fontWeight: '600', textAlign: 'center', flexShrink: 1 },
   dimmed: { opacity: 0.7 },
 });

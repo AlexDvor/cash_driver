@@ -17,6 +17,8 @@ export const typography = {
 };
 export const radii = { card: 24, input: 16, button: 16, chip: 12 };
 export const sizing = {
+  // Four platform chips need space for scaled text and card/screen padding.
+  platformFourColumnScreenWidth: 440,
   primaryButton: 56,
   touchTarget: 48,
   icon: 24,

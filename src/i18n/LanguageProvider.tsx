@@ -4,13 +4,14 @@ import {
   locales,
   translate,
   TranslationKey,
+  TranslationParams,
 } from './translations';
 import { usePersistence } from '../app/PersistenceProvider';
 interface LanguageContextValue {
   language: Language;
   locale: string;
   setLanguage: (language: Language) => void;
-  t: (key: TranslationKey) => string;
+  t: (key: TranslationKey, params?: TranslationParams) => string;
 }
 const LanguageContext = createContext<LanguageContextValue | undefined>(
   undefined,
@@ -27,7 +28,7 @@ export function LanguageProvider({ children }: React.PropsWithChildren) {
         language,
         setLanguage,
         locale: locales[language],
-        t: key => translate(language, key),
+        t: (key, params) => translate(language, key, params),
       }}
     >
       {children}

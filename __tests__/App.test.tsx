@@ -78,7 +78,7 @@ function foundation(
   );
 }
 
-test('boots in Spanish with four accessible tabs and an explicit unfinished screen', async () => {
+test('boots in Spanish with four accessible tabs and the payment form', async () => {
   const app = await mount(<App initialize={initialize} />);
   const tabs = app.root
     .findAll(node => typeof node.props.onPress === 'function')
@@ -90,9 +90,7 @@ test('boots in Spanish with four accessible tabs and an explicit unfinished scre
     'Ajustes',
   ]);
   expect(tabs[0].props.accessibilityState.selected).toBe(true);
-  expect(JSON.stringify(app.toJSON())).toContain(
-    'El formulario de cobro estará disponible',
-  );
+  expect(JSON.stringify(app.toJSON())).toContain('Nuevo cobro');
 });
 
 test('tab presses change routes; details and editing return to the previous tab', async () => {
@@ -140,5 +138,5 @@ test('language and theme changes preserve navigation and localize the mounted UI
   expect(JSON.stringify(app.toJSON())).toContain('Налаштування');
   await press(app, 'tab', 'Головна');
   expect(ref.getCurrentRoute()?.name).toBe('Home');
-  expect(JSON.stringify(app.toJSON())).toContain('Форма оплати буде доступна');
+  expect(JSON.stringify(app.toJSON())).toContain('Нова оплата');
 });

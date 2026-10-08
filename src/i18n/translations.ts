@@ -1,5 +1,34 @@
 export type Language = 'es' | 'en' | 'uk';
 export const es = {
+  today: 'Hoy',
+  operationCount: 'Operaciones',
+  fareTotal: 'Importe de viajes',
+  tipsTotal: 'Propinas',
+  retainedCash: 'Efectivo retenido',
+  totalsLoading: 'Cargando los totales de hoy',
+  totalsFailed: 'No se pudieron cargar los totales de hoy. Reintenta.',
+  newPayment: 'Nuevo cobro',
+  platform: 'Plataforma',
+  otherPlatform: 'Otro',
+  fareInput: 'Importe a cobrar',
+  receivedInput: 'El cliente entrega',
+  exact: 'Exacto',
+  change: 'CAMBIO',
+  missingCash: 'Faltan {amount}',
+  insufficientCash: 'El importe recibido es insuficiente',
+  changeIsTip: 'El cambio es propina',
+  tipAmount: 'Propina: {amount}',
+  confirmPayment: 'Confirmar cobro',
+  savingPayment: 'Guardando cobro…',
+  paymentFailed: 'No se pudo guardar el cobro. Inténtalo de nuevo.',
+  retryPayment: 'Reintentar cobro',
+  savedPayment: 'Cobro registrado · Importe de viaje: {fare}',
+  savedPaymentWithTip:
+    'Cobro registrado · Importe de viaje: {fare} · Propina: {tip}',
+  invalidMoney: 'Introduce un importe válido con hasta dos decimales.',
+  positiveFare: 'El importe del viaje debe ser mayor que cero.',
+  maximumMoney: 'El importe máximo es {amount}.',
+  dismissKeyboard: 'Ocultar teclado',
   appName: 'Cash Driver',
   storageLoading: 'Cargando datos locales',
   storageFailed:
@@ -40,6 +69,34 @@ export const es = {
 export type TranslationKey = keyof typeof es;
 type Dictionary = Record<TranslationKey, string>;
 export const en: Dictionary = {
+  today: 'Today',
+  operationCount: 'Operations',
+  fareTotal: 'Trip fares',
+  tipsTotal: 'Tips',
+  retainedCash: 'Cash retained',
+  totalsLoading: 'Loading today’s totals',
+  totalsFailed: 'Could not load today’s totals. Retry.',
+  newPayment: 'New payment',
+  platform: 'Platform',
+  otherPlatform: 'Other',
+  fareInput: 'Trip fare',
+  receivedInput: 'Cash received',
+  exact: 'Exact',
+  change: 'CHANGE',
+  missingCash: 'Missing {amount}',
+  insufficientCash: 'The cash received is insufficient',
+  changeIsTip: 'Keep all change as a tip',
+  tipAmount: 'Tip: {amount}',
+  confirmPayment: 'Confirm payment',
+  savingPayment: 'Saving payment…',
+  paymentFailed: 'Could not save the payment. Try again.',
+  retryPayment: 'Retry payment',
+  savedPayment: 'Payment recorded · Trip fare: {fare}',
+  savedPaymentWithTip: 'Payment recorded · Trip fare: {fare} · Tip: {tip}',
+  invalidMoney: 'Enter a valid amount with up to two decimal places.',
+  positiveFare: 'The trip fare must be greater than zero.',
+  maximumMoney: 'The maximum amount is {amount}.',
+  dismissKeyboard: 'Dismiss keyboard',
   appName: 'Cash Driver',
   storageLoading: 'Loading local data',
   storageFailed: 'Cannot open local data. It has not been deleted. Retry.',
@@ -76,6 +133,37 @@ export const en: Dictionary = {
     'Uses the device theme. To switch between day and night, configure the schedule in system settings.',
 };
 export const uk: Dictionary = {
+  today: 'Сьогодні',
+  operationCount: 'Операції',
+  fareTotal: 'Суми поїздок',
+  tipsTotal: 'Чайові',
+  retainedCash: 'Утримана готівка',
+  totalsLoading: 'Завантаження підсумків за сьогодні',
+  totalsFailed:
+    'Не вдалося завантажити підсумки за сьогодні. Повторіть спробу.',
+  newPayment: 'Нова оплата',
+  platform: 'Платформа',
+  otherPlatform: 'Інша',
+  fareInput: 'Вартість поїздки',
+  receivedInput: 'Отримана готівка',
+  exact: 'Точна сума',
+  change: 'ЗДАЧА',
+  missingCash: 'Бракує {amount}',
+  insufficientCash: 'Отриманої готівки недостатньо',
+  changeIsTip: 'Уся здача як чайові',
+  tipAmount: 'Чайові: {amount}',
+  confirmPayment: 'Підтвердити оплату',
+  savingPayment: 'Збереження оплати…',
+  paymentFailed: 'Не вдалося зберегти оплату. Повторіть спробу.',
+  retryPayment: 'Повторити оплату',
+  savedPayment: 'Оплату збережено · Вартість поїздки: {fare}',
+  savedPaymentWithTip:
+    'Оплату збережено · Вартість поїздки: {fare} · Чайові: {tip}',
+  invalidMoney:
+    'Введіть коректну суму з не більш ніж двома десятковими знаками.',
+  positiveFare: 'Вартість поїздки має бути більшою за нуль.',
+  maximumMoney: 'Максимальна сума — {amount}.',
+  dismissKeyboard: 'Приховати клавіатуру',
   appName: 'Cash Driver',
   storageLoading: 'Завантаження локальних даних',
   storageFailed:
@@ -123,6 +211,15 @@ export const locales: Record<Language, string> = {
   en: 'en-GB',
   uk: 'uk-UA',
 };
-export function translate(language: Language, key: TranslationKey): string {
-  return dictionaries[language][key] ?? es[key];
+export type TranslationParams = Record<string, string | number>;
+export function translate(
+  language: Language,
+  key: TranslationKey,
+  params: TranslationParams = {},
+): string {
+  return (dictionaries[language][key] ?? es[key]).replace(
+    /\{(\w+)\}/g,
+    (placeholder, name: string) =>
+      params[name] === undefined ? placeholder : String(params[name]),
+  );
 }
