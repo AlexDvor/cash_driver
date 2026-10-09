@@ -2,6 +2,7 @@ import { SqlConnection } from '../../database/sqlite';
 import { Language } from '../../i18n/translations';
 import { ThemeMode } from '../../theme/resolveTheme';
 import { Platform } from '../transactions/types';
+import { isPlatform } from '../../constants/platforms';
 
 export interface Preferences {
   language: Language;
@@ -20,10 +21,7 @@ export function decodePreferences(row: Record<string, unknown>): Preferences {
   if (
     (language !== 'es' && language !== 'en' && language !== 'uk') ||
     (themeMode !== 'light' && themeMode !== 'dark' && themeMode !== 'system') ||
-    (defaultPlatform !== 'uber' &&
-      defaultPlatform !== 'cabify' &&
-      defaultPlatform !== 'bolt' &&
-      defaultPlatform !== 'other') ||
+    !isPlatform(defaultPlatform) ||
     (haptics !== 0 && haptics !== 1)
   ) {
     throw new Error('Corrupt preferences');

@@ -4,11 +4,13 @@ Apply these rules during implementation within the scope of PROJECT_SPEC.md. Ins
 
 ## Placement and responsibilities
 
-The table below describes current responsibilities. Refactoring Phases 1–4 place screens in `src/screens/`, hooks in `src/hooks/`, universal primitives in `src/ui/`, feature-facing UI in `src/components/`, navigation in `src/navigation/` and contexts in `src/providers/`. Static styles and nontrivial public props are adjacent files; provider accessors remain beside their context. Feature folders retain calculations, services, repositories and deletion constants. A later phase introduces `src/constants/theme/` under `docs/REFACTORING_PLAN.md`; until then current theme tokens/resolution/system-bar helpers remain in `src/theme/`. Do not create duplicate implementations to satisfy the target tree. Keep domain calculations, services and repositories feature-grouped. The plan's Phase 0 migration map lists the original src files and their destinations; product/data/UI behavior retains its existing authority.
+The table below describes current responsibilities. Refactoring Phases 1–5 place screens in `src/screens/`, hooks in `src/hooks/`, universal primitives in `src/ui/`, feature-facing UI in `src/components/`, navigation in `src/navigation/` and contexts in `src/providers/`. Static styles and nontrivial public props are adjacent files; provider accessors remain beside their context. Feature folders retain calculations, services, repositories and deletion constants. Shared theme tokens now live in `src/constants/theme/tokens.ts`, and platform metadata/type validation in `src/constants/platforms.ts`. Theme resolution/system-bar helpers remain in `src/theme/`. Do not create duplicate implementations to satisfy the target tree. Keep domain calculations, services and repositories feature-grouped. The plan's Phase 0 migration map lists the original src files and their destinations; product/data/UI behavior retains its existing authority.
 
 | Location | Put here | Keep out |
 | --- | --- | --- |
-| `src/theme/` | Named colors, typography, spacing, radii, and shared sizing tokens from UI_DESIGN.md | Payment logic and device-specific screen copies |
+| `src/constants/theme/` | Existing palettes, typography, spacing, radii and shared sizing tokens from UI_DESIGN.md | Runtime context state and payment logic |
+| `src/constants/platforms.ts` | Four stable IDs, derived Platform type, existing labels and isPlatform guard | SQL/migration literals and preferences state |
+| `src/theme/` | Theme mode resolution and native system-bar helper | Duplicate palette/token definitions and payment logic |
 | `src/i18n/` | Matching Spanish, English, and Ukrainian translation dictionaries, locale mapping and formatting | User transaction data; relocated LanguageProvider/context accessor |
 | `src/ui/<Name>/` | Universal ActionButton, AppText, Card, ChoiceGroup, MoneyInput, ScreenContainer and TabIcon; adjacent static styles/complex props | SQL and feature-specific orchestration |
 | `src/components/<Name>/` | Shared create/edit PaymentForm, DailySummary, DeletionNotice, TransactionLoadState and retained PendingFeature; styles/complex props where needed | SQL and duplicated calculation policy |
@@ -49,7 +51,7 @@ Write code that a developer with basic React and TypeScript knowledge can follow
 
 ## Adaptive layout
 
-Resolve light/dark semantic tokens through ThemeProvider in `src/providers/ThemeProvider/`, using `src/theme/` tokens/resolution/system-bar helpers, the persisted preference and reactive system appearance. Components consume the resolved theme rather than maintain individual theme switches or fixed light-only styles. Share typography/spacing across palettes; propagate changes without remounting forms or losing state. Clean up appearance subscriptions. Reuse existing theme infrastructure when compatible.
+Resolve light/dark semantic tokens through ThemeProvider in `src/providers/ThemeProvider/`, using `src/constants/theme/` tokens and `src/theme/` resolution/system-bar helpers, the persisted preference and reactive system appearance. Components consume the resolved theme rather than maintain individual theme switches or fixed light-only styles. Share typography/spacing across palettes; propagate changes without remounting forms or losing state. Clean up appearance subscriptions. Reuse existing theme infrastructure when compatible.
 
 - Use available window/container width and flex layout, not a fixed screenshot size or device model detection. When responsive branching is needed, use reactive dimensions so rotation and window resizing update the layout.
 - Keep typography based on the documented logical-unit tokens and system text scaling. Do not multiply all font sizes and controls by screen width or disable font scaling to make the screenshot fit.

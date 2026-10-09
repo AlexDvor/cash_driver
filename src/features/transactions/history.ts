@@ -4,12 +4,6 @@ import {
   SummaryPeriod,
 } from '../summary/periods';
 import { CashTransaction, Platform } from './types';
-export const platformLabels = {
-  uber: 'Uber',
-  cabify: 'Cabify',
-  bolt: 'Bolt',
-  other: 'Otro',
-};
 
 export type HistoryPeriod = SummaryPeriod | 'all';
 export type HistoryPlatform = Platform | 'all';

@@ -2,7 +2,7 @@ import React from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
-import { spacing } from '../../theme/tokens';
+import { spacing } from '../../constants/theme/tokens';
 import { styles } from './ScreenContainer.styles';
 import { ScreenContainerProps } from './ScreenContainer.interface';
 

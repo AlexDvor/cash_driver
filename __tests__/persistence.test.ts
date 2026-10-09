@@ -9,6 +9,7 @@ import {
   transactionSchema,
 } from '../src/database/migrations';
 import { SqlConnection } from '../src/database/sqlite';
+import { decodePreferences } from '../src/features/settings/preferencesRepository';
 import {
   openTestDatabase,
   testPersistence,
@@ -78,6 +79,30 @@ test('invalid preferences and missing singleton row fail without inventing repla
     'missing',
   );
   expect((await db.execute('SELECT * FROM preferences')).rows).toEqual([]);
+});
+
+test('preference decoding rejects noncanonical platform values rather than guessing a default', () => {
+  for (const defaultPlatform of [
+    'unknown',
+    'Uber',
+    'otro',
+    '',
+    null,
+    undefined,
+    0,
+    true,
+    ['uber'],
+    { platform: 'uber' },
+  ]) {
+    expect(() =>
+      decodePreferences({
+        language: 'es',
+        theme_mode: 'system',
+        default_platform: defaultPlatform,
+        haptics_enabled: 0,
+      }),
+    ).toThrow('Corrupt preferences');
+  }
 });
 
 test('a failing subscriber cannot turn a committed save into an apparent failure or suppress other subscribers', async () => {

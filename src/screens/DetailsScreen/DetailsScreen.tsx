@@ -10,7 +10,7 @@ import { Card } from '../../ui/Card/Card';
 import { ScreenContainer } from '../../ui/ScreenContainer/ScreenContainer';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { formatLocalDateTime, formatMoney } from '../../i18n/formatting';
-import { platformLabels } from '../../features/transactions/history';
+import { platformLabels } from '../../constants/platforms';
 import { useTransactions } from '../../hooks/transactions/useTransactions';
 import { TransactionLoadState } from '../../components/TransactionLoadState/TransactionLoadState';
 import { useDeletion } from '../../providers/DeletionProvider/DeletionProvider';

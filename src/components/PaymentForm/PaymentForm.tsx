@@ -14,10 +14,10 @@ import { MoneyInput } from '../../ui/MoneyInput/MoneyInput';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { formatMoney } from '../../i18n/formatting';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
-import { sizing } from '../../theme/tokens';
+import { sizing } from '../../constants/theme/tokens';
 import { MAX_INPUT_CENTS } from '../../features/transactions/money';
 import type { MoneyParseResult } from '../../features/transactions/money';
-import { platforms } from '../../features/transactions/types';
+import { platforms, platformLabels } from '../../constants/platforms';
 import type { PaymentFormProps } from './PaymentForm.interface';
 import { styles } from './PaymentForm.styles';
 
@@ -54,10 +54,7 @@ export function PaymentForm({
         label={t('platform')}
         options={platforms.map(value => ({
           value,
-          label:
-            value === 'other'
-              ? 'Otro'
-              : value[0].toUpperCase() + value.slice(1),
+          label: platformLabels[value],
         }))}
         columns={
           width / fontScale >= sizing.platformFourColumnScreenWidth ? 4 : 2

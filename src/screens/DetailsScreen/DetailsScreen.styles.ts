@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { spacing } from '../../theme/tokens';
+import { spacing } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   value: {

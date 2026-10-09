@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { sizing, spacing } from '../../theme/tokens';
+import { sizing, spacing } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   bar: {

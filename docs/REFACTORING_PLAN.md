@@ -1,8 +1,8 @@
 # CashDriver — temporary refactoring plan
 
-Status: **PHASE 4 COMPLETE — PHASE 5 NOT STARTED**.
+Status: **PHASE 5 COMPLETE — PHASE 6 NOT STARTED**.
 
-Created: 2026-10-09. This is a temporary execution plan, not a replacement product specification. The owner separately authorized Phases 0–4 on 2026-10-09. They are complete within their assigned scopes; Phase 5 requires the next assignment. Do not restart historical MVP implementation phases.
+Created: 2026-10-09. This is a temporary execution plan, not a replacement product specification. The owner separately authorized Phases 0–5 on 2026-10-09. They are complete within their assigned scopes; Phase 6 requires the next assignment. Phase 5 explicitly excludes computer-use. Do not restart historical MVP implementation phases.
 
 ## Objective and authority
 
@@ -210,8 +210,8 @@ Commit: `docs: remove completed temporary refactoring plan`.
 | 1 | COMPLETE | typecheck/lint PASS; Jest 20 suites / 196 tests PASS; Android bundle PASS | 867bcc2 |
 | 2 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 198 tests PASS | c50b5af |
 | 3 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 198 tests PASS; Android bundle PASS; selected emulator width/text/keyboard checks | 75205e6 |
-| 4 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 198 tests PASS; Android bundle PASS; selected emulator boot/back/preferences/cross-tab undo checks | Hash reported after commit |
-| 5 | NOT STARTED | NOT RUN | — |
+| 4 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 198 tests PASS; Android bundle PASS; selected emulator boot/back/preferences/cross-tab undo checks | 58f926f |
+| 5 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 199 tests PASS; Android bundle PASS; no computer-use | Hash reported after commit |
 | 6 | NOT STARTED | NOT RUN | — |
 | 7 | NOT STARTED | NOT RUN | — |
 
@@ -372,3 +372,11 @@ Subagents phase4_navigation and phase4_providers owned disjoint moves; root inte
 Native selected checks used current nativeHistorialEntry and isolated fixture on Metro 8083: boot, English/Dark and draft preservation, Details/Edit/back, cross-tab Settings undo and row preservation, persisted preference restart. Two initial test-script navigation/timing attempts failed and fixture deletion expired normally; corrected script passed without source changes. No production transactions used. Fixture/temporary host/UI-dump removed, own Metro/reverse stopped, production database/Metro preserved. No responsive setting changes or native rebuild; full accessibility/iOS/physical haptics not verified. Historical tactile FAIL and other owner/native/audit gates remain; full MVP NOT COMPLETE.
 
 Permanent handoff and current placements updated in IMPLEMENTATION_PLAN.md and CODING_STANDARDS.md. Commit: refactor: isolate navigation and providers; hash reported after creation. Phase 5 requires the next assignment.
+
+## Phase 5 handoff — 2026-10-09
+
+Status: COMPLETE for assigned structural scope; baseline Phase 4 commit 58f926f. Canonical runtime platform list/order, derived type, fixed labels and strict guard live in src/constants/platforms.ts. Consumers use this source; domain types retain only a type re-export. PaymentForm labels now use the same metadata with identical Uber/Cabify/Bolt/Otro values in all languages. Repository platform checks simplified through shared guard; SQL, schema, migration literals, arithmetic/filtering/rounding and service sequencing remain unchanged. Summary's typed zero result shape retained. Domain helpers were already readable; no forced rewrites.
+
+Subagent phase5_theme moved tokens unchanged to src/constants/theme/tokens.ts and migrated 25 references across 24 consumers/tests; main agent owned platform changes/tests/docs. Independent phase5_review confirmed all69 token lines unchanged, strict validation equivalence and no confirmed regression. Fresh typecheck/lint PASS; Jest 21 suites / 199 tests PASS, 10.868 s, approved workspace TEMP/TMP and TZ=UTC. Added one unknown-platform preference decoder boundary test; existing real-SQLite/domain/UI coverage retained. Android production bundle PASS, 19 assets; known warnings remain.
+
+Owner explicitly excluded computer-use. No computer-use, UI automation, adb/device controls, native rebuild or native/visual rerun performed; selected Phase 4 observations remain historical. Existing physical haptics FAIL/accessibility/system/iOS NOT VERIFIED and owner/audit gates remain; full MVP NOT COMPLETE. Permanent handoff/current path guidance updated in IMPLEMENTATION_PLAN.md, CODING_STANDARDS.md, AGENTS.md and adapted UI skill. Commit: refactor: centralize constants and clarify domain code; hash reported after creation. Phase 6 requires the next assignment.

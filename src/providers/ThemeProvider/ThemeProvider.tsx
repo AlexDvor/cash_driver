@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import { AppState, StatusBar, useColorScheme } from 'react-native';
-import { palettes, Palette } from '../../theme/tokens';
+import { palettes, Palette } from '../../constants/theme/tokens';
 import {
   EffectiveTheme,
   resolveTheme,

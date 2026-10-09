@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { radii, sizing, spacing, typography } from '../../theme/tokens';
+import { radii, sizing, spacing, typography } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   quickRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },

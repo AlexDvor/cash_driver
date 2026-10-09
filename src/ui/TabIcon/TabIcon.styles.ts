@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { sizing } from '../../theme/tokens';
+import { sizing } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   frame: { width: sizing.icon, height: sizing.icon },

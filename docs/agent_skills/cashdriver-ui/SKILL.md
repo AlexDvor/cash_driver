@@ -8,7 +8,7 @@ description: Organize CashDriver UI styles and props while preserving its curren
 Adapted from CashDriver-agent-kit.zip on 2026-10-09. Use for UI/style extraction. Read docs/UI_DESIGN.md and docs/CODING_STANDARDS.md; refactoring is not a redesign.
 
 - Keep the actual current palettes, typography, spacing, radii and sizing. Do not copy the kit's provisional DentalCare-derived token files or invent new design values.
-- Until the constants phase, consume src/theme/tokens and useAppTheme as currently implemented. After migration use src/constants/theme for shared static tokens while retaining resolved runtime colors from the theme provider. Static Theme.colors must not freeze light/dark behavior.
+- Consume shared static tokens from src/constants/theme/tokens and resolved runtime colors through useAppTheme in src/providers/ThemeProvider/ThemeProvider. Mode resolution/system-bar helpers remain in src/theme. Static Theme.colors must not freeze light/dark behavior.
 - Separate StyleSheet.create into Component.styles.ts. Keep dynamic styles based on runtime state, available width, font scale, palette and insets. Use memoization only with an actual need.
 - Centralize reusable visual decisions, not every one-off geometry value. Preserve local native-View icon geometry; do not presume SVG assets or add an icon dependency.
 - Use feature-facing components and universal primitives as distinct responsibilities; retain one shared create/edit payment form. Extract nontrivial props beside their component.

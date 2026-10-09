@@ -1,6 +1,7 @@
 import { SqlConnection, SqlExecutor, SqlValue } from '../../database/sqlite';
 import { CashTransaction } from './types';
 import { calculatePayment } from './payment';
+import { isPlatform } from '../../constants/platforms';
 
 function decodeTransaction(row: Record<string, unknown>): CashTransaction {
   const {
@@ -16,11 +17,7 @@ function decodeTransaction(row: Record<string, unknown>): CashTransaction {
   } = row;
   if (
     typeof id !== 'string' ||
-    typeof platform !== 'string' ||
-    (platform !== 'uber' &&
-      platform !== 'cabify' &&
-      platform !== 'bolt' &&
-      platform !== 'other') ||
+    !isPlatform(platform) ||
     typeof fareAmountCents !== 'number' ||
     typeof cashReceivedCents !== 'number' ||
     typeof changeGivenCents !== 'number' ||

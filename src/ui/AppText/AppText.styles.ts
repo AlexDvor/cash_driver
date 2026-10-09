@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { typography } from '../../theme/tokens';
+import { typography } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   title: { fontSize: typography.title, fontWeight: '700' },

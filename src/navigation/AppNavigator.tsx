@@ -30,7 +30,7 @@ import { RootStackParamList, TabParamList } from './navigationTypes';
 import { DeletionProvider } from '../providers/DeletionProvider/DeletionProvider';
 import { useDeletion } from '../providers/DeletionProvider/DeletionProvider';
 import { DeletionNotice } from '../components/DeletionNotice/DeletionNotice';
-import { spacing } from '../theme/tokens';
+import { spacing } from '../constants/theme/tokens';
 import { AppText } from '../ui/AppText/AppText';
 import { AppNavigatorProps } from './AppNavigator.interface';
 import { styles } from './AppNavigator.styles';

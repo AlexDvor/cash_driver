@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { radii, sizing, spacing } from '../../theme/tokens';
+import { radii, sizing, spacing } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   heading: { gap: spacing.xs },

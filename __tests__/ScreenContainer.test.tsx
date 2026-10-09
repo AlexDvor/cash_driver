@@ -7,11 +7,11 @@ import {
   Text,
 } from 'react-native';
 import { ScreenContainer } from '../src/ui/ScreenContainer/ScreenContainer';
-import { spacing } from '../src/theme/tokens';
+import { spacing } from '../src/constants/theme/tokens';
 
 jest.mock('../src/providers/ThemeProvider/ThemeProvider', () => ({
   useAppTheme: () => ({
-    colors: require('../src/theme/tokens').palettes.light,
+    colors: require('../src/constants/theme/tokens').palettes.light,
   }),
 }));
 jest.mock('react-native-safe-area-context', () => ({

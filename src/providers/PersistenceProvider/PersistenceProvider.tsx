@@ -16,7 +16,7 @@ import {
 import { initializePersistence, Persistence } from '../../app/persistence';
 import { Preferences } from '../../features/settings/preferencesRepository';
 import { translate, TranslationKey } from '../../i18n/translations';
-import { palettes } from '../../theme/tokens';
+import { palettes } from '../../constants/theme/tokens';
 import { styles } from './PersistenceProvider.styles';
 
 interface PersistenceContextValue {

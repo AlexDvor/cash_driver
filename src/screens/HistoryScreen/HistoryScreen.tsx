@@ -18,9 +18,8 @@ import {
   HistoryPeriod,
   HistoryPlatform,
   localDateKey,
-  platformLabels,
 } from '../../features/transactions/history';
-import { platforms } from '../../features/transactions/types';
+import { platforms, platformLabels } from '../../constants/platforms';
 import { useTransactions } from '../../hooks/transactions/useTransactions';
 import { TransactionLoadState } from '../../components/TransactionLoadState/TransactionLoadState';
 import { styles } from './HistoryScreen.styles';

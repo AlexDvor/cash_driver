@@ -1,7 +1,8 @@
 import { validate as isUuid } from 'uuid';
 import { createChangeNotifier } from '../../app/changeNotifier';
 import { calculatePayment } from './payment';
-import { CashTransaction, PaymentAmounts, Platform, platforms } from './types';
+import { CashTransaction, PaymentAmounts, Platform } from './types';
+import { platforms } from '../../constants/platforms';
 import { TransactionRepository } from './transactionRepository';
 
 export interface TransactionInput extends PaymentAmounts {

@@ -6,7 +6,7 @@ import { TabIcon } from '../../ui/TabIcon/TabIcon';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { TranslationKey } from '../../i18n/translations';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
-import { spacing } from '../../theme/tokens';
+import { spacing } from '../../constants/theme/tokens';
 import { TabParamList } from '../navigationTypes';
 import { styles } from './AppTabBar.styles';
 import { routes } from '../routes';

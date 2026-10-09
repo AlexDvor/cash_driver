@@ -1,4 +1,5 @@
-import { CashTransaction, Platform, platforms } from '../transactions/types';
+import { CashTransaction, Platform } from '../transactions/types';
+import { platforms } from '../../constants/platforms';
 import { calculatePayment } from '../transactions/payment';
 
 export interface CashSummary {

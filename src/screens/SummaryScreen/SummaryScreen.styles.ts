@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { spacing, typography } from '../../theme/tokens';
+import { spacing, typography } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   money: {

@@ -16,8 +16,7 @@ import { useTranslation } from '../../providers/LanguageProvider/LanguageProvide
 import { languageOptions } from '../../i18n/translations';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { useDeletion } from '../../providers/DeletionProvider/DeletionProvider';
-import { platformLabels } from '../../features/transactions/history';
-import { platforms } from '../../features/transactions/types';
+import { platforms, platformLabels } from '../../constants/platforms';
 import {
   packageVersion,
   readAppVersion,

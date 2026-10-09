@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { sizing, spacing, typography } from '../../theme/tokens';
+import { sizing, spacing, typography } from '../../constants/theme/tokens';
 
 // Bootstrap has no resolved palette until persisted mode is available.
 export const styles = StyleSheet.create({
