@@ -330,7 +330,12 @@ test.each(['success', 'error'])(
 );
 
 test('pending deletion and undo keep saved totals; failed delete keeps totals, retry commit refreshes', async () => {
-  const row = await seed('2026-10-08T08:00:00Z');
+  const row = await seed('2026-10-08T08:00:00Z', {
+    ...validInput,
+    fareAmountCents: 2000,
+    cashReceivedCents: 5000,
+    tipCents: 500,
+  });
   await mount();
   const alert = jest.spyOn(Alert, 'alert');
   async function begin() {
@@ -345,7 +350,8 @@ test('pending deletion and undo keep saved totals; failed delete keeps totals, r
   }
   await begin();
   expectCount(1);
-  expect(text('summary-retained')).toMatch(/20,00/);
+  expect(text('summary-retained')).toMatch(/25,00/);
+  expect(text('summary-tipsTotal')).toMatch(/5,00/);
   await press('Deshacer');
   expect(await services.transactions.get(row.id)).toEqual(row);
   expectCount(1);
@@ -359,10 +365,13 @@ test('pending deletion and undo keep saved totals; failed delete keeps totals, r
   expect(content()).toContain('No se pudo eliminar la operación');
   expectCount(1);
   expect(await services.transactions.get(row.id)).toEqual(row);
+  expect(text('summary-retained')).toMatch(/25,00/);
+  expect(text('summary-tipsTotal')).toMatch(/5,00/);
   await db.execute('DROP TRIGGER reject_delete');
   await press('Reintentar');
   expectCount(0);
   expect(text('summary-retained')).toMatch(/0,00/);
+  expect(text('summary-tipsTotal')).toMatch(/0,00/);
 });
 
 test('focus, resume, local midnight and timezone changes reload persisted rows and clean subscriptions', async () => {

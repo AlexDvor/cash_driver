@@ -5,6 +5,7 @@ import { createNavigationContainerRef } from '@react-navigation/native';
 import ReactTestRenderer, { act } from 'react-test-renderer';
 import { AppNavigator } from '../src/navigation/AppNavigator';
 import { RootStackParamList } from '../src/navigation/navigationTypes';
+import { AppText } from '../src/ui/AppText/AppText';
 import {
   PersistenceProvider,
   usePersistence,
@@ -101,6 +102,115 @@ async function edit(id: string) {
   await details(id);
   await press('Editar');
 }
+
+function displayedText(id: string) {
+  const nodes = app.root.findAllByProps({ testID: id });
+  const children = nodes[nodes.length - 1]?.props.children;
+  return Array.isArray(children) ? children.join('') : String(children);
+}
+
+function detailAmount(label: string) {
+  const labels = app.root
+    .findAllByType(AppText)
+    .filter(node => node.props.children === label);
+  const labelNode = labels[labels.length - 1];
+  let row = labelNode?.parent;
+  while (row) {
+    const values = row.findAllByType(AppText);
+    if (values.length === 2 && values[0] === labelNode) {
+      return String(values[1].props.children);
+    }
+    row = row.parent;
+  }
+  throw Error(`Missing detail ${label}`);
+}
+
+test('persisted partial tip displays independently and edit refreshes history, daily and every period without duplication', async () => {
+  await mount();
+  await input('Importe a cobrar', '20');
+  await input('El cliente entrega', '50');
+  await input('Propina', '5');
+  await press('Confirmar cobro');
+  const [original] = await services.transactions.list();
+  expect(displayedText('payment-success')).toMatch(
+    /Importe de viaje:.*20,00.*Propina:.*5,00/,
+  );
+  expect(displayedText('fareTotal')).toMatch(/20,00/);
+  expect(displayedText('tipsTotal')).toMatch(/5,00/);
+  expect(displayedText('retainedCash')).toMatch(/25,00/);
+  await press('Resumen');
+  for (const period of ['Hoy', 'Semana', 'Mes']) {
+    await press(period);
+    expect(displayedText('summary-count')).toBe('Operaciones: 1');
+    expect(displayedText('summary-fareTotal')).toMatch(/20,00/);
+    expect(displayedText('summary-averageFare')).toMatch(/20,00/);
+    expect(displayedText('summary-tipsTotal')).toMatch(/5,00/);
+    expect(displayedText('summary-retained')).toMatch(/25,00/);
+  }
+  await press('Historial');
+  const historyRow = app.root.findAllByProps({
+    testID: `history-${original.id}`,
+  })[0];
+  const rowText = historyRow
+    .findAllByType(AppText)
+    .map(node => node.props.children)
+    .join(' ');
+  expect(rowText).toMatch(/20,00.*Propina:.*5,00/);
+  await details(original.id);
+  for (const [label, amount] of [
+    ['Importe a cobrar', '20,00'],
+    ['El cliente entrega', '50,00'],
+    ['Cambio entregado', '25,00'],
+    ['Propinas', '5,00'],
+    ['Efectivo retenido', '25,00'],
+  ]) {
+    expect(detailAmount(label)).toContain(amount);
+  }
+  await press('Editar');
+  jest.setSystemTime(new Date('2026-10-09T10:00:00Z'));
+  await input('Propina', '7');
+  await press('Guardar cambios');
+  expect(detailAmount('Propinas')).toContain('7,00');
+  expect(detailAmount('Cambio entregado')).toContain('23,00');
+  expect(detailAmount('Efectivo retenido')).toContain('27,00');
+  expect(await services.transactions.list()).toEqual([
+    expect.objectContaining({
+      id: original.id,
+      createdAt: original.createdAt,
+      tipCents: 700,
+    }),
+  ]);
+  await act(async () => ref.goBack());
+  await press('Todo');
+  const updatedRow = app.root.findAllByProps({
+    testID: `history-${original.id}`,
+  })[0];
+  expect(
+    updatedRow
+      .findAllByType(AppText)
+      .map(node => node.props.children)
+      .join(' '),
+  ).toMatch(/20,00.*Propina:.*7,00/);
+  await press('Inicio');
+  await act(async () => jest.advanceTimersByTime(1000));
+  expect(displayedText('daily-count')).toBe('Operaciones: 0');
+  expect(displayedText('retainedCash')).toMatch(/0,00/);
+  jest.setSystemTime(new Date('2026-10-08T12:00:00Z'));
+  await act(async () => jest.advanceTimersByTime(1000));
+  expect(displayedText('daily-count')).toBe('Operaciones: 1');
+  expect(displayedText('fareTotal')).toMatch(/20,00/);
+  expect(displayedText('tipsTotal')).toMatch(/7,00/);
+  expect(displayedText('retainedCash')).toMatch(/27,00/);
+  await press('Resumen');
+  for (const period of ['Hoy', 'Semana', 'Mes']) {
+    await press(period);
+    expect(displayedText('summary-count')).toBe('Operaciones: 1');
+    expect(displayedText('summary-fareTotal')).toMatch(/20,00/);
+    expect(displayedText('summary-averageFare')).toMatch(/20,00/);
+    expect(displayedText('summary-tipsTotal')).toMatch(/7,00/);
+    expect(displayedText('summary-retained')).toMatch(/27,00/);
+  }
+});
 
 test('partial cash tip commits exact cents once and clears the home draft', async () => {
   await mount();
