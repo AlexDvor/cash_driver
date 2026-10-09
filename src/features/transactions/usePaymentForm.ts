@@ -106,14 +106,12 @@ export function usePaymentForm({
     if (renderedSaveCount !== completedSaves.current) {
       return;
     }
-    setFocused(null);
-    const parsed = parseMoneyInput(
-      field === 'fare' ? fare : received,
-      'blurred',
-    );
-    if (parsed.status === 'valid') {
-      (field === 'fare' ? setFare : setReceived)(centsToInput(parsed.cents));
-    }
+    setFocused(current => (current === field ? null : current));
+    // Use the latest draft: an older native callback may follow a quick-value tap.
+    (field === 'fare' ? setFare : setReceived)(raw => {
+      const parsed = parseMoneyInput(raw, 'blurred');
+      return parsed.status === 'valid' ? centsToInput(parsed.cents) : raw;
+    });
   }
   function quick(cents?: number) {
     if (busy.current || !validFare || fareParsed.status !== 'valid') {

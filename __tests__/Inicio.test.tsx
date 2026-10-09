@@ -66,6 +66,17 @@ async function enter(fare: string, received: string) {
 function text(id: string): string {
   return String(app.root.findByProps({ testID: id }).props.children);
 }
+function tipValue() {
+  return app.root
+    .findAllByType(Switch)
+    .find(node =>
+      [
+        'El cambio es propina',
+        'Keep all change as a tip',
+        'Уся здача як чайові',
+      ].includes(node.props.accessibilityLabel),
+    )?.props.value;
+}
 async function tip(enabled: boolean) {
   const toggle = button('El cambio es propina');
   if (toggle.props.accessibilityState.checked !== enabled) {
@@ -98,17 +109,17 @@ test('quick values replace cash and reset tip, including same-value taps; either
   await tip(true);
   expect(text('change-result')).toMatch(/0,00/);
   await press('20,00 €');
-  expect(app.root.findByType(Switch).props.value).toBe(false);
+  expect(tipValue()).toBe(false);
   await tip(true);
   await press('50,00 €');
   expect(field('El cliente entrega').props.value).toBe('50,00');
   expect(text('change-result')).toMatch(/32,60/);
   await tip(true);
   await input('Importe a cobrar', '18');
-  expect(app.root.findByType(Switch).props.value).toBe(false);
+  expect(tipValue()).toBe(false);
   await tip(true);
   await input('El cliente entrega', '100');
-  expect(app.root.findByType(Switch).props.value).toBe(false);
+  expect(tipValue()).toBe(false);
 });
 
 test('committed tip payment clears money fields, retains platform and updates separately labeled daily totals', async () => {
@@ -192,7 +203,7 @@ test('real write failure retains complete draft and retry uses the same pending 
   expect(field('Importe a cobrar').props.value).toBe('18,50');
   expect(field('El cliente entrega').props.value).toBe('20');
   expect(button('Bolt').props.accessibilityState.selected).toBe(true);
-  expect(app.root.findByType(Switch).props.value).toBe(true);
+  expect(tipValue()).toBe(true);
   expect(JSON.stringify(app.toJSON())).toContain('No se pudo guardar el cobro');
   expect(await services.transactions.list()).toEqual([]);
   fail = false;
@@ -224,7 +235,7 @@ test('failed default-platform write preserves the active draft and committed def
   await press('Bolt');
   expect(button('Cabify').props.accessibilityState.selected).toBe(true);
   expect(field('Importe a cobrar').props.value).toBe('18');
-  expect(app.root.findByType(Switch).props.value).toBe(true);
+  expect(tipValue()).toBe(true);
   expect((await services.preferences.read()).defaultPlatform).toBe('cabify');
   expect(JSON.stringify(app.toJSON())).toContain(
     'No se pudo guardar la preferencia',
@@ -246,13 +257,13 @@ test('language/theme changes preserve raw draft, platform and tip while mounted'
   expect(field('Trip fare').props.value).toBe('18.5');
   expect(field('Cash received').props.value).toBe('20');
   expect(button('Cabify').props.accessibilityState.selected).toBe(true);
-  expect(app.root.findByType(Switch).props.value).toBe(true);
+  expect(tipValue()).toBe(true);
   expect(JSON.stringify(app.toJSON())).toContain('#101714');
   await press('Settings');
   await press('Українська');
   await press('Головна');
   expect(field('Вартість поїздки').props.value).toBe('18.5');
-  expect(app.root.findByType(Switch).props.value).toBe(true);
+  expect(tipValue()).toBe(true);
 });
 
 test('daily loading/error never render fake zero totals and retry loads genuine empty totals', async () => {

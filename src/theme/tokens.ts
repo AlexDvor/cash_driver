@@ -48,7 +48,7 @@ export const palettes: Record<'light' | 'dark', Palette> = {
     secondaryGreen: '#1F9D62',
     softGreen: '#E8F5EE',
     text: '#111827',
-    secondaryText: '#6B7280',
+    secondaryText: '#626975',
     border: '#E5E7EB',
     errorText: '#B91C1C',
     errorSurface: '#FEF2F2',

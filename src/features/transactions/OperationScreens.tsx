@@ -31,7 +31,11 @@ export function DetailsScreen({
   const record = state.status === 'ready' ? state.records[0] : undefined;
   const blocked = deletion.state.id === record?.id;
   function confirmDelete() {
-    if (!record || deletion.state.status !== 'idle') {
+    if (
+      !record ||
+      deletion.state.status !== 'idle' ||
+      deletion.allStatus === 'writing'
+    ) {
       return;
     }
     Alert.alert(t('deleteQuestion'), undefined, [
@@ -86,7 +90,10 @@ export function DetailsScreen({
           <ActionButton
             variant="destructive"
             label={t('delete')}
-            disabled={deletion.state.status !== 'idle'}
+            disabled={
+              deletion.state.status !== 'idle' ||
+              deletion.allStatus === 'writing'
+            }
             onPress={confirmDelete}
           />
         </>

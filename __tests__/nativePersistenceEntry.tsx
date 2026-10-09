@@ -47,7 +47,7 @@ async function verifyNativePersistence(): Promise<string> {
     cashReceivedCents: 2000,
     changeAsTip: true,
   } as const;
-  if (settings.hapticsEnabled === null) {
+  if (!settings.hapticsEnabled) {
     check(rows.length === 0, 'Fixture DB must start empty');
     const pending = transactions.newPendingOperation();
     const [first, second] = await Promise.all([
@@ -172,7 +172,7 @@ async function verifyNativePersistence(): Promise<string> {
     language: 'es',
     themeMode: 'system',
     defaultPlatform: 'uber',
-    hapticsEnabled: null,
+    hapticsEnabled: false,
   });
   return 'NATIVE RESTART PASS: operations/preferences restored, edit/date preserved, delete';
 }

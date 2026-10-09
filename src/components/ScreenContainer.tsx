@@ -21,9 +21,17 @@ export function ScreenContainer({
 }: ScreenContainerProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useAppTheme();
+  const viewportTopInset = hasHeader ? 0 : insets.top;
   return (
     <KeyboardAvoidingView
-      style={[styles.fill, { backgroundColor: colors.background }]}
+      style={[
+        styles.fill,
+        {
+          backgroundColor: colors.background,
+          // Reserve the viewport inset so scrolled controls stay below the bar.
+          paddingTop: viewportTopInset,
+        },
+      ]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
@@ -32,7 +40,7 @@ export function ScreenContainer({
         contentContainerStyle={[
           styles.scroll,
           {
-            paddingTop: spacing.xl + (hasHeader ? 0 : insets.top),
+            paddingTop: spacing.xl,
             paddingBottom: spacing.xl + (hasHeader ? insets.bottom : 0),
             paddingLeft: spacing.xl + insets.left,
             paddingRight: spacing.xl + insets.right,

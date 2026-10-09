@@ -167,11 +167,39 @@ test('migration from v1 preserves rows, IDs, cents and creation time', async () 
     language: 'es',
     themeMode: 'system',
     defaultPlatform: 'uber',
-    hapticsEnabled: null,
+    hapticsEnabled: false,
   });
   await migrateDatabase(db);
   expect(await services.transactions.list()).toHaveLength(1);
 });
+
+test.each([null, 0, 1])(
+  'v2 migration resolves only unset haptics (%s) without changing saved data',
+  async haptics => {
+    const services = await testPersistence(db);
+    const row = await services.transactions.save(
+      services.transactions.newPendingOperation(),
+      validInput,
+    );
+    await db.execute(
+      'UPDATE preferences SET language = ?, theme_mode = ?, default_platform = ?, haptics_enabled = ? WHERE id = 1',
+      ['uk', 'dark', 'bolt', haptics],
+    );
+    await db.execute('PRAGMA user_version = 2');
+    await migrateDatabase(db);
+    expect(await services.preferences.read()).toEqual({
+      language: 'uk',
+      themeMode: 'dark',
+      defaultPlatform: 'bolt',
+      hapticsEnabled: haptics === 1,
+    });
+    expect(await services.transactions.get(row.id)).toEqual(row);
+    await migrateDatabase(db);
+    expect((await db.execute('PRAGMA user_version')).rows[0].user_version).toBe(
+      SCHEMA_VERSION,
+    );
+  },
+);
 
 test('migration failure rolls back DDL and version; future versions are rejected without deleting data', async () => {
   await db.execute('CREATE TABLE preferences (sentinel TEXT)');

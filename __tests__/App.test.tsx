@@ -114,9 +114,9 @@ test('tab presses change routes; details and editing return to the previous tab'
   expect(JSON.stringify(app.toJSON())).toContain(
     'Esta operación ya no está disponible.',
   );
-  await act(async () => ref.goBack());
+  await press(app, 'button', 'Volver');
   expect(ref.getCurrentRoute()?.name).toBe('Details');
-  await act(async () => ref.goBack());
+  await press(app, 'button', 'Volver');
   expect(ref.getCurrentRoute()?.name).toBe('Settings');
 });
 
@@ -128,14 +128,20 @@ test('language and theme changes preserve navigation and localize the mounted UI
   await press(app, 'radio', 'English');
   expect(ref.getCurrentRoute()?.key).toBe(routeKey);
   expect(JSON.stringify(app.toJSON())).toContain(
-    'Language and theme are saved on this device.',
+    'Data stays only on this device.',
   );
+  await act(async () => ref.navigate('Details', { id: 'missing' }));
+  await press(app, 'button', 'Back');
+  expect(ref.getCurrentRoute()?.key).toBe(routeKey);
   await press(app, 'radio', 'Dark');
   expect(ref.getCurrentRoute()?.key).toBe(routeKey);
   expect(JSON.stringify(app.toJSON())).toContain('#101714');
   await press(app, 'radio', 'Українська');
   expect(ref.getCurrentRoute()?.key).toBe(routeKey);
   expect(JSON.stringify(app.toJSON())).toContain('Налаштування');
+  await act(async () => ref.navigate('Edit', { id: 'missing' }));
+  await press(app, 'button', 'Назад');
+  expect(ref.getCurrentRoute()?.key).toBe(routeKey);
   await press(app, 'tab', 'Головна');
   expect(ref.getCurrentRoute()?.name).toBe('Home');
   expect(JSON.stringify(app.toJSON())).toContain('Нова оплата');

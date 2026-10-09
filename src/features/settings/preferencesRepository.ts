@@ -7,7 +7,7 @@ export interface Preferences {
   language: Language;
   themeMode: ThemeMode;
   defaultPlatform: Platform;
-  hapticsEnabled: boolean | null; // NULL: initial owner decision is still pending.
+  hapticsEnabled: boolean;
 }
 
 export function decodePreferences(row: Record<string, unknown>): Preferences {
@@ -24,7 +24,7 @@ export function decodePreferences(row: Record<string, unknown>): Preferences {
       defaultPlatform !== 'cabify' &&
       defaultPlatform !== 'bolt' &&
       defaultPlatform !== 'other') ||
-    (haptics !== null && haptics !== 0 && haptics !== 1)
+    (haptics !== 0 && haptics !== 1)
   ) {
     throw new Error('Corrupt preferences');
   }
@@ -32,7 +32,7 @@ export function decodePreferences(row: Record<string, unknown>): Preferences {
     language,
     themeMode,
     defaultPlatform,
-    hapticsEnabled: haptics === null ? null : haptics === 1,
+    hapticsEnabled: haptics === 1,
   };
 }
 
@@ -47,16 +47,10 @@ export function createPreferencesRepository(db: SqlConnection) {
   return {
     read,
     async write(preferences: Preferences): Promise<void> {
-      if (
-        preferences.hapticsEnabled !== null &&
-        typeof preferences.hapticsEnabled !== 'boolean'
-      ) {
+      if (typeof preferences.hapticsEnabled !== 'boolean') {
         throw new Error('Invalid haptics preference');
       }
-      const haptics =
-        preferences.hapticsEnabled === null
-          ? null
-          : Number(preferences.hapticsEnabled);
+      const haptics = Number(preferences.hapticsEnabled);
       decodePreferences({
         language: preferences.language,
         theme_mode: preferences.themeMode,

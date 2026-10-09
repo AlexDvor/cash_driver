@@ -41,8 +41,8 @@ export function ActionButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor },
-        (pressed || disabled) && styles.dimmed,
+        { backgroundColor, borderColor: pressed ? textColor : 'transparent' },
+        disabled && styles.dimmed,
       ]}
     >
       {loading && <ActivityIndicator color={textColor} />}
@@ -57,6 +57,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     minHeight: sizing.primaryButton,
     borderRadius: radii.button,
+    borderWidth: sizing.borderWidth,
     padding: spacing.lg,
     justifyContent: 'center',
     alignItems: 'center',

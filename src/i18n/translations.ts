@@ -1,5 +1,30 @@
 export type Language = 'es' | 'en' | 'uk';
 export const es = {
+  currency: 'Moneda',
+  defaultPlatform: 'Plataforma predeterminada',
+  defaultPlatformHelp:
+    'Se actualiza también al elegir una plataforma en Inicio.',
+  confirmationHaptics: 'Confirmación háptica',
+  hapticsHelp:
+    'Solo después de guardar un cobro, si el dispositivo y sus ajustes lo permiten.',
+  appVersion: 'Versión de la aplicación',
+  packageVersionDifference:
+    'La versión instalada se muestra arriba. El package JavaScript tiene la versión {version}; sus metadatos todavía difieren.',
+  versionUnavailable: 'No se pudo leer la versión instalada.',
+  retryVersion: 'Reintentar versión',
+  localStorageHelp:
+    'Los datos se guardan solo en este dispositivo. Desinstalar la aplicación o borrar sus datos puede eliminar tu historial. Esta versión no incluye copia de seguridad ni restauración.',
+  preferencesSaving: 'Guardando preferencia…',
+  retryPreference: 'Reintentar preferencia',
+  deleteAll: 'Eliminar todas las operaciones',
+  deleteAllQuestion:
+    'Se eliminarán todas las operaciones guardadas. Esta acción no se puede deshacer.',
+  deleteAllConfirm: 'Eliminar todo',
+  deletingAll: 'Eliminando todas las operaciones…',
+  deleteAllFailed:
+    'No se pudieron eliminar las operaciones. Los datos se conservan. Reintenta.',
+  deleteAllSuccess: 'Se eliminaron todas las operaciones.',
+  retryDeleteAll: 'Reintentar eliminar todo',
   averageFare: 'Promedio por operación',
   byPlatform: 'Por plataforma',
   summaryLoading: 'Cargando resumen…',
@@ -103,6 +128,29 @@ export const es = {
 export type TranslationKey = keyof typeof es;
 type Dictionary = Record<TranslationKey, string>;
 export const en: Dictionary = {
+  currency: 'Currency',
+  defaultPlatform: 'Default platform',
+  defaultPlatformHelp: 'Also updated when you select a platform in Home.',
+  confirmationHaptics: 'Confirmation haptics',
+  hapticsHelp:
+    'Only after saving a payment, when the device and its settings allow it.',
+  appVersion: 'App version',
+  packageVersionDifference:
+    'The installed version is shown above. The JavaScript package version is {version}; these metadata still differ.',
+  versionUnavailable: 'Could not read the installed version.',
+  retryVersion: 'Retry version',
+  localStorageHelp:
+    'Data stays only on this device. Uninstalling the app or clearing its data may erase your history. This version has no backup or restore.',
+  preferencesSaving: 'Saving preference…',
+  retryPreference: 'Retry preference',
+  deleteAll: 'Delete all operations',
+  deleteAllQuestion:
+    'All saved operations will be deleted. This action cannot be undone.',
+  deleteAllConfirm: 'Delete all',
+  deletingAll: 'Deleting all operations…',
+  deleteAllFailed: 'Could not delete the operations. Data is retained. Retry.',
+  deleteAllSuccess: 'All operations were deleted.',
+  retryDeleteAll: 'Retry deleting all',
   averageFare: 'Average trip fare per operation',
   byPlatform: 'By platform',
   summaryLoading: 'Loading summary…',
@@ -200,6 +248,30 @@ export const en: Dictionary = {
     'Uses the device theme. To switch between day and night, configure the schedule in system settings.',
 };
 export const uk: Dictionary = {
+  currency: 'Валюта',
+  defaultPlatform: 'Платформа за замовчуванням',
+  defaultPlatformHelp: 'Також оновлюється після вибору платформи на Головній.',
+  confirmationHaptics: 'Вібровідгук підтвердження',
+  hapticsHelp:
+    'Лише після збереження оплати, якщо пристрій і його налаштування дозволяють.',
+  appVersion: 'Версія застосунку',
+  packageVersionDifference:
+    'Вище показано встановлену версію. Версія JavaScript package — {version}; ці метадані поки різняться.',
+  versionUnavailable: 'Не вдалося прочитати встановлену версію.',
+  retryVersion: 'Повторити читання версії',
+  localStorageHelp:
+    'Дані зберігаються лише на цьому пристрої. Видалення застосунку або очищення його даних може стерти історію. Ця версія не має резервного копіювання та відновлення.',
+  preferencesSaving: 'Збереження налаштування…',
+  retryPreference: 'Повторити налаштування',
+  deleteAll: 'Видалити всі операції',
+  deleteAllQuestion:
+    'Усі збережені операції буде видалено. Цю дію неможливо скасувати.',
+  deleteAllConfirm: 'Видалити все',
+  deletingAll: 'Видалення всіх операцій…',
+  deleteAllFailed:
+    'Не вдалося видалити операції. Дані збережено. Повторіть спробу.',
+  deleteAllSuccess: 'Усі операції видалено.',
+  retryDeleteAll: 'Повторити видалення всіх',
   averageFare: 'Середня вартість поїздки',
   byPlatform: 'За платформами',
   summaryLoading: 'Завантаження підсумків…',

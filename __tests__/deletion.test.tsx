@@ -20,6 +20,21 @@ let id: string;
 let originalState: typeof AppState.currentState;
 let onState: (state: AppStateStatus) => void;
 let removeSubscription: jest.Mock;
+test('stale confirmation callbacks cannot start single or all deletion after unmount', async () => {
+  const old = deletion;
+  const removeAll = jest.spyOn(services.transactions, 'removeAll');
+  const remove = jest.spyOn(services.transactions, 'remove');
+  await act(async () => app.unmount());
+  old.begin(id);
+  expect(await old.clearAll()).toBe(false);
+  await act(async () => {
+    jest.advanceTimersByTime(DELETION_UNDO_SECONDS * 1000);
+  });
+  expect(removeAll).not.toHaveBeenCalled();
+  expect(remove).not.toHaveBeenCalled();
+  expect(await services.transactions.get(id)).not.toBeNull();
+});
+
 function Probe() {
   deletion = useDeletion();
   return null;

@@ -25,6 +25,7 @@ interface PersistenceContextValue {
   saving: boolean;
   errorKey: TranslationKey | null;
   updatePreferences: (patch: Partial<Preferences>) => Promise<boolean>;
+  retryPreferences: () => Promise<boolean>;
 }
 const PersistenceContext = createContext<PersistenceContextValue | undefined>(
   undefined,
@@ -44,6 +45,7 @@ export function PersistenceProvider({
   const [errorKey, setErrorKey] = useState<TranslationKey | null>(null);
   const mounted = useRef(false);
   const savingRef = useRef(false);
+  const failedPatch = useRef<Partial<Preferences> | null>(null);
   const bootstrapColors =
     palettes[useColorScheme() === 'dark' ? 'dark' : 'light'];
   useEffect(() => {
@@ -76,6 +78,7 @@ export function PersistenceProvider({
       setSaving(true);
       savingRef.current = true;
       setErrorKey(null);
+      failedPatch.current = null;
       try {
         const preferences = await ready.services.preferences.update(patch);
         if (mounted.current) {
@@ -83,6 +86,7 @@ export function PersistenceProvider({
         }
         return true;
       } catch {
+        failedPatch.current = { ...patch };
         if (mounted.current) {
           setErrorKey(
             patch.themeMode !== undefined
@@ -143,7 +147,16 @@ export function PersistenceProvider({
   }
   return (
     <PersistenceContext.Provider
-      value={{ ...ready, saving, errorKey, updatePreferences }}
+      value={{
+        ...ready,
+        saving,
+        errorKey,
+        updatePreferences,
+        retryPreferences: () =>
+          failedPatch.current
+            ? updatePreferences(failedPatch.current)
+            : Promise.resolve(false),
+      }}
     >
       {children}
     </PersistenceContext.Provider>

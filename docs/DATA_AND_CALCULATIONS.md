@@ -96,6 +96,10 @@ Persist `themeMode` as `light`, `dark`, or `system` in local preferences, initia
 
 Persist a single default platform, initially Uber. Explicit platform selection in Inicio or Ajustes updates the same preference; the most recent selection wins. A new form uses this value, and resetting after successful save retains it. A settings change must not overwrite an existing payment draft. Historical edits do not update the preference. Keep the displayed setting synchronized with the persisted value and expose persistence failure rather than claiming it was saved.
 
+## Confirmation haptics preference
+
+Phase 7 owner-delegated decision (2026-10-08): confirmation haptics are initially disabled, centralized in `DEFAULT_HAPTICS_ENABLED`. Schema version 3 resolves only the former unset NULL preference; explicit stored choices are preserved. Persist enabled/disabled through the existing preferences mechanism. Feedback occurs only after a successful payment commit, respects device/system support and never determines persistence success.
+
 ## Single-operation deletion and undo
 
 After deletion confirmation, hold a pending deletion in memory during a brief `Deshacer` window. The owner-approved duration is 10 seconds, centralized as `DELETION_UNDO_SECONDS` in `src/features/transactions/deletionConstants.ts` (Phase 5 decision, 2026-10-08). Do not remove the SQLite row or exclude it from history or totals during this window. Undo cancels the pending action; no restore insert is needed, and ID, timestamps, and monetary fields remain unchanged.

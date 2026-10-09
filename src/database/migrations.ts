@@ -1,6 +1,7 @@
 import { SqlConnection } from './sqlite';
+import { DEFAULT_HAPTICS_ENABLED } from '../features/settings/settingsDefaults';
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 // Version 1 is the documented transaction schema, with explicit SQLite type
 // and input-bound checks so INTEGER affinity cannot silently accept fractions.
@@ -61,6 +62,14 @@ export async function migrateDatabase(db: SqlConnection): Promise<void> {
         ['es', 'system', 'uber', null],
       );
       await tx.execute('PRAGMA user_version = 2');
+    }
+    if (version < 3) {
+      // Preserve explicit choices; resolve only the previous unset preference.
+      await tx.execute(
+        'UPDATE preferences SET haptics_enabled = ? WHERE haptics_enabled IS NULL',
+        [Number(DEFAULT_HAPTICS_ENABLED)],
+      );
+      await tx.execute('PRAGMA user_version = 3');
     }
     // Fail on missing tables even if user_version incorrectly claims readiness.
     await tx.execute(

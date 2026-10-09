@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BottomTabBarProps,
@@ -11,8 +11,13 @@ import {
   NavigationContainer,
   NavigationContainerRef,
   Theme,
+  useNavigation,
 } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {
+  createNativeStackNavigator,
+  NativeStackHeaderBackProps,
+  NativeStackNavigationProp,
+} from '@react-navigation/native-stack';
 import { SettingsScreen } from '../features/settings/SettingsScreen';
 import { SummaryScreen } from '../features/summary/SummaryScreen';
 import {
@@ -28,10 +33,32 @@ import { RootStackParamList, TabParamList } from './navigationTypes';
 import { DeletionProvider } from '../features/transactions/DeletionProvider';
 import { useDeletion } from '../features/transactions/DeletionProvider';
 import { DeletionNotice } from '../features/transactions/DeletionNotice';
-import { spacing } from '../theme/tokens';
+import { sizing, spacing } from '../theme/tokens';
+import { AppText } from '../components/AppText';
 
 const Tabs = createBottomTabNavigator<TabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+function HeaderBackButton() {
+  const { t } = useTranslation();
+  const { colors } = useAppTheme();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t('back')}
+      onPress={() => navigation.goBack()}
+      style={styles.back}
+    >
+      <AppText style={{ color: colors.primary }}>←</AppText>
+    </Pressable>
+  );
+}
+
+function renderHeaderBack({ canGoBack }: NativeStackHeaderBackProps) {
+  return canGoBack ? <HeaderBackButton /> : null;
+}
 
 function renderTabBar(props: BottomTabBarProps) {
   return <AppTabBar {...props} />;
@@ -120,8 +147,11 @@ export function AppNavigator({ navigationRef }: AppNavigatorProps) {
             screenOptions={{
               // Static foundation transitions also respect Reduce Motion.
               animation: 'none',
+              statusBarStyle: appearance === 'dark' ? 'light' : 'dark',
               headerTintColor: colors.primary,
               headerBackTitle: t('back'),
+              headerBackVisible: false,
+              headerLeft: renderHeaderBack,
               headerStyle: { backgroundColor: colors.card },
               contentStyle: { backgroundColor: colors.background },
             }}
@@ -151,4 +181,10 @@ export function AppNavigator({ navigationRef }: AppNavigatorProps) {
 const styles = StyleSheet.create({
   fill: { flex: 1 },
   notice: { paddingTop: spacing.sm },
+  back: {
+    minWidth: sizing.touchTarget,
+    minHeight: sizing.touchTarget,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

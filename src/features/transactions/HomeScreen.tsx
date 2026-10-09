@@ -13,6 +13,7 @@ import { useDailySummary } from '../summary/useDailySummary';
 import { PaymentForm } from './PaymentForm';
 import { usePaymentForm } from './usePaymentForm';
 import { PendingOperation, TransactionInput } from './transactionService';
+import { confirmationHaptics } from '../settings/confirmationHaptics';
 
 export function HomeScreen() {
   const { t, locale } = useTranslation();
@@ -21,6 +22,8 @@ export function HomeScreen() {
     usePersistence();
   const clock = useLocalClock();
   const daily = useDailySummary(clock);
+  const hapticsEnabled = useRef(preferences.hapticsEnabled);
+  hapticsEnabled.current = preferences.hapticsEnabled;
   const pending = useRef<{
     operation: PendingOperation;
     input: TransactionInput;
@@ -46,6 +49,7 @@ export function HomeScreen() {
       }
       const saved = await services.transactions.save(operation, input);
       pending.current = null;
+      confirmationHaptics(hapticsEnabled.current);
       return saved;
     },
     [services],

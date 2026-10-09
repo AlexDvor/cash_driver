@@ -46,9 +46,9 @@ export function ChoiceGroup<Value extends string>({
                 },
                 {
                   backgroundColor: selected ? colors.softGreen : colors.card,
-                  borderColor: selected ? colors.primary : colors.border,
+                  borderColor:
+                    selected || pressed ? colors.primary : colors.border,
                 },
-                pressed && styles.pressed,
               ]}
             >
               <AppText
@@ -83,5 +83,4 @@ const styles = StyleSheet.create({
   },
   label: { textAlign: 'center' },
   selected: { fontWeight: '700' },
-  pressed: { opacity: 0.7 },
 });

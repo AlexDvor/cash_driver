@@ -5,6 +5,48 @@ import { usePaymentForm } from '../src/features/transactions/usePaymentForm';
 import { Platform } from '../src/features/transactions/types';
 import { openTestDatabase, testPersistence } from './sqliteTestDatabase';
 
+test('delayed blur preserves quick, Exacto and newly typed amounts', async () => {
+  let current: ReturnType<typeof usePaymentForm> | undefined;
+  function form() {
+    if (!current) {
+      throw new Error('Missing form');
+    }
+    return current;
+  }
+  function Probe() {
+    current = usePaymentForm({
+      initialPlatform: 'uber',
+      onSubmit: async () => {
+        throw new Error('This draft must not be submitted');
+      },
+    });
+    return <Text>{current.received}</Text>;
+  }
+  let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+  try {
+    await act(async () => {
+      renderer = ReactTestRenderer.create(<Probe />);
+    });
+    await act(async () => {
+      form().changeField('fare', '18');
+      form().changeField('received', '20');
+    });
+    const oldBlur = form().blur;
+    await act(async () => form().quick(5000));
+    await act(async () => oldBlur('received'));
+    expect(form().received).toBe('50,00');
+    expect(form().payment).toMatchObject({ changeGivenCents: 3200 });
+    await act(async () => form().quick());
+    await act(async () => oldBlur('received'));
+    expect(form().received).toBe('18,00');
+    await act(async () => form().changeField('fare', '25,'));
+    await act(async () => oldBlur('fare'));
+    expect(form().fare).toBe('25,00');
+  } finally {
+    await act(async () => renderer?.unmount());
+  }
+});
+
 test('default changes apply to a pristine or next form, preserving the platform of an existing draft', async () => {
   jest.useFakeTimers();
   const db = openTestDatabase();

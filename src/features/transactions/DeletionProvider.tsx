@@ -19,6 +19,8 @@ interface DeletionContextValue {
   undo: () => void;
   retry: () => void;
   cancelError: () => void;
+  allStatus: 'idle' | 'writing' | 'error' | 'success';
+  clearAll: () => Promise<boolean>;
 }
 const DeletionContext = createContext<DeletionContextValue | undefined>(
   undefined,
@@ -26,6 +28,9 @@ const DeletionContext = createContext<DeletionContextValue | undefined>(
 
 export function DeletionProvider({ children }: React.PropsWithChildren) {
   const { services } = usePersistence();
+  const [allStatus, setAllStatus] =
+    useState<DeletionContextValue['allStatus']>('idle');
+  const allWriting = useRef(false);
   const [state, setState] = useState<DeletionState>({
     status: 'idle',
     id: null,
@@ -54,6 +59,9 @@ export function DeletionProvider({ children }: React.PropsWithChildren) {
     change({ status: 'idle', id: null });
   }, [change, clearTimer]);
   const commit = useCallback(async () => {
+    if (!mounted.current || allWriting.current) {
+      return;
+    }
     const pending = current.current;
     if (pending.status !== 'pending' && pending.status !== 'error') {
       return;
@@ -77,7 +85,9 @@ export function DeletionProvider({ children }: React.PropsWithChildren) {
   const begin = useCallback(
     (id: string) => {
       if (
+        !mounted.current ||
         current.current.status !== 'idle' ||
+        allWriting.current ||
         !active.current ||
         AppState.currentState !== 'active'
       ) {
@@ -103,10 +113,45 @@ export function DeletionProvider({ children }: React.PropsWithChildren) {
       subscription.remove();
     };
   }, [clearTimer, undo]);
+  const clearAll = useCallback(async () => {
+    // Recheck after native confirmation; synchronous lock also covers double taps.
+    if (
+      !mounted.current ||
+      current.current.status !== 'idle' ||
+      allWriting.current
+    ) {
+      return false;
+    }
+    allWriting.current = true;
+    setAllStatus('writing');
+    try {
+      await services.transactions.removeAll();
+      if (mounted.current) {
+        setAllStatus('success');
+      }
+      return true;
+    } catch {
+      if (mounted.current) {
+        setAllStatus('error');
+      }
+      return false;
+    } finally {
+      allWriting.current = false;
+    }
+  }, [services]);
+  useEffect(() => {
+    if (allStatus !== 'success') {
+      return;
+    }
+    const timer = setTimeout(() => setAllStatus('idle'), 4000);
+    return () => clearTimeout(timer);
+  }, [allStatus]);
   return (
     <DeletionContext.Provider
       value={{
         state,
+        allStatus,
+        clearAll,
         begin,
         undo,
         retry: commit,

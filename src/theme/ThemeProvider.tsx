@@ -1,8 +1,9 @@
-import React, { createContext, useContext } from 'react';
-import { StatusBar, useColorScheme } from 'react-native';
+import React, { createContext, useContext, useEffect } from 'react';
+import { AppState, StatusBar, useColorScheme } from 'react-native';
 import { palettes, Palette } from './tokens';
 import { EffectiveTheme, resolveTheme, ThemeMode } from './resolveTheme';
 import { usePersistence } from '../app/PersistenceProvider';
+import { updateSystemBars } from './systemBars';
 interface ThemeContextValue {
   mode: ThemeMode;
   appearance: EffectiveTheme;
@@ -18,6 +19,16 @@ export function ThemeProvider({ children }: React.PropsWithChildren) {
   };
   const appearance = resolveTheme(mode, useColorScheme());
   const colors = palettes[appearance];
+  useEffect(() => {
+    const apply = () => updateSystemBars(appearance, colors.card);
+    apply();
+    const subscription = AppState.addEventListener('change', state => {
+      if (state === 'active') {
+        apply();
+      }
+    });
+    return () => subscription.remove();
+  }, [appearance, colors.card]);
   return (
     <ThemeContext.Provider value={{ mode, setMode, appearance, colors }}>
       <StatusBar
