@@ -18,14 +18,12 @@ import {
   NativeStackHeaderBackProps,
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
-import { SettingsScreen } from '../features/settings/SettingsScreen';
-import { SummaryScreen } from '../features/summary/SummaryScreen';
-import {
-  DetailsScreen,
-  EditScreen,
-  HistoryScreen,
-  HomeScreen,
-} from '../features/transactions/TransactionScreens';
+import { SettingsScreen } from '../screens/SettingsScreen/SettingsScreen';
+import { SummaryScreen } from '../screens/SummaryScreen/SummaryScreen';
+import { DetailsScreen } from '../screens/DetailsScreen/DetailsScreen';
+import { EditScreen } from '../screens/EditScreen/EditScreen';
+import { HistoryScreen } from '../screens/HistoryScreen/HistoryScreen';
+import { HomeScreen } from '../screens/HomeScreen/HomeScreen';
 import { useTranslation } from '../i18n/LanguageProvider';
 import { useAppTheme } from '../theme/ThemeProvider';
 import { AppTabBar } from './AppTabBar';

@@ -443,6 +443,16 @@ Fresh checks: npm run typecheck **PASS**; npm run lint **PASS**; npm test -- --r
 
 Read-only subagent baseline review confirmed protected contracts and migration risks: edit identity/one-time loading, retry UUIDs, latest haptics preference, global deletion lifetime/footer, distinct refresh/stale-response behavior and all native-entry imports. Main agent owns final documentation review and the phase commit. Preserve physical haptics FAIL, outstanding accessibility/iOS NOT VERIFIED, owner identifiers/signing/version decisions and historical dependency-audit limitation. Next prerequisite is a separate Phase 1 assignment. Phase commit message: docs: establish CashDriver refactoring baseline and rules; its hash is reported after committing, not invented here.
 
+## Refactoring Phase 1 — separate screens (2026-10-09)
+
+Status: **COMPLETE for structural screen refactoring**. Phase 0 commit: 05f5a3a. Six screen entries now live in src/screens/<Name>Screen/: Home, History, Summary, Settings, Details and Edit. Each consumes the existing feature hooks/components/services; screen-local static styles live beside their entry in five .styles.ts files. Edit needs no static stylesheet and retains LoadedEdit with key={record.id} and one-time useTransactions(id,false). AppNavigator imports six entries directly; obsolete feature screen files and TransactionScreens re-export removed. Route names, hooks, Providers, form, SQL, money, translations, palettes and configuration are unchanged.
+
+Subagent phase1_screens owned screen/style files and removal only; main agent integrated navigator and documentation. Independent read-only phase1_review checked unchanged bodies/styles, edit draft identity, Home UUID refs, deletion lifetime and stale imports, with no confirmed issue. Tests/native entries already use App/AppNavigator and have no direct old screen imports, so no test/native-entry edits were required. Existing behavioral coverage reused; no new tests/hooks added or assertions weakened.
+
+Fresh verification: npm run typecheck **PASS**; npm run lint **PASS**; full Jest with approved command-scoped workspace TEMP/TMP and TZ=UTC **20 suites / 196 tests PASS**, 9.111 s. One-off TypeScript AST comparison found all seven function declarations and five static styles identical to baseline after formatting. Production Android Metro bundle **PASS**, 19 assets, through index.js and relocated imports. The known ReactNativeFeatureFlags export-resolution and color-environment warnings remain; no dependency/config changes. Whitespace/review gates checked before phase commit, whose hash is reported after creation.
+
+No native build/device/visual rerun: component JSX and style values are unchanged; bundle is graph verification, not native acceptance. Physical haptics FAIL, accessibility/system-restriction and iOS native NOT VERIFIED, owner identifiers/signing/version decisions and audit limitation remain. Full MVP acceptance is still NOT COMPLETE. Phase 2 is NOT STARTED and requires the next assignment. Phase commit message: refactor: separate CashDriver screens.
+
 ## Required automated checks
 
 - Language: matching translation keys for es/en/uk; initial Spanish, persistence/restart, localized date/money displays, unchanged integer-cent values and period boundaries, draft preservation, and preference write failure.

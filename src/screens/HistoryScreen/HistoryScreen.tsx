@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../app/navigationTypes';
@@ -11,18 +11,18 @@ import { ScreenContainer } from '../../components/ScreenContainer';
 import { useTranslation } from '../../i18n/LanguageProvider';
 import { formatMoney } from '../../i18n/formatting';
 import { useAppTheme } from '../../theme/ThemeProvider';
-import { radii, sizing, spacing } from '../../theme/tokens';
-import { useDeletion } from './DeletionProvider';
+import { useDeletion } from '../../features/transactions/DeletionProvider';
 import {
   groupHistory,
   HistoryPeriod,
   HistoryPlatform,
   localDateKey,
   platformLabels,
-} from './history';
-import { platforms } from './types';
-import { useTransactions } from './useTransactions';
-import { TransactionLoadState } from './TransactionLoadState';
+} from '../../features/transactions/history';
+import { platforms } from '../../features/transactions/types';
+import { useTransactions } from '../../features/transactions/useTransactions';
+import { TransactionLoadState } from '../../features/transactions/TransactionLoadState';
+import { styles } from './HistoryScreen.styles';
 
 export function HistoryScreen() {
   const { t, locale } = useTranslation();
@@ -162,22 +162,3 @@ export function HistoryScreen() {
     </ScreenContainer>
   );
 }
-const styles = StyleSheet.create({
-  heading: { gap: spacing.xs },
-  group: { gap: spacing.md },
-  row: {
-    borderWidth: sizing.borderWidth,
-    borderRadius: radii.card,
-    padding: spacing.lg,
-    gap: spacing.sm,
-    minHeight: sizing.touchTarget,
-  },
-  rowContent: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-  },
-  amounts: { flexShrink: 1, gap: spacing.xs },
-  pressed: { opacity: 0.7 },
-});

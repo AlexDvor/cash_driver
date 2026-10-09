@@ -3,7 +3,6 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
-  StyleSheet,
   Switch,
   View,
 } from 'react-native';
@@ -16,11 +15,14 @@ import { ScreenContainer } from '../../components/ScreenContainer';
 import { useTranslation } from '../../i18n/LanguageProvider';
 import { languageOptions } from '../../i18n/translations';
 import { useAppTheme } from '../../theme/ThemeProvider';
-import { sizing, spacing } from '../../theme/tokens';
-import { useDeletion } from '../transactions/DeletionProvider';
-import { platformLabels } from '../transactions/history';
-import { platforms } from '../transactions/types';
-import { packageVersion, readAppVersion } from './appVersion';
+import { useDeletion } from '../../features/transactions/DeletionProvider';
+import { platformLabels } from '../../features/transactions/history';
+import { platforms } from '../../features/transactions/types';
+import {
+  packageVersion,
+  readAppVersion,
+} from '../../features/settings/appVersion';
+import { styles } from './SettingsScreen.styles';
 
 export function SettingsScreen() {
   const { t, language } = useTranslation();
@@ -204,14 +206,3 @@ export function SettingsScreen() {
     </ScreenContainer>
   );
 }
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-    minHeight: sizing.touchTarget,
-  },
-  toggleLabel: { flexShrink: 1 },
-});

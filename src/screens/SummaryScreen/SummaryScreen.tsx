@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { useLocalClock } from '../../app/useLocalClock';
 import { ActionButton } from '../../components/ActionButton';
 import { AppText } from '../../components/AppText';
@@ -9,11 +9,11 @@ import { ScreenContainer } from '../../components/ScreenContainer';
 import { useTranslation } from '../../i18n/LanguageProvider';
 import { formatMoney, formatPeriodRange } from '../../i18n/formatting';
 import { useAppTheme } from '../../theme/ThemeProvider';
-import { spacing, typography } from '../../theme/tokens';
-import { platformLabels } from '../transactions/history';
-import { platforms } from '../transactions/types';
-import { SummaryPeriod } from './periods';
-import { usePeriodSummary } from './usePeriodSummary';
+import { platformLabels } from '../../features/transactions/history';
+import { platforms } from '../../features/transactions/types';
+import { SummaryPeriod } from '../../features/summary/periods';
+import { usePeriodSummary } from '../../features/summary/usePeriodSummary';
+import { styles } from './SummaryScreen.styles';
 
 export function SummaryScreen() {
   const { t, locale } = useTranslation();
@@ -110,18 +110,3 @@ export function SummaryScreen() {
     </ScreenContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  money: {
-    fontSize: typography.money,
-    fontWeight: '700',
-    fontVariant: ['tabular-nums'],
-  },
-  value: { fontWeight: '600', fontVariant: ['tabular-nums'] },
-  row: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-  },
-});

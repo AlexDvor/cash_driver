@@ -1,8 +1,8 @@
 # CashDriver — temporary refactoring plan
 
-Status: **PHASE 0 COMPLETE — SOURCE REFACTORING NOT STARTED**.
+Status: **PHASE 1 COMPLETE — PHASE 2 NOT STARTED**.
 
-Created: 2026-10-09. This is a temporary execution plan, not a replacement product specification. The owner authorized the first phase on 2026-10-09: Phase 0 baseline/rules reconciliation. Phase 1 screen moves require the next assignment. Do not restart historical MVP implementation phases.
+Created: 2026-10-09. This is a temporary execution plan, not a replacement product specification. The owner separately authorized Phase 0 baseline/rules reconciliation and Phase 1 screen moves on 2026-10-09. Both are complete within their assigned scope; Phase 2 requires the next assignment. Do not restart historical MVP implementation phases.
 
 ## Objective and authority
 
@@ -206,8 +206,8 @@ Commit: `docs: remove completed temporary refactoring plan`.
 
 | Phase | Status | Verification | Commit |
 | --- | --- | --- | --- |
-| 0 | COMPLETE | typecheck/lint PASS; Jest 20 suites / 196 tests PASS | Hash reported after commit |
-| 1 | NOT STARTED | NOT RUN | — |
+| 0 | COMPLETE | typecheck/lint PASS; Jest 20 suites / 196 tests PASS | 05f5a3a |
+| 1 | COMPLETE | typecheck/lint PASS; Jest 20 suites / 196 tests PASS; Android bundle PASS | Hash reported after commit |
 | 2 | NOT STARTED | NOT RUN | — |
 | 3 | NOT STARTED | NOT RUN | — |
 | 4 | NOT STARTED | NOT RUN | — |
@@ -219,7 +219,7 @@ After each phase record: changed files/responsibilities; hooks/coverage reused o
 
 Allowed statuses: NOT STARTED / IN PROGRESS / VERIFICATION PENDING / COMPLETE / BLOCKED. Do not mark tests PASS from old logs or mark unavailable checks successful. Stop at the assigned phase boundary unless the user's execution instruction authorizes multiple phases.
 
-## Phase 0 handoff — 2026-10-09
+## Phase 0 handoff — 2026-10-09 (historical; commit 05f5a3a)
 
 Baseline commit: 1d3a2bd; working tree was clean for tracked files before this phase. The pre-existing temporary plan and several documentation files were ignored/untracked, so git status alone did not inventory them. Only explicitly listed docs files are included in this phase commit; ignore rules remain unchanged.
 
@@ -243,9 +243,9 @@ Unchanged gates: physical SM-A528B tactile haptics FAIL (cause unresolved); comp
 
 Next assignment: Phase 1 only, six screen components/styles and atomic imports; no hooks/provider/constants moves ahead of their phases. Commit this handoff only after final review/whitespace checks; stop before Phase 1.
 
-## Phase 0 migration map — current src files
+## Phase 0 migration map — original src files
 
-All paths below are relative to the repository. This is a destination map, not a claim that moves have occurred. Keep original files until their phase updates all consumers atomically. New styles/props/constants files are created only when their phase needs them.
+All paths below are relative to the repository. This records the Phase 0 baseline, not the current file inventory. Phase 1 screen moves/removal of the obsolete re-export are now complete; other moves remain planned. Keep remaining original files until their phase updates all consumers atomically. New styles/props/constants files are created only when their phase needs them.
 
 | Current file | Destination / action | Phase |
 | --- | --- | --- |
@@ -308,3 +308,28 @@ All paths below are relative to the repository. This is a destination map, not a
 | src/theme/tokens.ts | src/constants/theme/; preserve values and Palette contract, expose static tokens | 5 |
 
 Root App.tsx, index.js, __tests__/ (including native entries) and native bridge/config files keep their existing locations. Update only affected imports in their assigned phase. Configurations, package manifests/lockfile, native identifiers, dependencies and SQLite schema are not refactoring targets. PendingFeature is retained during component organization; deleting unused placeholders requires proving no consumers and no behavioral impact. src/theme/resolveTheme.ts and systemBars.ts retain their existing responsibilities/locations; only token placement migrates.
+
+## Phase 1 handoff — 2026-10-09
+
+Status: **COMPLETE for structural screen refactoring**; Phase 2 NOT STARTED. Baseline commit 05f5a3a; initial working tree clean.
+
+- Four standalone screens moved into src/screens/HomeScreen/, HistoryScreen/, SummaryScreen/ and SettingsScreen/; OperationScreens split into DetailsScreen/ and EditScreen/. Each folder has one exported screen entry; Edit keeps its private LoadedEdit component and stable record key.
+- Five static StyleSheet.create definitions moved unchanged into adjacent .styles.ts. Edit has no original static styles, so no unused EditScreen.styles.ts was created. Runtime palette/state styles remain in the existing JSX.
+- AppNavigator imports all six entries directly. Old screen files and TransactionScreens re-export removed. Search found no direct old screen imports in tests/native entries: they already import App/AppNavigator, so test and native entry source changes were unnecessary. Typecheck includes native .tsx entries.
+- Hooks, Providers, services, repositories, calculations, translations, theme tokens, routes and package/config/native files are unchanged. docs/CODING_STANDARDS.md and the permanent implementation handoff describe the actual screen placement.
+
+Subagents: phase1_screens owned only screen/style creation and old-screen removal, including existing Prettier formatting. Main agent owned AppNavigator/import integration, verification, documentation and commit. Independent phase1_review inspected bodies/styles, imports, edit identity and deletion/navigation interactions; no confirmed regression. Reviewers did not execute checks.
+
+| Actual fresh verification | Result |
+| --- | --- |
+| npm run typecheck | PASS |
+| npm run lint | PASS |
+| npm test -- --runInBand --no-cache --watch=false, command-scoped TEMP/TMP and TZ=UTC through approved execution | PASS: 20 suites / 196 tests, 9.111 s; standard Node SQLite experimental warning |
+| One-off TypeScript AST comparison against HEAD baseline (7 screen/private function declarations; all 5 style initializers) | PASS: function/JSX bodies and static styles unchanged, including after formatting |
+| node node_modules/react-native/cli.js bundle --platform android --dev false --entry-file index.js --bundle-output node_modules/.cache/cash-driver/phase1.android.bundle --assets-dest node_modules/.cache/cash-driver/assets --max-workers 2 | PASS: production entry and relocated screen/style graph resolve; 19 assets copied |
+
+Existing coverage reused without assertion/mocking changes: payment retries and draft preservation, navigation/back/language/theme, edit immutable ID/date/default, deletion/undo, summaries and settings. No new behavior, hooks or tests introduced. Formatting only followed the test run; the AST check confirms function/style equivalence. Metro retained its known ReactNativeFeatureFlags export-resolution warning and NO_COLOR/FORCE_COLOR notices; no suppression or dependency change.
+
+No native build/device/visual acceptance was rerun: this phase changes file placement/imports only, and all rendered JSX/style values match the baseline. Android bundle success is not native UI/build acceptance. Existing physical haptics FAIL, complete accessibility/system restrictions NOT VERIFIED, and iOS native NOT VERIFIED remain. Full MVP remains NOT COMPLETE.
+
+Commit after final documentation review and git diff --cached --check: refactor: separate CashDriver screens. Next assignment is Phase 2 hooks only; do not move Providers/UI/constants ahead of schedule.

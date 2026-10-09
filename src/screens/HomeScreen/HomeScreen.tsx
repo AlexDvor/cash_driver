@@ -1,6 +1,5 @@
 import React, { useCallback, useRef } from 'react';
-import { StyleSheet, View } from 'react-native';
-import { spacing } from '../../theme/tokens';
+import { View } from 'react-native';
 import { AppText } from '../../components/AppText';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { usePersistence } from '../../app/PersistenceProvider';
@@ -8,12 +7,16 @@ import { useLocalClock } from '../../app/useLocalClock';
 import { useTranslation } from '../../i18n/LanguageProvider';
 import { formatLocalDateTime } from '../../i18n/formatting';
 import { useAppTheme } from '../../theme/ThemeProvider';
-import { DailySummary } from '../summary/DailySummary';
-import { useDailySummary } from '../summary/useDailySummary';
-import { PaymentForm } from './PaymentForm';
-import { usePaymentForm } from './usePaymentForm';
-import { PendingOperation, TransactionInput } from './transactionService';
-import { confirmationHaptics } from '../settings/confirmationHaptics';
+import { DailySummary } from '../../features/summary/DailySummary';
+import { useDailySummary } from '../../features/summary/useDailySummary';
+import { PaymentForm } from '../../features/transactions/PaymentForm';
+import { usePaymentForm } from '../../features/transactions/usePaymentForm';
+import {
+  PendingOperation,
+  TransactionInput,
+} from '../../features/transactions/transactionService';
+import { confirmationHaptics } from '../../features/settings/confirmationHaptics';
+import { styles } from './HomeScreen.styles';
 
 export function HomeScreen() {
   const { t, locale } = useTranslation();
@@ -86,4 +89,3 @@ export function HomeScreen() {
     </ScreenContainer>
   );
 }
-const styles = StyleSheet.create({ header: { gap: spacing.xs } });

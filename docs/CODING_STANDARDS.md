@@ -4,16 +4,17 @@ Apply these rules during implementation within the scope of PROJECT_SPEC.md. Ins
 
 ## Placement and responsibilities
 
-The table below describes the pre-refactoring baseline. The user-authorized refactoring introduces `src/screens/`, `src/hooks/`, `src/ui/`, `src/navigation/`, `src/providers/` and `src/constants/theme/` incrementally under `docs/REFACTORING_PLAN.md`. Until each assigned phase migrates its files, existing paths remain valid; do not create duplicate implementations to satisfy the target tree. Keep domain calculations, services and repositories feature-grouped. The plan's Phase 0 migration map lists every existing src file and its destination; product/data/UI behavior retains its existing authority.
+The table below describes current responsibilities. Refactoring Phase 1 moves the six screens into `src/screens/` with adjacent static styles; feature folders retain hooks, components, calculations, services and repositories until their assigned phases. Later phases introduce `src/hooks/`, `src/ui/`, `src/navigation/`, `src/providers/` and `src/constants/theme/` incrementally under `docs/REFACTORING_PLAN.md`. Until each assigned phase migrates its files, existing paths remain valid; do not create duplicate implementations to satisfy the target tree. Keep domain calculations, services and repositories feature-grouped. The plan's Phase 0 migration map lists the original src files and their destinations; product/data/UI behavior retains its existing authority.
 
 | Location | Put here | Keep out |
 | --- | --- | --- |
 | `src/theme/` | Named colors, typography, spacing, radii, and shared sizing tokens from UI_DESIGN.md | Payment logic and device-specific screen copies |
 | `src/i18n/` | Matching Spanish, English, and Ukrainian translation dictionaries, locale mapping, and a shared translation accessor | User transaction data |
 | `src/components/` | Shared buttons, cards, inputs, selectors, and screen containers | SQL and feature-specific orchestration |
-| `src/features/transactions/` | Shared payment form for create/edit, feature components, hooks, pure calculations, service, repository | Duplicated create/edit arithmetic |
-| `src/features/summary/` | Period calculations, aggregation, and summary UI | A second source of monetary rules |
-| `src/features/settings/` | Preferences and settings UI | Transaction SQL in screens |
+| `src/screens/<Name>Screen/` | One screen entry per folder: Home, History, Summary, Settings, Details, Edit; adjacent static styles where used | SQL, duplicated arithmetic, copies of shared forms |
+| `src/features/transactions/` | Shared payment form for create/edit, feature components, hooks, pure calculations, service, repository | Duplicated create/edit arithmetic; screen entries |
+| `src/features/summary/` | Period calculations, aggregation, daily summary component and hooks | A second source of monetary rules; screen entries |
+| `src/features/settings/` | Preferences, defaults, haptics and installed-version adapters | Transaction SQL in screens; screen entries |
 | `src/database/` | Connection lifecycle and versioned migrations | Presentation logic |
 | `src/app/` | Bootstrap, navigation, and application wiring | Large payment screens or calculation rules |
 
