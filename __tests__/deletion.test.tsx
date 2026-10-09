@@ -70,7 +70,7 @@ beforeEach(async () => {
       platform: 'uber',
       fareAmountCents: 1800,
       cashReceivedCents: 2000,
-      changeAsTip: true,
+      tipCents: 200,
     },
   );
   id = saved.id;

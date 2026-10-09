@@ -302,7 +302,7 @@ test('create/read/edit/delete derive money, preserve createdAt and notify only a
     ...validInput,
     platform: 'bolt',
     fareAmountCents: 1750,
-    changeAsTip: false,
+    tipCents: 0,
   });
   expect(edited).toMatchObject({
     createdAt: saved.createdAt,
@@ -347,6 +347,7 @@ test('same pending ID is protected concurrently and after commit, conflicting in
     services.transactions.save(pending, {
       ...validInput,
       fareAmountCents: 1900,
+      tipCents: 100,
     }),
   ).rejects.toThrow('different');
   expect(await services.transactions.list()).toEqual([saved]);
@@ -370,7 +371,7 @@ test.each([0, -1, 0.5, 1000000, Number.NaN, Number.MAX_SAFE_INTEGER + 1])(
   },
 );
 
-test('rejects underpayment, invalid received amount, platform, ID and nonboolean tip without affecting saved data', async () => {
+test('rejects underpayment, invalid received amount, platform, ID and nonnumeric tip without affecting saved data', async () => {
   const services = await testPersistence(db);
   const saved = await services.transactions.save(
     services.transactions.newPendingOperation(),
@@ -396,7 +397,7 @@ test('rejects underpayment, invalid received amount, platform, ID and nonboolean
   await expect(
     services.transactions.save(services.transactions.newPendingOperation(), {
       ...validInput,
-      ...JSON.parse('{"changeAsTip":1}'),
+      ...JSON.parse('{"tipCents":true}'),
     }),
   ).rejects.toThrow('Invalid');
   expect(await services.transactions.list()).toEqual([saved]);
@@ -406,7 +407,12 @@ test('real SQLite bindings store integer cents and constraints reject fractions 
   const services = await testPersistence(db);
   const saved = await services.transactions.save(
     services.transactions.newPendingOperation(),
-    { ...validInput, fareAmountCents: 999999, cashReceivedCents: 999999 },
+    {
+      ...validInput,
+      fareAmountCents: 999999,
+      cashReceivedCents: 999999,
+      tipCents: 0,
+    },
   );
   expect(
     (
@@ -427,7 +433,7 @@ test('real SQLite bindings store integer cents and constraints reject fractions 
     [0.5, 1.5, 1, 0, 0.5],
     [1000000, 1000000, 0, 0, 1000000],
     [10, 9, 0, 0, 10],
-    [10, 20, 5, 5, 15],
+    [10, 20, 5, 6, 16],
     [10, 20, 10, 0, 20],
   ]) {
     await expect(

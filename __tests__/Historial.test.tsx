@@ -178,7 +178,7 @@ test('loading has no fabricated rows and a stale pre-edit response cannot overwr
     await services.transactions.edit(original.id, {
       ...validInput,
       fareAmountCents: 1900,
-      changeAsTip: false,
+      tipCents: 0,
     });
   });
   expect(rowIds()).toEqual([`history-${original.id}`]);

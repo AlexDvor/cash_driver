@@ -40,7 +40,7 @@ function LoadedEdit({
       platform: record.platform,
       fareAmountCents: record.fareAmountCents,
       cashReceivedCents: record.cashReceivedCents,
-      changeAsTip: record.tipCents > 0,
+      tipCents: record.tipCents,
     },
     clearAfterSave: false,
     onSubmit,

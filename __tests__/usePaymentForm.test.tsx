@@ -5,6 +5,75 @@ import { usePaymentForm } from '../src/hooks/transactions/usePaymentForm';
 import { Platform } from '../src/features/transactions/types';
 import { openTestDatabase, testPersistence } from './sqliteTestDatabase';
 
+test('the legacy form boundary retains exact partial tips across edit commit', async () => {
+  const db = openTestDatabase();
+  const services = await testPersistence(db);
+  const input = {
+    platform: 'uber' as const,
+    fareAmountCents: 2000,
+    cashReceivedCents: 5000,
+    tipCents: 500,
+  };
+  const saved = await services.transactions.save(
+    services.transactions.newPendingOperation(),
+    input,
+  );
+  let current: ReturnType<typeof usePaymentForm> | undefined;
+  function form() {
+    if (!current) {
+      throw new Error('Missing form');
+    }
+    return current;
+  }
+  function Probe() {
+    current = usePaymentForm({
+      initialPlatform: 'uber',
+      initialValues: input,
+      clearAfterSave: false,
+      onSubmit: draft => services.transactions.edit(saved.id, draft),
+    });
+    return null;
+  }
+  let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+  try {
+    await act(async () => {
+      renderer = ReactTestRenderer.create(<Probe />);
+    });
+    expect(form().payment).toMatchObject({
+      tipCents: 500,
+      changeGivenCents: 2500,
+    });
+    expect(form().changeAsTip).toBe(false);
+    await act(async () => {
+      expect(await form().submit()).toBe(true);
+    });
+    expect(form().payment).toMatchObject({
+      tipCents: 500,
+      changeGivenCents: 2500,
+    });
+    expect(await services.transactions.get(saved.id)).toMatchObject({
+      tipCents: 500,
+      createdAt: saved.createdAt,
+    });
+    await act(async () => {
+      expect(await form().submit()).toBe(false);
+    });
+    await act(async () => form().toggleTip(true));
+    expect(form().payment).toMatchObject({
+      tipCents: 3000,
+      changeGivenCents: 0,
+    });
+    await act(async () => form().toggleTip(false));
+    expect(form().payment).toMatchObject({
+      tipCents: 0,
+      changeGivenCents: 3000,
+    });
+  } finally {
+    await act(async () => renderer?.unmount());
+    db.close();
+  }
+});
+
 test('delayed blur preserves quick, Exacto and newly typed amounts', async () => {
   let current: ReturnType<typeof usePaymentForm> | undefined;
   function form() {

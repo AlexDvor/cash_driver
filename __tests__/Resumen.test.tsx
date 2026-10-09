@@ -140,7 +140,7 @@ test('saved platforms, tips and retained cash remain distinct, with fare-only av
       platform,
       fareAmountCents: fare,
       cashReceivedCents: 2000,
-      changeAsTip: platform === 'cabify',
+      tipCents: platform === 'cabify' ? 2000 - fare : 0,
     });
   }
   await mount();
@@ -219,12 +219,14 @@ test.each([
       ...validInput,
       fareAmountCents: 100,
       cashReceivedCents: 200,
+      tipCents: 100,
     });
     await seed(new Date(new Date(end).getTime() - 1).toISOString(), {
       ...validInput,
       platform: 'cabify',
       fareAmountCents: 101,
       cashReceivedCents: 200,
+      tipCents: 99,
     });
     await seed(end);
     await mount();
@@ -245,7 +247,7 @@ test('committed create/edit/delete refresh summary; edit still belongs to origin
     addedId = (
       await services.transactions.save(
         services.transactions.newPendingOperation(),
-        { ...validInput, platform: 'bolt', changeAsTip: false },
+        { ...validInput, platform: 'bolt', tipCents: 0 },
       )
     ).id;
   });
@@ -255,6 +257,7 @@ test('committed create/edit/delete refresh summary; edit still belongs to origin
       ...validInput,
       platform: 'cabify',
       fareAmountCents: 1900,
+      tipCents: 100,
     });
   });
   expect(text('summary-fareTotal')).toMatch(/37,00/);

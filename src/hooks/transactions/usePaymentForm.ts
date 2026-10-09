@@ -38,9 +38,7 @@ export function usePaymentForm({
     initialValues ? centsToInput(initialValues.cashReceivedCents) : '',
   );
   const [focused, setFocused] = useState<'fare' | 'received' | null>(null);
-  const [changeAsTip, setChangeAsTip] = useState(
-    initialValues?.changeAsTip ?? false,
-  );
+  const [tipCents, setTipCents] = useState(initialValues?.tipCents ?? 0);
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
   const [saved, setSaved] = useState<CashTransaction | null>(null);
@@ -87,7 +85,7 @@ export function usePaymentForm({
       ? calculatePayment({
           fareAmountCents: fareParsed.cents,
           cashReceivedCents: receivedParsed.cents,
-          changeAsTip,
+          tipCents,
         })
       : null;
   const canTip =
@@ -100,7 +98,7 @@ export function usePaymentForm({
     dirty.current = true;
     committedDraft.current = false;
     (field === 'fare' ? setFare : setReceived)(raw);
-    setChangeAsTip(false);
+    setTipCents(0);
     setFailed(false);
     setSaved(null);
   }
@@ -124,7 +122,7 @@ export function usePaymentForm({
       fareAmountCents: fareParsed.cents,
       cashReceivedCents:
         receivedParsed.status === 'valid' ? receivedParsed.cents : 0,
-      changeAsTip,
+      tipCents,
     };
     const next =
       cents === undefined
@@ -171,7 +169,7 @@ export function usePaymentForm({
       platform,
       fareAmountCents: fareParsed.cents,
       cashReceivedCents: receivedParsed.cents,
-      changeAsTip,
+      tipCents,
     };
     try {
       const committed = await onSubmit(input);
@@ -183,7 +181,7 @@ export function usePaymentForm({
         setReceived(
           clearAfterSave ? '' : centsToInput(committed.cashReceivedCents),
         );
-        setChangeAsTip(!clearAfterSave && committed.tipCents > 0);
+        setTipCents(clearAfterSave ? 0 : committed.tipCents);
         setFocused(null);
         dirty.current = !clearAfterSave;
         setPlatform(
@@ -212,7 +210,11 @@ export function usePaymentForm({
     validFare,
     payment,
     canTip,
-    changeAsTip,
+    // Compatibility for the old full-change switch until the new tip UI phase.
+    changeAsTip:
+      payment?.status === 'valid' &&
+      payment.tipCents > 0 &&
+      payment.changeGivenCents === 0,
     saving,
     failed,
     saved,
@@ -229,10 +231,10 @@ export function usePaymentForm({
     choosePlatform,
     submit,
     toggleTip: (enabled: boolean) => {
-      if (!busy.current && canTip) {
+      if (!busy.current && canTip && payment?.status === 'valid') {
         committedDraft.current = false;
         dirty.current = true;
-        setChangeAsTip(enabled);
+        setTipCents(enabled ? payment.tipCents + payment.changeGivenCents : 0);
         setFailed(false);
         setSaved(null);
       }

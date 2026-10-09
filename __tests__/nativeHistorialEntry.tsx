@@ -40,7 +40,7 @@ const ready = manager.initialize().then(async db => {
           platform,
           fareAmountCents: 1800,
           cashReceivedCents: 2000,
-          changeAsTip: platform === 'cabify',
+          tipCents: platform === 'cabify' ? 200 : 0,
         },
       );
     }

@@ -8,35 +8,34 @@ import {
 import { MAX_INPUT_CENTS } from '../src/features/transactions/money';
 
 test.each([
-  [2000, 2000, false, 0, 0, 2000],
-  [2000, 5000, false, 3000, 0, 2000],
-  [1800, 2000, true, 0, 200, 2000],
-  [2000, 2000, true, 0, 0, 2000],
-  [1, MAX_INPUT_CENTS, true, 0, MAX_INPUT_CENTS - 1, MAX_INPUT_CENTS],
+  [2000, 2000, 0, 0, 2000],
+  [2000, 5000, 0, 3000, 2000],
+  [1800, 2000, 200, 0, 2000],
+  [2000, 5000, 500, 2500, 2500],
+  [1, MAX_INPUT_CENTS, MAX_INPUT_CENTS - 1, 0, MAX_INPUT_CENTS],
 ])(
   'fare %i received %i tip %s',
   (
     fareAmountCents,
     cashReceivedCents,
-    changeAsTip,
-    changeGivenCents,
     tipCents,
+    changeGivenCents,
     netCashCents,
   ) => {
     expect(
-      calculatePayment({ fareAmountCents, cashReceivedCents, changeAsTip }),
+      calculatePayment({ fareAmountCents, cashReceivedCents, tipCents }),
     ).toEqual({ status: 'valid', changeGivenCents, tipCents, netCashCents });
   },
 );
 
-test.each([false, true])(
+test.each([0, 100])(
   'underpayment is insufficient even with tip=%s',
-  changeAsTip => {
+  tipCents => {
     expect(
       calculatePayment({
         fareAmountCents: 2450,
         cashReceivedCents: 2000,
-        changeAsTip,
+        tipCents,
       }),
     ).toEqual({ status: 'insufficient', missingCents: 450 });
   },
@@ -49,7 +48,7 @@ test.each([0, -1, 1.1, NaN, Infinity, MAX_INPUT_CENTS + 1])(
       calculatePayment({
         fareAmountCents,
         cashReceivedCents: 5000,
-        changeAsTip: false,
+        tipCents: 0,
       }).status,
     ).toBe('invalid');
   },
@@ -62,7 +61,7 @@ test.each([-1, 1.1, NaN, Infinity, MAX_INPUT_CENTS + 1])(
       calculatePayment({
         fareAmountCents: 100,
         cashReceivedCents,
-        changeAsTip: false,
+        tipCents: 0,
       }).status,
     ).toBe('invalid');
   },
@@ -72,11 +71,12 @@ test('money invariants hold for exact/change/tip cases at small and maximum valu
   const values = [1, 10, 99, 100, 1740, 20000, MAX_INPUT_CENTS];
   for (const fareAmountCents of values) {
     for (const cashReceivedCents of values) {
-      for (const changeAsTip of [false, true]) {
+      const difference = Math.max(0, cashReceivedCents - fareAmountCents);
+      for (const tipCents of [0, Math.floor(difference / 2), difference]) {
         const result = calculatePayment({
           fareAmountCents,
           cashReceivedCents,
-          changeAsTip,
+          tipCents,
         });
         if (cashReceivedCents < fareAmountCents) {
           expect(result.status).toBe('insufficient');
@@ -125,15 +125,15 @@ test('quick selection replaces cash and resets a tip even for the same received 
   const original = Object.freeze({
     fareAmountCents: 1800,
     cashReceivedCents: 2000,
-    changeAsTip: true,
+    tipCents: 200,
   });
   expect(applyQuickAmount(original, 5000)).toEqual({
     ...original,
     cashReceivedCents: 5000,
-    changeAsTip: false,
+    tipCents: 0,
   });
-  expect(applyQuickAmount(original, 2000).changeAsTip).toBe(false);
-  expect(original.changeAsTip).toBe(true);
+  expect(applyQuickAmount(original, 2000).tipCents).toBe(0);
+  expect(original.tipCents).toBe(200);
   expect(() => applyQuickAmount(original, 1000)).toThrow(RangeError);
 });
 
@@ -142,12 +142,12 @@ test('Exacto is available for every valid fare, including amounts above banknote
     const exact = applyExactAmount({
       fareAmountCents,
       cashReceivedCents: 5000,
-      changeAsTip: true,
+      tipCents: 200,
     });
     expect(exact).toEqual({
       fareAmountCents,
       cashReceivedCents: fareAmountCents,
-      changeAsTip: false,
+      tipCents: 0,
     });
     if (!exact) {
       throw new Error('Exact amount must exist for a valid fare');
@@ -163,7 +163,7 @@ test('Exacto is available for every valid fare, including amounts above banknote
     applyExactAmount({
       fareAmountCents: 0,
       cashReceivedCents: 100,
-      changeAsTip: true,
+      tipCents: 200,
     }),
   ).toBeNull();
 });
@@ -172,19 +172,19 @@ test('changing fare or received cents resets a tip without mutating its input', 
   const original = Object.freeze({
     fareAmountCents: 1800,
     cashReceivedCents: 2000,
-    changeAsTip: true,
+    tipCents: 200,
   });
   expect(changePaymentAmount(original, 'fareAmountCents', 1700)).toEqual({
     ...original,
     fareAmountCents: 1700,
-    changeAsTip: false,
+    tipCents: 0,
   });
   expect(changePaymentAmount(original, 'cashReceivedCents', 2100)).toEqual({
     ...original,
     cashReceivedCents: 2100,
-    changeAsTip: false,
+    tipCents: 0,
   });
-  expect(
-    changePaymentAmount(original, 'fareAmountCents', 1800).changeAsTip,
-  ).toBe(true);
+  expect(changePaymentAmount(original, 'fareAmountCents', 1800).tipCents).toBe(
+    0,
+  );
 });

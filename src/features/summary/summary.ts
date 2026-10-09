@@ -35,7 +35,6 @@ export function summarizeTransactions(
   for (const transaction of transactions) {
     const payment = calculatePayment({
       ...transaction,
-      changeAsTip: transaction.tipCents > 0,
     });
     if (
       !platforms.includes(transaction.platform) ||

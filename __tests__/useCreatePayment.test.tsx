@@ -8,6 +8,54 @@ import {
   validInput,
 } from './sqliteTestDatabase';
 
+test('failed retries reuse an ID only while the exact tip amount is unchanged', async () => {
+  const db = openTestDatabase();
+  const services = await testPersistence(db);
+  const feedback = jest
+    .spyOn(haptics, 'confirmationHaptics')
+    .mockImplementation(() => {});
+  const save = jest
+    .spyOn(services.transactions, 'save')
+    .mockRejectedValueOnce(new Error('Write failed'))
+    .mockRejectedValueOnce(new Error('Retry failed'));
+  let current: ReturnType<typeof useCreatePayment> | undefined;
+  function submit() {
+    if (!current) {
+      throw new Error('Missing payment handler');
+    }
+    return current;
+  }
+  function Probe() {
+    current = useCreatePayment(services, true);
+    return null;
+  }
+  let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+  const partial = {
+    ...validInput,
+    fareAmountCents: 2000,
+    cashReceivedCents: 5000,
+    tipCents: 500,
+  };
+  try {
+    await act(async () => {
+      renderer = ReactTestRenderer.create(<Probe />);
+    });
+    await expect(submit()(partial)).rejects.toThrow('Write failed');
+    await expect(submit()({ ...partial })).rejects.toThrow('Retry failed');
+    expect(save.mock.calls[1][0].id).toBe(save.mock.calls[0][0].id);
+    expect(feedback).not.toHaveBeenCalled();
+    const committed = await submit()({ ...partial, tipCents: 600 });
+    expect(save.mock.calls[2][0].id).not.toBe(save.mock.calls[0][0].id);
+    expect(committed).toMatchObject({ tipCents: 600, changeGivenCents: 2400 });
+    expect(await services.transactions.list()).toEqual([committed]);
+    expect(feedback).toHaveBeenCalledTimes(1);
+  } finally {
+    await act(async () => renderer?.unmount());
+    jest.restoreAllMocks();
+    db.close();
+  }
+});
+
 test.each([false, true])(
   'uses the latest haptics choice after a delayed commit (initially %s)',
   async initiallyEnabled => {

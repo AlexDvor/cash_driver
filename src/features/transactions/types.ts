@@ -17,5 +17,5 @@ export interface CashTransaction {
 export interface PaymentAmounts {
   fareAmountCents: number;
   cashReceivedCents: number;
-  changeAsTip: boolean;
+  tipCents: number;
 }

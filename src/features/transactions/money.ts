@@ -13,7 +13,7 @@ export type MoneyParseResult =
 
 export function validateAmountCents(
   cents: number,
-  field: 'fare' | 'received',
+  field: 'fare' | 'received' | 'tip',
 ): AmountError | null {
   if (!Number.isSafeInteger(cents)) {
     return 'notSafeInteger';

@@ -1,7 +1,7 @@
 import { SqlConnection } from './sqlite';
 import { DEFAULT_HAPTICS_ENABLED } from '../features/settings/settingsDefaults';
 
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 // Version 1 is the documented transaction schema, with explicit SQLite type
 // and input-bound checks so INTEGER affinity cannot silently accept fractions.
@@ -20,6 +20,11 @@ export const transactionSchema = `CREATE TABLE transactions (
   CHECK (net_cash_cents = fare_amount_cents + tip_cents),
   CHECK (tip_cents = 0 OR change_given_cents = 0)
 )`;
+
+// Keep the historical v1 schema intact; v4 removes only the full-change rule.
+const partialTipTransactionSchema = transactionSchema
+  .replace('CREATE TABLE transactions (', 'CREATE TABLE transactions_v4 (')
+  .replace(',\n  CHECK (tip_cents = 0 OR change_given_cents = 0)', '');
 
 export async function migrateDatabase(db: SqlConnection): Promise<void> {
   const integrity = await db.execute('PRAGMA quick_check');
@@ -70,6 +75,21 @@ export async function migrateDatabase(db: SqlConnection): Promise<void> {
         [Number(DEFAULT_HAPTICS_ENABLED)],
       );
       await tx.execute('PRAGMA user_version = 3');
+    }
+    if (version < 4) {
+      await tx.execute(partialTipTransactionSchema);
+      await tx.execute(`INSERT INTO transactions_v4
+        (id, platform, fare_amount_cents, cash_received_cents, change_given_cents, tip_cents, net_cash_cents, created_at, updated_at)
+        SELECT id, platform, fare_amount_cents, cash_received_cents, change_given_cents, tip_cents, net_cash_cents, created_at, updated_at FROM transactions`);
+      await tx.execute('DROP TABLE transactions');
+      await tx.execute('ALTER TABLE transactions_v4 RENAME TO transactions');
+      await tx.execute(
+        'CREATE INDEX transactions_created_at_idx ON transactions(created_at)',
+      );
+      await tx.execute(
+        'CREATE INDEX transactions_platform_created_at_idx ON transactions(platform, created_at)',
+      );
+      await tx.execute('PRAGMA user_version = 4');
     }
     // Fail on missing tables even if user_version incorrectly claims readiness.
     await tx.execute(

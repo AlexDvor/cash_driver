@@ -2,7 +2,11 @@ import { AmountError, validateAmountCents } from './money';
 import { PaymentAmounts } from './types';
 
 export type PaymentResult =
-  | { status: 'invalid'; field: 'fare' | 'received'; reason: AmountError }
+  | {
+      status: 'invalid';
+      field: 'fare' | 'received' | 'tip';
+      reason: AmountError | 'exceedsAvailableChange';
+    }
   | { status: 'insufficient'; missingCents: number }
   | {
       status: 'valid';
@@ -14,7 +18,7 @@ export type PaymentResult =
 export function calculatePayment(
   amounts: Readonly<PaymentAmounts>,
 ): PaymentResult {
-  const { fareAmountCents, cashReceivedCents, changeAsTip } = amounts;
+  const { fareAmountCents, cashReceivedCents, tipCents } = amounts;
   const fareError = validateAmountCents(fareAmountCents, 'fare');
   if (fareError) {
     return { status: 'invalid', field: 'fare', reason: fareError };
@@ -30,7 +34,17 @@ export function calculatePayment(
     };
   }
   const differenceCents = cashReceivedCents - fareAmountCents;
-  const tipCents = changeAsTip ? differenceCents : 0;
+  const tipError = validateAmountCents(tipCents, 'tip');
+  if (tipError) {
+    return { status: 'invalid', field: 'tip', reason: tipError };
+  }
+  if (tipCents > differenceCents) {
+    return {
+      status: 'invalid',
+      field: 'tip',
+      reason: 'exceedsAvailableChange',
+    };
+  }
   const changeGivenCents = differenceCents - tipCents;
   return {
     status: 'valid',
@@ -48,7 +62,7 @@ export function changePaymentAmount(
   return {
     ...amounts,
     [field]: cents,
-    changeAsTip: amounts[field] === cents && amounts.changeAsTip,
+    tipCents: 0,
   };
 }
 
@@ -71,7 +85,7 @@ export function applyQuickAmount(
     );
   }
   // A quick tap replaces cash, even when the value is unchanged, and clears tip.
-  return { ...amounts, cashReceivedCents: receivedCents, changeAsTip: false };
+  return { ...amounts, cashReceivedCents: receivedCents, tipCents: 0 };
 }
 
 export function applyExactAmount(
@@ -83,6 +97,6 @@ export function applyExactAmount(
   return {
     ...amounts,
     cashReceivedCents: amounts.fareAmountCents,
-    changeAsTip: false,
+    tipCents: 0,
   };
 }

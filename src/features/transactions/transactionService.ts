@@ -21,7 +21,6 @@ function recordFor(
   if (
     !isUuid(id) ||
     !platforms.includes(input.platform) ||
-    typeof input.changeAsTip !== 'boolean' ||
     payment.status !== 'valid'
   ) {
     throw new Error('Invalid operation input');
@@ -65,7 +64,7 @@ export function createTransactionService(
           existingWrite.input.platform !== input.platform ||
           existingWrite.input.fareAmountCents !== input.fareAmountCents ||
           existingWrite.input.cashReceivedCents !== input.cashReceivedCents ||
-          existingWrite.input.changeAsTip !== input.changeAsTip
+          existingWrite.input.tipCents !== input.tipCents
         ) {
           return Promise.reject(
             new Error('Pending operation input changed during save'),

@@ -31,7 +31,7 @@ function decodeTransaction(row: Record<string, unknown>): CashTransaction {
   const payment = calculatePayment({
     fareAmountCents,
     cashReceivedCents,
-    changeAsTip: tipCents > 0,
+    tipCents,
   });
   if (
     payment.status !== 'valid' ||

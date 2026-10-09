@@ -44,7 +44,7 @@ const ready = manager.initialize().then(async db => {
           platform,
           fareAmountCents: platform === 'cabify' ? 1501 : 1000,
           cashReceivedCents: 2000,
-          changeAsTip: platform === 'cabify',
+          tipCents: platform === 'cabify' ? 499 : 0,
         },
       );
     }
@@ -59,7 +59,7 @@ const ready = manager.initialize().then(async db => {
           platform: 'uber',
           fareAmountCents: 500,
           cashReceivedCents: 500,
-          changeAsTip: false,
+          tipCents: 0,
         },
       );
     }

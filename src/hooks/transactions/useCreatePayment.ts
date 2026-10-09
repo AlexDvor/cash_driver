@@ -25,7 +25,7 @@ export function useCreatePayment(
         previous.input.platform !== input.platform ||
         previous.input.fareAmountCents !== input.fareAmountCents ||
         previous.input.cashReceivedCents !== input.cashReceivedCents ||
-        previous.input.changeAsTip !== input.changeAsTip
+        previous.input.tipCents !== input.tipCents
       ) {
         pending.current = {
           operation: services.transactions.newPendingOperation(),

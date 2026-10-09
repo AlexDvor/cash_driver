@@ -81,3 +81,15 @@ test('summary rejects corrupt stored arithmetic rather than displaying fabricate
     );
   }
 });
+
+test('partial tip and returned change coexist without double counting in summary', () => {
+  const record = transaction('uber', 2000, 500, 2500);
+  expect(summarizeTransactions([record])).toMatchObject({
+    operationCount: 1,
+    fareTotalCents: 2000,
+    tipTotalCents: 500,
+    netCashTotalCents: 2500,
+    averageFareCents: 2000,
+    fareByPlatformCents: { uber: 2000, cabify: 0, bolt: 0, other: 0 },
+  });
+});

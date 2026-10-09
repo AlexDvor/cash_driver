@@ -45,7 +45,7 @@ async function verifyNativePersistence(): Promise<string> {
     platform: 'cabify',
     fareAmountCents: 1850,
     cashReceivedCents: 2000,
-    changeAsTip: true,
+    tipCents: 150,
   } as const;
   if (!settings.hapticsEnabled) {
     check(rows.length === 0, 'Fixture DB must start empty');
@@ -158,7 +158,7 @@ async function verifyNativePersistence(): Promise<string> {
   );
   const edited = await transactions.edit(rows[0].id, {
     ...input,
-    changeAsTip: false,
+    tipCents: 0,
   });
   check(
     edited.createdAt === rows[0].createdAt &&
