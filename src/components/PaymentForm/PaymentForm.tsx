@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  Keyboard,
-  Pressable,
-  Switch,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Keyboard, Pressable, useWindowDimensions, View } from 'react-native';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
 import { Card } from '../../ui/Card/Card';
@@ -44,6 +38,16 @@ export function PaymentForm({
     return undefined;
   }
   const result = form.payment;
+  const excessiveTip =
+    result?.status === 'invalid' &&
+    result.field === 'tip' &&
+    result.reason === 'exceedsAvailableChange';
+  const tipError =
+    excessiveTip && form.availableChangeCents !== null
+      ? t('tipExceedsChange', {
+          amount: formatMoney(form.availableChangeCents, locale),
+        })
+      : fieldError(form.tipParsed, false);
   const success = form.saved;
   return (
     <Card>
@@ -120,6 +124,52 @@ export function PaymentForm({
           </Pressable>
         )}
       </View>
+      <View style={styles.tipBlock}>
+        <AppText variant="supporting" secondary>
+          {t('optionalTip')}
+        </AppText>
+        <MoneyInput
+          label={t('tipInput')}
+          value={form.tip}
+          error={tipError}
+          disabled={disabled}
+          onChange={raw => form.changeField('tip', raw)}
+          onFocus={() => form.focus('tip')}
+          onBlur={() => form.blur('tip')}
+        />
+        <View style={styles.quickRow}>
+          {[
+            { label: t('noTip'), onPress: form.clearTip, disabled },
+            {
+              label: t('allChangeAsTip'),
+              onPress: form.allChangeAsTip,
+              disabled:
+                disabled ||
+                form.availableChangeCents === null ||
+                form.availableChangeCents === 0,
+            },
+          ].map(action => (
+            <Pressable
+              key={action.label}
+              accessibilityRole="button"
+              accessibilityLabel={action.label}
+              accessibilityState={{ disabled: action.disabled }}
+              disabled={action.disabled}
+              onPress={action.onPress}
+              style={({ pressed }) => [
+                styles.quick,
+                {
+                  borderColor: colors.border,
+                  backgroundColor: colors.background,
+                },
+                (pressed || action.disabled) && styles.pressed,
+              ]}
+            >
+              <AppText>{action.label}</AppText>
+            </Pressable>
+          ))}
+        </View>
+      </View>
       <View
         style={[
           styles.result,
@@ -162,33 +212,6 @@ export function PaymentForm({
           </AppText>
         )}
       </View>
-      {form.canTip && (
-        <View style={styles.tipRow}>
-          <AppText style={styles.tipLabel}>{t('changeIsTip')}</AppText>
-          <Pressable
-            accessibilityRole="switch"
-            accessibilityLabel={t('changeIsTip')}
-            accessibilityState={{ checked: form.changeAsTip, disabled }}
-            disabled={disabled}
-            onPress={() => form.toggleTip(!form.changeAsTip)}
-            style={styles.tipControl}
-          >
-            <View
-              pointerEvents="none"
-              importantForAccessibility="no-hide-descendants"
-            >
-              <Switch
-                accessible={false}
-                accessibilityLabel={t('changeIsTip')}
-                disabled={disabled}
-                value={form.changeAsTip}
-                trackColor={{ false: colors.border, true: colors.primary }}
-                thumbColor={colors.card}
-              />
-            </View>
-          </Pressable>
-        </View>
-      )}
       {result?.status === 'valid' && result.tipCents > 0 && (
         <AppText>
           {t('tipAmount', { amount: formatMoney(result.tipCents, locale) })}

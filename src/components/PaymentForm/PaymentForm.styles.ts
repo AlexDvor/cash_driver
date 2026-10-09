@@ -24,13 +24,6 @@ export const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   missing: { fontSize: typography.money },
-  tipRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  tipLabel: { flex: 1 },
-  tipControl: {
-    minHeight: sizing.touchTarget,
-    minWidth: sizing.touchTarget,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  tipBlock: { gap: spacing.sm },
   dismiss: { minHeight: sizing.touchTarget, justifyContent: 'center' },
 });

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { centsToInput } from '../../i18n/formatting';
 import {
+  MoneyParseResult,
   parseMoneyInput,
   validateAmountCents,
 } from '../../features/transactions/money';
@@ -37,8 +38,12 @@ export function usePaymentForm({
   const [received, setReceived] = useState(
     initialValues ? centsToInput(initialValues.cashReceivedCents) : '',
   );
-  const [focused, setFocused] = useState<'fare' | 'received' | null>(null);
-  const [tipCents, setTipCents] = useState(initialValues?.tipCents ?? 0);
+  const [focused, setFocused] = useState<'fare' | 'received' | 'tip' | null>(
+    null,
+  );
+  const [tip, setTip] = useState(
+    initialValues?.tipCents ? centsToInput(initialValues.tipCents) : '',
+  );
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
   const [saved, setSaved] = useState<CashTransaction | null>(null);
@@ -77,39 +82,61 @@ export function usePaymentForm({
     received,
     focused === 'received' ? 'editing' : 'blurred',
   );
+  const tipParsed: MoneyParseResult =
+    tip.trim() === ''
+      ? { status: 'valid', cents: 0 }
+      : parseMoneyInput(tip, focused === 'tip' ? 'editing' : 'blurred');
   const validFare =
     fareParsed.status === 'valid' &&
     validateAmountCents(fareParsed.cents, 'fare') === null;
-  const payment =
+  const basePayment =
     fareParsed.status === 'valid' && receivedParsed.status === 'valid'
       ? calculatePayment({
           fareAmountCents: fareParsed.cents,
           cashReceivedCents: receivedParsed.cents,
-          tipCents,
+          tipCents: 0,
         })
       : null;
-  const canTip =
-    payment?.status === 'valid' &&
-    (payment.changeGivenCents > 0 || payment.tipCents > 0);
-  function changeField(field: 'fare' | 'received', raw: string) {
+  const availableChangeCents =
+    basePayment?.status === 'valid' ? basePayment.changeGivenCents : null;
+  // Preserve insufficient-cash feedback even when the optional tip is invalid.
+  let payment = basePayment;
+  if (basePayment?.status !== 'insufficient') {
+    payment = null;
+    if (
+      fareParsed.status === 'valid' &&
+      receivedParsed.status === 'valid' &&
+      tipParsed.status === 'valid'
+    ) {
+      payment = calculatePayment({
+        fareAmountCents: fareParsed.cents,
+        cashReceivedCents: receivedParsed.cents,
+        tipCents: tipParsed.cents,
+      });
+    }
+  }
+  const fieldSetters = { fare: setFare, received: setReceived, tip: setTip };
+  function changeField(field: 'fare' | 'received' | 'tip', raw: string) {
     if (busy.current) {
       return;
     }
     dirty.current = true;
     committedDraft.current = false;
-    (field === 'fare' ? setFare : setReceived)(raw);
-    setTipCents(0);
+    fieldSetters[field](raw);
+    if (field !== 'tip') {
+      setTip('');
+    }
     setFailed(false);
     setSaved(null);
   }
-  function blur(field: 'fare' | 'received') {
+  function blur(field: 'fare' | 'received' | 'tip') {
     // Native blur may arrive after commit with the previous render's raw value.
     if (renderedSaveCount !== completedSaves.current) {
       return;
     }
     setFocused(current => (current === field ? null : current));
     // Use the latest draft: an older native callback may follow a quick-value tap.
-    (field === 'fare' ? setFare : setReceived)(raw => {
+    fieldSetters[field](raw => {
       const parsed = parseMoneyInput(raw, 'blurred');
       return parsed.status === 'valid' ? centsToInput(parsed.cents) : raw;
     });
@@ -122,7 +149,7 @@ export function usePaymentForm({
       fareAmountCents: fareParsed.cents,
       cashReceivedCents:
         receivedParsed.status === 'valid' ? receivedParsed.cents : 0,
-      tipCents,
+      tipCents: tipParsed.status === 'valid' ? tipParsed.cents : 0,
     };
     const next =
       cents === undefined
@@ -157,7 +184,8 @@ export function usePaymentForm({
       choosing.current ||
       payment?.status !== 'valid' ||
       fareParsed.status !== 'valid' ||
-      receivedParsed.status !== 'valid'
+      receivedParsed.status !== 'valid' ||
+      tipParsed.status !== 'valid'
     ) {
       return false;
     }
@@ -169,7 +197,7 @@ export function usePaymentForm({
       platform,
       fareAmountCents: fareParsed.cents,
       cashReceivedCents: receivedParsed.cents,
-      tipCents,
+      tipCents: tipParsed.cents,
     };
     try {
       const committed = await onSubmit(input);
@@ -181,7 +209,11 @@ export function usePaymentForm({
         setReceived(
           clearAfterSave ? '' : centsToInput(committed.cashReceivedCents),
         );
-        setTipCents(clearAfterSave ? 0 : committed.tipCents);
+        setTip(
+          clearAfterSave || committed.tipCents === 0
+            ? ''
+            : centsToInput(committed.tipCents),
+        );
         setFocused(null);
         dirty.current = !clearAfterSave;
         setPlatform(
@@ -205,16 +237,13 @@ export function usePaymentForm({
     platform,
     fare,
     received,
+    tip,
     fareParsed,
     receivedParsed,
+    tipParsed,
     validFare,
     payment,
-    canTip,
-    // Compatibility for the old full-change switch until the new tip UI phase.
-    changeAsTip:
-      payment?.status === 'valid' &&
-      payment.tipCents > 0 &&
-      payment.changeGivenCents === 0,
+    availableChangeCents,
     saving,
     failed,
     saved,
@@ -230,13 +259,10 @@ export function usePaymentForm({
     quick,
     choosePlatform,
     submit,
-    toggleTip: (enabled: boolean) => {
-      if (!busy.current && canTip && payment?.status === 'valid') {
-        committedDraft.current = false;
-        dirty.current = true;
-        setTipCents(enabled ? payment.tipCents + payment.changeGivenCents : 0);
-        setFailed(false);
-        setSaved(null);
+    clearTip: () => changeField('tip', ''),
+    allChangeAsTip: () => {
+      if (availableChangeCents !== null && availableChangeCents > 0) {
+        changeField('tip', centsToInput(availableChangeCents));
       }
     },
   };

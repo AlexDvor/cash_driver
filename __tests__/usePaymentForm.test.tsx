@@ -5,7 +5,7 @@ import { usePaymentForm } from '../src/hooks/transactions/usePaymentForm';
 import { Platform } from '../src/features/transactions/types';
 import { openTestDatabase, testPersistence } from './sqliteTestDatabase';
 
-test('the legacy form boundary retains exact partial tips across edit commit', async () => {
+test('the shared form retains exact partial tips across edit commit', async () => {
   const db = openTestDatabase();
   const services = await testPersistence(db);
   const input = {
@@ -43,7 +43,7 @@ test('the legacy form boundary retains exact partial tips across edit commit', a
       tipCents: 500,
       changeGivenCents: 2500,
     });
-    expect(form().changeAsTip).toBe(false);
+    expect(form().tip).toBe('5,00');
     await act(async () => {
       expect(await form().submit()).toBe(true);
     });
@@ -58,12 +58,12 @@ test('the legacy form boundary retains exact partial tips across edit commit', a
     await act(async () => {
       expect(await form().submit()).toBe(false);
     });
-    await act(async () => form().toggleTip(true));
+    await act(async () => form().allChangeAsTip());
     expect(form().payment).toMatchObject({
       tipCents: 3000,
       changeGivenCents: 0,
     });
-    await act(async () => form().toggleTip(false));
+    await act(async () => form().clearTip());
     expect(form().payment).toMatchObject({
       tipCents: 0,
       changeGivenCents: 3000,

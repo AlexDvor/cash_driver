@@ -68,20 +68,13 @@ function text(id: string): string {
 }
 function tipValue() {
   return app.root
-    .findAllByType(Switch)
+    .findAllByType(TextInput)
     .find(node =>
-      [
-        'El cambio es propina',
-        'Keep all change as a tip',
-        'Уся здача як чайові',
-      ].includes(node.props.accessibilityLabel),
+      ['Propina', 'Tip', 'Чайові'].includes(node.props.accessibilityLabel),
     )?.props.value;
 }
 async function tip(enabled: boolean) {
-  const toggle = button('El cambio es propina');
-  if (toggle.props.accessibilityState.checked !== enabled) {
-    await act(async () => toggle.props.onPress());
-  }
+  await press(enabled ? 'Todo el cambio como propina' : 'Sin propina');
 }
 
 test('ordinary change, exact and insufficient cash are immediate; malformed/zero/over-limit amounts cannot confirm', async () => {
@@ -109,17 +102,17 @@ test('quick values replace cash and reset tip, including same-value taps; either
   await tip(true);
   expect(text('change-result')).toMatch(/0,00/);
   await press('20,00 €');
-  expect(tipValue()).toBe(false);
+  expect(tipValue()).toBe('');
   await tip(true);
   await press('50,00 €');
   expect(field('El cliente entrega').props.value).toBe('50,00');
   expect(text('change-result')).toMatch(/32,60/);
   await tip(true);
   await input('Importe a cobrar', '18');
-  expect(tipValue()).toBe(false);
+  expect(tipValue()).toBe('');
   await tip(true);
   await input('El cliente entrega', '100');
-  expect(tipValue()).toBe(false);
+  expect(tipValue()).toBe('');
 });
 
 test('committed tip payment clears money fields, retains platform and updates separately labeled daily totals', async () => {
@@ -162,6 +155,7 @@ test('synchronous repeated taps and loading controls produce one committed opera
     });
   await mount();
   await enter('20', '50');
+  await input('Propina', '5');
   const confirm = button('Confirmar cobro');
   let first: Promise<void> | undefined;
   await act(async () => {
@@ -171,11 +165,21 @@ test('synchronous repeated taps and loading controls produce one committed opera
   expect(spy).toHaveBeenCalledTimes(1);
   expect(button('Guardando cobro…').props.disabled).toBe(true);
   expect(field('Importe a cobrar').props.editable).toBe(false);
+  expect(field('Propina').props.editable).toBe(false);
+  expect(button('Sin propina').props.disabled).toBe(true);
+  expect(button('Todo el cambio como propina').props.disabled).toBe(true);
+  await act(async () => {
+    field('Propina').props.onChangeText('9');
+    button('Sin propina').props.onPress();
+    button('Todo el cambio como propina').props.onPress();
+  });
+  expect(field('Propina').props.value).toBe('5');
   await act(async () => {
     release?.();
     await first;
   });
   expect(await services.transactions.list()).toHaveLength(1);
+  expect((await services.transactions.list())[0].tipCents).toBe(500);
 });
 
 test('real write failure retains complete draft and retry uses the same pending UUID', async () => {
@@ -203,7 +207,7 @@ test('real write failure retains complete draft and retry uses the same pending 
   expect(field('Importe a cobrar').props.value).toBe('18,50');
   expect(field('El cliente entrega').props.value).toBe('20');
   expect(button('Bolt').props.accessibilityState.selected).toBe(true);
-  expect(tipValue()).toBe(true);
+  expect(tipValue()).toBe('1,50');
   expect(JSON.stringify(app.toJSON())).toContain('No se pudo guardar el cobro');
   expect(await services.transactions.list()).toEqual([]);
   fail = false;
@@ -235,7 +239,7 @@ test('failed default-platform write preserves the active draft and committed def
   await press('Bolt');
   expect(button('Cabify').props.accessibilityState.selected).toBe(true);
   expect(field('Importe a cobrar').props.value).toBe('18');
-  expect(tipValue()).toBe(true);
+  expect(tipValue()).toBe('2,00');
   expect((await services.preferences.read()).defaultPlatform).toBe('cabify');
   expect(JSON.stringify(app.toJSON())).toContain(
     'No se pudo guardar la preferencia',
@@ -257,13 +261,13 @@ test('language/theme changes preserve raw draft, platform and tip while mounted'
   expect(field('Trip fare').props.value).toBe('18.5');
   expect(field('Cash received').props.value).toBe('20');
   expect(button('Cabify').props.accessibilityState.selected).toBe(true);
-  expect(tipValue()).toBe(true);
+  expect(tipValue()).toBe('1,50');
   expect(JSON.stringify(app.toJSON())).toContain('#101714');
   await press('Settings');
   await press('Українська');
   await press('Головна');
   expect(field('Вартість поїздки').props.value).toBe('18.5');
-  expect(tipValue()).toBe(true);
+  expect(tipValue()).toBe('1,50');
 });
 
 test('daily loading/error never render fake zero totals and retry loads genuine empty totals', async () => {

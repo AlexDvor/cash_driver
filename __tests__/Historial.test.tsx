@@ -225,13 +225,9 @@ test('details and edit prefill tip, cancel/back do not write; edit preserves ID/
   await press('Historial');
   await edit(original.id);
   expect(field('Importe a cobrar').props.value).toBe('18,00');
-  expect(button('El cambio es propina').props.accessibilityState.checked).toBe(
-    true,
-  );
+  expect(field('Propina').props.value).toBe('2,00');
   await input('Importe a cobrar', '19');
-  expect(button('El cambio es propina').props.accessibilityState.checked).toBe(
-    false,
-  );
+  expect(field('Propina').props.value).toBe('');
   await press('Cancelar');
   expect(await services.transactions.get(original.id)).toEqual(original);
   await press('Editar');
@@ -278,16 +274,14 @@ test('actual edit failure preserves draft/platform/tip and retry commits derived
   await mount();
   await edit(original.id);
   await input('Importe a cobrar', '17');
-  await press('El cambio es propina');
+  await press('Todo el cambio como propina');
   await press('Cabify');
   await db.execute(
     "CREATE TRIGGER reject_edit BEFORE UPDATE ON transactions BEGIN SELECT RAISE(ABORT, 'test failure'); END",
   );
   await press('Guardar cambios');
   expect(field('Importe a cobrar').props.value).toBe('17');
-  expect(button('El cambio es propina').props.accessibilityState.checked).toBe(
-    true,
-  );
+  expect(field('Propina').props.value).toBe('3,00');
   expect(await services.transactions.get(original.id)).toEqual(original);
   await act(async () => {
     await preferences.updatePreferences({ language: 'uk', themeMode: 'dark' });

@@ -194,7 +194,7 @@ test('latest explicit Home/Settings platform wins without replacing draft; edit 
   await press('Cabify');
   await input('Importe a cobrar', '18.5');
   await input('El cliente entrega', '20');
-  await press('El cambio es propina');
+  await press('Todo el cambio como propina');
   await press('Ajustes');
   await press('Bolt');
   await press('English');
@@ -202,9 +202,7 @@ test('latest explicit Home/Settings platform wins without replacing draft; edit 
   await press('Home');
   expect(field('Trip fare').props.value).toBe('18.5');
   expect(button('Cabify').props.accessibilityState.selected).toBe(true);
-  expect(
-    button('Keep all change as a tip').props.accessibilityState.checked,
-  ).toBe(true);
+  expect(field('Tip').props.value).toBe('1,50');
   await press('Otro');
   expect((await services.preferences.read()).defaultPlatform).toBe('other');
   await edit(row.id);
