@@ -433,6 +433,16 @@ Final bounded handoff (2026-10-09, owner-directed continuation without phone unl
 
 Final outcome: the **available-scope Phase 8 review is finished**, with remaining gates recorded rather than silently waived. **Full Phase 8 / Android MVP / iOS MVP: NOT COMPLETE**. Future verification requires a supported physical-device tactile diagnosis and full accessibility traversal, then a macOS/Xcode iOS build and acceptance matrix. The existing dependency-audit limitation and owner decisions about final identifiers/release versions/signing remain recorded; none was invented or resolved by this scope restriction. No new feature, next-version work, publication or Git commit was performed in this handoff.
 
+## Refactoring Phase 0 — baseline and rules reconciliation (2026-10-09)
+
+Status: **COMPLETE for documentation/baseline scope**. The first phase in the temporary docs/REFACTORING_PLAN.md is Phase 0; screen moves are Phase 1 and have not started. Existing full MVP/Phase 8 acceptance status above remains NOT COMPLETE.
+
+Read the actual CashDriver-agent-kit.zip and reconciled its instructions with current CashDriver behavior. docs/AGENTS.md and CODING_STANDARDS.md describe the incremental screens/hooks/UI/navigation/providers/constants transition while preserving CashTransaction, feature-local domain/services/repositories, four platforms, existing localization and reactive theme values. Three adapted local skills are stored inside docs/agent_skills/ and linked explicitly; automatic .agents discovery was not installed. docs/README.md indexes them and the temporary plan. The plan records all 57 existing src files and their intended destinations/actions; no source moves, new dependencies or database changes occurred.
+
+Fresh checks: npm run typecheck **PASS**; npm run lint **PASS**; npm test -- --runInBand --no-cache --watch=false **PASS: 20 suites / 196 tests**, 12.599 s, with command-scoped workspace TEMP/TMP and TZ=UTC through approved execution. Two preceding sandbox attempts failed before tests with the known Windows realpath EPERM (default TEMP and workspace TEMP). No test/config/runtime modification or suppression; standard Node SQLite experimental warning remains. Existing coverage reused; no tests/hooks added. Native/device checks were not rerun for this documentation-only phase.
+
+Read-only subagent baseline review confirmed protected contracts and migration risks: edit identity/one-time loading, retry UUIDs, latest haptics preference, global deletion lifetime/footer, distinct refresh/stale-response behavior and all native-entry imports. Main agent owns final documentation review and the phase commit. Preserve physical haptics FAIL, outstanding accessibility/iOS NOT VERIFIED, owner identifiers/signing/version decisions and historical dependency-audit limitation. Next prerequisite is a separate Phase 1 assignment. Phase commit message: docs: establish CashDriver refactoring baseline and rules; its hash is reported after committing, not invented here.
+
 ## Required automated checks
 
 - Language: matching translation keys for es/en/uk; initial Spanish, persistence/restart, localized date/money displays, unchanged integer-cent values and period boundaries, draft preservation, and preference write failure.
