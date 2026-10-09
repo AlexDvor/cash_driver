@@ -4,4 +4,4 @@
 
 `serializedConnection.ts` queues public reads and transactions together; transaction callbacks must use their supplied executor. This prevents reads from seeing values that may still roll back.
 
-Feature repositories own parameterized CRUD SQL. Services reuse the domain validators, calculate cents and emit change notifications after commit. Preferences use the same database. Phase 7 resolves the owner-delegated initial haptics choice to disabled: schema version 3 converts only former `NULL` choices to `DEFAULT_HAPTICS_ENABLED`, preserving explicit enabled/disabled values.
+Feature repositories own parameterized CRUD SQL. Services reuse the domain validators, calculate cents and emit change notifications after commit. Preferences use the same database. The historical MVP Phase 7 owner decision made confirmation haptics opt-in: schema version 3 converts only former `NULL` choices to `DEFAULT_HAPTICS_ENABLED`, preserving explicit enabled/disabled values.

@@ -1,8 +1,8 @@
 # CashDriver — temporary refactoring plan
 
-Status: **PHASE 5 COMPLETE — PHASE 6 NOT STARTED**.
+Status: **PHASE 6 AVAILABLE-SCOPE COMPLETE — NATIVE ACCEPTANCE PENDING — PHASE 7 NOT STARTED**.
 
-Created: 2026-10-09. This is a temporary execution plan, not a replacement product specification. The owner separately authorized Phases 0–5 on 2026-10-09. They are complete within their assigned scopes; Phase 6 requires the next assignment. Phase 5 explicitly excludes computer-use. Do not restart historical MVP implementation phases.
+Created: 2026-10-09. This is a temporary execution plan, not a replacement product specification. The owner separately authorized Phases 0–6 on 2026-10-09. Phase 6 code review, available checks/build and permanent documentation are complete; full native acceptance remains pending. Phase 7 requires the next assignment. Phases 5 and 6 explicitly exclude computer-use. Do not restart historical MVP implementation phases.
 
 ## Objective and authority
 
@@ -211,8 +211,8 @@ Commit: `docs: remove completed temporary refactoring plan`.
 | 2 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 198 tests PASS | c50b5af |
 | 3 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 198 tests PASS; Android bundle PASS; selected emulator width/text/keyboard checks | 75205e6 |
 | 4 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 198 tests PASS; Android bundle PASS; selected emulator boot/back/preferences/cross-tab undo checks | 58f926f |
-| 5 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 199 tests PASS; Android bundle PASS; no computer-use | Hash reported after commit |
-| 6 | NOT STARTED | NOT RUN | — |
+| 5 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 199 tests PASS; Android bundle PASS; no computer-use | 74fe546 |
+| 6 | COMPLETE (available scope) | typecheck/lint PASS; Jest 21 suites / 199 tests PASS; Android debug/release build PASS; full native acceptance PENDING | Hash reported after commit |
 | 7 | NOT STARTED | NOT RUN | — |
 
 After each phase record: changed files/responsibilities; hooks/coverage reused or added; subagent ownership/findings/resolution; exact commands/results; native checks and limitations; unresolved decisions; commit hash after commit; prerequisites for the next phase. A commit hash need not be amended into its own commit; record it in the next handoff and user report.
@@ -380,3 +380,13 @@ Status: COMPLETE for assigned structural scope; baseline Phase 4 commit 58f926f.
 Subagent phase5_theme moved tokens unchanged to src/constants/theme/tokens.ts and migrated 25 references across 24 consumers/tests; main agent owned platform changes/tests/docs. Independent phase5_review confirmed all69 token lines unchanged, strict validation equivalence and no confirmed regression. Fresh typecheck/lint PASS; Jest 21 suites / 199 tests PASS, 10.868 s, approved workspace TEMP/TMP and TZ=UTC. Added one unknown-platform preference decoder boundary test; existing real-SQLite/domain/UI coverage retained. Android production bundle PASS, 19 assets; known warnings remain.
 
 Owner explicitly excluded computer-use. No computer-use, UI automation, adb/device controls, native rebuild or native/visual rerun performed; selected Phase 4 observations remain historical. Existing physical haptics FAIL/accessibility/system/iOS NOT VERIFIED and owner/audit gates remain; full MVP NOT COMPLETE. Permanent handoff/current path guidance updated in IMPLEMENTATION_PLAN.md, CODING_STANDARDS.md, AGENTS.md and adapted UI skill. Commit: refactor: centralize constants and clarify domain code; hash reported after creation. Phase 6 requires the next assignment.
+
+## Phase 6 handoff — 2026-10-09
+
+Status: COMPLETE for available code review/checks/build/docs scope; full cross-platform native acceptance PENDING. Baseline Phase 5 commit 74fe546. Two read-only subagents audited the entire refactoring: no confirmed behavior regression or missing/cyclic imports. Final graph 82 src TS/TSX modules, no unreachable modules when App/test entries included. Removed unused PendingFeature and six unused placeholder translation keys per language; retained tested unfinished contract and all active texts. Timeless UUID retry comment and historical database README clarified; UI_DESIGN aligns with already approved ten-second undo. No money/date/SQL/migrations/dependency/theme-value changes, new features or test weakening.
+
+After cleanup: typecheck/lint PASS; full Jest 21 suites / 199 tests PASS, 12.124 s, approved workspace TEMP/TMP and TZ=UTC. Earlier pre-cleanup21/19917.699s separately recorded as historical. Android gradlew assembleDebug assembleRelease PASS, 3m56s, 526 tasks96executed430up-to-date, existing production configuration. Final app-specific assembleDebug/assembleRelease confirmation after cleanup also PASS11s459tasks51executed408up-to-date. Existing compiler/deprecation/Metro/copy-fallback warnings remain; no install/publication. Release retains debug signing configuration and is not production approval.
+
+Owner excluded computer-use; no computer-use/UI automation/adb/device controls or fresh visual/native flow acceptance. Historical selected Phase3/4 observations remain historical. Full payment/history/edit/undo/delete-all/summary/settings, accessibility/all layouts/languages/themes/system restrictions and iOS checks are NOT VERIFIED in this phase. Physical haptics tactile FAIL, owner identifier/signing/version and audit limitations remain; full MVP NOT COMPLETE.
+
+Permanent current architecture, create/edit/deletion/preferences data flow, Phases0–5commitregistry, actual final checks and all unresolved gates now live in IMPLEMENTATION_PLAN.md. CODING_STANDARDS/README updated; earlier implementation handoffs and migration map retained as historical. Commit: docs: finalize CashDriver refactoring verification and architecture; hash reported after creation. Phase7 NOT STARTED; separate assignment required before removing this plan.

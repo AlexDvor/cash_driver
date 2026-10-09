@@ -493,6 +493,62 @@ Subagent phase5_theme owned only theme moves/imports; main agent owned platform 
 
 User explicitly excluded computer-use: no computer-use tools, UI automation, adb/device controls, native build or fresh native/visual acceptance were used in this phase. Tokens/labels/JSX design remain equivalent; automated checks and source review do not prove native appearance. Existing physical haptics FAIL, accessibility/system restrictions and iOS NOT VERIFIED, owner identifiers/signing/version and audit limitations remain; full MVP NOT COMPLETE. CODING_STANDARDS, AGENTS and adapted UI skill describe current paths. Whitespace/docs reviewed before phase commit: refactor: centralize constants and clarify domain code (hash reported after creation). Phase 6 NOT STARTED; next assignment required.
 
+## Refactoring final architecture and verification — Phase 6 (2026-10-09)
+
+Status: **COMPLETE for code review, available automated/native-build verification and permanent documentation; full cross-platform native acceptance NOT COMPLETE**. Phase 5 baseline: 74fe546. The owner excluded computer-use; no computer-use, UI automation, adb/device controls, installation, publication or production data access was performed. Phase 7 remains NOT STARTED: keep the temporary plan until separately assigned removal. Earlier MVP/refactoring handoffs describe historical paths and observations, not current module placement or fresh verification.
+
+### Current architecture
+
+| Location | Current responsibility |
+| --- | --- |
+| App.tsx | SafeAreaProvider → PersistenceProvider → LanguageProvider → ThemeProvider → AppNavigator composition |
+| src/screens/<Name>Screen/ | Six stable entries: Home, History, Summary, Settings, Details, Edit; static screen styles where needed |
+| src/hooks/app/, transactions/, summary/ | Seven focused hooks for clock/change subscriptions, shared form/create orchestration and three separate data loaders |
+| src/ui/<Name>/ | Seven primitives: ActionButton, AppText, Card, ChoiceGroup, MoneyInput, ScreenContainer, TabIcon |
+| src/components/<Name>/ | Four feature-facing components: PaymentForm, DailySummary, DeletionNotice, TransactionLoadState |
+| src/navigation/ | AppNavigator, AppTabBar, routes and typed parameters; DeletionProvider wraps NavigationContainer and a global footer follows the Stack |
+| src/providers/<Name>/ | Four contexts/accessors: PersistenceProvider, LanguageProvider, ThemeProvider, DeletionProvider; persisted preferences gate first main render |
+| src/constants/ | Canonical platforms/types/labels/validation and unchanged theme/tokens palettes/spacing/typography/radii/sizing |
+| src/features/transactions/ | CashTransaction/payment types, pure cents/parser/history functions, transaction service/repository and deletion constants |
+| src/features/summary/ | Device-zone calendar boundaries and pure summary aggregation |
+| src/features/settings/ | Preferences service/repository, default haptics, native feedback and installed-version adapters |
+| src/app/ and src/database/ | Persistence composition/change notifier; serialized SQLite connection, interfaces and non-destructive migrations |
+| src/i18n/ and src/theme/ | Three matching dictionaries and formatting; theme-mode resolution/native system-bar helper |
+
+Create flow: Home composes usePaymentForm/useCreatePayment and the shared PaymentForm. UI confirm → form onSubmit → useCreatePayment → transactionService validation/recalculation/UUID coordination → transactionRepository → serialized SQLite commit → changeNotifier → loaders/history/totals. Reset/success and optional latest-preference haptics follow successful persistence. Unchanged failed drafts retry their pending UUID; no UI module owns SQL or monetary policy.
+
+Edit flow: Details passes only the record ID to Edit. EditScreen loads once through useTransactions(id,false); LoadedEdit receives the record, is keyed by record.id and composes usePaymentForm/shared PaymentForm to call transactionService.edit. Editing preserves ID/createdAt and the repository persists service-generated updatedAt; no edit writes default-platform preferences. Loader refreshes do not replace an active edit draft.
+
+Deletion flow: native confirmation → global DeletionProvider pending state → ten-second undo or active expiry → existing transaction service/repository. Until commit the SQLite row and totals remain present. Background/unmount cancels pending deletion; synchronous arbitration prevents undo/expiry double outcomes. Delete-all is separately confirmed and preserves preferences. Global footer remains accessible across routes; failure is retryable.
+
+Preference flow: screen choice → PersistenceProvider → preferencesService/repository → commit → context update. Language and ThemeProvider react to committed preferences without remounting drafts/navigation. Theme colors resolve from persisted mode plus system appearance; static constants never replace runtime authority. Domain/summary/loaders retain device-timezone, Monday, DST and half-open period contracts.
+
+### Final audit and cleanup
+
+Read-only subagents phase6_structure and phase6_behavior audited the full 1d3a2bd → 74fe546 refactoring. No confirmed behavioral regression. Structure graph after cleanup: **82 src TS/TSX modules, no missing relative imports, no dependency cycles and no unreachable modules** when App/test entries are included. No duplicate runtime platform/token definitions or compatibility implementations. Platform type-only re-export remains useful to domain consumers. Money/payment/calendar, SQL/schema/migration literals, adapter behavior and all theme values preserved. Existing tests plus three added behavioral cases adequately cover the refactoring; no implementation-mirroring tests or weakened assertions.
+
+Removed unused PendingFeature and six unused historical *Pending keys from each language (unfinished remains because its contract is tested). Updated timeless UUID retry comment and clarified the database README's historical MVP haptics phase. UI_DESIGN now agrees with the already owner-approved ten-second undo duration; no new duration decision. Permanent coding standards/README point to this current architecture; historical handoffs are preserved.
+
+### Fresh verification and remaining gates
+
+After cleanup: npm run typecheck **PASS**, npm run lint **PASS**, full npm test -- --runInBand --no-cache --watch=false **21 suites / 199 tests PASS**, 12.124 s, approved command-scoped workspace TEMP/TMP and TZ=UTC. Earlier pre-cleanup run also passed 21/199, 17.699 s; the latter is historical to the cleanup and not the final source result. Tests retain real-SQLite persistence/migration coverage, retry/duplicate/commit/draft/edit/deletion races, stale responses/subscriptions, theme/language/navigation and date/summary behavior. Android .\gradlew.bat assembleDebug assembleRelease from android/ **PASS: BUILD SUCCESSFUL in 3m 56s, 526 tasks (96 executed / 430 up-to-date)** using existing configuration and production entry. Final app-specific confirmation after cleanup, .\gradlew.bat :app:assembleDebug :app:assembleRelease, also PASS: 11 s, 459 tasks (51 executed / 408 up-to-date). Production release bundle was generated after the translation cleanup. Both app-debug.apk and app-release.apk produced; no installation/publication. Existing AGP/Gradle deprecated APIs/settings, Metro export/color, CMake unused variable/tokenizer option and hard-link copy-fallback notices remain. No configuration/dependency changes or suppressed warnings. Release uses existing debug signing; this is local build verification only.
+
+Native/visual scenario matrix was not rerun. Selected Phase 3/4 emulator observations remain historical only. Final payment/history/edit/undo/delete-all/summary/settings, all-screen/language/theme/keyboard/text-scale/screen-reader and system-restriction acceptance remains **NOT VERIFIED in this phase**. Physical SM-A528B tactile haptics remains **FAIL, cause unresolved**. iOS build/device acceptance remains **NOT VERIFIED** on this Windows host. Full MVP remains **NOT COMPLETE**. Owner final identifiers/signing/release-version decisions and historical dependency-audit limitation remain open. The existing release variant uses the debug signing config; a successful local build is not a production release approval. No readiness or validation evidence is invented.
+
+### Durable refactoring commit record
+
+| Phase | Completed work | Commit |
+| --- | --- | --- |
+| 0 | Baseline, reconciled kit rules and migration map | 05f5a3a |
+| 1 | Six screen entries | 867bcc2 |
+| 2 | Hooks and Home creation orchestration | c50b5af |
+| 3 | Shared UI/components, styles and complex props | 75205e6 |
+| 4 | Navigation/routes and Providers | 58f926f |
+| 5 | Platform metadata/guards and unchanged theme tokens | 74fe546 |
+| 6 | Final review, dead placeholder cleanup, checks and permanent architecture | Hash reported after creation |
+
+Phase 6 commit: docs: finalize CashDriver refactoring verification and architecture. Next authorized step is Phase 7 documentation-only removal of the temporary plan, retaining this architecture, commit record, verification scope and unresolved gates. Full native acceptance still requires separately completed device/accessibility/haptics and macOS/Xcode iOS checks; removing a planning file does not satisfy those gates.
+
 ## Required automated checks
 
 - Language: matching translation keys for es/en/uk; initial Spanish, persistence/restart, localized date/money displays, unchanged integer-cent values and period boundaries, draft preservation, and preference write failure.

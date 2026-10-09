@@ -83,7 +83,7 @@ Details: `Detalle de operación`, platform, full local date/time, and labeled mo
 
 Editing reuses the payment form: platform, fare, received cash, quick values, live change result, and full-change tip toggle. Prepopulate from the saved operation, including its tip state. Changing fare or received cash clears the toggle as on Inicio. Use `Guardar cambios`; after commit show `Operación actualizada` with labeled fare and optional tip. On failure preserve the edited draft and allow retry; cancelling leaves the stored operation unchanged.
 
-After confirmed single-operation deletion, show `Eliminación pendiente` with `Deshacer`. Keep the operation in history and totals until deletion commits; show its pending state and disable editing or another deletion of that row. Undo cancels the pending deletion without rewriting the record. The brief window duration must be defined before implementing this flow. On commit refresh history and totals; on failure show `No se pudo eliminar la operación. Inténtalo de nuevo.` and keep the record. Delete-all has no undo.
+After confirmed single-operation deletion, show `Eliminación pendiente` with `Deshacer`. Keep the operation in history and totals until deletion commits; show its pending state and disable editing or another deletion of that row. Undo cancels the pending deletion without rewriting the record. The owner-approved window is 10 seconds, defined by DELETION_UNDO_SECONDS in src/features/transactions/deletionConstants.ts; follow DATA_AND_CALCULATIONS.md for expiry and background cancellation. On commit refresh history and totals; on failure show `No se pudo eliminar la operación. Inténtalo de nuevo.` and keep the record. Delete-all has no undo.
 
 ## Resumen
 
