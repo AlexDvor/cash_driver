@@ -4,21 +4,23 @@ Apply these rules during implementation within the scope of PROJECT_SPEC.md. Ins
 
 ## Placement and responsibilities
 
-The table below describes current responsibilities. Refactoring Phases 1–3 place screens in `src/screens/`, hooks in `src/hooks/`, universal primitives in `src/ui/` and feature-facing UI in `src/components/`. Static styles and nontrivial public props are adjacent files. Feature folders retain calculations, services, repositories and the current deletion Provider. Later phases introduce `src/navigation/`, `src/providers/` and `src/constants/theme/` incrementally under `docs/REFACTORING_PLAN.md`. Until each assigned phase migrates its files, existing paths remain valid; do not create duplicate implementations to satisfy the target tree. Keep domain calculations, services and repositories feature-grouped. The plan's Phase 0 migration map lists the original src files and their destinations; product/data/UI behavior retains its existing authority.
+The table below describes current responsibilities. Refactoring Phases 1–4 place screens in `src/screens/`, hooks in `src/hooks/`, universal primitives in `src/ui/`, feature-facing UI in `src/components/`, navigation in `src/navigation/` and contexts in `src/providers/`. Static styles and nontrivial public props are adjacent files; provider accessors remain beside their context. Feature folders retain calculations, services, repositories and deletion constants. A later phase introduces `src/constants/theme/` under `docs/REFACTORING_PLAN.md`; until then current theme tokens/resolution/system-bar helpers remain in `src/theme/`. Do not create duplicate implementations to satisfy the target tree. Keep domain calculations, services and repositories feature-grouped. The plan's Phase 0 migration map lists the original src files and their destinations; product/data/UI behavior retains its existing authority.
 
 | Location | Put here | Keep out |
 | --- | --- | --- |
 | `src/theme/` | Named colors, typography, spacing, radii, and shared sizing tokens from UI_DESIGN.md | Payment logic and device-specific screen copies |
-| `src/i18n/` | Matching Spanish, English, and Ukrainian translation dictionaries, locale mapping, and a shared translation accessor | User transaction data |
+| `src/i18n/` | Matching Spanish, English, and Ukrainian translation dictionaries, locale mapping and formatting | User transaction data; relocated LanguageProvider/context accessor |
 | `src/ui/<Name>/` | Universal ActionButton, AppText, Card, ChoiceGroup, MoneyInput, ScreenContainer and TabIcon; adjacent static styles/complex props | SQL and feature-specific orchestration |
 | `src/components/<Name>/` | Shared create/edit PaymentForm, DailySummary, DeletionNotice, TransactionLoadState and retained PendingFeature; styles/complex props where needed | SQL and duplicated calculation policy |
 | `src/screens/<Name>Screen/` | One screen entry per folder: Home, History, Summary, Settings, Details, Edit; adjacent static styles where used | SQL, duplicated arithmetic, copies of shared forms |
 | `src/hooks/app/`, `src/hooks/transactions/`, `src/hooks/summary/` | Clock/subscriptions, form/create-save/load orchestration, daily/period refresh; React lifecycle and service coordination | SQL and pure calculation policy; provider context definitions |
-| `src/features/transactions/` | Types, pure calculations, service, repository, current deletion Provider/constants | Duplicated create/edit arithmetic; relocated screens/hooks/presentation components |
+| `src/features/transactions/` | Types, pure calculations, service, repository and deletion constants | Duplicated create/edit arithmetic; relocated screens/hooks/presentation components/Provider |
 | `src/features/summary/` | Period calculations and aggregation | A second source of monetary rules; relocated screens/hooks/presentation components |
 | `src/features/settings/` | Preferences, defaults, haptics and installed-version adapters | Transaction SQL in screens; screen entries |
 | `src/database/` | Connection lifecycle and versioned migrations | Presentation logic |
-| `src/app/` | Bootstrap, navigation, and application wiring | Large payment screens or calculation rules |
+| `src/navigation/` | AppNavigator, AppTabBar, exact route constants and typed params; global deletion footer wiring | Storage/calculation policy and Provider context definitions |
+| `src/providers/<Name>/` | PersistenceProvider, LanguageProvider, ThemeProvider, DeletionProvider and their accessors; bootstrap styles where needed | Route definitions and duplicated services |
+| `src/app/` | Persistence composition and change notifier | Relocated navigation/Providers; large payment screens or calculation rules |
 
 ## Style and reuse
 
@@ -47,7 +49,7 @@ Write code that a developer with basic React and TypeScript knowledge can follow
 
 ## Adaptive layout
 
-Resolve light/dark semantic tokens centrally in `src/theme/` from the persisted preference and reactive system appearance. Components consume the resolved theme rather than maintain individual theme switches or fixed light-only styles. Share typography/spacing across palettes; propagate changes without remounting forms or losing state. Clean up appearance subscriptions. Reuse existing theme infrastructure when compatible.
+Resolve light/dark semantic tokens through ThemeProvider in `src/providers/ThemeProvider/`, using `src/theme/` tokens/resolution/system-bar helpers, the persisted preference and reactive system appearance. Components consume the resolved theme rather than maintain individual theme switches or fixed light-only styles. Share typography/spacing across palettes; propagate changes without remounting forms or losing state. Clean up appearance subscriptions. Reuse existing theme infrastructure when compatible.
 
 - Use available window/container width and flex layout, not a fixed screenshot size or device model detection. When responsive branching is needed, use reactive dimensions so rotation and window resizing update the layout.
 - Keep typography based on the documented logical-unit tokens and system text scaling. Do not multiply all font sizes and controls by screen width or disable font scaling to make the screenshot fit.

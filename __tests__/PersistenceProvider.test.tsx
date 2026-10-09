@@ -4,9 +4,9 @@ import ReactTestRenderer, { act } from 'react-test-renderer';
 import {
   PersistenceProvider,
   usePersistence,
-} from '../src/app/PersistenceProvider';
-import { LanguageProvider, useTranslation } from '../src/i18n/LanguageProvider';
-import { ThemeProvider, useAppTheme } from '../src/theme/ThemeProvider';
+} from '../src/providers/PersistenceProvider/PersistenceProvider';
+import { LanguageProvider, useTranslation } from '../src/providers/LanguageProvider/LanguageProvider';
+import { ThemeProvider, useAppTheme } from '../src/providers/ThemeProvider/ThemeProvider';
 import { useDataChanges } from '../src/hooks/app/useDataChanges';
 import { SqlConnection } from '../src/database/sqlite';
 import {

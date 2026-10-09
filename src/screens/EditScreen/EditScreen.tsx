@@ -1,18 +1,19 @@
 import React, { useCallback } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../app/navigationTypes';
-import { usePersistence } from '../../app/PersistenceProvider';
+import { RootStackParamList } from '../../navigation/navigationTypes';
+import { routes } from '../../navigation/routes';
+import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
 import { ScreenContainer } from '../../ui/ScreenContainer/ScreenContainer';
-import { useTranslation } from '../../i18n/LanguageProvider';
+import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { CashTransaction } from '../../features/transactions/types';
 import { TransactionInput } from '../../features/transactions/transactionService';
 import { PaymentForm } from '../../components/PaymentForm/PaymentForm';
 import { usePaymentForm } from '../../hooks/transactions/usePaymentForm';
 import { useTransactions } from '../../hooks/transactions/useTransactions';
 import { TransactionLoadState } from '../../components/TransactionLoadState/TransactionLoadState';
-import { useDeletion } from '../../features/transactions/DeletionProvider';
+import { useDeletion } from '../../providers/DeletionProvider/DeletionProvider';
 
 function LoadedEdit({
   record,
@@ -69,7 +70,7 @@ function LoadedEdit({
 export function EditScreen({
   route,
   navigation,
-}: NativeStackScreenProps<RootStackParamList, 'Edit'>) {
+}: NativeStackScreenProps<RootStackParamList, typeof routes.Edit>) {
   const { state, refresh } = useTransactions(route.params.id, false);
   const record = state.status === 'ready' ? state.records[0] : undefined;
   return (

@@ -1,8 +1,8 @@
 # CashDriver — temporary refactoring plan
 
-Status: **PHASE 3 COMPLETE — PHASE 4 NOT STARTED**.
+Status: **PHASE 4 COMPLETE — PHASE 5 NOT STARTED**.
 
-Created: 2026-10-09. This is a temporary execution plan, not a replacement product specification. The owner separately authorized Phases 0, 1, 2 and 3 on 2026-10-09. They are complete within their assigned scopes; Phase 4 requires the next assignment. Do not restart historical MVP implementation phases.
+Created: 2026-10-09. This is a temporary execution plan, not a replacement product specification. The owner separately authorized Phases 0–4 on 2026-10-09. They are complete within their assigned scopes; Phase 5 requires the next assignment. Do not restart historical MVP implementation phases.
 
 ## Objective and authority
 
@@ -209,8 +209,8 @@ Commit: `docs: remove completed temporary refactoring plan`.
 | 0 | COMPLETE | typecheck/lint PASS; Jest 20 suites / 196 tests PASS | 05f5a3a |
 | 1 | COMPLETE | typecheck/lint PASS; Jest 20 suites / 196 tests PASS; Android bundle PASS | 867bcc2 |
 | 2 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 198 tests PASS | c50b5af |
-| 3 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 198 tests PASS; Android bundle PASS; selected emulator width/text/keyboard checks | Hash reported after commit |
-| 4 | NOT STARTED | NOT RUN | — |
+| 3 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 198 tests PASS; Android bundle PASS; selected emulator width/text/keyboard checks | 75205e6 |
+| 4 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 198 tests PASS; Android bundle PASS; selected emulator boot/back/preferences/cross-tab undo checks | Hash reported after commit |
 | 5 | NOT STARTED | NOT RUN | — |
 | 6 | NOT STARTED | NOT RUN | — |
 | 7 | NOT STARTED | NOT RUN | — |
@@ -362,3 +362,13 @@ Subagents phase3_ui and phase3_components owned disjoint component moves; main a
 Selected emulator observations: light Home/form at 320dp/font 1.0, keyboard opening/dismissal and reachable confirm; Home/form and Summary at 600dp/font 1.5; Home daily values and Summary wrapping at 320dp/font 1.5. No observed clipping in this scope. Used current nativeAjustesEntry via temporary Metro 8083 and isolated cash-driver-ajustes-test.sqlite; no payment saved. Restored original size/font, removed only temporary fixture/host/UI-dump files and own Metro/reverse; production database/Metro preserved. Full all-screen/language/theme/accessibility matrix, native rebuild, iOS and physical haptics were not verified by these checks. Existing tactile FAIL and other owner/native/audit gates remain; full MVP NOT COMPLETE.
 
 Permanent handoff is in IMPLEMENTATION_PLAN.md. Commit: refactor: organize shared UI and feature components; hash reported after creation. Phase 4 requires the next assignment.
+
+## Phase 4 handoff — 2026-10-09
+
+Status: COMPLETE for assigned structural scope; baseline Phase 3 commit 75205e6. Navigation files moved to src/navigation/, exact seven strings centralized in routes with unchanged typed params, AppTabBar organized in its own folder. Static navigation styles and nontrivial AppNavigator props are adjacent. Four Providers/accessors moved to src/providers/<Name>/; Persistence bootstrap styles extracted. App/production/test consumer imports migrated. Provider order, global DeletionProvider outside NavigationContainer/footer after Stack, initialization/retry, async guards/cleanup, drafts and routes remain unchanged. No Phase 5 work, dependencies, configuration, SQL or business changes.
+
+Subagents phase4_navigation and phase4_providers owned disjoint moves; root integrated consumers/docs/checks. Independent phase4_review confirmed function/style equivalence and no stale/missing imports/cycles across 82 src TS/TSX files. Existing behavioral coverage reused; tests import-only with independent route literals preserved. Fresh typecheck/lint PASS; full Jest 21 suites / 198 tests PASS, 10.658 s with approved workspace TEMP/TMP and TZ=UTC. Production Android bundle PASS, 19 assets; existing warnings remain.
+
+Native selected checks used current nativeHistorialEntry and isolated fixture on Metro 8083: boot, English/Dark and draft preservation, Details/Edit/back, cross-tab Settings undo and row preservation, persisted preference restart. Two initial test-script navigation/timing attempts failed and fixture deletion expired normally; corrected script passed without source changes. No production transactions used. Fixture/temporary host/UI-dump removed, own Metro/reverse stopped, production database/Metro preserved. No responsive setting changes or native rebuild; full accessibility/iOS/physical haptics not verified. Historical tactile FAIL and other owner/native/audit gates remain; full MVP NOT COMPLETE.
+
+Permanent handoff and current placements updated in IMPLEMENTATION_PLAN.md and CODING_STANDARDS.md. Commit: refactor: isolate navigation and providers; hash reported after creation. Phase 5 requires the next assignment.

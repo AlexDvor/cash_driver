@@ -9,15 +9,15 @@ import React, {
 import {
   ActivityIndicator,
   Pressable,
-  StyleSheet,
   Text,
   useColorScheme,
   View,
 } from 'react-native';
-import { initializePersistence, Persistence } from './persistence';
-import { Preferences } from '../features/settings/preferencesRepository';
-import { translate, TranslationKey } from '../i18n/translations';
-import { palettes, sizing, spacing, typography } from '../theme/tokens';
+import { initializePersistence, Persistence } from '../../app/persistence';
+import { Preferences } from '../../features/settings/preferencesRepository';
+import { translate, TranslationKey } from '../../i18n/translations';
+import { palettes } from '../../theme/tokens';
+import { styles } from './PersistenceProvider.styles';
 
 interface PersistenceContextValue {
   services: Persistence;
@@ -170,15 +170,3 @@ export function usePersistence(): PersistenceContextValue {
   }
   return context;
 }
-
-// Bootstrap has no resolved palette until persisted mode is available.
-const styles = StyleSheet.create({
-  bootstrap: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: spacing.xl,
-    gap: spacing.xl,
-  },
-  message: { fontSize: typography.body, textAlign: 'center' },
-  retry: { minHeight: sizing.primaryButton, justifyContent: 'center' },
-});

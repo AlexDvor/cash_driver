@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BottomTabBarProps,
@@ -9,7 +9,6 @@ import {
   DarkTheme,
   DefaultTheme,
   NavigationContainer,
-  NavigationContainerRef,
   Theme,
   useNavigation,
 } from '@react-navigation/native';
@@ -24,15 +23,18 @@ import { DetailsScreen } from '../screens/DetailsScreen/DetailsScreen';
 import { EditScreen } from '../screens/EditScreen/EditScreen';
 import { HistoryScreen } from '../screens/HistoryScreen/HistoryScreen';
 import { HomeScreen } from '../screens/HomeScreen/HomeScreen';
-import { useTranslation } from '../i18n/LanguageProvider';
-import { useAppTheme } from '../theme/ThemeProvider';
-import { AppTabBar } from './AppTabBar';
+import { useTranslation } from '../providers/LanguageProvider/LanguageProvider';
+import { useAppTheme } from '../providers/ThemeProvider/ThemeProvider';
+import { AppTabBar } from './AppTabBar/AppTabBar';
 import { RootStackParamList, TabParamList } from './navigationTypes';
-import { DeletionProvider } from '../features/transactions/DeletionProvider';
-import { useDeletion } from '../features/transactions/DeletionProvider';
+import { DeletionProvider } from '../providers/DeletionProvider/DeletionProvider';
+import { useDeletion } from '../providers/DeletionProvider/DeletionProvider';
 import { DeletionNotice } from '../components/DeletionNotice/DeletionNotice';
-import { sizing, spacing } from '../theme/tokens';
+import { spacing } from '../theme/tokens';
 import { AppText } from '../ui/AppText/AppText';
+import { AppNavigatorProps } from './AppNavigator.interface';
+import { styles } from './AppNavigator.styles';
+import { routes } from './routes';
 
 const Tabs = createBottomTabNavigator<TabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -70,31 +72,27 @@ function TabNavigator() {
       screenOptions={{ headerShown: false, animation: 'none' }}
     >
       <Tabs.Screen
-        name="Home"
+        name={routes.Home}
         component={HomeScreen}
         options={{ title: t('home') }}
       />
       <Tabs.Screen
-        name="History"
+        name={routes.History}
         component={HistoryScreen}
         options={{ title: t('history') }}
       />
       <Tabs.Screen
-        name="Summary"
+        name={routes.Summary}
         component={SummaryScreen}
         options={{ title: t('summary') }}
       />
       <Tabs.Screen
-        name="Settings"
+        name={routes.Settings}
         component={SettingsScreen}
         options={{ title: t('settings') }}
       />
     </Tabs.Navigator>
   );
-}
-
-interface AppNavigatorProps {
-  navigationRef?: React.Ref<NavigationContainerRef<RootStackParamList>>;
 }
 
 function DeletionFooter() {
@@ -155,17 +153,17 @@ export function AppNavigator({ navigationRef }: AppNavigatorProps) {
             }}
           >
             <Stack.Screen
-              name="Tabs"
+              name={routes.Tabs}
               component={TabNavigator}
               options={{ headerShown: false }}
             />
             <Stack.Screen
-              name="Details"
+              name={routes.Details}
               component={DetailsScreen}
               options={{ title: t('details') }}
             />
             <Stack.Screen
-              name="Edit"
+              name={routes.Edit}
               component={EditScreen}
               options={{ title: t('edit') }}
             />
@@ -176,13 +174,3 @@ export function AppNavigator({ navigationRef }: AppNavigatorProps) {
     </DeletionProvider>
   );
 }
-const styles = StyleSheet.create({
-  fill: { flex: 1 },
-  notice: { paddingTop: spacing.sm },
-  back: {
-    minWidth: sizing.touchTarget,
-    minHeight: sizing.touchTarget,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

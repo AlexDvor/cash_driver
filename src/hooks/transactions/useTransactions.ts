@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useDataChanges } from '../app/useDataChanges';
-import { usePersistence } from '../../app/PersistenceProvider';
+import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
 import { CashTransaction } from '../../features/transactions/types';
 
 type RecordsState =

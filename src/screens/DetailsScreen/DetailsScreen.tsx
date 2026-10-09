@@ -1,24 +1,25 @@
 import React from 'react';
 import { Alert, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../app/navigationTypes';
+import { RootStackParamList } from '../../navigation/navigationTypes';
+import { routes } from '../../navigation/routes';
 import { useLocalClock } from '../../hooks/app/useLocalClock';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
 import { Card } from '../../ui/Card/Card';
 import { ScreenContainer } from '../../ui/ScreenContainer/ScreenContainer';
-import { useTranslation } from '../../i18n/LanguageProvider';
+import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { formatLocalDateTime, formatMoney } from '../../i18n/formatting';
 import { platformLabels } from '../../features/transactions/history';
 import { useTransactions } from '../../hooks/transactions/useTransactions';
 import { TransactionLoadState } from '../../components/TransactionLoadState/TransactionLoadState';
-import { useDeletion } from '../../features/transactions/DeletionProvider';
+import { useDeletion } from '../../providers/DeletionProvider/DeletionProvider';
 import { styles } from './DetailsScreen.styles';
 
 export function DetailsScreen({
   route,
   navigation,
-}: NativeStackScreenProps<RootStackParamList, 'Details'>) {
+}: NativeStackScreenProps<RootStackParamList, typeof routes.Details>) {
   const { state, refresh } = useTransactions(route.params.id);
   const { t, locale } = useTranslation();
   const clock = useLocalClock();
@@ -80,7 +81,7 @@ export function DetailsScreen({
             variant="secondary"
             label={t('editAction')}
             disabled={blocked}
-            onPress={() => navigation.navigate('Edit', { id: record.id })}
+            onPress={() => navigation.navigate(routes.Edit, { id: record.id })}
           />
           <ActionButton
             variant="destructive"

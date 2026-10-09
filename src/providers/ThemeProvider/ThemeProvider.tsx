@@ -1,9 +1,13 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import { AppState, StatusBar, useColorScheme } from 'react-native';
-import { palettes, Palette } from './tokens';
-import { EffectiveTheme, resolveTheme, ThemeMode } from './resolveTheme';
-import { usePersistence } from '../app/PersistenceProvider';
-import { updateSystemBars } from './systemBars';
+import { palettes, Palette } from '../../theme/tokens';
+import {
+  EffectiveTheme,
+  resolveTheme,
+  ThemeMode,
+} from '../../theme/resolveTheme';
+import { usePersistence } from '../PersistenceProvider/PersistenceProvider';
+import { updateSystemBars } from '../../theme/systemBars';
 interface ThemeContextValue {
   mode: ThemeMode;
   appearance: EffectiveTheme;

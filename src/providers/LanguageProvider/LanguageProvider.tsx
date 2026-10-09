@@ -5,8 +5,8 @@ import {
   translate,
   TranslationKey,
   TranslationParams,
-} from './translations';
-import { usePersistence } from '../app/PersistenceProvider';
+} from '../../i18n/translations';
+import { usePersistence } from '../PersistenceProvider/PersistenceProvider';
 interface LanguageContextValue {
   language: Language;
   locale: string;

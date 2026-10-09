@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
-import { usePersistence } from '../../app/PersistenceProvider';
+import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
 import { useDataChanges } from '../app/useDataChanges';
 import { useLocalClock } from '../app/useLocalClock';
 import { getPeriodBounds, isWithinPeriod } from '../../features/summary/periods';

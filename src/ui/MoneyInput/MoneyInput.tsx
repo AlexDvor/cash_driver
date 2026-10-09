@@ -1,6 +1,6 @@
 import React from 'react';
 import { TextInput, View } from 'react-native';
-import { useAppTheme } from '../../theme/ThemeProvider';
+import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 
 import { AppText } from '../AppText/AppText';
 import { styles } from './MoneyInput.styles';

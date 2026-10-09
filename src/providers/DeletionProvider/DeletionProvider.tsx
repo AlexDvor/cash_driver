@@ -7,8 +7,8 @@ import React, {
   useState,
 } from 'react';
 import { AppState } from 'react-native';
-import { usePersistence } from '../../app/PersistenceProvider';
-import { DELETION_UNDO_SECONDS } from './deletionConstants';
+import { usePersistence } from '../PersistenceProvider/PersistenceProvider';
+import { DELETION_UNDO_SECONDS } from '../../features/transactions/deletionConstants';
 
 type DeletionState =
   | { status: 'idle'; id: null }

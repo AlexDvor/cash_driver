@@ -3,9 +3,9 @@ import { ActivityIndicator } from 'react-native';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
 import { Card } from '../../ui/Card/Card';
-import { useTranslation } from '../../i18n/LanguageProvider';
-import { useAppTheme } from '../../theme/ThemeProvider';
-import { useDeletion } from '../../features/transactions/DeletionProvider';
+import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
+import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
+import { useDeletion } from '../../providers/DeletionProvider/DeletionProvider';
 
 export function DeletionNotice() {
   const deletion = useDeletion();

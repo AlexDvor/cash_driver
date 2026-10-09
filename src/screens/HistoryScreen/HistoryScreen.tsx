@@ -2,16 +2,17 @@ import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../app/navigationTypes';
+import { RootStackParamList } from '../../navigation/navigationTypes';
+import { routes } from '../../navigation/routes';
 import { useLocalClock } from '../../hooks/app/useLocalClock';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
 import { ChoiceGroup } from '../../ui/ChoiceGroup/ChoiceGroup';
 import { ScreenContainer } from '../../ui/ScreenContainer/ScreenContainer';
-import { useTranslation } from '../../i18n/LanguageProvider';
+import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { formatMoney } from '../../i18n/formatting';
-import { useAppTheme } from '../../theme/ThemeProvider';
-import { useDeletion } from '../../features/transactions/DeletionProvider';
+import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
+import { useDeletion } from '../../providers/DeletionProvider/DeletionProvider';
 import {
   groupHistory,
   HistoryPeriod,
@@ -81,7 +82,9 @@ export function HistoryScreen() {
           {state.records.length === 0 && (
             <ActionButton
               label={t('registerPayment')}
-              onPress={() => navigation.navigate('Tabs', { screen: 'Home' })}
+              onPress={() =>
+                navigation.navigate(routes.Tabs, { screen: routes.Home })
+              }
             />
           )}
         </>
@@ -117,7 +120,7 @@ export function HistoryScreen() {
                   fare: formatMoney(record.fareAmountCents, locale),
                 })}
                 onPress={() =>
-                  navigation.navigate('Details', { id: record.id })
+                  navigation.navigate(routes.Details, { id: record.id })
                 }
                 style={({ pressed }) => [
                   styles.row,

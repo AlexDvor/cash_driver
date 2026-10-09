@@ -2,9 +2,9 @@ import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
-import { useTranslation } from '../../i18n/LanguageProvider';
+import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { formatMoney } from '../../i18n/formatting';
-import { useAppTheme } from '../../theme/ThemeProvider';
+import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import type { useDailySummary } from '../../hooks/summary/useDailySummary';
 import { styles } from './DailySummary.styles';
 

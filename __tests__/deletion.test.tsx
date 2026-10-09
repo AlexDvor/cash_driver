@@ -1,12 +1,12 @@
 import React from 'react';
 import { AppState, AppStateStatus } from 'react-native';
 import ReactTestRenderer, { act } from 'react-test-renderer';
-import { PersistenceProvider } from '../src/app/PersistenceProvider';
+import { PersistenceProvider } from '../src/providers/PersistenceProvider/PersistenceProvider';
 import { Persistence } from '../src/app/persistence';
 import {
   DeletionProvider,
   useDeletion,
-} from '../src/features/transactions/DeletionProvider';
+} from '../src/providers/DeletionProvider/DeletionProvider';
 import { DELETION_UNDO_SECONDS } from '../src/features/transactions/deletionConstants';
 import { SqlConnection } from '../src/database/sqlite';
 import { openTestDatabase, testPersistence } from './sqliteTestDatabase';

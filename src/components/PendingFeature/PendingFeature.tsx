@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTranslation } from '../../i18n/LanguageProvider';
+import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { AppText } from '../../ui/AppText/AppText';
 import { Card } from '../../ui/Card/Card';
 

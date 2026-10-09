@@ -1,19 +1,21 @@
 import React from 'react';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { AppText } from '../ui/AppText/AppText';
-import { TabIcon } from '../ui/TabIcon/TabIcon';
-import { useTranslation } from '../i18n/LanguageProvider';
-import { TranslationKey } from '../i18n/translations';
-import { useAppTheme } from '../theme/ThemeProvider';
-import { sizing, spacing } from '../theme/tokens';
-import { TabParamList } from './navigationTypes';
+import { Pressable, View } from 'react-native';
+import { AppText } from '../../ui/AppText/AppText';
+import { TabIcon } from '../../ui/TabIcon/TabIcon';
+import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
+import { TranslationKey } from '../../i18n/translations';
+import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
+import { spacing } from '../../theme/tokens';
+import { TabParamList } from '../navigationTypes';
+import { styles } from './AppTabBar.styles';
+import { routes } from '../routes';
 
 const labels: Record<keyof TabParamList, TranslationKey> = {
-  Home: 'home',
-  History: 'history',
-  Summary: 'summary',
-  Settings: 'settings',
+  [routes.Home]: 'home',
+  [routes.History]: 'history',
+  [routes.Summary]: 'summary',
+  [routes.Settings]: 'settings',
 };
 
 function isTabName(name: string): name is keyof TabParamList {
@@ -77,22 +79,3 @@ export function AppTabBar({ state, navigation, insets }: BottomTabBarProps) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  bar: {
-    flexDirection: 'row',
-    borderTopWidth: sizing.borderWidth,
-    paddingTop: spacing.sm,
-  },
-  tab: {
-    flex: 1,
-    minHeight: sizing.touchTarget,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    paddingHorizontal: spacing.xs,
-  },
-  label: { textAlign: 'center', flexShrink: 1 },
-  selected: { fontWeight: '700' },
-  pressed: { opacity: 0.7 },
-});

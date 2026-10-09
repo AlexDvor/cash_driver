@@ -9,7 +9,7 @@ import {
 import { ScreenContainer } from '../src/ui/ScreenContainer/ScreenContainer';
 import { spacing } from '../src/theme/tokens';
 
-jest.mock('../src/theme/ThemeProvider', () => ({
+jest.mock('../src/providers/ThemeProvider/ThemeProvider', () => ({
   useAppTheme: () => ({
     colors: require('../src/theme/tokens').palettes.light,
   }),

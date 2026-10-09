@@ -9,12 +9,12 @@ import {
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createNavigationContainerRef } from '@react-navigation/native';
 import ReactTestRenderer, { act } from 'react-test-renderer';
-import { AppNavigator } from '../src/app/AppNavigator';
-import { RootStackParamList } from '../src/app/navigationTypes';
-import { PersistenceProvider } from '../src/app/PersistenceProvider';
+import { AppNavigator } from '../src/navigation/AppNavigator';
+import { RootStackParamList } from '../src/navigation/navigationTypes';
+import { PersistenceProvider } from '../src/providers/PersistenceProvider/PersistenceProvider';
 import { Persistence } from '../src/app/persistence';
-import { LanguageProvider } from '../src/i18n/LanguageProvider';
-import { ThemeProvider } from '../src/theme/ThemeProvider';
+import { LanguageProvider } from '../src/providers/LanguageProvider/LanguageProvider';
+import { ThemeProvider } from '../src/providers/ThemeProvider/ThemeProvider';
 import { SqlConnection } from '../src/database/sqlite';
 import {
   openTestDatabase,

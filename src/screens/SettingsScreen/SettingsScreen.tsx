@@ -6,16 +6,16 @@ import {
   Switch,
   View,
 } from 'react-native';
-import { usePersistence } from '../../app/PersistenceProvider';
+import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
 import { Card } from '../../ui/Card/Card';
 import { ChoiceGroup } from '../../ui/ChoiceGroup/ChoiceGroup';
 import { ScreenContainer } from '../../ui/ScreenContainer/ScreenContainer';
-import { useTranslation } from '../../i18n/LanguageProvider';
+import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { languageOptions } from '../../i18n/translations';
-import { useAppTheme } from '../../theme/ThemeProvider';
-import { useDeletion } from '../../features/transactions/DeletionProvider';
+import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
+import { useDeletion } from '../../providers/DeletionProvider/DeletionProvider';
 import { platformLabels } from '../../features/transactions/history';
 import { platforms } from '../../features/transactions/types';
 import {
