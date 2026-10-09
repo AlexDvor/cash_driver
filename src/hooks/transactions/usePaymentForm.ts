@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { centsToInput } from '../../i18n/formatting';
-import { parseMoneyInput, validateAmountCents } from '../../features/transactions/money';
+import {
+  parseMoneyInput,
+  validateAmountCents,
+} from '../../features/transactions/money';
 import {
   applyExactAmount,
   applyQuickAmount,

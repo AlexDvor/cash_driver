@@ -4,8 +4,15 @@ import { useFocusEffect } from '@react-navigation/native';
 import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
 import { useDataChanges } from '../app/useDataChanges';
 import { useLocalClock } from '../app/useLocalClock';
-import { getPeriodBounds, isWithinPeriod, SummaryPeriod } from '../../features/summary/periods';
-import { CashSummary, summarizeTransactions } from '../../features/summary/summary';
+import {
+  getPeriodBounds,
+  isWithinPeriod,
+  SummaryPeriod,
+} from '../../features/summary/periods';
+import {
+  CashSummary,
+  summarizeTransactions,
+} from '../../features/summary/summary';
 
 type SummaryState =
   | { status: 'loading'; summary: null }

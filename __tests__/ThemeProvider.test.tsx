@@ -7,7 +7,10 @@ import {
   Text,
 } from 'react-native';
 import ReactTestRenderer, { act } from 'react-test-renderer';
-import { ThemeProvider, useAppTheme } from '../src/providers/ThemeProvider/ThemeProvider';
+import {
+  ThemeProvider,
+  useAppTheme,
+} from '../src/providers/ThemeProvider/ThemeProvider';
 import { ChoiceGroup } from '../src/ui/ChoiceGroup/ChoiceGroup';
 import { ThemeMode } from '../src/theme/resolveTheme';
 import { PersistenceProvider } from '../src/providers/PersistenceProvider/PersistenceProvider';

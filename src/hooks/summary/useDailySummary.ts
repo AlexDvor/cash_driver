@@ -3,8 +3,14 @@ import { AppState } from 'react-native';
 import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
 import { useDataChanges } from '../app/useDataChanges';
 import { useLocalClock } from '../app/useLocalClock';
-import { getPeriodBounds, isWithinPeriod } from '../../features/summary/periods';
-import { CashSummary, summarizeTransactions } from '../../features/summary/summary';
+import {
+  getPeriodBounds,
+  isWithinPeriod,
+} from '../../features/summary/periods';
+import {
+  CashSummary,
+  summarizeTransactions,
+} from '../../features/summary/summary';
 
 type DailyState =
   | { status: 'loading'; summary: null }
