@@ -21,7 +21,7 @@ Follow `docs/CODING_STANDARDS.md` for code placement, theme tokens, component re
 13. Version the database schema and use non-destructive migrations.
 14. Never show sample operations as real data in the installed application.
 15. Run the relevant checks in `docs/IMPLEMENTATION_PLAN.md`. Report what was actually verified and any environment limitations.
-16. Implement only the phase assigned by the user in `docs/IMPLEMENTATION_PLAN.md`, or in the temporary `docs/REFACTORING_PLAN.md` for refactoring. Verify prerequisites, record the phase handoff, and stop before the next phase. Do not interpret the complete MVP specification as permission to implement all phases.
+16. Implement only the scope assigned by the user, using `docs/IMPLEMENTATION_PLAN.md` for requirements, historical phase handoffs and the final refactoring architecture. Refactoring Phases 0–7 are closed; do not restart them or historical MVP phases without a new assignment. Verify prerequisites, record the handoff, and stop at the assigned boundary. Do not interpret the complete MVP specification as permission to implement all phases.
 17. Add/update meaningful behavioral tests during each coding phase and reuse suitable custom hooks as specified in CODING_STANDARDS.md. When the user requests a subagent review and tools support it, use the bounded review workflow there; report actual verification and delegation results.
 
 ## Source of truth

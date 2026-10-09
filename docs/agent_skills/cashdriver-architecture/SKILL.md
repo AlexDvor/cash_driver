@@ -5,7 +5,7 @@ description: Refactor existing CashDriver screens, hooks and components without 
 
 # CashDriver architecture skill
 
-Adapted from CashDriver-agent-kit.zip on 2026-10-09. Read docs/AGENTS.md and the assigned phase of docs/REFACTORING_PLAN.md first. User requirements and existing product/data/UI contracts take precedence over kit examples.
+Adapted from CashDriver-agent-kit.zip on 2026-10-09. Read docs/AGENTS.md and the final refactoring architecture/handoff in docs/IMPLEMENTATION_PLAN.md first. Refactoring Phases 0–7 are closed; apply these rules only within a new user-assigned scope. User requirements and existing product/data/UI contracts take precedence over kit examples.
 
 ## Scope and placement
 
