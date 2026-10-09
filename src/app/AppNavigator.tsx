@@ -30,9 +30,9 @@ import { AppTabBar } from './AppTabBar';
 import { RootStackParamList, TabParamList } from './navigationTypes';
 import { DeletionProvider } from '../features/transactions/DeletionProvider';
 import { useDeletion } from '../features/transactions/DeletionProvider';
-import { DeletionNotice } from '../features/transactions/DeletionNotice';
+import { DeletionNotice } from '../components/DeletionNotice/DeletionNotice';
 import { sizing, spacing } from '../theme/tokens';
-import { AppText } from '../components/AppText';
+import { AppText } from '../ui/AppText/AppText';
 
 const Tabs = createBottomTabNavigator<TabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();

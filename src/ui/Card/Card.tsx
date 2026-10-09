@@ -1,7 +1,7 @@
 import React from 'react';
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import { useAppTheme } from '../theme/ThemeProvider';
-import { radii, sizing, spacing } from '../theme/tokens';
+import { StyleProp, View, ViewStyle } from 'react-native';
+import { useAppTheme } from '../../theme/ThemeProvider';
+import { styles } from './Card.styles';
 
 export function Card({
   children,
@@ -20,12 +20,3 @@ export function Card({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  card: {
-    borderRadius: radii.card,
-    borderWidth: sizing.borderWidth,
-    padding: spacing.xl,
-    gap: spacing.lg,
-  },
-});

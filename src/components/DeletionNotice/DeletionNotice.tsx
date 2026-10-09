@@ -1,11 +1,11 @@
 import React from 'react';
 import { ActivityIndicator } from 'react-native';
-import { ActionButton } from '../../components/ActionButton';
-import { AppText } from '../../components/AppText';
-import { Card } from '../../components/Card';
+import { ActionButton } from '../../ui/ActionButton/ActionButton';
+import { AppText } from '../../ui/AppText/AppText';
+import { Card } from '../../ui/Card/Card';
 import { useTranslation } from '../../i18n/LanguageProvider';
 import { useAppTheme } from '../../theme/ThemeProvider';
-import { useDeletion } from './DeletionProvider';
+import { useDeletion } from '../../features/transactions/DeletionProvider';
 
 export function DeletionNotice() {
   const deletion = useDeletion();

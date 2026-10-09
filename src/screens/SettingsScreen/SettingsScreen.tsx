@@ -7,11 +7,11 @@ import {
   View,
 } from 'react-native';
 import { usePersistence } from '../../app/PersistenceProvider';
-import { ActionButton } from '../../components/ActionButton';
-import { AppText } from '../../components/AppText';
-import { Card } from '../../components/Card';
-import { ChoiceGroup } from '../../components/ChoiceGroup';
-import { ScreenContainer } from '../../components/ScreenContainer';
+import { ActionButton } from '../../ui/ActionButton/ActionButton';
+import { AppText } from '../../ui/AppText/AppText';
+import { Card } from '../../ui/Card/Card';
+import { ChoiceGroup } from '../../ui/ChoiceGroup/ChoiceGroup';
+import { ScreenContainer } from '../../ui/ScreenContainer/ScreenContainer';
 import { useTranslation } from '../../i18n/LanguageProvider';
 import { languageOptions } from '../../i18n/translations';
 import { useAppTheme } from '../../theme/ThemeProvider';

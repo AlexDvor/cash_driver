@@ -4,17 +4,18 @@ Apply these rules during implementation within the scope of PROJECT_SPEC.md. Ins
 
 ## Placement and responsibilities
 
-The table below describes current responsibilities. Refactoring Phase 1 moved the six screens into `src/screens/` with adjacent static styles; Phase 2 moved application/transaction/summary hooks into `src/hooks/` and extracted Home creation orchestration into useCreatePayment. Feature folders retain components, calculations, services and repositories. Later phases introduce `src/ui/`, `src/navigation/`, `src/providers/` and `src/constants/theme/` incrementally under `docs/REFACTORING_PLAN.md`. Until each assigned phase migrates its files, existing paths remain valid; do not create duplicate implementations to satisfy the target tree. Keep domain calculations, services and repositories feature-grouped. The plan's Phase 0 migration map lists the original src files and their destinations; product/data/UI behavior retains its existing authority.
+The table below describes current responsibilities. Refactoring Phases 1–3 place screens in `src/screens/`, hooks in `src/hooks/`, universal primitives in `src/ui/` and feature-facing UI in `src/components/`. Static styles and nontrivial public props are adjacent files. Feature folders retain calculations, services, repositories and the current deletion Provider. Later phases introduce `src/navigation/`, `src/providers/` and `src/constants/theme/` incrementally under `docs/REFACTORING_PLAN.md`. Until each assigned phase migrates its files, existing paths remain valid; do not create duplicate implementations to satisfy the target tree. Keep domain calculations, services and repositories feature-grouped. The plan's Phase 0 migration map lists the original src files and their destinations; product/data/UI behavior retains its existing authority.
 
 | Location | Put here | Keep out |
 | --- | --- | --- |
 | `src/theme/` | Named colors, typography, spacing, radii, and shared sizing tokens from UI_DESIGN.md | Payment logic and device-specific screen copies |
 | `src/i18n/` | Matching Spanish, English, and Ukrainian translation dictionaries, locale mapping, and a shared translation accessor | User transaction data |
-| `src/components/` | Shared buttons, cards, inputs, selectors, and screen containers | SQL and feature-specific orchestration |
+| `src/ui/<Name>/` | Universal ActionButton, AppText, Card, ChoiceGroup, MoneyInput, ScreenContainer and TabIcon; adjacent static styles/complex props | SQL and feature-specific orchestration |
+| `src/components/<Name>/` | Shared create/edit PaymentForm, DailySummary, DeletionNotice, TransactionLoadState and retained PendingFeature; styles/complex props where needed | SQL and duplicated calculation policy |
 | `src/screens/<Name>Screen/` | One screen entry per folder: Home, History, Summary, Settings, Details, Edit; adjacent static styles where used | SQL, duplicated arithmetic, copies of shared forms |
 | `src/hooks/app/`, `src/hooks/transactions/`, `src/hooks/summary/` | Clock/subscriptions, form/create-save/load orchestration, daily/period refresh; React lifecycle and service coordination | SQL and pure calculation policy; provider context definitions |
-| `src/features/transactions/` | Shared payment form for create/edit, feature components, pure calculations, service, repository | Duplicated create/edit arithmetic; screen entries and moved hooks |
-| `src/features/summary/` | Period calculations, aggregation and daily summary component | A second source of monetary rules; screen entries and moved hooks |
+| `src/features/transactions/` | Types, pure calculations, service, repository, current deletion Provider/constants | Duplicated create/edit arithmetic; relocated screens/hooks/presentation components |
+| `src/features/summary/` | Period calculations and aggregation | A second source of monetary rules; relocated screens/hooks/presentation components |
 | `src/features/settings/` | Preferences, defaults, haptics and installed-version adapters | Transaction SQL in screens; screen entries |
 | `src/database/` | Connection lifecycle and versioned migrations | Presentation logic |
 | `src/app/` | Bootstrap, navigation, and application wiring | Large payment screens or calculation rules |

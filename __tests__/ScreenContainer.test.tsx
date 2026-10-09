@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Text,
 } from 'react-native';
-import { ScreenContainer } from '../src/components/ScreenContainer';
+import { ScreenContainer } from '../src/ui/ScreenContainer/ScreenContainer';
 import { spacing } from '../src/theme/tokens';
 
 jest.mock('../src/theme/ThemeProvider', () => ({

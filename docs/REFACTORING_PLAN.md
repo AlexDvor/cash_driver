@@ -1,8 +1,8 @@
 # CashDriver — temporary refactoring plan
 
-Status: **PHASE 2 COMPLETE — PHASE 3 NOT STARTED**.
+Status: **PHASE 3 COMPLETE — PHASE 4 NOT STARTED**.
 
-Created: 2026-10-09. This is a temporary execution plan, not a replacement product specification. The owner separately authorized Phases 0, 1 and 2 on 2026-10-09. They are complete within their assigned scopes; Phase 3 requires the next assignment. Do not restart historical MVP implementation phases.
+Created: 2026-10-09. This is a temporary execution plan, not a replacement product specification. The owner separately authorized Phases 0, 1, 2 and 3 on 2026-10-09. They are complete within their assigned scopes; Phase 4 requires the next assignment. Do not restart historical MVP implementation phases.
 
 ## Objective and authority
 
@@ -208,8 +208,8 @@ Commit: `docs: remove completed temporary refactoring plan`.
 | --- | --- | --- | --- |
 | 0 | COMPLETE | typecheck/lint PASS; Jest 20 suites / 196 tests PASS | 05f5a3a |
 | 1 | COMPLETE | typecheck/lint PASS; Jest 20 suites / 196 tests PASS; Android bundle PASS | 867bcc2 |
-| 2 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 198 tests PASS | Hash reported after commit |
-| 3 | NOT STARTED | NOT RUN | — |
+| 2 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 198 tests PASS | c50b5af |
+| 3 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 198 tests PASS; Android bundle PASS; selected emulator width/text/keyboard checks | Hash reported after commit |
 | 4 | NOT STARTED | NOT RUN | — |
 | 5 | NOT STARTED | NOT RUN | — |
 | 6 | NOT STARTED | NOT RUN | — |
@@ -352,3 +352,13 @@ Production Android Metro bundle through index.js **PASS**, using node_modules/.c
 No native build/device/visual acceptance was rerun: no UI/style changes. Android bundle is not native acceptance. Physical tactile haptics FAIL, outstanding accessibility/system restrictions and iOS native NOT VERIFIED, existing owner identifiers/signing/version decisions and dependency-audit limitation remain. Full MVP remains NOT COMPLETE.
 
 Commit: refactor: organize hooks and screen orchestration; hash reported after creation. Next assignment is Phase 3 shared UI/components only.
+
+## Phase 3 handoff — 2026-10-09
+
+Status: COMPLETE for assigned structural scope; baseline Phase 2 commit c50b5af. Seven primitives moved into src/ui/<Name>/ and five feature-facing components into src/components/<Name>/, including PendingFeature. Nine static style modules and six nontrivial props interfaces extracted; runtime theme/inset styles and simple inline props retained. Consumer/two test imports updated, obsolete component files removed. No additional UI sections or business changes. CODING_STANDARDS.md records actual current placements; the Phase 0 map remains historical.
+
+Subagents phase3_ui and phase3_components owned disjoint component moves; main agent integrated consumers/tests/documentation and corrected missing spacing/sizing imports exposed by initial checks. Independent phase3_review confirmed unchanged bodies/styles/interfaces after import/format normalization and no remaining issue. Final typecheck/lint PASS; Jest 21 suites / 198 tests PASS, 10.742 s, approved workspace TEMP/TMP and TZ=UTC. Production Android Metro bundle PASS, 19 assets. Existing warnings remain; no test assertions weakened or dependencies/config changed.
+
+Selected emulator observations: light Home/form at 320dp/font 1.0, keyboard opening/dismissal and reachable confirm; Home/form and Summary at 600dp/font 1.5; Home daily values and Summary wrapping at 320dp/font 1.5. No observed clipping in this scope. Used current nativeAjustesEntry via temporary Metro 8083 and isolated cash-driver-ajustes-test.sqlite; no payment saved. Restored original size/font, removed only temporary fixture/host/UI-dump files and own Metro/reverse; production database/Metro preserved. Full all-screen/language/theme/accessibility matrix, native rebuild, iOS and physical haptics were not verified by these checks. Existing tactile FAIL and other owner/native/audit gates remain; full MVP NOT COMPLETE.
+
+Permanent handoff is in IMPLEMENTATION_PLAN.md. Commit: refactor: organize shared UI and feature components; hash reported after creation. Phase 4 requires the next assignment.

@@ -1,8 +1,8 @@
 import React from 'react';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { AppText } from '../components/AppText';
-import { TabIcon } from '../components/TabIcon';
+import { AppText } from '../ui/AppText/AppText';
+import { TabIcon } from '../ui/TabIcon/TabIcon';
 import { useTranslation } from '../i18n/LanguageProvider';
 import { TranslationKey } from '../i18n/translations';
 import { useAppTheme } from '../theme/ThemeProvider';

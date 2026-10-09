@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator } from 'react-native';
-import { ActionButton } from '../../components/ActionButton';
-import { AppText } from '../../components/AppText';
+import { ActionButton } from '../../ui/ActionButton/ActionButton';
+import { AppText } from '../../ui/AppText/AppText';
 import { useTranslation } from '../../i18n/LanguageProvider';
 import { useAppTheme } from '../../theme/ThemeProvider';
 

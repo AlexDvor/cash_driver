@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import ReactTestRenderer, { act } from 'react-test-renderer';
 import { ThemeProvider, useAppTheme } from '../src/theme/ThemeProvider';
-import { ChoiceGroup } from '../src/components/ChoiceGroup';
+import { ChoiceGroup } from '../src/ui/ChoiceGroup/ChoiceGroup';
 import { ThemeMode } from '../src/theme/resolveTheme';
 import { PersistenceProvider } from '../src/app/PersistenceProvider';
 import { openTestDatabase, testPersistence } from './sqliteTestDatabase';

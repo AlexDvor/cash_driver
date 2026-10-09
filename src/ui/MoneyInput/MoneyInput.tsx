@@ -1,18 +1,11 @@
 import React from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
-import { useAppTheme } from '../theme/ThemeProvider';
-import { radii, sizing, spacing, typography } from '../theme/tokens';
-import { AppText } from './AppText';
+import { TextInput, View } from 'react-native';
+import { useAppTheme } from '../../theme/ThemeProvider';
 
-interface MoneyInputProps {
-  label: string;
-  value: string;
-  error?: string;
-  disabled: boolean;
-  onChange: (raw: string) => void;
-  onFocus: () => void;
-  onBlur: () => void;
-}
+import { AppText } from '../AppText/AppText';
+import { styles } from './MoneyInput.styles';
+import { MoneyInputProps } from './MoneyInput.interface';
+
 export function MoneyInput({
   label,
   value,
@@ -60,15 +53,3 @@ export function MoneyInput({
     </View>
   );
 }
-const styles = StyleSheet.create({
-  group: { gap: spacing.sm },
-  input: {
-    minHeight: sizing.primaryButton,
-    borderWidth: sizing.borderWidth,
-    borderRadius: radii.input,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    fontSize: typography.money,
-    fontVariant: ['tabular-nums'],
-  },
-});

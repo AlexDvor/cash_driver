@@ -2,16 +2,16 @@ import React, { useCallback } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../app/navigationTypes';
 import { usePersistence } from '../../app/PersistenceProvider';
-import { ActionButton } from '../../components/ActionButton';
-import { AppText } from '../../components/AppText';
-import { ScreenContainer } from '../../components/ScreenContainer';
+import { ActionButton } from '../../ui/ActionButton/ActionButton';
+import { AppText } from '../../ui/AppText/AppText';
+import { ScreenContainer } from '../../ui/ScreenContainer/ScreenContainer';
 import { useTranslation } from '../../i18n/LanguageProvider';
 import { CashTransaction } from '../../features/transactions/types';
 import { TransactionInput } from '../../features/transactions/transactionService';
-import { PaymentForm } from '../../features/transactions/PaymentForm';
+import { PaymentForm } from '../../components/PaymentForm/PaymentForm';
 import { usePaymentForm } from '../../hooks/transactions/usePaymentForm';
 import { useTransactions } from '../../hooks/transactions/useTransactions';
-import { TransactionLoadState } from '../../features/transactions/TransactionLoadState';
+import { TransactionLoadState } from '../../components/TransactionLoadState/TransactionLoadState';
 import { useDeletion } from '../../features/transactions/DeletionProvider';
 
 function LoadedEdit({

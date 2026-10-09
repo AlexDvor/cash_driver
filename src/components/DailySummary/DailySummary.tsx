@@ -1,12 +1,12 @@
 import React from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { ActionButton } from '../../components/ActionButton';
-import { AppText } from '../../components/AppText';
+import { ActivityIndicator, View } from 'react-native';
+import { ActionButton } from '../../ui/ActionButton/ActionButton';
+import { AppText } from '../../ui/AppText/AppText';
 import { useTranslation } from '../../i18n/LanguageProvider';
 import { formatMoney } from '../../i18n/formatting';
 import { useAppTheme } from '../../theme/ThemeProvider';
-import { radii, spacing } from '../../theme/tokens';
-import { useDailySummary } from '../../hooks/summary/useDailySummary';
+import type { useDailySummary } from '../../hooks/summary/useDailySummary';
+import { styles } from './DailySummary.styles';
 
 export function DailySummary({
   daily,
@@ -63,18 +63,3 @@ export function DailySummary({
     </View>
   );
 }
-const styles = StyleSheet.create({
-  container: {
-    borderRadius: radii.input,
-    padding: spacing.lg,
-    gap: spacing.md,
-  },
-  totals: { gap: spacing.sm },
-  total: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-  },
-  value: { fontWeight: '600', fontVariant: ['tabular-nums'] },
-});

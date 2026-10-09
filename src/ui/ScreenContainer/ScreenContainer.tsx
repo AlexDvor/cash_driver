@@ -1,19 +1,10 @@
 import React from 'react';
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAppTheme } from '../theme/ThemeProvider';
-import { sizing, spacing } from '../theme/tokens';
-
-interface ScreenContainerProps extends React.PropsWithChildren {
-  // Native stack headers already consume the top inset; tabs hide their header.
-  hasHeader?: boolean;
-}
+import { useAppTheme } from '../../theme/ThemeProvider';
+import { spacing } from '../../theme/tokens';
+import { styles } from './ScreenContainer.styles';
+import { ScreenContainerProps } from './ScreenContainer.interface';
 
 export function ScreenContainer({
   children,
@@ -52,14 +43,3 @@ export function ScreenContainer({
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  fill: { flex: 1 },
-  scroll: { flexGrow: 1 },
-  content: {
-    width: '100%',
-    maxWidth: sizing.contentMaxWidth,
-    alignSelf: 'center',
-    gap: spacing.xxl,
-  },
-});

@@ -1,17 +1,10 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { useAppTheme } from '../theme/ThemeProvider';
-import { radii, sizing, spacing } from '../theme/tokens';
-import { AppText } from './AppText';
+import { Pressable, View } from 'react-native';
+import { useAppTheme } from '../../theme/ThemeProvider';
 
-interface ChoiceGroupProps<Value extends string> {
-  columns?: 2 | 4;
-  disabled?: boolean;
-  label: string;
-  options: { value: Value; label: string }[];
-  value: Value;
-  onChange: (value: Value) => void;
-}
+import { AppText } from '../AppText/AppText';
+import { styles } from './ChoiceGroup.styles';
+import { ChoiceGroupProps } from './ChoiceGroup.interface';
 
 export function ChoiceGroup<Value extends string>({
   columns,
@@ -67,20 +60,3 @@ export function ChoiceGroup<Value extends string>({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  group: { gap: spacing.md },
-  choices: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  choice: {
-    minHeight: sizing.touchTarget,
-    borderRadius: radii.chip,
-    borderWidth: sizing.borderWidth,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 1,
-  },
-  label: { textAlign: 'center' },
-  selected: { fontWeight: '700' },
-});

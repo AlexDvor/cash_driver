@@ -1,7 +1,7 @@
 import React from 'react';
-import { useTranslation } from '../i18n/LanguageProvider';
-import { AppText } from './AppText';
-import { Card } from './Card';
+import { useTranslation } from '../../i18n/LanguageProvider';
+import { AppText } from '../../ui/AppText/AppText';
+import { Card } from '../../ui/Card/Card';
 
 export function PendingFeature({ message }: { message: string }) {
   const { t } = useTranslation();

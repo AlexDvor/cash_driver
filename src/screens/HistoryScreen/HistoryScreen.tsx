@@ -4,10 +4,10 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../app/navigationTypes';
 import { useLocalClock } from '../../hooks/app/useLocalClock';
-import { ActionButton } from '../../components/ActionButton';
-import { AppText } from '../../components/AppText';
-import { ChoiceGroup } from '../../components/ChoiceGroup';
-import { ScreenContainer } from '../../components/ScreenContainer';
+import { ActionButton } from '../../ui/ActionButton/ActionButton';
+import { AppText } from '../../ui/AppText/AppText';
+import { ChoiceGroup } from '../../ui/ChoiceGroup/ChoiceGroup';
+import { ScreenContainer } from '../../ui/ScreenContainer/ScreenContainer';
 import { useTranslation } from '../../i18n/LanguageProvider';
 import { formatMoney } from '../../i18n/formatting';
 import { useAppTheme } from '../../theme/ThemeProvider';
@@ -21,7 +21,7 @@ import {
 } from '../../features/transactions/history';
 import { platforms } from '../../features/transactions/types';
 import { useTransactions } from '../../hooks/transactions/useTransactions';
-import { TransactionLoadState } from '../../features/transactions/TransactionLoadState';
+import { TransactionLoadState } from '../../components/TransactionLoadState/TransactionLoadState';
 import { styles } from './HistoryScreen.styles';
 
 export function HistoryScreen() {

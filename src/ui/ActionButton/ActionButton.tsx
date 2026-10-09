@@ -1,16 +1,10 @@
 import React from 'react';
-import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
-import { useAppTheme } from '../theme/ThemeProvider';
-import { radii, sizing, spacing } from '../theme/tokens';
-import { AppText } from './AppText';
+import { ActivityIndicator, Pressable } from 'react-native';
+import { useAppTheme } from '../../theme/ThemeProvider';
 
-interface ActionButtonProps {
-  label: string;
-  onPress: () => void;
-  disabled?: boolean;
-  loading?: boolean;
-  variant?: 'primary' | 'secondary' | 'destructive';
-}
+import { AppText } from '../AppText/AppText';
+import { styles } from './ActionButton.styles';
+import { ActionButtonProps } from './ActionButton.interface';
 
 export function ActionButton({
   label,
@@ -50,18 +44,3 @@ export function ActionButton({
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  button: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    minHeight: sizing.primaryButton,
-    borderRadius: radii.button,
-    borderWidth: sizing.borderWidth,
-    padding: spacing.lg,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  label: { fontWeight: '600', textAlign: 'center', flexShrink: 1 },
-  dimmed: { opacity: 0.7 },
-});

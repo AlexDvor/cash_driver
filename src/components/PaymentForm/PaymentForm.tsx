@@ -2,31 +2,25 @@ import React from 'react';
 import {
   Keyboard,
   Pressable,
-  StyleSheet,
   Switch,
   useWindowDimensions,
   View,
 } from 'react-native';
-import { ActionButton } from '../../components/ActionButton';
-import { AppText } from '../../components/AppText';
-import { Card } from '../../components/Card';
-import { ChoiceGroup } from '../../components/ChoiceGroup';
-import { MoneyInput } from '../../components/MoneyInput';
+import { ActionButton } from '../../ui/ActionButton/ActionButton';
+import { AppText } from '../../ui/AppText/AppText';
+import { Card } from '../../ui/Card/Card';
+import { ChoiceGroup } from '../../ui/ChoiceGroup/ChoiceGroup';
+import { MoneyInput } from '../../ui/MoneyInput/MoneyInput';
 import { useTranslation } from '../../i18n/LanguageProvider';
 import { formatMoney } from '../../i18n/formatting';
 import { useAppTheme } from '../../theme/ThemeProvider';
-import { radii, sizing, spacing, typography } from '../../theme/tokens';
-import { MAX_INPUT_CENTS, MoneyParseResult } from './money';
-import { platforms } from './types';
-import { usePaymentForm } from '../../hooks/transactions/usePaymentForm';
+import { sizing } from '../../theme/tokens';
+import { MAX_INPUT_CENTS } from '../../features/transactions/money';
+import type { MoneyParseResult } from '../../features/transactions/money';
+import { platforms } from '../../features/transactions/types';
+import type { PaymentFormProps } from './PaymentForm.interface';
+import { styles } from './PaymentForm.styles';
 
-interface PaymentFormProps {
-  form: ReturnType<typeof usePaymentForm>;
-  preferenceSaving?: boolean;
-  title: string;
-  confirmLabel: string;
-  mode?: 'create' | 'edit';
-}
 export function PaymentForm({
   form,
   preferenceSaving = false,
@@ -258,31 +252,3 @@ export function PaymentForm({
     </Card>
   );
 }
-const styles = StyleSheet.create({
-  quickRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  quick: {
-    minHeight: sizing.touchTarget,
-    borderWidth: sizing.borderWidth,
-    borderRadius: radii.chip,
-    padding: spacing.md,
-    justifyContent: 'center',
-    flexShrink: 1,
-  },
-  pressed: { opacity: 0.7 },
-  result: { borderRadius: radii.input, padding: spacing.lg, gap: spacing.sm },
-  amount: {
-    fontSize: typography.change,
-    fontWeight: '700',
-    fontVariant: ['tabular-nums'],
-  },
-  missing: { fontSize: typography.money },
-  tipRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  tipLabel: { flex: 1 },
-  tipControl: {
-    minHeight: sizing.touchTarget,
-    minWidth: sizing.touchTarget,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  dismiss: { minHeight: sizing.touchTarget, justifyContent: 'center' },
-});
