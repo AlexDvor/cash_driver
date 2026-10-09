@@ -62,6 +62,8 @@ A fixed bottom bar with consistent outline icons and labels: Inicio, Historial, 
 
 ## Inicio: top to bottom
 
+Partial-tip layout below is implemented in the shared form in Phase 3 with automated behavioral verification. Native layout/keyboard/text-scale/accessibility acceptance remains NOT VERIFIED until Phase 5. The reference image's full-change switch is historical; use the documented input/actions instead.
+
 1. `Cash Driver`, subtitle `Registro rápido de efectivo`, local date/time such as `8 oct 2026 · 12:28`.
 2. A quiet daily summary with operation count and separately labeled `Importe de viajes`, `Propinas`, and `Efectivo retenido`. Cash retained includes tips once and excludes change returned; never use an unlabeled monetary total.
 3. White card titled `Nuevo cobro`.
@@ -69,11 +71,23 @@ A fixed bottom bar with consistent outline icons and labels: Inicio, Historial, 
 5. `Importe a cobrar` money input.
 6. `El cliente entrega` money input.
 7. Quick buttons such as `20 €`, `50 €`, `100 €`, plus `Exacto`. Buttons replace the received amount, not add to it.
-8. Soft-green result area: `CAMBIO`, then a dominant `30,00 €`.
-9. For a positive difference, a compact `El cambio es propina` toggle. When active, show `Propina: 2,00 €` and change `0,00 €`.
+8. Compact optional tip block: `Propina`, supporting `Opcional`, a money input initially blank (zero), and two small actions `Sin propina` / `Todo el cambio como propina`. Keep the block visible, allow actions to wrap and reuse existing tokens/MoneyInput. It replaces the former switch; no separate tip-mode toggle.
+9. Soft-green result area: `CAMBIO`, then the dominant change to return. For fare 20, received 50, entered tip 5: show `25,00 €` and separately `Propina: 5,00 €`. Keep confirmation visually primary.
 10. Full-width green `Confirmar cobro` button.
 
 Before sufficient input, show `—` in the change result. For insufficient cash show `Faltan 3,00 €` and inline `El importe recibido es insuficiente`; never show a valid zero-change state for an underpayment. Disable confirm for invalid inputs and while saving. During save show progress without layout jumps. After successful commit, use a brief toast such as `Cobro registrado · Importe de viaje: 18,00 € · Propina: 2,00 €` and optional haptic feedback. Omit the tip segment when zero. Display committed amounts, not received cash as the fare.
+
+Use DATA_AND_CALCULATIONS.md for action availability, reset and focus/blur rules. Excessive tip shows `La propina no puede superar {amount}` under the tip input, with the available difference formatted in the current locale. Invalid format uses the existing localized money error; focused unfinished tip keeps `—` and confirmation disabled until blur. Do not show a valid-looking zero change for invalid T. Disable tip input/actions during writes. Accessible labels distinguish fare, received and tip; retain keyboard dismissal, text scaling and all-language wrapping.
+
+| Tip UI text | Spanish | English | Ukrainian |
+| --- | --- | --- | --- |
+| Input label | Propina | Tip | Чайові |
+| Supporting text | Opcional | Optional | Необов’язково |
+| Clear action | Sin propina | No tip | Без чайових |
+| Full-change action | Todo el cambio como propina | All change as tip | Вся здача — чайові |
+| Excess error | La propina no puede superar {amount} | Tip cannot exceed {amount} | Чайові не можуть перевищувати {amount} |
+
+Phase 3 adds matching centralized tipInput, optionalTip, noTip, allChangeAsTip and tipExceedsChange keys in all three dictionaries; removes the obsolete changeIsTip key. Dictionary completeness and form behavior are automatically tested; this does not prove native all-language layout acceptance.
 
 ## Historial
 
@@ -81,7 +95,7 @@ Title `Historial`, subtitle `Tus cobros en efectivo`. Period chips, then a compa
 
 Details: `Detalle de operación`, platform, full local date/time, and labeled monetary values. Secondary `Editar` action and soft-red `Eliminar`. Delete dialog: `¿Eliminar esta operación?`, `Cancelar`, `Eliminar`. Edit screen clearly says `Editar operación`; saving does not create a new record.
 
-Editing reuses the payment form: platform, fare, received cash, quick values, live change result, and full-change tip toggle. Prepopulate from the saved operation, including its tip state. Changing fare or received cash clears the toggle as on Inicio. Use `Guardar cambios`; after commit show `Operación actualizada` with labeled fare and optional tip. On failure preserve the edited draft and allow retry; cancelling leaves the stored operation unchanged.
+Editing reuses the payment form: platform, fare, received cash, quick values, live change result, and exact tip input/actions. Prepopulate the saved tip amount, including partial and legacy full-change tips; zero may display blank. Changing fare or received cash clears tip as on Inicio. After successful edit retain the exact committed tip amount in the form. Use `Guardar cambios`; after commit show `Operación actualizada` with labeled fare and optional tip. On failure preserve the edited draft and allow retry; cancelling leaves the stored operation unchanged.
 
 After confirmed single-operation deletion, show `Eliminación pendiente` with `Deshacer`. Keep the operation in history and totals until deletion commits; show its pending state and disable editing or another deletion of that row. Undo cancels the pending deletion without rewriting the record. The owner-approved window is 10 seconds, defined by DELETION_UNDO_SECONDS in src/features/transactions/deletionConstants.ts; follow DATA_AND_CALCULATIONS.md for expiry and background cancellation. On commit refresh history and totals; on failure show `No se pudo eliminar la operación. Inténtalo de nuevo.` and keep the record. Delete-all has no undo.
 

@@ -1,5 +1,61 @@
 # Implementation plan and acceptance checks
 
+## Partial-tip extension — current change boundary (2026-10-09)
+
+Phases 0–4 are complete in their assigned scopes. Phases 2–3 implement exact-tip domain/persistence, schema v4 and the shared raw tip input/actions; automated checks pass. Phase 4 history/summary integration verified by automated tests; Phase 5 native acceptance remains pending. PROJECT_SPEC.md, DATA_AND_CALCULATIONS.md and UI_DESIGN.md define the target. The temporary PARTIAL_TIPS_PLAN.md controls the separately assigned phase sequence until its final handoff/removal. Historical MVP/refactoring phases, paths, full-change-only controls and test/build evidence below remain historical; they do not verify partial tips or authorize repeating completed work. The current refactoring architecture later in this document remains the placement reference.
+
+The domain/persistence phase must update exact-tip calculations, service validation/retry equality, repository row decoding and summary validation together, adapting the legacy form boundary until the new UI phase. The next migration targets v4 only if the v3 baseline is unchanged. The UI phase reuses PaymentForm, usePaymentForm and useCreatePayment for create/edit, including exact tip prefill/post-save state. History/summary integration follows; native acceptance and permanent handoff precede temporary-plan removal. Stop at every assigned phase boundary.
+
+### Partial-tip Phase 2 handoff
+
+Completed 2026-10-09 within domain/persistence scope. PaymentAmounts now requires numeric tipCents; money/payment validate integer bounds and available change. Service and useCreatePayment compare exact T for retry/concurrency; repository decoder and summary validator calculate exact T. Existing CashTransaction columns and summary formulas remain unchanged. Migration v4 transactionally rebuilds/copies transactions, drops only the full-change restriction and restores both indexes; legacy v1-v3 schema/migrations and preferences remain intact.
+
+Reused usePaymentForm with numeric tip state and a derived compatibility boolean for the old switch, plus useCreatePayment; no new hooks, UI controls, dependencies or configuration. Edit passes exact stored T rather than a boolean and retains it after commit. The new raw tip input/actions are Phase 3. Updated legacy automated/native test fixtures to explicit tip amounts without changing their expected behavior; native entries were not executed.
+
+Subagent implementation task added partialTips.test.ts (17 real-SQLite tests); an independent read-only reviewer checked code/tests and requested exact-tip hook coverage, which was added and rereviewed. No confirmed blocking findings remain. Final checks: npm run typecheck PASS, npm run lint PASS, full Jest PASS **22 suites / 219 tests**, 8.819 s (exit 0). Jest used command-scoped docs TEMP/TMP, TZ=UTC and docs/.phase2-test-cache with approved outside-sandbox execution due to Node realpath restriction. An earlier full run had 7 Resumen fixture failures from inherited 200-cent T after smaller fare/received differences; fixed fixtures to their original full-tip values 100/99/100 without weakening expectations, then reran all checks successfully. Node emitted the experimental SQLite warning.
+
+Coverage includes no/partial/full tips, integer invariants, malformed/excess T rejection, create/read/edit, exact retry/inflight/persisted conflicts, v1/v2/v3 upgrades and fresh installs, unchanged legacy data/indexes/preferences, idempotence, SQL constraints, post-DROP rollback and summary counting. Hook tests cover failed unchanged/changed-T retry IDs, exact partial edit prefill/post-commit and legacy switch partial/full/zero. Existing parser/draft/reset/defaults/deletion/refresh regressions pass. No active Git hooks were available; none installed or bypassed. Native migration/restart, builds, visual/accessibility and physical haptics were not verified here; existing Android/iOS/release gates remain open. Stop before Phase 3.
+
+Phase 2 implementation commit: `4a1d1d9` — `feat: support exact partial tips and migrate transactions to v4` (24 source/test files, including database README). Prior documentation edits and this handoff remain outside that commit; ignored PROJECT_SPEC.md and temporary plan remain local. No push/publication. Staged diff whitespace check passed. Git index writes/commit used approved outside-sandbox execution after index.lock permission denial; no hook bypass.
+
+### Partial-tip Phase 3 handoff
+
+Local implementation commit: `3f20d77` (`feat: add partial tip input to shared payment form`), nine source/test files only. Documentation updates remain uncommitted; no push performed.
+
+Completed 2026-10-09 for shared form/hooks and automated verification. usePaymentForm now owns one raw tip string; blank-only zero interpretation and existing parser focus/blur feed exact cents into the same pure domain calculation. No duplicated numeric tip state or boolean mode remains. A tip draft/invalid/excess amount blocks confirm and displays —; underpayment retains insufficient feedback even with malformed T. Existing setters/reset/submit guards and delayed native-blur protections extend to tip. All-change availability derives from valid fare/received with T=0, independently of invalid current tip. No tip clears raw text; full-change action writes the available amount. Both actions preserve latest-draft behavior and respect the save guard.
+
+PaymentForm reuses MoneyInput for the optional field and wraps two small accessible actions before the prominent change result; obsolete Switch/styles removed. Existing tokens, reactive themes, touch targets, keyboard dismissal, scrolling/safe-area containers retained. Create and Edit use the same block, exact prefill/committed state, complete failed-draft preservation and unchanged retry protections. Added ES/EN/UK translation keys with completeness checks; removed unused changeIsTip key. No dependencies, database, configuration, navigation or additional hooks changed.
+
+One subagent owned only new partialTipForm.test.tsx; another performed read-only review and rereview. Review requested pending-save disabled/queued-callback coverage, full-change availability at empty/underpaid/exact inputs, and malformed-tip underpayment feedback; all were added and confirmed closed. New integration suite covers 20/50/5 -> 25 real SQLite commit/duplicate protection, blank/reset, invalid/excess T, focused trailing separator/blur, stale blur after both actions/commit, quick/Exacto reset, raw language/theme preservation, partial edit cancel/prefill/failed-write retry, and failed Home insert retry. Existing Inicio/Historial/Ajustes/usePaymentForm tests were adapted from switch state to actual tip input/actions without weakening monetary/storage expectations.
+
+Final fresh checks: npm run typecheck PASS, npm run lint PASS, full Jest **23 suites / 226 tests PASS**, 9.5 s (exit 0), and diff whitespace review. Earlier Jest passed 23/225 while typecheck found three new-test act callbacks returning Promise<boolean>; callbacks corrected to await in void blocks, review coverage added, then all checks rerun successfully. Jest used approved outside-sandbox execution, command-scoped absolute docs TEMP/TMP, TZ=UTC and docs/.phase3-test-cache; Node experimental SQLite warning remains. Temporary caches removed afterward. No active Git hooks; none installed or bypassed. Existing React hooks reused: usePaymentForm and useCreatePayment; no new hook or Git-hook framework.
+
+Reference screen inspected and source layout reviewed for wrapping, touch targets and scroll/keyboard access. No fresh native builds, installation, device/UI automation or native visual/accessibility/haptics acceptance performed; Android/iOS layout, large-text/keyboard and screen-reader behavior remains NOT VERIFIED in this phase. Historical haptics/native/release limitations remain open. Phase 4 integration review, Phase 5 native acceptance and Phase 6 temporary-plan removal NOT STARTED. Stop before Phase 4.
+
+### Partial-tip Phase 4 handoff
+
+Local verification commit: `7186c66` (`test: verify partial tips in history and summaries`), two test files only. Documentation handoffs remain outside this commit.
+
+Completed 2026-10-09 for history/summary integration verification. Source inspection and independent read-only review found no confirmed production incompatibility: Details displays fare/received/change/tip/retained independently; History and success use actual T; existing summaries sum F/T/N once, retaining fare-only averages and calendar rules. No application source, schema, configuration or dependency changes were required.
+
+File-by-file verification changes: __tests__/partialTipForm.test.tsx adds a real SQLite/UI path for 20/50/5: success fare/tip, daily and all three period totals, scoped history row and five detail amounts. Editing T to 7 refreshes detail/history/daily/period totals, preserves ID/createdAt and one row, and excludes the row on the next day. __tests__/Resumen.test.tsx reuses the deletion/undo/failure/retry regression with simultaneous nonzero T/C, asserting preserved retained/tip totals on failure and zeros after committed removal. Existing empty-period, deletion races, refresh/stale-response and calendar tests reused unchanged.
+
+Existing React hooks retained: useTransactions, useDailySummary, usePeriodSummary, useDataChanges and useLocalClock; form/create hooks reused through the real navigation flow. No new hooks. core.hooksPath remains unset and .git/hooks contains sample files only; no active Git hook run, installed or bypassed. Independent review and rereview found no remaining actionable defects. Initial new-test failures came from selecting a hidden Home label and not advancing the existing clock after changing fake time; corrected scoped detail lookup and clock timing without production changes or weakened expectations.
+
+Final fresh npm run typecheck PASS; npm run lint PASS; npm test -- --runInBand --no-cache --watch=false --cacheDirectory=docs/.phase4-test-cache PASS, **23 suites / 227 tests**, 9.522 s, exit 0. Jest used approved outside-sandbox execution for the previously observed realpath restriction, command-scoped absolute docs TEMP/TMP and TZ=UTC. Experimental Node SQLite warning remains. Temporary caches removed after verified workspace containment. Diff whitespace check passed.
+
+Android/iOS native acceptance, build/device restart, layout/keyboard/accessibility and tactile behavior NOT VERIFIED in this phase. Historical haptics FAIL and other release gates remain open. Phase 5 requires separate assignment; temporary plan is retained until Phase 6 prerequisites pass. Current status updated in AGENTS.md, PROJECT_SPEC.md, README.md and temporary plan; historical handoffs preserved. Earlier documentation edits remain uncommitted; ignored local docs remain ignored; no push.
+
+### Partial-tip Phase 5 handoff — verification in progress
+
+Assigned 2026-10-09. Fresh production-entry Android build: .\gradlew.bat :app:assembleDebug :app:assembleRelease from android/, PASS (BUILD SUCCESSFUL in 25s; 459 tasks, 55 executed / 404 up-to-date). Existing debug/release APKs produced; release uses existing debug signing and is not publication approval. Existing AGP/Gradle/Metro/native warnings remain; no configuration or dependency changes.
+
+Fresh npm run typecheck PASS; npm run lint PASS; full npm test -- --runInBand --no-cache --watch=false --cacheDirectory=docs/.phase5-test-cache PASS, 23 suites / 227 tests, 9.92 s, exit 0. Approved Jest execution uses command-scoped absolute docs TEMP/TMP and TZ=UTC; experimental SQLite warning remains. These checks do not prove native partial-tip acceptance.
+
+Read-only adb availability: emulator-5554, API 34, x86_64, com.tempapp already installed; no physical target connected. Initial sandbox adb daemon startup failed, approved read-only inventory succeeded. No installation, UI/device-control or production data changes performed. xcodebuild unavailable on Windows; iOS build/device acceptance NOT VERIFIED. Independent read-only subagent reviewed native gates and fixtures: nativeInicioEntry provides real App with isolated DB; existing nativePersistenceEntry still exercises full tips and v1 upgrade, so its historical PASS cannot establish partial-tip restart or v3-to-v4 native migration. Source accessibility/layout review is not visual or screen-reader evidence.
+
+The historical refactoring handoff records owner exclusion of computer-use/device controls. Clarification requested whether this Phase 5 assignment allows isolated emulator controls. Required device-dependent work remains pending that answer: offline create/edit/history/summary; ES/EN/UK and light/dark; narrow/large text, keyboard/accessibility; legacy-history upgrade; partial-tip process/device restart; failure/retry and exact/no/full/repeated-save scenarios. Phase 5 NOT COMPLETE. Historical physical haptics FAIL remains unresolved; no physical tactile result claimed. Phase 6 and temporary-plan removal not authorized by this partial verification.
+
 ## Architecture
 
 ```text
@@ -567,7 +623,10 @@ Phase 7 commit: docs: remove completed temporary refactoring plan; hash reported
 - Theme: explicit light/dark override system appearance; automatic follows it with light fallback; the selected mode survives restart; write failure restores the persisted choice without losing drafts.
 
 - Money parsing: all valid/invalid examples in DATA_AND_CALCULATIONS.md; input upper bound.
-- Calculation: exact payment, ordinary change, insufficient cash, full-change tip, and clearing the toggle after changes.
+- Calculation: exact payment, ordinary change, insufficient cash, explicit partial/full-change tip, excessive/invalid T, and clearing tip after monetary edits/quick/Exacto.
+- Tip parser/form: blank means zero only for tip; comma/period, cent precision, input maximum; focused trailing separator stays draft and blocks confirm until blur; stale blur after actions/commit cannot restore old values. Invalid T does not show valid change. No tip clears invalid text; All change uses valid F/R independently of invalid T.
+- Partial-tip domain/persistence: exact T in service, repository decoder and summary validator; pending retry/concurrency equality includes T; unsupported/corrupt inputs rejected without writes; partial-tip create/read/edit preserves original ID/createdAt. Include summary regressions during domain changes, not only final integration.
+- Migration: supported v1/v2/v3 upgrades and fresh install to target v4, no/full-tip legacy row preservation, both indexes/preferences retained, repeated initialization, DDL/data/version rollback on failure and future-version rejection. Native upgrade/restart remains separately required.
 - Invariants: net = fare + tip; received = change + net; all saved amounts are integer cents.
 - Summary: empty period, multiple platforms, tips excluded from fare average, tips included once in retained cash.
 - Calendar boundaries: Monday week, month/year transition, and daylight saving dates using a supported test time zone.
@@ -582,7 +641,15 @@ Run project type checks, lint, and the relevant tests. Do not claim native behav
 | Scenario | Expected result |
 | --- | --- |
 | Uber fare 20, received 50 | Change 30; retained 20 |
-| Cabify fare 18, received 20, tip on | Change 0; tip 2; retained 20 |
+| Cabify fare 18, received 20, All change as tip | Change 0; tip 2; retained 20 |
+| Fare 20, received 50, entered tip 5 | Change 25; tip 5; retained 25; saved details show all five monetary values |
+| Same payment, No tip / All change actions | Respectively change 30/tip 0/retained 20 and change 0/tip 30/retained 50 |
+| Tip above 30 for fare 20/received 50 | Localized inline excess error; result —; cannot confirm; no clamping |
+| Empty tip / malformed tip / focused 5, then blur | Empty is zero; malformed cannot confirm; 5, stays draft until blur, then tip 5 and change 25 |
+| Monetary edit or quick/Exacto with a tip | Tip cleared, including same-value quick tap; Exacto yields no tip/change |
+| Failed save retry, then changed tip | Unchanged draft reuses pending ID; changed T uses a new pending operation; concurrent differing T rejected |
+| Upgrade existing history to partial-tip schema | Legacy rows/IDs/timestamps/money/indexes/preferences preserved; new partial tip survives restart |
+| Partial-tip create/edit reflected in daily/period summary | Fare 20, tip 5, retained 25 counted once; average remains fare-based; refresh after commit |
 | Bolt fare 24,50, received 20 | Insufficient message; cannot confirm |
 | Otro fare 20, received Exacto | Change 0; no tip |
 | Tap confirm repeatedly | One stored operation |
@@ -598,7 +665,7 @@ Run project type checks, lint, and the relevant tests. Do not claim native behav
 | Simulated deletion failure | Record and totals preserved; visible error and retry |
 | Successful create/edit with tip | Message shows saved fare and tip separately, after commit |
 | Inicio daily totals | Fare, tips, and retained cash have separate labels; no double counting |
-| Edit an operation with tip | Payment form prefilled; monetary changes clear tip toggle; failed save keeps draft |
+| Edit an operation with partial or full-change tip | Exact saved T prefilled and retained after commit; monetary changes clear tip; failed save keeps draft; cancel preserves stored row |
 | Change platform in Inicio, then Ajustes, then restart | Latest explicit selection is the new default |
 | Ajustes storage explanation | Device-only storage and potential data loss are explained; no backup promise |
 | Change period/platform filter | Only matching operations appear |
