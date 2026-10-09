@@ -1,21 +1,17 @@
-import React, { useCallback, useRef } from 'react';
+import React from 'react';
 import { View } from 'react-native';
 import { AppText } from '../../components/AppText';
 import { ScreenContainer } from '../../components/ScreenContainer';
 import { usePersistence } from '../../app/PersistenceProvider';
-import { useLocalClock } from '../../app/useLocalClock';
+import { useLocalClock } from '../../hooks/app/useLocalClock';
 import { useTranslation } from '../../i18n/LanguageProvider';
 import { formatLocalDateTime } from '../../i18n/formatting';
 import { useAppTheme } from '../../theme/ThemeProvider';
 import { DailySummary } from '../../features/summary/DailySummary';
-import { useDailySummary } from '../../features/summary/useDailySummary';
+import { useDailySummary } from '../../hooks/summary/useDailySummary';
 import { PaymentForm } from '../../features/transactions/PaymentForm';
-import { usePaymentForm } from '../../features/transactions/usePaymentForm';
-import {
-  PendingOperation,
-  TransactionInput,
-} from '../../features/transactions/transactionService';
-import { confirmationHaptics } from '../../features/settings/confirmationHaptics';
+import { usePaymentForm } from '../../hooks/transactions/usePaymentForm';
+import { useCreatePayment } from '../../hooks/transactions/useCreatePayment';
 import { styles } from './HomeScreen.styles';
 
 export function HomeScreen() {
@@ -25,38 +21,7 @@ export function HomeScreen() {
     usePersistence();
   const clock = useLocalClock();
   const daily = useDailySummary(clock);
-  const hapticsEnabled = useRef(preferences.hapticsEnabled);
-  hapticsEnabled.current = preferences.hapticsEnabled;
-  const pending = useRef<{
-    operation: PendingOperation;
-    input: TransactionInput;
-  } | null>(null);
-  const onSubmit = useCallback(
-    async (input: TransactionInput) => {
-      const previous = pending.current;
-      if (
-        !previous ||
-        previous.input.platform !== input.platform ||
-        previous.input.fareAmountCents !== input.fareAmountCents ||
-        previous.input.cashReceivedCents !== input.cashReceivedCents ||
-        previous.input.changeAsTip !== input.changeAsTip
-      ) {
-        pending.current = {
-          operation: services.transactions.newPendingOperation(),
-          input: { ...input },
-        };
-      }
-      const operation = pending.current?.operation;
-      if (!operation) {
-        throw new Error('Missing pending operation');
-      }
-      const saved = await services.transactions.save(operation, input);
-      pending.current = null;
-      confirmationHaptics(hapticsEnabled.current);
-      return saved;
-    },
-    [services],
-  );
+  const onSubmit = useCreatePayment(services, preferences.hapticsEnabled);
   const form = usePaymentForm({
     initialPlatform: preferences.defaultPlatform,
     onSubmit,

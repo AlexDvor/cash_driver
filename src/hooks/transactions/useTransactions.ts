@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { useDataChanges } from '../../app/useDataChanges';
+import { useDataChanges } from '../app/useDataChanges';
 import { usePersistence } from '../../app/PersistenceProvider';
-import { CashTransaction } from './types';
+import { CashTransaction } from '../../features/transactions/types';
 
 type RecordsState =
   | { status: 'loading' | 'error'; records: null }

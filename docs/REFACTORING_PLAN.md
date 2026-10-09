@@ -1,8 +1,8 @@
 # CashDriver — temporary refactoring plan
 
-Status: **PHASE 1 COMPLETE — PHASE 2 NOT STARTED**.
+Status: **PHASE 2 COMPLETE — PHASE 3 NOT STARTED**.
 
-Created: 2026-10-09. This is a temporary execution plan, not a replacement product specification. The owner separately authorized Phase 0 baseline/rules reconciliation and Phase 1 screen moves on 2026-10-09. Both are complete within their assigned scope; Phase 2 requires the next assignment. Do not restart historical MVP implementation phases.
+Created: 2026-10-09. This is a temporary execution plan, not a replacement product specification. The owner separately authorized Phases 0, 1 and 2 on 2026-10-09. They are complete within their assigned scopes; Phase 3 requires the next assignment. Do not restart historical MVP implementation phases.
 
 ## Objective and authority
 
@@ -44,7 +44,7 @@ src/
     EditScreen/       EditScreen.tsx, EditScreen.styles.ts
   hooks/
     app/             useLocalClock.ts, useDataChanges.ts
-    transactions/    usePaymentForm.ts, useTransactions.ts
+    transactions/    usePaymentForm.ts, useTransactions.ts, useCreatePayment.ts
     summary/         useDailySummary.ts, usePeriodSummary.ts
   components/        PaymentForm/, DailySummary/, DeletionNotice/,
                      TransactionLoadState/
@@ -207,8 +207,8 @@ Commit: `docs: remove completed temporary refactoring plan`.
 | Phase | Status | Verification | Commit |
 | --- | --- | --- | --- |
 | 0 | COMPLETE | typecheck/lint PASS; Jest 20 suites / 196 tests PASS | 05f5a3a |
-| 1 | COMPLETE | typecheck/lint PASS; Jest 20 suites / 196 tests PASS; Android bundle PASS | Hash reported after commit |
-| 2 | NOT STARTED | NOT RUN | — |
+| 1 | COMPLETE | typecheck/lint PASS; Jest 20 suites / 196 tests PASS; Android bundle PASS | 867bcc2 |
+| 2 | COMPLETE | typecheck/lint PASS; Jest 21 suites / 198 tests PASS | Hash reported after commit |
 | 3 | NOT STARTED | NOT RUN | — |
 | 4 | NOT STARTED | NOT RUN | — |
 | 5 | NOT STARTED | NOT RUN | — |
@@ -245,7 +245,7 @@ Next assignment: Phase 1 only, six screen components/styles and atomic imports; 
 
 ## Phase 0 migration map — original src files
 
-All paths below are relative to the repository. This records the Phase 0 baseline, not the current file inventory. Phase 1 screen moves/removal of the obsolete re-export are now complete; other moves remain planned. Keep remaining original files until their phase updates all consumers atomically. New styles/props/constants files are created only when their phase needs them.
+All paths below are relative to the repository. This records the Phase 0 baseline, not the current file inventory. Phase 1 screen moves/removal of the obsolete re-export and Phase 2 hook moves are now complete; other moves remain planned. Keep remaining original files until their phase updates all consumers atomically. New styles/props/constants files are created only when their phase needs them.
 
 | Current file | Destination / action | Phase |
 | --- | --- | --- |
@@ -309,7 +309,7 @@ All paths below are relative to the repository. This records the Phase 0 baselin
 
 Root App.tsx, index.js, __tests__/ (including native entries) and native bridge/config files keep their existing locations. Update only affected imports in their assigned phase. Configurations, package manifests/lockfile, native identifiers, dependencies and SQLite schema are not refactoring targets. PendingFeature is retained during component organization; deleting unused placeholders requires proving no consumers and no behavioral impact. src/theme/resolveTheme.ts and systemBars.ts retain their existing responsibilities/locations; only token placement migrates.
 
-## Phase 1 handoff — 2026-10-09
+## Phase 1 handoff — 2026-10-09 (historical; commit 867bcc2)
 
 Status: **COMPLETE for structural screen refactoring**; Phase 2 NOT STARTED. Baseline commit 05f5a3a; initial working tree clean.
 
@@ -333,3 +333,22 @@ Existing coverage reused without assertion/mocking changes: payment retries and 
 No native build/device/visual acceptance was rerun: this phase changes file placement/imports only, and all rendered JSX/style values match the baseline. Android bundle success is not native UI/build acceptance. Existing physical haptics FAIL, complete accessibility/system restrictions NOT VERIFIED, and iOS native NOT VERIFIED remain. Full MVP remains NOT COMPLETE.
 
 Commit after final documentation review and git diff --cached --check: refactor: separate CashDriver screens. Next assignment is Phase 2 hooks only; do not move Providers/UI/constants ahead of schedule.
+
+## Phase 2 handoff — 2026-10-09
+
+Status: **COMPLETE for hook organization/orchestration refactoring**; Phase 3 NOT STARTED. Baseline commit 867bcc2; initial working tree clean.
+
+- Moved useLocalClock/useDataChanges into src/hooks/app/, usePaymentForm/useTransactions into src/hooks/transactions/, and useDailySummary/usePeriodSummary into src/hooks/summary/. Removed the original files rather than leaving parallel implementations/re-exports. Imports resolve to the same existing domain functions, services and Providers.
+- Extracted Home's pending-operation/save callback into src/hooks/transactions/useCreatePayment.ts with explicit services and hapticsEnabled inputs. Home now composes the hook and form. Keep an unchanged failed draft's pending UUID, reset pending only after save succeeds, read the latest haptics choice through a ref and retain callback dependency [services]. Pure arithmetic remains outside hooks.
+- Updated five screen consumers, shared PaymentForm and DailySummary type consumers, and the two direct hook-test imports. Native acceptance entries already consume App and need no path changes; typecheck includes them. Edit preserves LoadedEdit identity and one-time loading. Daily/period/transaction loaders remain separate with unchanged refresh contracts.
+- Existing Provider accessor hooks stay beside their context. No Providers/navigation/UI/constants moves, SQL/schema/dependency/native configuration changes or new product behavior.
+
+Subagents: phase2_hooks owned only the six hook moves/internal imports; main agent owned useCreatePayment, consumer/test imports, tests, documentation and integration. Independent phase2_review compared bodies, retry/reset/feedback sequencing, edit contracts, stale imports and dependency graph: no confirmed issue. Reviewer did not execute tests.
+
+Verification: npm run typecheck **PASS**; npm run lint **PASS**; full Jest with approved workspace TEMP/TMP and TZ=UTC **21 suites / 198 tests PASS**, 10.204 s. One-off TypeScript AST comparison confirms all six moved hooks unchanged apart from imports. New useCreatePayment.test.tsx covers haptics selection changing both ways during delayed save, no record/feedback before the gate and latest feedback after real SQLite commit. The adapter boundary is spied; storage/validation remain real. Reused existing Home/default/duplicate/failure-retry, edit, stale-request, blur, subscription, DST, summary and deletion tests; assertions were not weakened.
+
+Production Android Metro bundle through index.js **PASS**, using node_modules/.cache/cash-driver/phase2.android.bundle and existing assets directory, max-workers 2. This checks the relocated module graph; known ReactNativeFeatureFlags export-resolution/color notices and Node SQLite experimental warning remain. No runtime/config patches or warning suppressions. Whitespace check and final documentation review precede the commit.
+
+No native build/device/visual acceptance was rerun: no UI/style changes. Android bundle is not native acceptance. Physical tactile haptics FAIL, outstanding accessibility/system restrictions and iOS native NOT VERIFIED, existing owner identifiers/signing/version decisions and dependency-audit limitation remain. Full MVP remains NOT COMPLETE.
+
+Commit: refactor: organize hooks and screen orchestration; hash reported after creation. Next assignment is Phase 3 shared UI/components only.

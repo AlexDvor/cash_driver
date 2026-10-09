@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
-import { useLocalClock } from '../../app/useLocalClock';
+import { useLocalClock } from '../../hooks/app/useLocalClock';
 import { ActionButton } from '../../components/ActionButton';
 import { AppText } from '../../components/AppText';
 import { Card } from '../../components/Card';
@@ -12,7 +12,7 @@ import { useAppTheme } from '../../theme/ThemeProvider';
 import { platformLabels } from '../../features/transactions/history';
 import { platforms } from '../../features/transactions/types';
 import { SummaryPeriod } from '../../features/summary/periods';
-import { usePeriodSummary } from '../../features/summary/usePeriodSummary';
+import { usePeriodSummary } from '../../hooks/summary/usePeriodSummary';
 import { styles } from './SummaryScreen.styles';
 
 export function SummaryScreen() {

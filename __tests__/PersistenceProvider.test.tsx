@@ -7,7 +7,7 @@ import {
 } from '../src/app/PersistenceProvider';
 import { LanguageProvider, useTranslation } from '../src/i18n/LanguageProvider';
 import { ThemeProvider, useAppTheme } from '../src/theme/ThemeProvider';
-import { useDataChanges } from '../src/app/useDataChanges';
+import { useDataChanges } from '../src/hooks/app/useDataChanges';
 import { SqlConnection } from '../src/database/sqlite';
 import {
   openTestDatabase,

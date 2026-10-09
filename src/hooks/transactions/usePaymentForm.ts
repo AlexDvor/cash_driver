@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { centsToInput } from '../../i18n/formatting';
-import { parseMoneyInput, validateAmountCents } from './money';
+import { parseMoneyInput, validateAmountCents } from '../../features/transactions/money';
 import {
   applyExactAmount,
   applyQuickAmount,
   calculatePayment,
   getQuickAmounts,
-} from './payment';
-import { CashTransaction, Platform } from './types';
-import { TransactionInput } from './transactionService';
+} from '../../features/transactions/payment';
+import { CashTransaction, Platform } from '../../features/transactions/types';
+import { TransactionInput } from '../../features/transactions/transactionService';
 
 interface PaymentFormOptions {
   initialPlatform: Platform;

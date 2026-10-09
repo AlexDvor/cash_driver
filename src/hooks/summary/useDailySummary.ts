@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { usePersistence } from '../../app/PersistenceProvider';
-import { useDataChanges } from '../../app/useDataChanges';
-import { useLocalClock } from '../../app/useLocalClock';
-import { getPeriodBounds, isWithinPeriod } from './periods';
-import { CashSummary, summarizeTransactions } from './summary';
+import { useDataChanges } from '../app/useDataChanges';
+import { useLocalClock } from '../app/useLocalClock';
+import { getPeriodBounds, isWithinPeriod } from '../../features/summary/periods';
+import { CashSummary, summarizeTransactions } from '../../features/summary/summary';
 
 type DailyState =
   | { status: 'loading'; summary: null }

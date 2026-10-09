@@ -6,7 +6,7 @@ import { useTranslation } from '../../i18n/LanguageProvider';
 import { formatMoney } from '../../i18n/formatting';
 import { useAppTheme } from '../../theme/ThemeProvider';
 import { radii, spacing } from '../../theme/tokens';
-import { useDailySummary } from './useDailySummary';
+import { useDailySummary } from '../../hooks/summary/useDailySummary';
 
 export function DailySummary({
   daily,

@@ -18,7 +18,7 @@ import { useAppTheme } from '../../theme/ThemeProvider';
 import { radii, sizing, spacing, typography } from '../../theme/tokens';
 import { MAX_INPUT_CENTS, MoneyParseResult } from './money';
 import { platforms } from './types';
-import { usePaymentForm } from './usePaymentForm';
+import { usePaymentForm } from '../../hooks/transactions/usePaymentForm';
 
 interface PaymentFormProps {
   form: ReturnType<typeof usePaymentForm>;

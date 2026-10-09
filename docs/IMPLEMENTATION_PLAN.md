@@ -453,6 +453,14 @@ Fresh verification: npm run typecheck **PASS**; npm run lint **PASS**; full Jest
 
 No native build/device/visual rerun: component JSX and style values are unchanged; bundle is graph verification, not native acceptance. Physical haptics FAIL, accessibility/system-restriction and iOS native NOT VERIFIED, owner identifiers/signing/version decisions and audit limitation remain. Full MVP acceptance is still NOT COMPLETE. Phase 2 is NOT STARTED and requires the next assignment. Phase commit message: refactor: separate CashDriver screens.
 
+## Refactoring Phase 2 — hooks and creation orchestration (2026-10-09)
+
+Status: **COMPLETE for the assigned structural scope**. Baseline Phase 1 commit: 867bcc2. Six existing hooks now live in src/hooks/app/, transactions/ and summary/, with unchanged bodies/effects/cleanup and updated imports. Home creation coordination moved into useCreatePayment(services,hapticsEnabled), preserving pending UUID/draft comparison, failed retry, commit-only reset/feedback, latest preference ref and [services] callback dependency. Screens/shared components/tests use the new paths. Daily/period/transaction loaders remain separate; provider accessors stay beside their context. No navigation/UI/style/provider/domain/SQL/schema/dependency changes.
+
+Subagent phase2_hooks owned only moves/internal imports; main agent owned Home extraction, consumers/tests and integration. Independent read-only phase2_review found no regression or stale imports/cycles. AST comparison confirmed all six moved hooks unchanged apart from imports. Existing behavior tests reused, two direct hook test imports updated and new useCreatePayment.test.tsx adds two cases for the latest haptics selection changing during delayed real-SQLite save; no assertion weakening. Typecheck also covers unchanged native entries through their existing App imports.
+
+Fresh npm run typecheck **PASS**, npm run lint **PASS**, full Jest with approved workspace TEMP/TMP and TZ=UTC **21 suites / 198 tests PASS**, 10.204 s. Production Android Metro bundle through index.js **PASS**; known export-resolution/color notices and experimental Node SQLite warning remain. No native build/device/visual rerun or tactile/iOS claims. Physical haptics FAIL, accessibility/iOS NOT VERIFIED, owner identifiers/signing/version and audit limitations remain; full MVP still NOT COMPLETE. Documentation and whitespace reviewed before the phase commit: refactor: organize hooks and screen orchestration (hash reported after creation). Phase 3 NOT STARTED; next assignment required.
+
 ## Required automated checks
 
 - Language: matching translation keys for es/en/uk; initial Spanish, persistence/restart, localized date/money displays, unchanged integer-cent values and period boundaries, draft preservation, and preference write failure.

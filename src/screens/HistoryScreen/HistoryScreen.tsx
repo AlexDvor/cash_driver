@@ -3,7 +3,7 @@ import { Pressable, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../app/navigationTypes';
-import { useLocalClock } from '../../app/useLocalClock';
+import { useLocalClock } from '../../hooks/app/useLocalClock';
 import { ActionButton } from '../../components/ActionButton';
 import { AppText } from '../../components/AppText';
 import { ChoiceGroup } from '../../components/ChoiceGroup';
@@ -20,7 +20,7 @@ import {
   platformLabels,
 } from '../../features/transactions/history';
 import { platforms } from '../../features/transactions/types';
-import { useTransactions } from '../../features/transactions/useTransactions';
+import { useTransactions } from '../../hooks/transactions/useTransactions';
 import { TransactionLoadState } from '../../features/transactions/TransactionLoadState';
 import { styles } from './HistoryScreen.styles';
 

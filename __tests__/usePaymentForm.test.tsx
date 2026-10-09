@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text } from 'react-native';
 import ReactTestRenderer, { act } from 'react-test-renderer';
-import { usePaymentForm } from '../src/features/transactions/usePaymentForm';
+import { usePaymentForm } from '../src/hooks/transactions/usePaymentForm';
 import { Platform } from '../src/features/transactions/types';
 import { openTestDatabase, testPersistence } from './sqliteTestDatabase';
 

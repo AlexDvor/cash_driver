@@ -9,8 +9,8 @@ import { useTranslation } from '../../i18n/LanguageProvider';
 import { CashTransaction } from '../../features/transactions/types';
 import { TransactionInput } from '../../features/transactions/transactionService';
 import { PaymentForm } from '../../features/transactions/PaymentForm';
-import { usePaymentForm } from '../../features/transactions/usePaymentForm';
-import { useTransactions } from '../../features/transactions/useTransactions';
+import { usePaymentForm } from '../../hooks/transactions/usePaymentForm';
+import { useTransactions } from '../../hooks/transactions/useTransactions';
 import { TransactionLoadState } from '../../features/transactions/TransactionLoadState';
 import { useDeletion } from '../../features/transactions/DeletionProvider';
 
