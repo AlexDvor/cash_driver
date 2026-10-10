@@ -113,9 +113,7 @@ async function toggleTip() {
   await act(async () => tipSection().props.onPress());
 }
 function changeResult() {
-  return String(
-    app.root.findByProps({ testID: 'change-result' }).props.children,
-  );
+  return displayedText('change-result');
 }
 async function details(id: string) {
   await act(async () => ref.navigate('Details', { id }));
@@ -178,6 +176,40 @@ test('new form keeps tip controls hidden and disabled until explicit expansion, 
   });
   expect(tipSection().props.accessibilityState.expanded).toBe(false);
 });
+
+test.each(['empty', 'zero', 'removed'])(
+  'collapsed %s tip creates one SQLite operation without tips',
+  async draft => {
+    await mount();
+    await input('Importe a cobrar', '20');
+    await input('El cliente entrega', '50');
+    if (draft !== 'empty') {
+      await expandTip();
+      await input('Propina', draft === 'zero' ? '0' : '5');
+      if (draft === 'removed') {
+        await press('Quitar propina');
+      } else {
+        await toggleTip();
+      }
+    }
+    expect(tipSection().props.accessibilityState.expanded).toBe(false);
+    expect(tipSection().props.accessibilityLabel).toBe('+ Añadir propina');
+    expect(field('Propina').props.editable).toBe(false);
+    expect(changeResult()).toMatch(/30,00/);
+    await press('Confirmar cobro');
+    expect(await services.transactions.list()).toEqual([
+      expect.objectContaining({
+        fareAmountCents: 2000,
+        cashReceivedCents: 5000,
+        tipCents: 0,
+        changeGivenCents: 3000,
+        netCashCents: 2000,
+      }),
+    ]);
+    expect(tipSection().props.accessibilityState.expanded).toBe(false);
+    expect(field('Propina').props.value).toBe('');
+  },
+);
 
 test('collapsed partial tip retains exact change and a localized visible amount; remove restores all change', async () => {
   const dismiss = jest.spyOn(Keyboard, 'dismiss');
@@ -262,8 +294,20 @@ test('persisted partial tip displays independently and edit refreshes history, d
   await input('Importe a cobrar', '20');
   await input('El cliente entrega', '50');
   await input('Propina', '5');
+  await toggleTip();
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  expect(tipSection().props.accessibilityLabel).toMatch(/Propina:.*5,00/);
+  expect(field('Propina').props.editable).toBe(false);
+  expect(changeResult()).toMatch(/25,00/);
   await press('Confirmar cobro');
   const [original] = await services.transactions.list();
+  expect(original).toMatchObject({
+    fareAmountCents: 2000,
+    cashReceivedCents: 5000,
+    tipCents: 500,
+    changeGivenCents: 2500,
+    netCashCents: 2500,
+  });
   expect(displayedText('payment-success')).toMatch(
     /Importe de viaje:.*20,00.*Propina:.*5,00/,
   );
@@ -301,6 +345,11 @@ test('persisted partial tip displays independently and edit refreshes history, d
   await press('Editar');
   jest.setSystemTime(new Date('2026-10-09T10:00:00Z'));
   await input('Propina', '7');
+  await toggleTip();
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  expect(tipSection().props.accessibilityLabel).toMatch(/Propina:.*7,00/);
+  expect(field('Propina').props.editable).toBe(false);
+  expect(changeResult()).toMatch(/23,00/);
   await press('Guardar cambios');
   expect(detailAmount('Propinas')).toContain('7,00');
   expect(detailAmount('Cambio entregado')).toContain('23,00');
@@ -309,7 +358,12 @@ test('persisted partial tip displays independently and edit refreshes history, d
     expect.objectContaining({
       id: original.id,
       createdAt: original.createdAt,
+      updatedAt: '2026-10-09T10:00:00.000Z',
+      fareAmountCents: 2000,
+      cashReceivedCents: 5000,
       tipCents: 700,
+      changeGivenCents: 2300,
+      netCashCents: 2700,
     }),
   ]);
   await act(async () => ref.goBack());
@@ -499,27 +553,59 @@ test('language and theme changes preserve the raw partial tip draft', async () =
 
 test('failed home insert retains the exact raw partial tip and retry writes it once', async () => {
   await mount();
+  const save = jest.spyOn(services.transactions, 'save');
   await expandTip();
   await input('Importe a cobrar', '20');
   await input('El cliente entrega', '50');
   await input('Propina', '5,25');
+  await toggleTip();
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  expect(tipSection().props.accessibilityLabel).toMatch(/Propina:.*5,25/);
+  expect(changeResult()).toMatch(/24,75/);
   await db.execute(
     "CREATE TRIGGER reject_partial_insert BEFORE INSERT ON transactions BEGIN SELECT RAISE(ABORT, 'test failure'); END",
   );
   await press('Confirmar cobro');
+  expect(save).toHaveBeenCalledTimes(1);
+  const [pending, attemptedInput] = save.mock.calls[0];
+  expect(attemptedInput).toMatchObject({
+    fareAmountCents: 2000,
+    cashReceivedCents: 5000,
+    tipCents: 525,
+  });
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
   expect(field('Propina').props.value).toBe('5,25');
   expect(field('Importe a cobrar').props.value).toBe('20');
   expect(field('El cliente entrega').props.value).toBe('50');
   expect(await services.transactions.list()).toHaveLength(0);
+  await expandTip();
+  await toggleTip();
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  expect(field('Propina').props.value).toBe('5,25');
+  expect(changeResult()).toMatch(/24,75/);
+  expect(button('Reintentar cobro').props.disabled).toBe(false);
+  expect(save).toHaveBeenCalledTimes(1);
+  jest.setSystemTime(new Date('2026-10-09T11:00:00Z'));
   await db.execute('DROP TRIGGER reject_partial_insert');
-  await press('Reintentar cobro');
+  await act(async () => {
+    const retry = button('Reintentar cobro').props.onPress;
+    await Promise.all([retry(), retry()]);
+  });
+  expect(save).toHaveBeenCalledTimes(2);
+  expect(save.mock.calls[1]).toEqual([pending, attemptedInput]);
   expect(await services.transactions.list()).toEqual([
     expect.objectContaining({
+      id: pending.id,
+      createdAt: '2026-10-09T11:00:00.000Z',
+      fareAmountCents: 2000,
+      cashReceivedCents: 5000,
       tipCents: 525,
       changeGivenCents: 2475,
       netCashCents: 2525,
     }),
   ]);
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  expect(field('Propina').props.value).toBe('');
 });
 
 test('partial edit prefills exact tip, cancel leaves storage intact and failed SQLite write retries exact draft', async () => {
@@ -541,17 +627,49 @@ test('partial edit prefills exact tip, cancel leaves storage intact and failed S
   expect(await services.transactions.get(original.id)).toEqual(original);
   await press('Editar');
   await input('Propina', '7,25');
+  await toggleTip();
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  expect(tipSection().props.accessibilityLabel).toMatch(/Propina:.*7,25/);
+  expect(changeResult()).toMatch(/22,75/);
+  const update = jest.spyOn(services.transactions, 'edit');
+  jest.setSystemTime(new Date('2026-10-09T10:00:00Z'));
   await db.execute(
     "CREATE TRIGGER reject_partial_edit BEFORE UPDATE ON transactions BEGIN SELECT RAISE(ABORT, 'test failure'); END",
   );
   await press('Guardar cambios');
+  expect(update).toHaveBeenCalledTimes(1);
+  const attemptedUpdate = update.mock.calls[0];
+  expect(attemptedUpdate).toEqual([
+    original.id,
+    {
+      platform: original.platform,
+      fareAmountCents: 2000,
+      cashReceivedCents: 5000,
+      tipCents: 725,
+    },
+  ]);
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
   expect(field('Propina').props.value).toBe('7,25');
   expect(await services.transactions.get(original.id)).toEqual(original);
+  await expandTip();
+  await toggleTip();
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  expect(field('Propina').props.value).toBe('7,25');
+  expect(changeResult()).toMatch(/22,75/);
+  expect(button('Reintentar cambios').props.disabled).toBe(false);
+  expect(update).toHaveBeenCalledTimes(1);
+  jest.setSystemTime(new Date('2026-10-10T11:00:00Z'));
   await db.execute('DROP TRIGGER reject_partial_edit');
-  await press('Reintentar cambios');
+  const retry = button('Reintentar cambios').props.onPress;
+  await act(async () => {
+    await Promise.all([retry(), retry()]);
+  });
+  expect(update).toHaveBeenCalledTimes(2);
+  expect(update.mock.calls[1]).toEqual(attemptedUpdate);
   expect(await services.transactions.get(original.id)).toMatchObject({
     id: original.id,
     createdAt: original.createdAt,
+    updatedAt: '2026-10-10T11:00:00.000Z',
     fareAmountCents: 2000,
     cashReceivedCents: 5000,
     tipCents: 725,
@@ -559,6 +677,14 @@ test('partial edit prefills exact tip, cancel leaves storage intact and failed S
     netCashCents: 2725,
   });
   expect(await services.transactions.list()).toHaveLength(1);
+  await expandTip();
+  await toggleTip();
+  expect(button('Guardar cambios').props.disabled).toBe(true);
+  await act(async () => {
+    await button('Guardar cambios').props.onPress();
+    await retry();
+  });
+  expect(update).toHaveBeenCalledTimes(2);
 });
 
 test('editing a saved operation without tips starts collapsed and cancellation leaves it unchanged', async () => {
