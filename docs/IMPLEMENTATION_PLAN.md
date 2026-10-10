@@ -726,3 +726,9 @@ Run project type checks, lint, and the relevant tests. Do not claim native behav
 ## Delivery report
 
 Report implemented features, checks actually run, and unresolved issues separately for Android and iOS. Run the manual acceptance matrix on both platforms, including native builds, persistence/restart, keyboard, back navigation, safe areas, accessibility, and both themes. Verify haptics on supported physical devices. If iOS cannot be built in the environment, report `iOS NOT VERIFIED`; compatibility alone does not complete iOS delivery. Neither platform is complete when its core persistence or arithmetic checks fail.
+
+## Collapsible-tip Phase 5 — selected native acceptance, 2026-10-10
+
+PARTIALLY VERIFIED / NOT COMPLETE. Android API34 x86_64 emulator ran the current embedded bundle on isolated test databases. Collapsed20/50/5 ->25 create, editT7 ->23, real SQL INSERT/UPDATE failure and UUID-preserving retry, cancel, and selected three-language/two-theme Home views passed. JSON row snapshots prove integer tip storage, original ID/createdAt preservation and successful-retry timestamps. Narrow320dp/fontScale1.5 revealed E / UR currency wrapping; OS activity recreation clears unsaved draft. These limitations and unavailable native checks prevent closing the phase.
+
+See [COLLAPSIBLE_TIPS_NATIVE_ACCEPTANCE.md](COLLAPSIBLE_TIPS_NATIVE_ACCEPTANCE.md) for evidence, the wrong-package installation/restoration incident, cleanup and remaining gates. Fresh typecheck/lint PASS; full Jest25 suites/256 tests PASS11.851s. Production application code/configuration unchanged; local native fault entry remains untracked under documentation-only handoff. iOS, actual screen-reader traversal, Reduce Motion and native animation acceptance NOT VERIFIED. Existing physical haptics FAIL and earlier gates remain open. Do not start Phase6 or delete temporary plans without gate closure or explicit deferral.
