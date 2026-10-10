@@ -2,11 +2,53 @@
 
 ## Collapsible-tip extension — current change boundary (2026-10-10)
 
-Phases0–4 COMPLETE in automated scopes; shared collapsed UI/animation and real-SQLite integration verified; native Phase5 awaits separate assignment. COLLAPSIBLE_TIPS_PLAN.md records the ordered separately assigned phases. New target supersedes always-visible presentation: collapsed new form, exact positive T in persistent header, guarded collapse/blur, Remove tip clears/collapses, edit-positive opens, money reset preserves visibility, save failure preserves draft and success-create resets instantly. Shared Home/Edit form and local hook state only; no service/model/schema/dependency changes. Retain historical partial-tip handoffs and unresolved native gates below.
+Phases0–4 COMPLETE in automated scopes; shared collapsed UI/animation and real-SQLite integration verified. Phase5 selected Android acceptance is PARTIALLY VERIFIED / NOT COMPLETE. Phase6 permanent documentation handoff is recorded below; final closure and temporary-plan deletion remain pending gate closure or explicit owner deferral. COLLAPSIBLE_TIPS_PLAN.md retains the separately assigned phase history. New behavior supersedes always-visible presentation: collapsed new form, exact positive T in persistent header, guarded collapse/blur, Remove tip clears/collapses, edit-positive opens, money reset preserves visibility, save failure preserves draft and success-create resets instantly. Shared Home/Edit form and local hook state only; no service/model/schema/dependency changes. Retain historical partial-tip handoffs and unresolved native gates below.
 
 Acceptance: hidden controls inaccessible; 20/50/5 ->25 before/after collapse and actual write; no/full/zero/remove cases; invalid/excess stays open including malformed-T underpayment; 5, blur and stale callbacks; monetary/quick/Exacto resets; platform/language/theme preservation; pending-save/failed retry identity and duplicate guards; edit prefill/cancel/ID/date; natural-height rapid-toggle and Reduce Motion query/listener/failure/cleanup. Native isolated-DB checks require actual current build, all three languages/both themes, narrow/large text, keyboard/focus traversal and create/edit/retry; unavailable required gates NOT VERIFIED. Phase6 removal requires completed gates or explicit owner deferral.
 
 Phase0 verification: clean commit8bba332; typecheck/lint PASS; Jest23 suites/227 tests PASS15.554s; independent read-only review; sample Git hooks only; no native checks. Phase1 changes only docs: temporary plan, product/UI/data contracts, active guidance/index and this handoff. Phase1 fresh typecheck/lint PASS; full Jest23/227 PASS11.417s; bounded read-only review status clarifications resolved. Checks are unchanged-code baseline, not collapse feature validation. Approved docs TEMP/TMP/TZ=UTC/cache execution; experimental SQLite warning; caches cleaned. No application/test/config edits or native checks. Documentation diff and new local links checked. Stop before Phase2.
+
+## Collapsible-tip Phase 6 — permanent handoff, 2026-10-10
+
+Status: **DOCUMENTATION HANDOFF COMPLETE / FINAL CLOSURE PENDING**. The owner assigned Phase6 after the partial Phase5 report; this assignment does not explicitly defer any native gate. Do not describe the extension or either platform as fully accepted. Both temporary tip plans remain until their own gates pass or the owner explicitly agrees to defer them.
+
+### Permanent behavior and implementation map
+
+[PROJECT_SPEC.md](PROJECT_SPEC.md) defines product scope, [UI_DESIGN.md](UI_DESIGN.md) defines the shared Home/Edit header, controls, translations, accessibility and motion, and [DATA_AND_CALCULATIONS.md](DATA_AND_CALCULATIONS.md) defines integer-cent arithmetic, raw draft/blur/reset/retry and storage boundaries. These permanent contracts contain the final behavior independently of the temporary plan.
+
+`usePaymentForm` owns local tipExpanded, latest raw tip and guarded expand/collapse/remove/reset actions. `PaymentForm` renders the always-visible localized header and existing MoneyInput/actions; focused collapse explicitly blurs and dismisses the keyboard. `CollapsibleTipContent` owns measured height/opacity180ms, interruption, Reduce Motion and cleanup only. Visibility is never stored and does not change payment identity, calculations or save permission. Models, service/repository API and schema remain unchanged by this extension.
+
+New form starts collapsed; positive-tip edit starts expanded. Collapse keeps positive T in the header and in calculation/persistence; 5, normalizes through existing blur; invalid/excess T keeps the error visible and cannot collapse or confirm. Remove clears/collapses. Fare/received/quick/Exacto clears T without changing expansion. Platform/language/theme preserves raw draft and expansion. Successful create clears/collapses instantly; failure keeps both; edit retains original ID/createdAt and cancel never writes. All section controls obey the pending-save guard. Expansion never autofocuses; hidden controls are immediately excluded from touch/accessibility. Arithmetic and writes never wait for animation.
+
+| Phase | Commit / durable evidence | Verification boundary |
+| --- | --- | --- |
+| 1 | af067f1 | Documentation contract and phase plan |
+| 2 | d655aa9 | Hook lifecycle, parser/reset/busy/retry behavior |
+| 3 | 8433eb2 | Shared collapsed UI, localization and motion; automated checks |
+| 4 | 8cd6614 | Real test SQLite create/edit/retry/history/summary;25 suites/256 tests |
+| 5 | 68a95cd; [native report](COLLAPSIBLE_TIPS_NATIVE_ACCEPTANCE.md) and linked evidence | Selected Android emulator checks only; phase NOT COMPLETE |
+| 6 | This documentation handoff | No code/tests/config changes or new native acceptance |
+
+### Remaining verification and limitations
+
+| Item | Current status | Required next action |
+| --- | --- | --- |
+| Android TalkBack traversal, announcements and focus | NOT VERIFIED | Verify actual screen-reader behavior, including hidden controls |
+| Android Reduce Motion and actual rapid-toggle/resize/error animation | NOT VERIFIED | Run native preference and motion matrix; Jest/still images do not close it |
+| Full ES/EN/UK x light/dark narrow/large-text/keyboard matrix | NOT VERIFIED | Complete matrix; UK320dp/fontScale1.5 currently wraps currency E / UR and ellipsizes stack title |
+| Unsaved Home draft on OS Activity recreation | Observed limitation | Separately scope correction or explicit acceptance; in-app language/theme preservation is a different verified scenario |
+| Remaining native no-tip/zero-edit/invalid/reset/platform/concurrent-confirm cases | NOT VERIFIED in Phase5 | Run the remaining native matrix; retain automated evidence separately |
+| iOS build/install, persistence, UI, accessibility and motion | NOT VERIFIED | Use an available macOS/Xcode native environment and isolated database |
+| Physical haptics and older partial-tip/native/release gates | Historical haptics FAIL; other gates remain open | Follow historical acceptance requirements; no automatic closure from this extension |
+| Durable fault-injection fixture | Local untracked test entry; not delivered | Explicitly authorize test-file work under the current docs-only restriction if committed reproduction is needed |
+
+Phase5 actual evidence includes collapsed20/50/5 ->25 create, positive editT7 ->23, real native-query INSERT/UPDATE failure/retry with the same UUID, unchanged row on cancel and selected normal-width localized themes. The native report preserves isolated SQLite JSON, screenshots/control trees, filtered write attempts, installation incident/restoration and cleanup. Do not infer native upgrade, all-device behavior or production-row integrity from those isolated snapshots.
+
+### Phase 6 checks and scope
+
+Fresh typecheck PASS; lint PASS; full Jest **25 suites /256 tests PASS,10.65s**, exit0. Command-scoped docs TEMP/TMP, TZ=UTC, --runInBand --no-cache --watch=false and docs/.collapsible-phase6-cache used with approved execution for the known sandbox Node realpath limitation. Experimental SQLite warning remains. Checks reuse existing coverage and do not prove new native results. Independent read-only documentation review and link/diff checks performed; no active Git hooks (samples only, core.hooksPath unset), none installed or bypassed.
+
+Only docs files are part of this phase. Existing untracked `__tests__/nativeCollapsibleTipsEntry.tsx` is preserved, not staged or changed. No application/test/config/script/database-schema edits, native builds/installations/device controls or push. Temporary plans retained; no owner deferral recorded. Closing the phase requires remaining gates to pass or explicit agreement identifying deferred checks and limitations.
 
 
 ## Collapsible-tip Phase 2 handoff
@@ -731,4 +773,4 @@ Report implemented features, checks actually run, and unresolved issues separate
 
 PARTIALLY VERIFIED / NOT COMPLETE. Android API34 x86_64 emulator ran the current embedded bundle on isolated test databases. Collapsed20/50/5 ->25 create, editT7 ->23, real SQL INSERT/UPDATE failure and UUID-preserving retry, cancel, and selected three-language/two-theme Home views passed. JSON row snapshots prove integer tip storage, original ID/createdAt preservation and successful-retry timestamps. Narrow320dp/fontScale1.5 revealed E / UR currency wrapping; OS activity recreation clears unsaved draft. These limitations and unavailable native checks prevent closing the phase.
 
-See [COLLAPSIBLE_TIPS_NATIVE_ACCEPTANCE.md](COLLAPSIBLE_TIPS_NATIVE_ACCEPTANCE.md) for evidence, the wrong-package installation/restoration incident, cleanup and remaining gates. Fresh typecheck/lint PASS; full Jest25 suites/256 tests PASS11.851s. Production application code/configuration unchanged; local native fault entry remains untracked under documentation-only handoff. iOS, actual screen-reader traversal, Reduce Motion and native animation acceptance NOT VERIFIED. Existing physical haptics FAIL and earlier gates remain open. Do not start Phase6 or delete temporary plans without gate closure or explicit deferral.
+See [COLLAPSIBLE_TIPS_NATIVE_ACCEPTANCE.md](COLLAPSIBLE_TIPS_NATIVE_ACCEPTANCE.md) for evidence, the wrong-package installation/restoration incident, cleanup and remaining gates. Fresh typecheck/lint PASS; full Jest25 suites/256 tests PASS11.851s. Production application code/configuration unchanged; local native fault entry remains untracked under documentation-only handoff. iOS, actual screen-reader traversal, Reduce Motion and native animation acceptance NOT VERIFIED. Existing physical haptics FAIL and earlier gates remain open. The later owner-assigned Phase6 documentation handoff is recorded above; final closure and temporary-plan deletion still require gate closure or explicit deferral.

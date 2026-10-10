@@ -1,6 +1,6 @@
 # Collapsible tips — temporary implementation plan
 
-Created 2026-10-10. Phases 0–4 COMPLETE in automated scopes; shared collapsed UI/animation and real-SQLite integration verified; Phase5 native acceptance PARTIALLY VERIFIED / NOT COMPLETE; see COLLAPSIBLE_TIPS_NATIVE_ACCEPTANCE.md. Execute only the separately assigned phase. This plan does not restart historical MVP/refactoring or partial-tip phases. Preserve PARTIAL_TIPS_PLAN.md and its unresolved native gates.
+Created 2026-10-10. Phases 0–4 COMPLETE in automated scopes; shared collapsed UI/animation and real-SQLite integration verified; Phase5 native acceptance PARTIALLY VERIFIED / NOT COMPLETE; see COLLAPSIBLE_TIPS_NATIVE_ACCEPTANCE.md. Phase6 permanent handoff recorded in IMPLEMENTATION_PLAN.md; final closure/deletion pending gates or explicit owner deferral. Execute only separately assigned work. This plan does not restart historical MVP/refactoring or partial-tip phases. Preserve PARTIAL_TIPS_PLAN.md and its unresolved native gates.
 
 ## Agreed behavior
 
@@ -43,7 +43,7 @@ Collapse eligibility checks optional blank-zero and the existing parser in blurr
 | 3 | Shared header/content, translations, Animated/Reduce Motion/accessibility; adapt existing tests to explicitly expand | COMPLETE automated scope; final checks/review recorded below; native layout NOT VERIFIED by Jest |
 | 4 | Real SQLite create/edit/hidden-tip storage/history/summary/retry regressions | COMPLETE; real-SQLite hidden-tip create/edit/retry/history/summary regressions PASS; fresh checks/review recorded below |
 | 5 | Actual current-build acceptance on isolated DB, Android and available iOS | PARTIALLY VERIFIED / NOT COMPLETE; Android emulator selected create/edit/retry/localization checks PASS; native motion/accessibility, full adaptive matrix and iOS NOT VERIFIED; see COLLAPSIBLE_TIPS_NATIVE_ACCEPTANCE.md |
-| 6 | Durable permanent handoff; remove this file/references only after gates pass or explicit owner deferral | Preserve historical records/older unresolved gates; fresh checks/doc links |
+| 6 | Durable permanent handoff; remove this file/references only after gates pass or explicit owner deferral | DOCUMENTATION HANDOFF COMPLETE / FINAL CLOSURE PENDING; permanent contracts/results/open gates in IMPLEMENTATION_PLAN.md; both plans retained, no deferral recorded |
 
 After each executed phase run npm run typecheck, npm run lint and full npm test -- --runInBand --no-cache --watch=false; record actual counts, failures/fixes and environment exceptions. Review diff and links; reuse actual Git hooks without installing/bypassing hooks. For coding phases obtain bounded independent read-only review, commit only successful phase files, and stop at its boundary. Do not mix unrelated Android script changes into this extension.
 
@@ -108,3 +108,11 @@ Final npm run typecheck PASS; npm run lint PASS; full Jest25 suites/256 tests PA
 Executed available Android emulator acceptance on 2026-10-10, baseline8cd6614. Status PARTIALLY VERIFIED / NOT COMPLETE. Current embedded APK with separate package/database exercised create20/50/5 ->25, collapse/normalize/remove/full-change UI, excessive31, refusal, positive editT7 ->23, real native SQL failure/retry for INSERT/UPDATE with preserved UUID, and cancel preserving exact row. Selected ES/EN/UK light/dark Home views observed. Narrow320dp/fontScale1.5 keyboard/scrolling only partially verified: currency wraps E / UR; OS configuration activity recreation clears unsaved draft. No production application-code change. Local fault entry remains untracked outside this documentation-only commit.
 
 [Native acceptance report](COLLAPSIBLE_TIPS_NATIVE_ACCEPTANCE.md) records actual screenshots/control trees, integer SQLite evidence, build/isolation details, the initial wrong-package installation and production APK restoration, cleanup and open gates. Fresh typecheck/lint PASS, full Jest25 suites/256 tests PASS11.851s, exit0. Read-only independent review; hooks unavailable, none bypassed. iOS, TalkBack, Reduce Motion and actual animation/rapid-interruption rendering NOT VERIFIED. Historical haptics FAIL remains open. Test package removed and emulator display/font restored. Phase6 not started; retain both temporary plans until required gates pass or explicit owner deferral.
+
+## Collapsible-tip Phase 6 handoff — 2026-10-10
+
+DOCUMENTATION HANDOFF COMPLETE / FINAL CLOSURE PENDING. Permanent product/UI/data contracts now link the actual selected Android evidence and permanent implementation handoff. IMPLEMENTATION_PLAN.md records final lifecycle/blur/animation behavior, responsible components/hook, phase commits, verification boundaries and remaining native/layout/activity/fixture gates. Active stale Phase5-awaiting-assignment and translation-not-implemented statements reconciled; historical earlier handoffs and older partial-tip gates retained.
+
+Fresh typecheck/lint PASS; full Jest25 suites/256 tests PASS10.65s, exit0. Approved command-scoped docs TEMP/TMP, TZ=UTC, --runInBand --no-cache --watch=false and docs/.collapsible-phase6-cache; experimental SQLite warning remains. Documentation-only changes; no new native results, code/tests/configuration/schema changes or push. Existing untracked native fault entry preserved and excluded. Independent read-only documentation review; diff and links checked. No active Git hooks, none installed or bypassed.
+
+The owner assigned Phase6 but did not explicitly defer mandatory checks or accept the observed limitations. Both temporary plans therefore remain. Closing/removing them requires evidence passing their remaining gates or explicit owner agreement identifying deferred scenarios and limitations; this handoff is not full Android/iOS acceptance.

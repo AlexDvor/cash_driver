@@ -93,7 +93,7 @@ Phase 3 adds matching centralized tipInput, optionalTip, noTip, allChangeAsTip a
 
 ### Collapsible-tip target — 2026-10-10
 
-Shared collapsed UI and animation implemented in new Phases2–3; automated checks pass, native appearance/accessibility NOT VERIFIED. This contract supersedes the old always-visible requirement, not prior test/build evidence. Follow COLLAPSIBLE_TIPS_PLAN.md for assigned phases; prior partial-tip native gates remain open.
+Shared collapsed UI and animation implemented in Phases2–3; automated checks pass. Phase5 selected Android emulator checks are recorded in [COLLAPSIBLE_TIPS_NATIVE_ACCEPTANCE.md](COLLAPSIBLE_TIPS_NATIVE_ACCEPTANCE.md); full native appearance/accessibility remains NOT VERIFIED. This permanent contract supersedes the old always-visible requirement, not prior test/build evidence. [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) records the Phase6 handoff and remaining gates; the temporary plan retains phase history. Prior partial-tip native gates remain open.
 
 New create form starts collapsed. Header shows + Add tip when collapsed with zero; Tip when expanded with zero; existing locale-formatted tipAmount when positive and valid. Header stays visible; expand/collapse only changes visibility. Expanding never autofocuses. Remove tip clears to blank/zero and collapses. Monetary edits, quick amounts and Exacto clear T but preserve expanded state; language/theme/platform preserve raw draft and visibility. Successful create clears/collapses instantly; failed save preserves both. Edit initializes expanded for T>0, otherwise collapsed; successful edit retains committed T and current visibility.
 
@@ -108,7 +108,7 @@ Animated natural measured height and opacity use 180ms Easing.inOut(Easing.ease)
 | expandTip | Expandir propina | Expand tip | Розгорнути чайові |
 | collapseTip | Contraer propina | Collapse tip | Згорнути чайові |
 
-Render + before addTip; reuse tipInput/tipAmount and allChangeAsTip. The historical No tip action is replaced by Remove tip in this form; check other usages before deleting old keys. These new keys are requirements, not already implemented translations.
+Render + before addTip; reuse tipInput/tipAmount and allChangeAsTip. The historical No tip action is replaced by Remove tip in this form; check other usages before deleting old keys. These four keys are implemented in ES/EN/UK in Phase3. Dictionary and component tests do not establish complete native localization/layout acceptance.
 
 ## Historial
 

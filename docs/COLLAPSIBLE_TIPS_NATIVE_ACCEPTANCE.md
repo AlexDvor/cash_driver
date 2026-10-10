@@ -1,6 +1,6 @@
 # Collapsible tips — native acceptance, 2026-10-10
 
-Phase 5 status: **PARTIALLY VERIFIED / NOT COMPLETE**. Android emulator evidence below covers selected scenarios on the current implementation at baseline `8cd6614`. iOS and mandatory accessibility/motion scenarios remain **NOT VERIFIED**. Do not start Phase 6 or remove either temporary tip plan on this evidence alone.
+Phase 5 status: **PARTIALLY VERIFIED / NOT COMPLETE**. Android emulator evidence below covers selected scenarios on the current implementation at baseline `8cd6614`. iOS and mandatory accessibility/motion scenarios remain **NOT VERIFIED**. The separately assigned Phase6 documentation handoff may proceed; do not close Phase6 or remove either temporary tip plan on this evidence alone.
 
 ## Environment and isolation
 
@@ -61,4 +61,4 @@ Fresh `npm run typecheck`: PASS. `npm run lint`: PASS. Full `npm test -- --runIn
 
 Independent read-only subagent reviewed the native fault entry and selected screenshots: no entry defects found; production initialization/entry unchanged, actual native-query failure and original IDs preserved. Final report reviewed separately. No active Git hooks (only sample hooks, core.hooksPath unset); none installed or bypassed.
 
-Phase5 remains **NOT COMPLETE**. Minimum next step: address/accept the observed layout and activity-recreation limitations, authorize durable fault-fixture delivery if needed, then run the remaining Android accessibility/motion/native matrix and iOS acceptance in an available native environment. Phase6 and temporary-plan deletion remain blocked until gates pass or the owner explicitly defers them.
+Phase5 remains **NOT COMPLETE**. Minimum next step: address/accept the observed layout and activity-recreation limitations, authorize durable fault-fixture delivery if needed, then run the remaining Android accessibility/motion/native matrix and iOS acceptance in an available native environment. Phase6 documentation handoff was subsequently assigned and recorded in [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md); no additional native evidence or owner deferral was supplied. Final closure and temporary-plan deletion remain pending until gates pass or the owner explicitly defers them.
