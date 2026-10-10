@@ -63,6 +63,22 @@ async function enter(fare: string, received: string) {
   await input('Importe a cobrar', fare);
   await input('El cliente entrega', received);
 }
+function summaryToggle() {
+  return app.root.findByProps({ testID: 'daily-summary-toggle' });
+}
+function summaryContent() {
+  return app.root.find(
+    node =>
+      node.props.testID === 'daily-summary-content' &&
+      node.props.pointerEvents !== undefined,
+  );
+}
+async function toggleSummary() {
+  await act(async () => summaryToggle().props.onPress());
+}
+async function openSummary() {
+  if (!summaryToggle().props.accessibilityState.expanded) await toggleSummary();
+}
 function text(id: string): string {
   return String(app.root.findByProps({ testID: id }).props.children);
 }
@@ -142,6 +158,8 @@ test('committed tip payment clears money fields, retains platform and updates se
   expect(text('payment-success')).toMatch(
     /Importe de viaje:.*18,00.*Propina:.*2,00/,
   );
+  expect(summaryToggle().props.accessibilityState.expanded).toBe(false);
+  await openSummary();
   expect(text('fareTotal')).toMatch(/18,00/);
   expect(text('tipsTotal')).toMatch(/2,00/);
   expect(text('retainedCash')).toMatch(/20,00/);
@@ -299,6 +317,7 @@ test('daily loading/error never render fake zero totals and retry loads genuine 
     .mockImplementation(list);
   await mount();
   expect(app.root.findAllByProps({ testID: 'fareTotal' })).toHaveLength(0);
+  await openSummary();
   expect(JSON.stringify(app.toJSON())).toContain('Cargando los totales');
   await act(async () => reject?.(new Error('Cannot read')));
   expect(app.root.findAllByProps({ testID: 'fareTotal' })).toHaveLength(0);
@@ -325,6 +344,7 @@ test.each(['success', 'error'])(
     await mount();
     await enter('20', '20');
     await press('Confirmar cobro');
+    await openSummary();
     expect(text('fareTotal')).toMatch(/20,00/);
     await act(async () => {
       if (outcome === 'success') {
@@ -348,6 +368,7 @@ test('daily totals update at local midnight and on resume, with subscription cle
   await mount();
   await enter('20', '20');
   await press('Confirmar cobro');
+  await openSummary();
   expect(text('fareTotal')).toMatch(/20,00/);
   await act(async () => {
     jest.setSystemTime(new Date('2026-10-09T00:00:00Z'));
@@ -374,3 +395,96 @@ test('daily totals update at local midnight and on resume, with subscription cle
   await act(async () => app.unmount());
   expect(remove).toHaveBeenCalledTimes(callbacks.length);
 });
+
+test('summary starts hidden, toggles access and preserves fare and tip draft through rapid taps', async () => {
+  await mount();
+  expect(summaryToggle().props.accessibilityState.expanded).toBe(false);
+  expect(summaryToggle().props.accessibilityLabel).toBe(
+    'Hoy · Mostrar totales',
+  );
+  expect(summaryContent().props.pointerEvents).toBe('none');
+  expect(summaryContent().props.accessibilityElementsHidden).toBe(true);
+  expect(summaryContent().props.importantForAccessibility).toBe(
+    'no-hide-descendants',
+  );
+  await enter('20', '50');
+  await press('+ Añadir propina');
+  await input('Propina', '5');
+  await toggleSummary();
+  expect(summaryContent().props.pointerEvents).toBe('auto');
+  expect(summaryContent().props.accessibilityElementsHidden).toBe(false);
+  expect(summaryToggle().props.accessibilityLabel).toBe(
+    'Hoy · Ocultar totales',
+  );
+  await toggleSummary();
+  expect(summaryToggle().props.accessibilityState.expanded).toBe(false);
+  await act(async () => {
+    summaryToggle().props.onPress();
+    summaryToggle().props.onPress();
+    summaryToggle().props.onPress();
+  });
+  expect(summaryToggle().props.accessibilityState.expanded).toBe(true);
+  expect(field('Importe a cobrar').props.value).toBe('20');
+  expect(field('El cliente entrega').props.value).toBe('50');
+  expect(field('Propina').props.value).toBe('5');
+  expect(text('change-result')).toMatch(/25,00/);
+  await press('Confirmar cobro');
+  expect(summaryToggle().props.accessibilityState.expanded).toBe(true);
+  expect(text('fareTotal')).toMatch(/20,00/);
+  expect(text('tipsTotal')).toMatch(/5,00/);
+  expect(text('retainedCash')).toMatch(/25,00/);
+});
+
+test('navigation hides summary immediately without clearing the payment draft', async () => {
+  await mount();
+  await enter('18', '20');
+  await tip(true);
+  await openSummary();
+  const previousReset = app.root.findByProps({
+    testID: 'daily-summary-content',
+  }).props.resetCount;
+  await press('Ajustes');
+  await press('Inicio');
+  expect(summaryToggle().props.accessibilityState.expanded).toBe(false);
+  expect(summaryContent().props.pointerEvents).toBe('none');
+  expect(
+    app.root.findByProps({ testID: 'daily-summary-content' }).props.resetCount,
+  ).toBeGreaterThan(previousReset);
+  expect(field('Importe a cobrar').props.value).toBe('18');
+  expect(field('El cliente entrega').props.value).toBe('20');
+  expect(tipValue()).toBe('2,00');
+});
+
+test.each(['inactive', 'background'] as const)(
+  'summary hides on %s and stays hidden on resume',
+  async nextState => {
+    const callbacks: ((state: AppStateStatus) => void)[] = [];
+    const remove = jest.fn();
+    jest
+      .spyOn(AppState, 'addEventListener')
+      .mockImplementation((_, callback) => {
+        callbacks.push(callback);
+        return { remove };
+      });
+    await mount();
+    await enter('20', '50');
+    await tip(true);
+    await openSummary();
+    const previousReset = app.root.findByProps({
+      testID: 'daily-summary-content',
+    }).props.resetCount;
+    await act(async () => callbacks.forEach(callback => callback(nextState)));
+    expect(summaryToggle().props.accessibilityState.expanded).toBe(false);
+    expect(summaryContent().props.accessibilityElementsHidden).toBe(true);
+    expect(
+      app.root.findByProps({ testID: 'daily-summary-content' }).props
+        .resetCount,
+    ).toBeGreaterThan(previousReset);
+    await act(async () => callbacks.forEach(callback => callback('active')));
+    expect(summaryToggle().props.accessibilityState.expanded).toBe(false);
+    expect(field('Importe a cobrar').props.value).toBe('20');
+    expect(tipValue()).toBe('30,00');
+    await act(async () => app.unmount());
+    expect(remove).toHaveBeenCalledTimes(callbacks.length);
+  },
+);

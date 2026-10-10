@@ -311,6 +311,7 @@ test('persisted partial tip displays independently and edit refreshes history, d
   expect(displayedText('payment-success')).toMatch(
     /Importe de viaje:.*20,00.*Propina:.*5,00/,
   );
+  await press('Hoy · Mostrar totales');
   expect(displayedText('fareTotal')).toMatch(/20,00/);
   expect(displayedText('tipsTotal')).toMatch(/5,00/);
   expect(displayedText('retainedCash')).toMatch(/25,00/);
@@ -379,6 +380,7 @@ test('persisted partial tip displays independently and edit refreshes history, d
   ).toMatch(/20,00.*Propina:.*7,00/);
   await press('Inicio');
   await act(async () => jest.advanceTimersByTime(1000));
+  await press('Hoy · Mostrar totales');
   expect(displayedText('daily-count')).toBe('Operaciones: 0');
   expect(displayedText('retainedCash')).toMatch(/0,00/);
   jest.setSystemTime(new Date('2026-10-08T12:00:00Z'));

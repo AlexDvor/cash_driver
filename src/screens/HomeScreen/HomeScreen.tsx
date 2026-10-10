@@ -1,5 +1,6 @@
-import React from 'react';
-import { View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { AppState, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { AppText } from '../../ui/AppText/AppText';
 import { ScreenContainer } from '../../ui/ScreenContainer/ScreenContainer';
 import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
@@ -19,6 +20,19 @@ export function HomeScreen() {
   const { colors } = useAppTheme();
   const { services, preferences, updatePreferences, saving, errorKey } =
     usePersistence();
+  const [summaryExpanded, setSummaryExpanded] = useState(false);
+  const [summaryResetCount, setSummaryResetCount] = useState(0);
+  const hideSummary = useCallback(() => {
+    setSummaryExpanded(false);
+    setSummaryResetCount(count => count + 1);
+  }, []);
+  useFocusEffect(useCallback(() => hideSummary, [hideSummary]));
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', next => {
+      if (next === 'inactive' || next === 'background') hideSummary();
+    });
+    return () => subscription.remove();
+  }, [hideSummary]);
   const clock = useLocalClock();
   const daily = useDailySummary(clock);
   const onSubmit = useCreatePayment(services, preferences.hapticsEnabled);
@@ -39,7 +53,12 @@ export function HomeScreen() {
           {formatLocalDateTime(clock.now, locale, clock.timeZone)}
         </AppText>
       </View>
-      <DailySummary daily={daily} />
+      <DailySummary
+        daily={daily}
+        expanded={summaryExpanded}
+        resetCount={summaryResetCount}
+        onToggle={() => setSummaryExpanded(expanded => !expanded)}
+      />
       {errorKey && (
         <AppText accessibilityRole="alert" style={{ color: colors.errorText }}>
           {t(errorKey)}
