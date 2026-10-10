@@ -4,6 +4,19 @@ export interface PeriodBounds {
   end: Date;
 }
 
+export interface CalendarMonth {
+  year: number;
+  month: number;
+}
+
+export interface CalendarDate extends CalendarMonth {
+  day: number;
+}
+
+export interface CalendarDayBounds extends PeriodBounds {
+  dateKey: string;
+}
+
 function calendarTimestamp(year: number, month: number, day: number): number {
   const date = new Date(0);
   date.setUTCFullYear(year, month - 1, day);
@@ -23,11 +36,111 @@ function wallTimestamp(
     }
     return Number(value);
   }
-  const date = new Date(
-    calendarTimestamp(part('year'), part('month'), part('day')),
-  );
+  const era = parts.find(item => item.type === 'era')?.value;
+  const year = era === 'BC' ? 1 - part('year') : part('year');
+  const date = new Date(calendarTimestamp(year, part('month'), part('day')));
   date.setUTCHours(part('hour'), part('minute'), part('second'), 0);
   return date.getTime();
+}
+
+function calendarFormatter(timeZone: string): Intl.DateTimeFormat {
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone,
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    hourCycle: 'h23',
+    era: 'short',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+}
+
+function validatedCalendar(value: CalendarDate): Date {
+  if (
+    !Number.isInteger(value.year) ||
+    !Number.isInteger(value.month) ||
+    !Number.isInteger(value.day) ||
+    value.month < 1 ||
+    value.month > 12 ||
+    value.day < 1 ||
+    value.day > 31
+  ) {
+    throw new RangeError('Invalid calendar coordinates');
+  }
+  const date = new Date(calendarTimestamp(value.year, value.month, value.day));
+  if (
+    !Number.isFinite(date.getTime()) ||
+    date.getUTCFullYear() !== value.year ||
+    date.getUTCMonth() + 1 !== value.month ||
+    date.getUTCDate() !== value.day
+  ) {
+    throw new RangeError('Invalid or unrepresentable calendar date');
+  }
+  return date;
+}
+
+function resolveCalendarBounds(
+  startCalendar: Date,
+  endCalendar: Date,
+  formatter: Intl.DateTimeFormat,
+): PeriodBounds {
+  if (!Number.isFinite(endCalendar.getTime())) {
+    throw new RangeError('Unrepresentable calendar boundary');
+  }
+  const start = localMidnight(startCalendar, formatter);
+  const end = localMidnight(endCalendar, formatter);
+  if (
+    !Number.isFinite(start.getTime()) ||
+    !Number.isFinite(end.getTime()) ||
+    start > end
+  ) {
+    throw new RangeError('Invalid calendar bounds');
+  }
+  // A completely skipped local date has an empty range, never the next day's data.
+  return { start, end };
+}
+
+export function getCalendarMonthBounds(
+  month: Readonly<CalendarMonth>,
+  timeZone: string,
+): PeriodBounds {
+  const start = validatedCalendar({ ...month, day: 1 });
+  const end = new Date(start.getTime());
+  end.setUTCMonth(end.getUTCMonth() + 1);
+  return resolveCalendarBounds(start, end, calendarFormatter(timeZone));
+}
+
+export function getCalendarDayBounds(
+  day: Readonly<CalendarDate>,
+  timeZone: string,
+): PeriodBounds {
+  const start = validatedCalendar(day);
+  const end = new Date(start.getTime());
+  end.setUTCDate(end.getUTCDate() + 1);
+  return resolveCalendarBounds(start, end, calendarFormatter(timeZone));
+}
+
+export function getCalendarMonthDays(
+  month: Readonly<CalendarMonth>,
+  timeZone: string,
+): CalendarDayBounds[] {
+  const calendar = validatedCalendar({ ...month, day: 1 });
+  const formatter = calendarFormatter(timeZone);
+  const days: CalendarDayBounds[] = [];
+  while (calendar.getUTCMonth() + 1 === month.month) {
+    const next = new Date(calendar.getTime());
+    next.setUTCDate(next.getUTCDate() + 1);
+    days.push({
+      dateKey: calendar.toISOString().split('T')[0],
+      ...resolveCalendarBounds(calendar, next, formatter),
+    });
+    calendar.setTime(next.getTime());
+  }
+  return days;
 }
 
 function localMidnight(calendar: Date, formatter: Intl.DateTimeFormat): Date {

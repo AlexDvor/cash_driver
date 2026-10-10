@@ -54,6 +54,10 @@ export function createTransactionService(
     },
     list: repository.list,
     get: repository.get,
+    listPage: repository.listPage,
+    summarize: repository.summarize,
+    occupiedDates: repository.occupiedDates,
+    hasAny: repository.hasAny,
     save(
       pending: PendingOperation,
       input: TransactionInput,

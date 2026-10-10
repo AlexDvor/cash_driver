@@ -19,6 +19,26 @@ function addCents(total: number, cents: number): number {
   return sum;
 }
 
+export function averageFareCents(
+  fareTotalCents: number,
+  operationCount: number,
+): number {
+  if (
+    !Number.isSafeInteger(fareTotalCents) ||
+    fareTotalCents < 0 ||
+    !Number.isSafeInteger(operationCount) ||
+    operationCount < 0
+  ) {
+    throw new RangeError('Invalid summary total or count');
+  }
+  if (operationCount === 0) {
+    return 0;
+  }
+  const quotient = Math.floor(fareTotalCents / operationCount);
+  const remainder = fareTotalCents % operationCount;
+  return quotient + (remainder >= Math.ceil(operationCount / 2) ? 1 : 0);
+}
+
 // Pass records already selected for the requested period/platform. No clock,
 // filtering state, persistence, or UI is consulted by this calculation.
 export function summarizeTransactions(
@@ -62,14 +82,10 @@ export function summarizeTransactions(
       transaction.fareAmountCents,
     );
   }
-  if (summary.operationCount > 0) {
-    const quotient = Math.floor(
-      summary.fareTotalCents / summary.operationCount,
-    );
-    const remainder = summary.fareTotalCents % summary.operationCount;
-    // Integer quotient/remainder rounding; a half cent rounds upward.
-    summary.averageFareCents =
-      quotient + (remainder >= Math.ceil(summary.operationCount / 2) ? 1 : 0);
-  }
+  // Share exact integer rounding with compact SQL summaries.
+  summary.averageFareCents = averageFareCents(
+    summary.fareTotalCents,
+    summary.operationCount,
+  );
   return summary;
 }
