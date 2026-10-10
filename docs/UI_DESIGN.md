@@ -62,7 +62,7 @@ A fixed bottom bar with consistent outline icons and labels: Inicio, Historial, 
 
 ## Inicio: top to bottom
 
-Partial-tip layout below is implemented in the shared form in Phase 3 with automated behavioral verification. Native layout/keyboard/text-scale/accessibility acceptance remains NOT VERIFIED until Phase 5. The reference image's full-change switch is historical; use the documented input/actions instead.
+The existing always-visible partial-tip UI was implemented in the earlier Phase 3 with automated behavioral verification. The updated layout below describes the 2026-10-10 collapsible target, NOT IMPLEMENTED yet. Native layout/keyboard/text-scale/accessibility acceptance remains NOT VERIFIED. The reference image's full-change switch is historical.
 
 1. `Cash Driver`, subtitle `Registro rápido de efectivo`, local date/time such as `8 oct 2026 · 12:28`.
 2. A quiet daily summary with operation count and separately labeled `Importe de viajes`, `Propinas`, and `Efectivo retenido`. Cash retained includes tips once and excludes change returned; never use an unlabeled monetary total.
@@ -71,13 +71,15 @@ Partial-tip layout below is implemented in the shared form in Phase 3 with autom
 5. `Importe a cobrar` money input.
 6. `El cliente entrega` money input.
 7. Quick buttons such as `20 €`, `50 €`, `100 €`, plus `Exacto`. Buttons replace the received amount, not add to it.
-8. Compact optional tip block: `Propina`, supporting `Opcional`, a money input initially blank (zero), and two small actions `Sin propina` / `Todo el cambio como propina`. Keep the block visible, allow actions to wrap and reuse existing tokens/MoneyInput. It replaces the former switch; no separate tip-mode toggle.
-9. Soft-green result area: `CAMBIO`, then the dominant change to return. For fare 20, received 50, entered tip 5: show `25,00 €` and separately `Propina: 5,00 €`. Keep confirmation visually primary.
+8. Collapsible tip target (2026-10-10; implementation NOT STARTED): initial header + Add tip; expand to optional MoneyInput and Remove tip / All change as tip. Positive T remains locale-formatted in the header even when collapsed. Reuse shared form, tokens and wrapping; see the collapsible contract below.
+9. Soft-green result area: `CAMBIO`, then the dominant change to return. For fare 20, received 50, entered tip 5: show `25,00 €` and `Propina: 5,00 €` in the tip-section header. Remove the duplicate tip line below the result when implementing the collapsible target. Keep confirmation visually primary.
 10. Full-width green `Confirmar cobro` button.
 
 Before sufficient input, show `—` in the change result. For insufficient cash show `Faltan 3,00 €` and inline `El importe recibido es insuficiente`; never show a valid zero-change state for an underpayment. Disable confirm for invalid inputs and while saving. During save show progress without layout jumps. After successful commit, use a brief toast such as `Cobro registrado · Importe de viaje: 18,00 € · Propina: 2,00 €` and optional haptic feedback. Omit the tip segment when zero. Display committed amounts, not received cash as the fare.
 
 Use DATA_AND_CALCULATIONS.md for action availability, reset and focus/blur rules. Excessive tip shows `La propina no puede superar {amount}` under the tip input, with the available difference formatted in the current locale. Invalid format uses the existing localized money error; focused unfinished tip keeps `—` and confirmation disabled until blur. Do not show a valid-looking zero change for invalid T. Disable tip input/actions during writes. Accessible labels distinguish fare, received and tip; retain keyboard dismissal, text scaling and all-language wrapping.
+
+Historical 2026-10-09 implemented input/action texts (new collapsible target below supersedes the No tip action in this form):
 
 | Tip UI text | Spanish | English | Ukrainian |
 | --- | --- | --- | --- |
@@ -88,6 +90,25 @@ Use DATA_AND_CALCULATIONS.md for action availability, reset and focus/blur rules
 | Excess error | La propina no puede superar {amount} | Tip cannot exceed {amount} | Чайові не можуть перевищувати {amount} |
 
 Phase 3 adds matching centralized tipInput, optionalTip, noTip, allChangeAsTip and tipExceedsChange keys in all three dictionaries; removes the obsolete changeIsTip key. Dictionary completeness and form behavior are automatically tested; this does not prove native all-language layout acceptance.
+
+### Collapsible-tip target — 2026-10-10
+
+Documentation target only: existing always-visible partial-tip UI remains implemented until the new code phases pass. This contract supersedes the old always-visible requirement, not prior test/build evidence. Follow COLLAPSIBLE_TIPS_PLAN.md for assigned phases; prior partial-tip native gates remain open.
+
+New create form starts collapsed. Header shows + Add tip when collapsed with zero; Tip when expanded with zero; existing locale-formatted tipAmount when positive and valid. Header stays visible; expand/collapse only changes visibility. Expanding never autofocuses. Remove tip clears to blank/zero and collapses. Monetary edits, quick amounts and Exacto clear T but preserve expanded state; language/theme/platform preserve raw draft and visibility. Successful create clears/collapses instantly; failed save preserves both. Edit initializes expanded for T>0, otherwise collapsed; successful edit retains committed T and current visibility.
+
+Explicitly blur focused tip on collapse and dismiss its native keyboard/focus. Existing blurred parsing normalizes 5, to 5,00; malformed/negative/over-limit/excess T keeps the block open and error visible. Check invalid T independently of insufficient payment result. Empty is valid zero. Hidden amount remains part of live calculation/save; collapse never clears it or causes a write. Disable header and content during save. Hide collapsed content from touch/accessibility immediately. Header uses button role, expanded/disabled state and localized action hint; minimum target48, no clipped essential values.
+
+Animated natural measured height and opacity use 180ms Easing.inOut(Easing.ease), JS driver for height. Measure inner content independently of clipped wrapper; remeasure for width/text scale/language/errors. Rapid toggles stop previous animation and target latest state. Initial/reset display is instant; calculation/confirmation never waits for animation. AccessibilityInfo initial query plus reduceMotionChanged: no animation until known, on query failure, or when Reduce Motion enabled; changed preference stops animation and snaps to target. Cleanup listener, late query and animation on unmount.
+
+| New translation key | Spanish | English | Ukrainian |
+| --- | --- | --- | --- |
+| addTip | Añadir propina | Add tip | Додати чайові |
+| removeTip | Quitar propina | Remove tip | Прибрати чайові |
+| expandTip | Expandir propina | Expand tip | Розгорнути чайові |
+| collapseTip | Contraer propina | Collapse tip | Згорнути чайові |
+
+Render + before addTip; reuse tipInput/tipAmount and allChangeAsTip. The historical No tip action is replaced by Remove tip in this form; check other usages before deleting old keys. These new keys are requirements, not already implemented translations.
 
 ## Historial
 

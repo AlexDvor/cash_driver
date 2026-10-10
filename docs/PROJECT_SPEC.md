@@ -32,7 +32,7 @@ Partial-tip requirements below were documented on 2026-10-09. Phases 2–3 imple
 - Accept comma or period decimal input with at most two fractional digits.
 - Offer quick received-amount buttons and an `Exacto` button.
 - Calculate and prominently display `CAMBIO` immediately.
-- Offer an optional `Propina` money input, initially blank (zero), with `Sin propina` and `Todo el cambio como propina` actions before the change result. Accept partial tips up to received cash minus fare. Do not retain a separate full-change toggle. Follow DATA_AND_CALCULATIONS.md for parser, reset and validation rules.
+- Collapsible-tip target (2026-10-10, documentation only): initially show + Add tip before the change result; expand to the existing Propina input, Remove tip and All change as tip. Preserve positive T in the collapsed header; removing clears and collapses. Edit starts expanded for positive saved T. Follow UI_DESIGN.md and DATA_AND_CALCULATIONS.md for lifecycle, blur/errors and reset rules. Implementation pending separately assigned phases; current code still displays the input directly.
 - Save with `Confirmar cobro`; only after successful persistence show a brief message with the saved fare and, when present, tip, then clear monetary inputs. Preserve the complete draft on failure and allow retry.
 - Store the actual confirmation date and time automatically; date entry is not required.
 

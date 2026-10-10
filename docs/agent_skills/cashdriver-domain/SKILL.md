@@ -15,13 +15,15 @@ Keep pure money/payment/history functions in features/transactions, calendar/sum
 
 ## Protected behavior
 
-- Integer EUR cents, current input bounds/parser, positive fare, underpayment rejection, quick replacement and Exacto. The 2026-10-09 partial-tip target uses exact tipCents, optional blank-zero input and No tip/All change actions; monetary edits clear tip. Require 0 <= tip <= received - fare; net = fare + tip and received = change + net. Follow DATA_AND_CALCULATIONS.md focus/blur rules; partial-tip implementation remains pending until its assigned phases pass.
+- Integer EUR cents, current input bounds/parser, positive fare, underpayment rejection, quick replacement and Exacto. The 2026-10-09 partial-tip implementation uses exact tipCents, optional blank-zero input and No tip/All change actions; monetary edits clear tip. Require 0 <= tip <= received - fare; net = fare + tip and received = change + net. Follow DATA_AND_CALCULATIONS.md focus/blur rules; earlier partial-tip phases 2–4 passed automated gates, native acceptance remains pending. New collapsible presentation below is not implemented yet.
 - Partial-tip migration targets v4 from the inspected v3 baseline, preserving history/preferences/indexes and rollback. Repository decoding, service retry comparisons and summary validation must use exact T; never reconstruct a partial tip from a boolean. Preserve historical migration semantics and legacy full-change records.
 - Stable pending UUID for unchanged failed save retries, duplicate protection and success/reset only after persistence commit. Preserve complete failed drafts and service-side recalculation.
 - Edit preserves ID/createdAt and updates updatedAt without changing the default platform. Shared Home/Settings defaults affect pristine/next drafts without replacing active drafts.
 - Ten-second single-deletion undo leaves the row/totals intact; expiry commits only while active, background cancels, failed delete retains data. Delete-all is confirmed separately and preserves preferences.
 - UTC timestamps, current device timezone, Monday/calendar/DST boundaries, half-open periods, immutable filtering and stable ordering. Summary separates fares, tips and retained cash; received cash is not revenue and retained cash is not profit.
 - Serialization, rollback, non-destructive migrations, corrupt-storage errors, commit-only notifications, stale-response rejection and cleanup remain unchanged. Optional haptics cannot turn a committed payment into failure.
+
+Collapsible-tip target (2026-10-10, implementation pending): local visibility never changes hidden T or retry equality. Remove clears/collapses; monetary reset preserves visibility; success-create resets, failure preserves; edit-positive initializes expanded. Explicit collapse blur normalizes drafts but cannot hide invalid/excess T. UI_DESIGN.md and DATA_AND_CALCULATIONS.md supersede historical No tip/always-visible presentation, without changing arithmetic/storage.
 
 ## Verification
 

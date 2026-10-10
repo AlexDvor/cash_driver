@@ -41,7 +41,7 @@ Do not accept grouping separators in editable inputs. A formatted displayed valu
 
 Optional tip uses the same parser and maximum. Only trimmed empty tip is interpreted by the form as zero; do not change empty fare/received semantics. Explicit `0` is also valid. Focused `5,` is an unfinished draft: show change as `—` and disable confirmation; blur normalizes it to 500 cents and then recalculates. Submit requires already valid parsed amounts and never implicitly parses unfinished drafts as blurred values. Keep accessible keyboard dismissal so the user can blur and then confirm. Invalid tip format or excess tip similarly produces `—`, an inline error and disabled confirmation. Underpayment keeps its existing insufficient-cash result rather than being converted to zero change. Preserve latest-draft and post-commit guards against delayed native blur for the tip field too.
 
-No tip and All change as tip replace the latest raw tip draft. A queued native blur after either action must use that latest value and cannot restore the previous tip text or amount.
+In the existing 2026-10-09 implementation, No tip and All change as tip replace the latest raw tip draft. The new target replaces No tip with Remove tip (clear and collapse), preserving latest-draft and busy guards. A queued native blur after either action must use that latest value and cannot restore the previous tip text or amount.
 
 ## Arithmetic
 
@@ -57,6 +57,14 @@ Let F = fare, R = received, T = tip, C = change given, N = retained cash.
 - Exact payment uses R = F and T = C = 0.
 
 Never clamp an underpayment to a valid zero change. Return an invalid/insufficient result and disable confirmation. Recalculate all derived fields on create and edit; do not trust cached UI results.
+
+## Collapsible-tip lifecycle target — 2026-10-10
+
+Documentation only; application implementation NOT STARTED. Visibility is local form state, never SQLite/model/service input or pending-operation equality. Raw tip remains monetary authority when hidden. Collapse preserves T and must not clear failed state, replace retry UUID, unlock an already committed edit, or write anything. Remove tip clears to blank and collapses. New form starts collapsed; edit starts expanded iff saved T>0. Successful create clears/collapses without animation; failure preserves draft/visibility; successful edit retains committed T/current visibility.
+
+Collapse explicitly finishes focused tip editing with the existing blurred parser and latest-draft/post-commit guards. Focused 5, normalizes to 500 cents. Empty remains blank-zero; invalid/negative/over-limit/excess T cannot be hidden. Validate T independently of payment.status, since underpayment intentionally preserves insufficient feedback even with malformed tip. Check excess against available change when known; unknown difference alone does not make T excessive. Do not alter parser or submit semantics.
+
+Existing fare/received/quick/Exacto reset clears T while preserving visibility. Platform/language/theme changes preserve raw T/visibility. All section actions obey busy guard. The keyboard/touch/accessibility/180ms Reduce Motion contract is in UI_DESIGN.md; animation is never a source of money, write permission or lifecycle success. No migration or new monetary fields.
 
 ## Quick values
 
