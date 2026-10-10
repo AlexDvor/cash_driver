@@ -44,6 +44,11 @@ export function usePaymentForm({
   const [tip, setTip] = useState(
     initialValues?.tipCents ? centsToInput(initialValues.tipCents) : '',
   );
+  const [tipExpanded, setTipExpanded] = useState(
+    (initialValues?.tipCents ?? 0) > 0,
+  );
+  const latestTip = useRef(tip);
+  latestTip.current = tip;
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
   const [saved, setSaved] = useState<CashTransaction | null>(null);
@@ -99,6 +104,8 @@ export function usePaymentForm({
       : null;
   const availableChangeCents =
     basePayment?.status === 'valid' ? basePayment.changeGivenCents : null;
+  const latestAvailableChange = useRef(availableChangeCents);
+  latestAvailableChange.current = availableChangeCents;
   // Preserve insufficient-cash feedback even when the optional tip is invalid.
   let payment = basePayment;
   if (basePayment?.status !== 'insufficient') {
@@ -123,7 +130,11 @@ export function usePaymentForm({
     dirty.current = true;
     committedDraft.current = false;
     fieldSetters[field](raw);
+    if (field === 'tip') {
+      latestTip.current = raw;
+    }
     if (field !== 'tip') {
+      latestTip.current = '';
       setTip('');
     }
     setFailed(false);
@@ -140,6 +151,47 @@ export function usePaymentForm({
       const parsed = parseMoneyInput(raw, 'blurred');
       return parsed.status === 'valid' ? centsToInput(parsed.cents) : raw;
     });
+  }
+  function canChangeTipSection() {
+    return (
+      mounted.current &&
+      !busy.current &&
+      renderedSaveCount === completedSaves.current
+    );
+  }
+  function expandTip() {
+    if (canChangeTipSection()) {
+      setTipExpanded(true);
+    }
+  }
+  function collapseTip(): boolean {
+    if (!canChangeTipSection()) {
+      return false;
+    }
+    // Collapse finishes editing, but never silently accepts a malformed tip.
+    // Check T separately: insufficient cash intentionally masks payment errors.
+    const parsed: MoneyParseResult =
+      latestTip.current.trim() === ''
+        ? { status: 'valid', cents: 0 }
+        : parseMoneyInput(latestTip.current, 'blurred');
+    if (
+      parsed.status !== 'valid' ||
+      (latestAvailableChange.current !== null &&
+        parsed.cents > latestAvailableChange.current)
+    ) {
+      return false;
+    }
+    blur('tip');
+    setTipExpanded(false);
+    return true;
+  }
+  function removeTip() {
+    if (!canChangeTipSection()) {
+      return;
+    }
+    changeField('tip', '');
+    setFocused(current => (current === 'tip' ? null : current));
+    setTipExpanded(false);
   }
   function quick(cents?: number) {
     if (busy.current || !validFare || fareParsed.status !== 'valid') {
@@ -204,6 +256,13 @@ export function usePaymentForm({
       committedDraft.current = !clearAfterSave;
       completedSaves.current++;
       if (mounted.current) {
+        latestTip.current =
+          clearAfterSave || committed.tipCents === 0
+            ? ''
+            : centsToInput(committed.tipCents);
+        if (clearAfterSave) {
+          setTipExpanded(false);
+        }
         setSaved(committed);
         setFare(clearAfterSave ? '' : centsToInput(committed.fareAmountCents));
         setReceived(
@@ -238,6 +297,9 @@ export function usePaymentForm({
     fare,
     received,
     tip,
+    tipExpanded,
+    // UI can distinguish instant successful-create reset from user collapse.
+    tipResetCount: clearAfterSave ? completedSaves.current : 0,
     fareParsed,
     receivedParsed,
     tipParsed,
@@ -259,6 +321,9 @@ export function usePaymentForm({
     quick,
     choosePlatform,
     submit,
+    expandTip,
+    collapseTip,
+    removeTip,
     clearTip: () => changeField('tip', ''),
     allChangeAsTip: () => {
       if (availableChangeCents !== null && availableChangeCents > 0) {

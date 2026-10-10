@@ -1,6 +1,6 @@
 # Collapsible tips — temporary implementation plan
 
-Created 2026-10-10. Phases 0–1 COMPLETE; application implementation NOT STARTED. Execute only the separately assigned phase. This plan does not restart historical MVP/refactoring or partial-tip phases. Preserve PARTIAL_TIPS_PLAN.md and its unresolved native gates.
+Created 2026-10-10. Phases 0–2 COMPLETE; hook lifecycle implemented and tested; shared collapsed UI/animation NOT STARTED (Phase 3). Execute only the separately assigned phase. This plan does not restart historical MVP/refactoring or partial-tip phases. Preserve PARTIAL_TIPS_PLAN.md and its unresolved native gates.
 
 ## Agreed behavior
 
@@ -39,7 +39,7 @@ Collapse eligibility checks optional blank-zero and the existing parser in blurr
 | --- | --- | --- |
 | 0 | Read-only current source/docs, lifecycle/test/hooks/environment baseline | COMPLETE; report below |
 | 1 | This plan; align PROJECT_SPEC, UI_DESIGN, DATA_AND_CALCULATIONS, active guidance and permanent acceptance requirements | COMPLETE documentation only; code NOT STARTED |
-| 2 | Hook expansion state, collapse/blur/remove, init/reset/retry/save guards; meaningful hook tests | Fresh typecheck/lint/full Jest and independent read-only review; stop before UI |
+| 2 | Hook expansion state, collapse/blur/remove, init/reset/retry/save guards; meaningful hook tests | COMPLETE; typecheck/lint PASS, Jest 24 suites / 242 tests PASS; independent read-only review; stop before UI |
 | 3 | Shared header/content, translations, Animated/Reduce Motion/accessibility; adapt existing tests to explicitly expand | Fresh checks and independent review; native layout NOT VERIFIED by Jest |
 | 4 | Real SQLite create/edit/hidden-tip storage/history/summary/retry regressions | Correct sums, unchanged ID/date, no duplicate rows; fresh checks/review |
 | 5 | Actual current-build acceptance on isolated DB, Android and available iOS | Record platform results independently; required unavailable checks NOT VERIFIED; phase not COMPLETE while gates open |
@@ -71,3 +71,11 @@ Fresh typecheck/lint PASS; full Jest 23 suites / 227 tests PASS, 15.554 s, exit0
 ## Phase 1 handoff
 
 COMPLETE documentation-only scope. Updated product/UI/data contracts, AGENTS, domain guidance, README and permanent implementation boundary; created this plan. Independent read-only review found status-wording ambiguities, corrected to distinguish implemented partial tips from unimplemented collapse; old No tip table marked historical. Fresh typecheck/lint PASS; full Jest23 suites/227 tests PASS11.417s, exit0. Approved command-scoped docs TEMP/TMP, TZ=UTC and docs/.collapsible-phase1-cache; experimental SQLite warning remains. Checks are existing-code regressions, not proof of new UI. Generated caches removed; diff/links reviewed. No application/test/configuration edits or native execution. No active Git hooks installed/run/bypassed. Stop before Phase2. Retain this file until Phase6 gates pass.
+
+## Collapsible-tip Phase 2 handoff
+
+Completed 2026-10-10 for usePaymentForm lifecycle only. Added local tipExpanded, guarded expandTip/collapseTip/removeTip and tipResetCount for the later instant successful-create reset. Positive stored tips initialize expanded; zero/new drafts initialize collapsed. Collapse uses the latest raw tip and existing blurred parser, rejects malformed/negative/over-limit/excess tips independently of underpayment feedback, and preserves monetary draft/retry identity. Remove clears and collapses. Monetary/quick/Exacto resets retain visibility; platform changes retain raw text and visibility. Success-create clears/collapses; failed writes preserve draft/visibility; successful edit retains committed T/current visibility. Pending-save, completed-save epoch and unmount guards apply to section actions. Existing clearTip remains for the unchanged shared UI until Phase3.
+
+Added collapsibleTipHook.test.tsx with 15 behavioral tests, including actual SQLite failed-create retry preserving UUID and exact 20/50/5 ->25 amounts, initialization, invalid-underpaid draft, normalization/stale blur, monetary resets, pending actions, create/edit success and duplicate protection. Independent read-only code and test reviews found no remaining actionable issues; existing tests were not weakened. Initial typecheck errors in new-test callback access were corrected with guarded accessors before final checks.
+
+Final fresh npm run typecheck PASS; npm run lint PASS; full Jest 24 suites / 242 tests PASS, 9.549 s, exit0. Approved execution used command-scoped absolute docs TEMP/TMP, TZ=UTC, --runInBand --no-cache --watch=false and docs/.collapsible-phase2-cache for the known sandbox Node realpath restriction. Experimental Node SQLite warning remains. No new hooks, dependencies, model/service/repository/schema/configuration changes. No active Git hooks were available; none installed or bypassed. Shared UI, localization, native focus dismissal, animation and Reduce Motion are Phase3 work, not verified by this hook phase. No native builds/device checks performed; prior native/haptics gates remain open. Stop before Phase3.

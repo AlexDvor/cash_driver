@@ -26,7 +26,7 @@ Follow `docs/CODING_STANDARDS.md` for code placement, theme tokens, component re
 
 Partial tips are an assigned 2026-10-09 extension. Phases 2–3 implement exact-tip domain/persistence, migration v4 and shared tip input/actions with automated verification; Phase 4 history/summary integration verified by automated tests; Phase 5 native acceptance remains pending. Follow the exact tip input, arithmetic and migration contracts in DATA_AND_CALCULATIONS.md and shared form rules in UI_DESIGN.md. Preserve unaffected behavior; historical full-change-only descriptions do not override this target. Phase 1 updates documentation only; application phases require separate assignment. The owner requested read-only subagent review and existing hooks for this change; run typecheck, lint and full Jest after each executed phase and report native checks separately.
 
-Collapsible tips are a new separately phased 2026-10-10 documentation target. Follow COLLAPSIBLE_TIPS_PLAN.md and the newer UI/data contracts; current code still has always-visible partial-tip input. Only assigned phases may start. Preserve prior partial-tip/native gates; visibility is local UI state, not monetary or persistence authority.
+Collapsible tips are a new separately phased 2026-10-10 documentation target. Follow COLLAPSIBLE_TIPS_PLAN.md and the newer UI/data contracts; Phase2 hook lifecycle is implemented and tested; current shared UI still has always-visible partial-tip input until separately assigned Phase3. Only assigned phases may start. Preserve prior partial-tip/native gates; visibility is local UI state, not monetary or persistence authority.
 
 ## Source of truth
 
