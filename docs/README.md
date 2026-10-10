@@ -1,58 +1,20 @@
-# Cash Driver — пакет документації MVP
+# Cash Driver — документація
 
-Ця папка містить специфікацію, правила роботи AI-агентів і перевірені handoff реалізації CashDriver. Поточна структура після рефакторингу та межі перевірок записані в `IMPLEMENTATION_PLAN.md`; історичні описи не визначають сучасне розташування файлів. Повна native acceptance залишається незавершеною.
+Основні вимоги та правила підтримки застосунку. Документація англійською; інтерфейс має ES/EN/UK, валюта EUR, платформи Uber/Cabify/Bolt/Otro.
 
 | Файл | Призначення |
 | --- | --- |
-| AGENTS.md | Інструкції та правила роботи AI-агента |
-| docs/CODING_STANDARDS.md | Структура коду, дизайн-константи, компоненти, адаптивність і перевірки |
-| docs/screen.png | Візуальний орієнтир; письмова специфікація має пріоритет у разі розбіжностей |
-| PROJECT_SPEC.md | Функції та межі першої версії |
-| docs/UI_DESIGN.md | Чотири екрани, зелений стиль, тексти й поведінка інтерфейсу |
-| docs/DATA_AND_CALCULATIONS.md | Гроші в центах, здача, чайові, SQLite, дати й підсумки |
-| docs/IMPLEMENTATION_PLAN.md | Порядок реалізації та перевірки |
-| COLLAPSIBLE_TIPS_NATIVE_ACCEPTANCE.md | Фактичні докази Android-перевірок чайових і відкриті native gates |
-| docs/agent_skills/ | Узгоджені з CashDriver правила architecture/UI/domain з agent kit; читаються через docs/AGENTS.md |
+| [PROJECT_SPEC.md](PROJECT_SPEC.md) | Функції та межі продукту |
+| [UI_DESIGN.md](UI_DESIGN.md) | Екрани, чайові, теми, accessibility та анімація |
+| [DATA_AND_CALCULATIONS.md](DATA_AND_CALCULATIONS.md) | Гроші, валідація, SQLite, дати й підсумки |
+| [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | Архітектура, handoff, результати та відкриті перевірки |
+| [AGENTS.md](AGENTS.md) | Правила роботи AI-агентів |
+| [CODING_STANDARDS.md](CODING_STANDARDS.md) | Структура коду, компоненти та перевірки |
+| [screen.png](screen.png) | Візуальний орієнтир; письмові вимоги мають пріоритет |
+| agent_skills/ | Узгоджені локальні правила architecture/UI/domain; посилання в AGENTS.md |
 
-Документація англійською для зручної роботи coding-агентів. Інтерфейс застосунку — іспанською за замовчуванням, з вибором англійської або української в налаштуваннях. Платформи: Uber, Cabify, Bolt, Otro. Основний сценарій: сума поїздки → отримана готівка → здача → підтвердження → історія та підсумки.
+Часткові та згорнуті чайові реалізовано й перевірено автоматизованими тестами. Постійні вимоги містяться в product/UI/data-документах; [native-підсумок](IMPLEMENTATION_PLAN.md#native-tip-acceptance) окремо описує фактично перевірені Android-сценарії та обмеження.
 
-Рефакторинг Phases 0–7 завершено в scope коду, документації та доступних перевірок. Постійна архітектура, коміти й відкриті native gates збережені в `IMPLEMENTATION_PLAN.md`; тимчасовий план видалено. Нову роботу виконуй лише за окремим завданням користувача.
+Повна native acceptance **NOT COMPLETE**: iOS, screen reader, Reduce Motion, анімація, адаптивна матриця й попередні gates залишаються відкритими. Тимчасові плани, дубльований звіт, проміжні докази та кеші видалено за прямим дорученням власника; це не означає проходження або відкладення перевірок. Закомічену історію можна відновити через Git.
 
-Нове розширення від 2026-10-09 — часткові чайові: поїздка 20 €, отримано 50 €, чайові 5 €, здача 25 €. Контракти описані в PROJECT_SPEC.md, DATA_AND_CALCULATIONS.md та UI_DESIGN.md. Фази 2–3 реалізують розрахунки, збереження, міграцію v4 та спільний блок введення з автоматичними перевірками; інтеграцію історії та підсумків перевірено у фазі 4, native acceptance очікує фазу 5. Порядок етапів тимчасово записаний у [PARTIAL_TIPS_PLAN.md](PARTIAL_TIPS_PLAN.md). Цей план буде видалено після постійного handoff; його створення не перезапускає історичні фази. Історичні результати перевірок не підтверджують нову функцію.
-
-Розширення від 2026-10-10 — згорнута секція чайових. Фази 0–4 завершені в автоматизованому scope; фаза5 має часткові Android-докази й залишається NOT COMPLETE. Фаза6 перенесла остаточну поведінку, карту реалізації, результати та відкриті перевірки в постійний [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md). Product/UI/data-вимоги містяться в PROJECT_SPEC.md, UI_DESIGN.md та DATA_AND_CALCULATIONS.md; [native-звіт](COLLAPSIBLE_TIPS_NATIVE_ACCEPTANCE.md) містить докази. Фінальне закриття очікує перевірок або явного погодження їх відкладення: iOS, accessibility, Reduce Motion, анімація, повна адаптивна матриця та попередні gates залишаються відкритими. [COLLAPSIBLE_TIPS_PLAN.md](COLLAPSIBLE_TIPS_PLAN.md) і старий partial-tip план поки зберігаються; доручення фази6 не означає погодження відкласти перевірки.
-
-## Архівний початковий промпт для AI-агента
-
-Наведені нижче промпти описують початок історичного MVP-процесу; вони не є дорученням повторно запускати завершені фази в поточному проєкті.
-
-```text
-Read docs/AGENTS.md, docs/PROJECT_SPEC.md, docs/UI_DESIGN.md,
-docs/DATA_AND_CALCULATIONS.md, docs/CODING_STANDARDS.md,
-and docs/IMPLEMENTATION_PLAN.md first. Inspect docs/screen.png as the visual reference.
-Execute only Phase 0 — Project inspection from docs/IMPLEMENTATION_PLAN.md.
-Inspect the existing project without implementation changes.
-Keep Spanish as the default with English/Ukrainian selection, the green design system, integer-cent arithmetic,
-local SQLite persistence, and Uber/Cabify/Bolt/Otro platform selection.
-Report existing work, dependencies, available checks, and blockers.
-Stop after the report; do not start Phase 1.
-```
-
-Для наступного етапу: «Виконай лише Phase N з docs/IMPLEMENTATION_PLAN.md. Перевір передумови, дотримуйся docs/AGENTS.md і docs/CODING_STANDARDS.md, виконай перевірки цієї фази, онови Progress та зупинись. Наступну фазу не починай». Заміни N на потрібний номер; спочатку виконай Phase 0. Фази й передавання результатів описані в одному IMPLEMENTATION_PLAN.md, без окремого документа на кожну фазу.
-
-Якщо в проєкті вже є `AGENTS.md`, об'єднай правила, зберігши потрібні існуючі інструкції. Не перезаписуй його без перевірки.
-
-Для фази реалізації можна додати до промпту:
-
-```text
-Add or update meaningful tests for this phase and run the relevant checks.
-Reuse suitable project custom hooks; create focused hooks only where needed.
-If subagent tools are available, use one review subagent to inspect this phase's
-changed code and tests without editing files. Fix confirmed findings and report
-checks actually run. If unavailable, perform self-review and say so.
-Record the results in Progress and stop before the next phase.
-```
-
-Цей блок призначений для фаз із написанням коду, а не для Phase 0. Custom React hooks організовують логіку застосунку; Git hooks запускають перевірки; субагент переглядає результат. Це різні механізми.
-
-Оновлення згорнутих чайових, фаза5 (2026-10-10): частину native сценаріїв перевірено на Android-емуляторі з окремою SQLite — створення, редагування, помилка/retry, скасування та вибрані ES/EN/UK світла/темна тема. Повна фаза NOT COMPLETE: iOS, screen reader, Reduce Motion, фактична анімація й повна адаптивна матриця NOT VERIFIED; виявлено перенос валюти та втрату незбереженої чернетки при системному перестворенні Activity. [Звіт і докази](COLLAPSIBLE_TIPS_NATIVE_ACCEPTANCE.md). Фаза6 завершила документаційний handoff; тимчасові плани зберігаються до фінального закриття.
+Нову роботу виконуй лише за окремим дорученням; історичні фази не є завданням повторно починати реалізацію.
