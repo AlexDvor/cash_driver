@@ -74,7 +74,15 @@ function tipValue() {
     )?.props.value;
 }
 async function tip(enabled: boolean) {
-  await press(enabled ? 'Todo el cambio como propina' : 'Sin propina');
+  if (
+    !app.root.findByProps({ testID: 'tip-section-toggle' }).props
+      .accessibilityState.expanded
+  ) {
+    await act(async () =>
+      app.root.findByProps({ testID: 'tip-section-toggle' }).props.onPress(),
+    );
+  }
+  await press(enabled ? 'Todo el cambio como propina' : 'Quitar propina');
 }
 
 test('ordinary change, exact and insufficient cash are immediate; malformed/zero/over-limit amounts cannot confirm', async () => {
@@ -155,8 +163,15 @@ test('synchronous repeated taps and loading controls produce one committed opera
     });
   await mount();
   await enter('20', '50');
+  await press('+ Añadir propina');
   await input('Propina', '5');
+  const tipToggle = app.root.find(
+    node =>
+      node.props.testID === 'tip-section-toggle' &&
+      typeof node.props.onPress === 'function',
+  );
   const confirm = button('Confirmar cobro');
+  const queuedTipToggle = tipToggle.props.onPress;
   let first: Promise<void> | undefined;
   await act(async () => {
     first = confirm.props.onPress();
@@ -166,14 +181,16 @@ test('synchronous repeated taps and loading controls produce one committed opera
   expect(button('Guardando cobro…').props.disabled).toBe(true);
   expect(field('Importe a cobrar').props.editable).toBe(false);
   expect(field('Propina').props.editable).toBe(false);
-  expect(button('Sin propina').props.disabled).toBe(true);
+  expect(button('Quitar propina').props.disabled).toBe(true);
   expect(button('Todo el cambio como propina').props.disabled).toBe(true);
   await act(async () => {
     field('Propina').props.onChangeText('9');
-    button('Sin propina').props.onPress();
+    button('Quitar propina').props.onPress();
     button('Todo el cambio como propina').props.onPress();
+    queuedTipToggle();
   });
   expect(field('Propina').props.value).toBe('5');
+  expect(tipToggle.props.accessibilityState.expanded).toBe(true);
   await act(async () => {
     release?.();
     await first;

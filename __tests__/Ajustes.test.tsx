@@ -194,6 +194,7 @@ test('latest explicit Home/Settings platform wins without replacing draft; edit 
   await press('Cabify');
   await input('Importe a cobrar', '18.5');
   await input('El cliente entrega', '20');
+  await press('+ Añadir propina');
   await press('Todo el cambio como propina');
   await press('Ajustes');
   await press('Bolt');

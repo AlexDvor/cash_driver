@@ -225,6 +225,15 @@ test('details and edit prefill tip, cancel/back do not write; edit preserves ID/
   await press('Historial');
   await edit(original.id);
   expect(field('Importe a cobrar').props.value).toBe('18,00');
+  expect(
+    app.root
+      .findAll(
+        node =>
+          node.props.testID === 'tip-section-toggle' &&
+          typeof node.props.onPress === 'function',
+      )
+      .slice(-1)[0].props.accessibilityState.expanded,
+  ).toBe(true);
   expect(field('Propina').props.value).toBe('2,00');
   await input('Importe a cobrar', '19');
   expect(field('Propina').props.value).toBe('');

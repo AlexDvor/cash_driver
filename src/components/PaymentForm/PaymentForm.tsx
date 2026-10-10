@@ -1,5 +1,12 @@
-import React from 'react';
-import { Keyboard, Pressable, useWindowDimensions, View } from 'react-native';
+import React, { useRef, type ComponentRef } from 'react';
+import {
+  Keyboard,
+  Pressable,
+  TextInput,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { CollapsibleTipContent } from '../CollapsibleTipContent/CollapsibleTipContent';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
 import { Card } from '../../ui/Card/Card';
@@ -26,6 +33,15 @@ export function PaymentForm({
   const { colors } = useAppTheme();
   const { width, fontScale } = useWindowDimensions();
   const disabled = form.saving;
+  const tipInput = useRef<ComponentRef<typeof TextInput>>(null);
+  const tipFocused = useRef(false);
+  function finishTipFocus() {
+    if (tipFocused.current) {
+      tipFocused.current = false;
+      tipInput.current?.blur();
+      Keyboard.dismiss();
+    }
+  }
   function fieldError(parsed: MoneyParseResult, fare: boolean) {
     if (parsed.status === 'invalid') {
       return parsed.reason === 'aboveMaximum'
@@ -39,9 +55,9 @@ export function PaymentForm({
   }
   const result = form.payment;
   const excessiveTip =
-    result?.status === 'invalid' &&
-    result.field === 'tip' &&
-    result.reason === 'exceedsAvailableChange';
+    (form.tipParsed.status === 'valid' || form.tipParsed.status === 'draft') &&
+    form.availableChangeCents !== null &&
+    form.tipParsed.cents > form.availableChangeCents;
   const tipError =
     excessiveTip && form.availableChangeCents !== null
       ? t('tipExceedsChange', {
@@ -49,6 +65,12 @@ export function PaymentForm({
         })
       : fieldError(form.tipParsed, false);
   const success = form.saved;
+  const tipHeader =
+    form.tipParsed.status === 'valid' && form.tipParsed.cents > 0 && !tipError
+      ? t('tipAmount', { amount: formatMoney(form.tipParsed.cents, locale) })
+      : form.tipExpanded
+      ? t('tipInput')
+      : t('addTip');
   return (
     <Card>
       <AppText variant="heading" accessibilityRole="header">
@@ -125,50 +147,93 @@ export function PaymentForm({
         )}
       </View>
       <View style={styles.tipBlock}>
-        <AppText variant="supporting" secondary>
-          {t('optionalTip')}
-        </AppText>
-        <MoneyInput
-          label={t('tipInput')}
-          value={form.tip}
-          error={tipError}
+        <Pressable
+          testID="tip-section-toggle"
+          accessibilityRole="button"
+          accessibilityLabel={tipHeader}
+          accessibilityHint={t(form.tipExpanded ? 'collapseTip' : 'expandTip')}
+          accessibilityState={{ expanded: form.tipExpanded, disabled }}
           disabled={disabled}
-          onChange={raw => form.changeField('tip', raw)}
-          onFocus={() => form.focus('tip')}
-          onBlur={() => form.blur('tip')}
-        />
-        <View style={styles.quickRow}>
-          {[
-            { label: t('noTip'), onPress: form.clearTip, disabled },
-            {
-              label: t('allChangeAsTip'),
-              onPress: form.allChangeAsTip,
-              disabled:
-                disabled ||
-                form.availableChangeCents === null ||
-                form.availableChangeCents === 0,
-            },
-          ].map(action => (
-            <Pressable
-              key={action.label}
-              accessibilityRole="button"
-              accessibilityLabel={action.label}
-              accessibilityState={{ disabled: action.disabled }}
-              disabled={action.disabled}
-              onPress={action.onPress}
-              style={({ pressed }) => [
-                styles.quick,
-                {
-                  borderColor: colors.border,
-                  backgroundColor: colors.background,
+          onPress={() => {
+            if (disabled) return;
+            if (form.tipExpanded) {
+              if (form.collapseTip()) finishTipFocus();
+            } else {
+              form.expandTip();
+            }
+          }}
+          style={({ pressed }) => [
+            styles.tipHeader,
+            { borderColor: colors.border, backgroundColor: colors.background },
+            (pressed || disabled) && styles.pressed,
+          ]}
+        >
+          <AppText>{tipHeader}</AppText>
+        </Pressable>
+        <CollapsibleTipContent
+          expanded={form.tipExpanded}
+          resetCount={form.tipResetCount}
+        >
+          <AppText variant="supporting" secondary>
+            {t('optionalTip')}
+          </AppText>
+          <MoneyInput
+            inputRef={tipInput}
+            label={t('tipInput')}
+            value={form.tip}
+            error={tipError}
+            disabled={disabled || !form.tipExpanded}
+            onChange={raw => form.changeField('tip', raw)}
+            onFocus={() => {
+              tipFocused.current = true;
+              form.focus('tip');
+            }}
+            onBlur={() => {
+              tipFocused.current = false;
+              form.blur('tip');
+            }}
+          />
+          <View style={styles.quickRow}>
+            {[
+              {
+                label: t('removeTip'),
+                onPress: () => {
+                  form.removeTip();
+                  finishTipFocus();
                 },
-                (pressed || action.disabled) && styles.pressed,
-              ]}
-            >
-              <AppText>{action.label}</AppText>
-            </Pressable>
-          ))}
-        </View>
+                disabled: disabled || !form.tipExpanded,
+              },
+              {
+                label: t('allChangeAsTip'),
+                onPress: form.allChangeAsTip,
+                disabled:
+                  disabled ||
+                  !form.tipExpanded ||
+                  form.availableChangeCents === null ||
+                  form.availableChangeCents === 0,
+              },
+            ].map(action => (
+              <Pressable
+                key={action.label}
+                accessibilityRole="button"
+                accessibilityLabel={action.label}
+                accessibilityState={{ disabled: action.disabled }}
+                disabled={action.disabled}
+                onPress={action.onPress}
+                style={({ pressed }) => [
+                  styles.quick,
+                  {
+                    borderColor: colors.border,
+                    backgroundColor: colors.background,
+                  },
+                  (pressed || action.disabled) && styles.pressed,
+                ]}
+              >
+                <AppText>{action.label}</AppText>
+              </Pressable>
+            ))}
+          </View>
+        </CollapsibleTipContent>
       </View>
       <View
         style={[
@@ -212,11 +277,6 @@ export function PaymentForm({
           </AppText>
         )}
       </View>
-      {result?.status === 'valid' && result.tipCents > 0 && (
-        <AppText>
-          {t('tipAmount', { amount: formatMoney(result.tipCents, locale) })}
-        </AppText>
-      )}
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('dismissKeyboard')}

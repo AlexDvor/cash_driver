@@ -1,5 +1,5 @@
 import React from 'react';
-import { AppState, TextInput } from 'react-native';
+import { AppState, Keyboard, TextInput } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createNavigationContainerRef } from '@react-navigation/native';
 import ReactTestRenderer, { act } from 'react-test-renderer';
@@ -85,10 +85,32 @@ function field(label: string) {
   return found;
 }
 async function input(label: string, raw: string) {
+  expect(field(label).props.editable).not.toBe(false);
   await act(async () => {
     field(label).props.onFocus();
     field(label).props.onChangeText(raw);
   });
+}
+function tipSection() {
+  const nodes = app.root.findAll(
+    node =>
+      node.props.testID === 'tip-section-toggle' &&
+      typeof node.props.onPress === 'function',
+  );
+  const section = nodes[nodes.length - 1];
+  if (!section) {
+    throw Error('Missing tip section');
+  }
+  return section;
+}
+async function expandTip() {
+  if (!tipSection().props.accessibilityState.expanded) {
+    await act(async () => tipSection().props.onPress());
+  }
+  expect(tipSection().props.accessibilityState.expanded).toBe(true);
+}
+async function toggleTip() {
+  await act(async () => tipSection().props.onPress());
 }
 function changeResult() {
   return String(
@@ -125,8 +147,118 @@ function detailAmount(label: string) {
   throw Error(`Missing detail ${label}`);
 }
 
+test('new form keeps tip controls hidden and disabled until explicit expansion, without focusing the input', async () => {
+  const dismiss = jest.spyOn(Keyboard, 'dismiss');
+  await mount();
+  const contentNodes = app.root.findAllByProps({
+    testID: 'tip-section-content',
+  });
+  const content = contentNodes[contentNodes.length - 1];
+  expect(tipSection().props.accessibilityRole).toBe('button');
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  expect(tipSection().props.accessibilityLabel).toBe('+ Añadir propina');
+  expect(content.props.pointerEvents).toBe('none');
+  expect(content.props.accessibilityElementsHidden).toBe(true);
+  expect(content.props.importantForAccessibility).toBe('no-hide-descendants');
+  expect(field('Propina').props.editable).toBe(false);
+  expect(field('Propina').props.autoFocus).not.toBe(true);
+  await input('Importe a cobrar', '20');
+  await input('El cliente entrega', '50');
+  await expandTip();
+  expect(dismiss).not.toHaveBeenCalled();
+  expect(field('Propina').props.editable).toBe(true);
+  expect(field('Propina').props.autoFocus).not.toBe(true);
+  expect(field('Propina').props.value).toBe('');
+  expect(changeResult()).toMatch(/30,00/);
+  await toggleTip();
+  await press('Confirmar cobro');
+  expect((await services.transactions.list())[0]).toMatchObject({
+    tipCents: 0,
+    changeGivenCents: 3000,
+  });
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+});
+
+test('collapsed partial tip retains exact change and a localized visible amount; remove restores all change', async () => {
+  const dismiss = jest.spyOn(Keyboard, 'dismiss');
+  await mount();
+  await input('Importe a cobrar', '20');
+  await input('El cliente entrega', '50');
+  await expandTip();
+  await input('Propina', '5,');
+  await toggleTip();
+  expect(dismiss).toHaveBeenCalledTimes(1);
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  expect(tipSection().props.accessibilityLabel).toMatch(/Propina:.*5,00/);
+  expect(field('Propina').props.value).toBe('5,00');
+  expect(changeResult()).toMatch(/25,00/);
+  await act(async () => {
+    await preferences.updatePreferences({ language: 'en', themeMode: 'dark' });
+  });
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  expect(tipSection().props.accessibilityLabel).toMatch(/Tip:.*5\.00/);
+  expect(field('Tip').props.value).toBe('5,00');
+  await act(async () => {
+    await preferences.updatePreferences({ language: 'uk', themeMode: 'light' });
+  });
+  expect(tipSection().props.accessibilityLabel).toMatch(/Чайові:.*5,00/);
+  await expandTip();
+  await press('Прибрати чайові');
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  expect(tipSection().props.accessibilityLabel).toBe('+ Додати чайові');
+  expect(field('Чайові').props.value).toBe('');
+  expect(changeResult()).toMatch(/30,00/);
+});
+
+test('invalid or excessive tip cannot collapse and focused trailing separator normalizes without hiding an error', async () => {
+  await mount();
+  await input('Importe a cobrar', '20');
+  await input('El cliente entrega', '50');
+  await expandTip();
+  for (const raw of ['31', '31,', '-1', 'malformed']) {
+    await input('Propina', raw);
+    await toggleTip();
+    expect(tipSection().props.accessibilityState.expanded).toBe(true);
+    expect(field('Propina').props.value).toBe(raw);
+    expect(button('Confirmar cobro').props.disabled).toBe(true);
+    expect(
+      app.root.findAll(node => node.props.accessibilityRole === 'alert').length,
+    ).toBeGreaterThan(0);
+  }
+  await input('Propina', '5,');
+  await toggleTip();
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  expect(field('Propina').props.value).toBe('5,00');
+  expect(changeResult()).toMatch(/25,00/);
+  await press('Confirmar cobro');
+  expect((await services.transactions.list())[0]).toMatchObject({
+    tipCents: 500,
+    changeGivenCents: 2500,
+  });
+});
+
+test('full change remains a tip while collapsed and success resets the section', async () => {
+  await mount();
+  await input('Importe a cobrar', '20');
+  await input('El cliente entrega', '50');
+  await expandTip();
+  await press('Todo el cambio como propina');
+  await toggleTip();
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  expect(tipSection().props.accessibilityLabel).toMatch(/Propina:.*30,00/);
+  expect(changeResult()).toMatch(/0,00/);
+  await press('Confirmar cobro');
+  expect((await services.transactions.list())[0]).toMatchObject({
+    tipCents: 3000,
+    changeGivenCents: 0,
+  });
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  expect(tipSection().props.accessibilityLabel).toBe('+ Añadir propina');
+});
+
 test('persisted partial tip displays independently and edit refreshes history, daily and every period without duplication', async () => {
   await mount();
+  await expandTip();
   await input('Importe a cobrar', '20');
   await input('El cliente entrega', '50');
   await input('Propina', '5');
@@ -214,6 +346,7 @@ test('persisted partial tip displays independently and edit refreshes history, d
 
 test('partial cash tip commits exact cents once and clears the home draft', async () => {
   await mount();
+  await expandTip();
   await input('Importe a cobrar', '20');
   await input('El cliente entrega', '50');
   expect(field('Propina').props.value).toBe('');
@@ -243,6 +376,7 @@ test('partial cash tip commits exact cents once and clears the home draft', asyn
 
 test('tip validation blocks malformed and excessive drafts; actions recover either draft', async () => {
   await mount();
+  await expandTip();
   await input('Importe a cobrar', '20');
   await input('El cliente entrega', '50');
   for (const raw of ['31', '-1', '1,2.3', '1,234', '10000']) {
@@ -258,7 +392,9 @@ test('tip validation blocks malformed and excessive drafts; actions recover eith
   expect(changeResult()).toMatch(/0,00/);
   expect(button('Confirmar cobro').props.disabled).toBe(false);
   await input('Propina', 'malformed');
-  await press('Sin propina');
+  await press('Quitar propina');
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  await expandTip();
   expect(field('Propina').props.value).toBe('');
   expect(changeResult()).toMatch(/30,00/);
   expect(button('Confirmar cobro').props.disabled).toBe(false);
@@ -271,15 +407,18 @@ test('tip validation blocks malformed and excessive drafts; actions recover eith
 
 test('full-change action requires positive available change and underpayment remains insufficient with invalid tip', async () => {
   await mount();
+  await expandTip();
   expect(button('Todo el cambio como propina').props.disabled).toBe(true);
-  expect(button('Sin propina').props.disabled).toBe(false);
+  expect(button('Quitar propina').props.disabled).toBe(false);
   await input('Importe a cobrar', '20');
   await input('El cliente entrega', '19');
   await input('Propina', 'malformed');
   expect(changeResult()).toMatch(/Faltan.*1,00/);
   expect(button('Confirmar cobro').props.disabled).toBe(true);
   expect(button('Todo el cambio como propina').props.disabled).toBe(true);
-  await press('Sin propina');
+  await press('Quitar propina');
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  await expandTip();
   expect(changeResult()).toMatch(/Faltan.*1,00/);
   await input('El cliente entrega', '20');
   expect(button('Todo el cambio como propina').props.disabled).toBe(true);
@@ -287,7 +426,9 @@ test('full-change action requires positive available change and underpayment rem
   await input('Propina', '1');
   expect(changeResult()).toBe('—');
   expect(button('Confirmar cobro').props.disabled).toBe(true);
-  await press('Sin propina');
+  await press('Quitar propina');
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  await expandTip();
   expect(button('Confirmar cobro').props.disabled).toBe(false);
   await input('El cliente entrega', '50');
   expect(button('Todo el cambio como propina').props.disabled).toBe(false);
@@ -295,6 +436,7 @@ test('full-change action requires positive available change and underpayment rem
 
 test('tip draft formats only on blur and money edits/quick amounts reset it', async () => {
   await mount();
+  await expandTip();
   await input('Importe a cobrar', '20');
   await input('El cliente entrega', '50');
   await input('Propina', '5,');
@@ -309,7 +451,9 @@ test('tip draft formats only on blur and money edits/quick amounts reset it', as
   await press('Todo el cambio como propina');
   await act(async () => staleBlur());
   expect(field('Propina').props.value).toBe('30,00');
-  await press('Sin propina');
+  await press('Quitar propina');
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  await expandTip();
   await act(async () => staleBlur());
   expect(field('Propina').props.value).toBe('');
   await input('Propina', '5');
@@ -335,6 +479,7 @@ test('tip draft formats only on blur and money edits/quick amounts reset it', as
 
 test('language and theme changes preserve the raw partial tip draft', async () => {
   await mount();
+  await expandTip();
   await input('Importe a cobrar', '20');
   await input('El cliente entrega', '50');
   await input('Propina', '5,');
@@ -354,6 +499,7 @@ test('language and theme changes preserve the raw partial tip draft', async () =
 
 test('failed home insert retains the exact raw partial tip and retry writes it once', async () => {
   await mount();
+  await expandTip();
   await input('Importe a cobrar', '20');
   await input('El cliente entrega', '50');
   await input('Propina', '5,25');
@@ -388,6 +534,7 @@ test('partial edit prefills exact tip, cancel leaves storage intact and failed S
   );
   await mount();
   await edit(original.id);
+  expect(tipSection().props.accessibilityState.expanded).toBe(true);
   expect(field('Propina').props.value).toBe('5,00');
   await input('Propina', '7,25');
   await press('Cancelar');
@@ -412,4 +559,27 @@ test('partial edit prefills exact tip, cancel leaves storage intact and failed S
     netCashCents: 2725,
   });
   expect(await services.transactions.list()).toHaveLength(1);
+});
+
+test('editing a saved operation without tips starts collapsed and cancellation leaves it unchanged', async () => {
+  const original = await services.transactions.save(
+    services.transactions.newPendingOperation(),
+    {
+      platform: 'uber',
+      fareAmountCents: 2000,
+      cashReceivedCents: 5000,
+      tipCents: 0,
+    },
+  );
+  await mount();
+  await edit(original.id);
+  expect(tipSection().props.accessibilityState.expanded).toBe(false);
+  expect(tipSection().props.accessibilityLabel).toBe('+ Añadir propina');
+  expect(field('Propina').props.editable).toBe(false);
+  await expandTip();
+  await input('Propina', '5');
+  await toggleTip();
+  expect(tipSection().props.accessibilityLabel).toMatch(/Propina:.*5,00/);
+  await press('Cancelar');
+  expect(await services.transactions.get(original.id)).toEqual(original);
 });

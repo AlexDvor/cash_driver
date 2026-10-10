@@ -62,7 +62,7 @@ A fixed bottom bar with consistent outline icons and labels: Inicio, Historial, 
 
 ## Inicio: top to bottom
 
-The existing always-visible partial-tip UI was implemented in the earlier Phase 3 with automated behavioral verification. The updated layout below describes the 2026-10-10 collapsible target, NOT IMPLEMENTED yet. Native layout/keyboard/text-scale/accessibility acceptance remains NOT VERIFIED. The reference image's full-change switch is historical.
+The existing always-visible partial-tip UI was implemented in the earlier Phase 3 with automated behavioral verification. The updated layout below is implemented in the 2026-10-10 collapsible Phase3 with automated behavioral verification. Native layout/keyboard/text-scale/accessibility acceptance remains NOT VERIFIED. The reference image's full-change switch is historical.
 
 1. `Cash Driver`, subtitle `Registro rápido de efectivo`, local date/time such as `8 oct 2026 · 12:28`.
 2. A quiet daily summary with operation count and separately labeled `Importe de viajes`, `Propinas`, and `Efectivo retenido`. Cash retained includes tips once and excludes change returned; never use an unlabeled monetary total.
@@ -71,7 +71,7 @@ The existing always-visible partial-tip UI was implemented in the earlier Phase 
 5. `Importe a cobrar` money input.
 6. `El cliente entrega` money input.
 7. Quick buttons such as `20 €`, `50 €`, `100 €`, plus `Exacto`. Buttons replace the received amount, not add to it.
-8. Collapsible tip target (2026-10-10; implementation NOT STARTED): initial header + Add tip; expand to optional MoneyInput and Remove tip / All change as tip. Positive T remains locale-formatted in the header even when collapsed. Reuse shared form, tokens and wrapping; see the collapsible contract below.
+8. Collapsible tip behavior (2026-10-10; implemented in Phase3, native acceptance pending): initial header + Add tip; expand to optional MoneyInput and Remove tip / All change as tip. Positive T remains locale-formatted in the header even when collapsed. Reuse shared form, tokens and wrapping; see the collapsible contract below.
 9. Soft-green result area: `CAMBIO`, then the dominant change to return. For fare 20, received 50, entered tip 5: show `25,00 €` and `Propina: 5,00 €` in the tip-section header. Remove the duplicate tip line below the result when implementing the collapsible target. Keep confirmation visually primary.
 10. Full-width green `Confirmar cobro` button.
 
@@ -93,7 +93,7 @@ Phase 3 adds matching centralized tipInput, optionalTip, noTip, allChangeAsTip a
 
 ### Collapsible-tip target — 2026-10-10
 
-Documentation target only: existing always-visible partial-tip UI remains implemented until the new code phases pass. This contract supersedes the old always-visible requirement, not prior test/build evidence. Follow COLLAPSIBLE_TIPS_PLAN.md for assigned phases; prior partial-tip native gates remain open.
+Shared collapsed UI and animation implemented in new Phases2–3; automated checks pass, native appearance/accessibility NOT VERIFIED. This contract supersedes the old always-visible requirement, not prior test/build evidence. Follow COLLAPSIBLE_TIPS_PLAN.md for assigned phases; prior partial-tip native gates remain open.
 
 New create form starts collapsed. Header shows + Add tip when collapsed with zero; Tip when expanded with zero; existing locale-formatted tipAmount when positive and valid. Header stays visible; expand/collapse only changes visibility. Expanding never autofocuses. Remove tip clears to blank/zero and collapses. Monetary edits, quick amounts and Exacto clear T but preserve expanded state; language/theme/platform preserve raw draft and visibility. Successful create clears/collapses instantly; failed save preserves both. Edit initializes expanded for T>0, otherwise collapsed; successful edit retains committed T and current visibility.
 

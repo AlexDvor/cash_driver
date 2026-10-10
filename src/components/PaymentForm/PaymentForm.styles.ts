@@ -25,5 +25,12 @@ export const styles = StyleSheet.create({
   },
   missing: { fontSize: typography.money },
   tipBlock: { gap: spacing.sm },
+  tipHeader: {
+    minHeight: sizing.touchTarget,
+    borderWidth: sizing.borderWidth,
+    borderRadius: radii.chip,
+    padding: spacing.md,
+    justifyContent: 'center',
+  },
   dismiss: { minHeight: sizing.touchTarget, justifyContent: 'center' },
 });

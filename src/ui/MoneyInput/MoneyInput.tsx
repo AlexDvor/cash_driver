@@ -7,6 +7,7 @@ import { styles } from './MoneyInput.styles';
 import { MoneyInputProps } from './MoneyInput.interface';
 
 export function MoneyInput({
+  inputRef,
   label,
   value,
   error,
@@ -20,6 +21,7 @@ export function MoneyInput({
     <View style={styles.group}>
       <AppText>{label}</AppText>
       <TextInput
+        ref={inputRef}
         accessibilityLabel={label}
         accessibilityHint={error}
         value={value}
