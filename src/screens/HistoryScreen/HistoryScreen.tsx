@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Pressable, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Pressable, SectionList, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/navigationTypes';
 import { routes } from '../../navigation/routes';
@@ -8,21 +9,32 @@ import { useLocalClock } from '../../hooks/app/useLocalClock';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
 import { ChoiceGroup } from '../../ui/ChoiceGroup/ChoiceGroup';
-import { ScreenContainer } from '../../ui/ScreenContainer/ScreenContainer';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
-import { formatMoney } from '../../i18n/formatting';
+import { formatMoney, formatPeriodRange } from '../../i18n/formatting';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { useDeletion } from '../../providers/DeletionProvider/DeletionProvider';
 import {
   groupHistory,
   HistoryPeriod,
   HistoryPlatform,
-  localDateKey,
 } from '../../features/transactions/history';
 import { platforms, platformLabels } from '../../constants/platforms';
-import { useTransactions } from '../../hooks/transactions/useTransactions';
+import { usePagedTransactions } from '../../hooks/transactions/usePagedTransactions';
+import { useHasTransactions } from '../../hooks/transactions/useHasTransactions';
+import { useCalendarSelection } from '../../hooks/summary/useCalendarSelection';
+import { CalendarNavigation } from '../../components/CalendarNavigation/CalendarNavigation';
+import { calendarFullDateLabel } from '../../components/CalendarModal/calendarPresentation';
+import {
+  getCalendarDayBounds,
+  getPeriodBounds,
+} from '../../features/summary/periods';
+import { spacing } from '../../constants/theme/tokens';
 import { TransactionLoadState } from '../../components/TransactionLoadState/TransactionLoadState';
 import { styles } from './HistoryScreen.styles';
+
+function HistorySeparator() {
+  return <View style={styles.separator} />;
+}
 
 export function HistoryScreen() {
   const { t, locale } = useTranslation();
@@ -30,16 +42,86 @@ export function HistoryScreen() {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const clock = useLocalClock();
-  const { state, refresh } = useTransactions();
+  const insets = useSafeAreaInsets();
+  const calendar = useCalendarSelection(clock);
+  const cancelCalendar = useRef(calendar.cancelCalendar);
+  cancelCalendar.current = calendar.cancelCalendar;
+  useFocusEffect(useCallback(() => () => cancelCalendar.current(), []));
   const deletion = useDeletion();
   const [period, setPeriod] = useState<HistoryPeriod>('day');
   const [platform, setPlatform] = useState<HistoryPlatform>('all');
-  const groups =
-    state.status === 'ready'
-      ? groupHistory(state.records, period, platform, clock.now, clock.timeZone)
-      : [];
-  return (
-    <ScreenContainer>
+  const bounds = useMemo(() => {
+    if (period === 'all') {
+      return undefined;
+    }
+    if (period === 'month') {
+      return calendar.bounds;
+    }
+    const [year, month, day] = clock.dayKey.split('-').map(Number);
+    const dayBounds = getCalendarDayBounds(
+      { year, month, day },
+      clock.timeZone,
+    );
+    return period === 'day'
+      ? dayBounds
+      : getPeriodBounds(dayBounds.start, 'week', clock.timeZone);
+  }, [period, calendar.bounds, clock.dayKey, clock.timeZone]);
+  const filter = useMemo(
+    () => ({ bounds, platform: platform === 'all' ? undefined : platform }),
+    [bounds, platform],
+  );
+  const { state, refresh, loadMore } = usePagedTransactions(filter);
+  const existence = useHasTransactions();
+  const groups = useMemo(
+    () =>
+      state.records
+        ? groupHistory(state.records, 'all', 'all', new Date(0), clock.timeZone)
+        : [],
+    [state.records, clock.timeZone],
+  );
+  const sections = useMemo(() => {
+    const dateFormat = new Intl.DateTimeFormat(locale, {
+      timeZone: clock.timeZone,
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+    const timeFormat = new Intl.DateTimeFormat(locale, {
+      timeZone: clock.timeZone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    });
+    return groups.map(group => ({
+      ...group,
+      dateLabel: dateFormat.format(group.date),
+      data: group.records.map(record => {
+        const timeLabel = timeFormat.format(new Date(record.createdAt));
+        const fareLabel = formatMoney(record.fareAmountCents, locale);
+        return {
+          ...record,
+          timeLabel,
+          fareLabel,
+          tipLabel:
+            record.tipCents > 0
+              ? t('tipAmount', { amount: formatMoney(record.tipCents, locale) })
+              : null,
+          openLabel: t('openOperation', {
+            platform: platformLabels[record.platform],
+            time: timeLabel,
+            fare: fareLabel,
+          }),
+        };
+      }),
+    }));
+  }, [groups, locale, clock.timeZone, t]);
+  const empty =
+    state.status === 'ready' &&
+    state.empty &&
+    !state.refreshing &&
+    !state.refreshError;
+  const header = (
+    <View style={styles.controls}>
       <View style={styles.heading}>
         <AppText variant="title" accessibilityRole="header">
           {t('history')}
@@ -57,6 +139,20 @@ export function HistoryScreen() {
           { value: 'all', label: t('allTime') },
         ]}
       />
+      {period === 'month' && (
+        <CalendarNavigation
+          calendar={calendar}
+          timeZone={clock.timeZone}
+          todayDateKey={clock.dayKey}
+        />
+      )}
+      {bounds && (
+        <AppText secondary testID="history-range">
+          {period === 'month' && calendar.selection.kind === 'day'
+            ? calendarFullDateLabel(calendar.selection.date, locale)
+            : formatPeriodRange(bounds, locale, clock.timeZone)}
+        </AppText>
+      )}
       <ChoiceGroup
         label={t('platform')}
         value={platform}
@@ -69,16 +165,44 @@ export function HistoryScreen() {
       {state.status !== 'ready' && (
         <TransactionLoadState status={state.status} retry={refresh} />
       )}
-      {state.status === 'ready' && groups.length === 0 && (
+      {state.refreshing && (
+        <View style={styles.feedback}>
+          <ActivityIndicator color={colors.primary} />
+          <AppText accessibilityLiveRegion="polite">
+            {t('dataRefreshing')}
+          </AppText>
+        </View>
+      )}
+      {state.refreshError && (
+        <View style={styles.feedback}>
+          <AppText accessibilityRole="alert">{t('dataRefreshFailed')}</AppText>
+          <ActionButton label={t('retry')} onPress={refresh} />
+        </View>
+      )}
+      {empty && existence.state.status === 'loading' && (
+        <ActivityIndicator
+          accessibilityLabel={t('operationsLoading')}
+          color={colors.primary}
+        />
+      )}
+      {empty && existence.state.status === 'error' && (
+        <View style={styles.feedback}>
+          <AppText accessibilityRole="alert">
+            {t('historyExistenceFailed')}
+          </AppText>
+          <ActionButton label={t('retry')} onPress={existence.refresh} />
+        </View>
+      )}
+      {empty && existence.state.status === 'ready' && (
         <>
           <AppText>
             {t(
-              state.records.length === 0
+              existence.state.hasAny === false
                 ? 'historyEmpty'
                 : 'historyFilteredEmpty',
             )}
           </AppText>
-          {state.records.length === 0 && (
+          {existence.state.hasAny === false && (
             <ActionButton
               label={t('registerPayment')}
               onPress={() =>
@@ -88,79 +212,114 @@ export function HistoryScreen() {
           )}
         </>
       )}
-      {groups.map(group => (
-        <View key={group.key} style={styles.group}>
-          <AppText variant="heading" accessibilityRole="header">
-            {localDateKey(clock.now, clock.timeZone) === group.key
-              ? `${t('today')} · `
-              : ''}
-            {new Intl.DateTimeFormat(locale, {
-              timeZone: clock.timeZone,
-              day: 'numeric',
-              month: 'short',
-              year: 'numeric',
-            }).format(group.date)}
-          </AppText>
-          {group.records.map(record => {
-            const time = new Intl.DateTimeFormat(locale, {
-              timeZone: clock.timeZone,
-              hour: '2-digit',
-              minute: '2-digit',
-              hourCycle: 'h23',
-            }).format(new Date(record.createdAt));
-            return (
-              <Pressable
-                key={record.id}
-                testID={`history-${record.id}`}
-                accessibilityRole="button"
-                accessibilityLabel={t('openOperation', {
-                  platform: platformLabels[record.platform],
-                  time,
-                  fare: formatMoney(record.fareAmountCents, locale),
-                })}
-                onPress={() =>
-                  navigation.navigate(routes.Details, { id: record.id })
-                }
-                style={({ pressed }) => [
-                  styles.row,
-                  { backgroundColor: colors.card, borderColor: colors.border },
-                  pressed && styles.pressed,
-                ]}
-              >
-                <View style={styles.rowContent}>
-                  <View style={styles.heading}>
-                    <AppText variant="heading">
-                      {platformLabels[record.platform]}
-                    </AppText>
-                    <AppText secondary variant="supporting">
-                      {time}
-                    </AppText>
-                  </View>
-                  <View style={styles.amounts}>
-                    <AppText variant="heading">
-                      {formatMoney(record.fareAmountCents, locale)}
-                    </AppText>
-                    {record.tipCents > 0 && (
-                      <AppText secondary variant="supporting">
-                        {t('tipAmount', {
-                          amount: formatMoney(record.tipCents, locale),
-                        })}
-                      </AppText>
-                    )}
-                  </View>
+    </View>
+  );
+  return (
+    <View
+      style={[
+        styles.fill,
+        { backgroundColor: colors.background, paddingTop: insets.top },
+      ]}
+    >
+      <SectionList
+        testID="history-list"
+        sections={sections}
+        keyExtractor={record => record.id}
+        stickySectionHeadersEnabled={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop: spacing.xl,
+            paddingBottom: spacing.xl,
+            paddingLeft: spacing.xl + insets.left,
+            paddingRight: spacing.xl + insets.right,
+          },
+        ]}
+        ListHeaderComponent={header}
+        ItemSeparatorComponent={HistorySeparator}
+        renderSectionHeader={({ section: group }) => (
+          <View style={styles.groupHeading}>
+            <AppText variant="heading" accessibilityRole="header">
+              {clock.dayKey === group.key ? `${t('today')} · ` : ''}
+              {group.dateLabel}
+            </AppText>
+          </View>
+        )}
+        renderItem={({ item: record }) => {
+          return (
+            <Pressable
+              testID={`history-${record.id}`}
+              accessibilityRole="button"
+              accessibilityLabel={record.openLabel}
+              onPress={() =>
+                navigation.navigate(routes.Details, { id: record.id })
+              }
+              style={({ pressed }) => [
+                styles.row,
+                { backgroundColor: colors.card, borderColor: colors.border },
+                pressed && styles.pressed,
+              ]}
+            >
+              <View style={styles.rowContent}>
+                <View style={styles.heading}>
+                  <AppText variant="heading">
+                    {platformLabels[record.platform]}
+                  </AppText>
+                  <AppText secondary variant="supporting">
+                    {record.timeLabel}
+                  </AppText>
                 </View>
-                <AppText variant="supporting" style={{ color: colors.primary }}>
-                  {t(
-                    deletion.state.id === record.id
-                      ? 'deletionPending'
-                      : 'recorded',
+                <View style={styles.amounts}>
+                  <AppText variant="heading">{record.fareLabel}</AppText>
+                  {record.tipCents > 0 && (
+                    <AppText secondary variant="supporting">
+                      {record.tipLabel}
+                    </AppText>
                   )}
-                </AppText>
-              </Pressable>
-            );
-          })}
-        </View>
-      ))}
-    </ScreenContainer>
+                </View>
+              </View>
+              <AppText variant="supporting" style={{ color: colors.primary }}>
+                {t(
+                  deletion.state.id === record.id
+                    ? 'deletionPending'
+                    : 'recorded',
+                )}
+              </AppText>
+            </Pressable>
+          );
+        }}
+        ListFooterComponent={
+          state.status === 'ready' &&
+          !state.refreshing &&
+          !state.refreshError ? (
+            <View style={styles.footer}>
+              {state.loadingMore ? (
+                <View style={styles.feedback}>
+                  <ActivityIndicator color={colors.primary} />
+                  <AppText accessibilityLiveRegion="polite">
+                    {t('historyLoadingMore')}
+                  </AppText>
+                </View>
+              ) : state.loadMoreError ? (
+                <View style={styles.feedback}>
+                  <AppText accessibilityRole="alert">
+                    {t('historyLoadMoreFailed')}
+                  </AppText>
+                  <ActionButton label={t('retry')} onPress={loadMore} />
+                </View>
+              ) : state.hasMore ? (
+                <ActionButton
+                  label={t('historyLoadMore')}
+                  variant="secondary"
+                  onPress={loadMore}
+                />
+              ) : null}
+            </View>
+          ) : undefined
+        }
+      />
+    </View>
   );
 }

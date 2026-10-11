@@ -1,5 +1,11 @@
 export type Language = 'es' | 'en' | 'uk';
 export const es = {
+  dataRefreshing: 'Actualizando… Se muestran los datos anteriores.',
+  dataRefreshFailed: 'Datos anteriores; actualización fallida',
+  historyLoadMore: 'Cargar más operaciones',
+  historyLoadingMore: 'Cargando más operaciones…',
+  historyLoadMoreFailed: 'No se pudieron cargar más operaciones.',
+  historyExistenceFailed: 'No se pudo comprobar si hay operaciones guardadas.',
   calendarOpen: 'Abrir calendario',
   calendarTitle: 'Calendario',
   calendarSelectMonthYear: 'Elegir mes y año',
@@ -145,6 +151,12 @@ export const es = {
 export type TranslationKey = keyof typeof es;
 type Dictionary = Record<TranslationKey, string>;
 export const en: Dictionary = {
+  dataRefreshing: 'Updating… Showing previous data.',
+  dataRefreshFailed: 'Previous data; update failed',
+  historyLoadMore: 'Load more operations',
+  historyLoadingMore: 'Loading more operations…',
+  historyLoadMoreFailed: 'Could not load more operations.',
+  historyExistenceFailed: 'Could not check for saved operations.',
   calendarOpen: 'Open calendar',
   calendarTitle: 'Calendar',
   calendarSelectMonthYear: 'Choose month and year',
@@ -283,6 +295,13 @@ export const en: Dictionary = {
     'Uses the device theme. To switch between day and night, configure the schedule in system settings.',
 };
 export const uk: Dictionary = {
+  dataRefreshing: 'Оновлення… Показано попередні дані.',
+  dataRefreshFailed: 'Попередні дані; оновлення не вдалося',
+  historyLoadMore: 'Завантажити більше операцій',
+  historyLoadingMore: 'Завантаження наступних операцій…',
+  historyLoadMoreFailed: 'Не вдалося завантажити наступні операції.',
+  historyExistenceFailed:
+    'Не вдалося перевірити наявність збережених операцій.',
   calendarOpen: 'Відкрити календар',
   calendarTitle: 'Календар',
   calendarSelectMonthYear: 'Вибрати місяць і рік',

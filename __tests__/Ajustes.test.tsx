@@ -126,7 +126,9 @@ function rowIds() {
     .map(node => node.props.testID);
 }
 function content() {
-  return JSON.stringify(app.toJSON());
+  return JSON.stringify(app.toJSON(), (_key, value: unknown) =>
+    React.isValidElement(value) ? undefined : value,
+  );
 }
 async function details(id: string) {
   await act(async () => ref.navigate('Details', { id }));

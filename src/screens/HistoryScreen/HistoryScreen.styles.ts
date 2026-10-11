@@ -2,8 +2,19 @@ import { StyleSheet } from 'react-native';
 import { radii, sizing, spacing } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
+  fill: { flex: 1 },
+  content: {
+    flexGrow: 1,
+    width: '100%',
+    maxWidth: sizing.contentMaxWidth,
+    alignSelf: 'center',
+  },
+  controls: { gap: spacing.xxl },
+  feedback: { gap: spacing.md },
+  groupHeading: { paddingTop: spacing.xxl, paddingBottom: spacing.md },
+  separator: { height: spacing.md },
+  footer: { paddingTop: spacing.xxl },
   heading: { gap: spacing.xs },
-  group: { gap: spacing.md },
   row: {
     borderWidth: sizing.borderWidth,
     borderRadius: radii.card,

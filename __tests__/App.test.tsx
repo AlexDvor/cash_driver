@@ -90,7 +90,11 @@ test('boots in Spanish with four accessible tabs and the payment form', async ()
     'Ajustes',
   ]);
   expect(tabs[0].props.accessibilityState.selected).toBe(true);
-  expect(JSON.stringify(app.toJSON())).toContain('Nuevo cobro');
+  expect(
+    JSON.stringify(app.toJSON(), (_key, value: unknown) =>
+      React.isValidElement(value) ? undefined : value,
+    ),
+  ).toContain('Nuevo cobro');
 });
 
 test('tab presses change routes; details and editing return to the previous tab', async () => {
@@ -106,14 +110,18 @@ test('tab presses change routes; details and editing return to the previous tab'
   }
   await act(async () => ref.navigate('Details', { id: 'missing' }));
   expect(ref.getCurrentRoute()?.name).toBe('Details');
-  expect(JSON.stringify(app.toJSON())).toContain(
-    'Esta operación ya no está disponible.',
-  );
+  expect(
+    JSON.stringify(app.toJSON(), (_key, value: unknown) =>
+      React.isValidElement(value) ? undefined : value,
+    ),
+  ).toContain('Esta operación ya no está disponible.');
   await act(async () => ref.navigate('Edit', { id: 'missing' }));
   expect(ref.getCurrentRoute()?.name).toBe('Edit');
-  expect(JSON.stringify(app.toJSON())).toContain(
-    'Esta operación ya no está disponible.',
-  );
+  expect(
+    JSON.stringify(app.toJSON(), (_key, value: unknown) =>
+      React.isValidElement(value) ? undefined : value,
+    ),
+  ).toContain('Esta operación ya no está disponible.');
   await press(app, 'button', 'Volver');
   expect(ref.getCurrentRoute()?.name).toBe('Details');
   await press(app, 'button', 'Volver');
@@ -127,22 +135,36 @@ test('language and theme changes preserve navigation and localize the mounted UI
   const routeKey = ref.getCurrentRoute()?.key;
   await press(app, 'radio', 'English');
   expect(ref.getCurrentRoute()?.key).toBe(routeKey);
-  expect(JSON.stringify(app.toJSON())).toContain(
-    'Data stays only on this device.',
-  );
+  expect(
+    JSON.stringify(app.toJSON(), (_key, value: unknown) =>
+      React.isValidElement(value) ? undefined : value,
+    ),
+  ).toContain('Data stays only on this device.');
   await act(async () => ref.navigate('Details', { id: 'missing' }));
   await press(app, 'button', 'Back');
   expect(ref.getCurrentRoute()?.key).toBe(routeKey);
   await press(app, 'radio', 'Dark');
   expect(ref.getCurrentRoute()?.key).toBe(routeKey);
-  expect(JSON.stringify(app.toJSON())).toContain('#101714');
+  expect(
+    JSON.stringify(app.toJSON(), (_key, value: unknown) =>
+      React.isValidElement(value) ? undefined : value,
+    ),
+  ).toContain('#101714');
   await press(app, 'radio', 'Українська');
   expect(ref.getCurrentRoute()?.key).toBe(routeKey);
-  expect(JSON.stringify(app.toJSON())).toContain('Налаштування');
+  expect(
+    JSON.stringify(app.toJSON(), (_key, value: unknown) =>
+      React.isValidElement(value) ? undefined : value,
+    ),
+  ).toContain('Налаштування');
   await act(async () => ref.navigate('Edit', { id: 'missing' }));
   await press(app, 'button', 'Назад');
   expect(ref.getCurrentRoute()?.key).toBe(routeKey);
   await press(app, 'tab', 'Головна');
   expect(ref.getCurrentRoute()?.name).toBe('Home');
-  expect(JSON.stringify(app.toJSON())).toContain('Нова оплата');
+  expect(
+    JSON.stringify(app.toJSON(), (_key, value: unknown) =>
+      React.isValidElement(value) ? undefined : value,
+    ),
+  ).toContain('Нова оплата');
 });

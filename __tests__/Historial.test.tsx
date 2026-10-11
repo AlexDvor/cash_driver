@@ -19,6 +19,7 @@ import {
   validInput,
 } from './sqliteTestDatabase';
 import { CashTransaction } from '../src/features/transactions/types';
+import { HistoryPage } from '../src/features/transactions/transactionReadContracts';
 
 let db: SqlConnection;
 let services: Persistence;
@@ -117,7 +118,10 @@ function rowIds() {
     .map(node => node.props.testID);
 }
 function content() {
-  return JSON.stringify(app.toJSON());
+  // SectionList mock props contain React elements; assert rendered content only.
+  return JSON.stringify(app.toJSON(), (_key, value: unknown) =>
+    React.isValidElement(value) ? undefined : value,
+  );
 }
 async function details(id: string) {
   await act(async () => ref.navigate('Details', { id }));
@@ -152,10 +156,10 @@ test('genuine empty state navigates Home; load error shows retry without fabrica
   await press('Registrar cobro');
   expect(ref.getCurrentRoute()?.name).toBe('Home');
   jest
-    .spyOn(services.transactions, 'list')
+    .spyOn(services.transactions, 'listPage')
     .mockRejectedValueOnce(Error('read failed'));
   await press('Historial');
-  expect(content()).toContain('No se pudieron cargar las operaciones');
+  expect(content()).toContain('Datos anteriores; actualización fallida');
   expect(rowIds()).toEqual([]);
   await press('Reintentar');
   expect(content()).toContain('Todavía no hay operaciones');
@@ -164,12 +168,12 @@ test('genuine empty state navigates Home; load error shows retry without fabrica
 test('loading has no fabricated rows and a stale pre-edit response cannot overwrite refreshed history', async () => {
   const original = await seed();
   await mount();
-  let release: (rows: CashTransaction[]) => void = () => {};
-  const oldRead = new Promise<CashTransaction[]>(resolve => {
+  let release: (page: HistoryPage) => void = () => {};
+  const oldRead = new Promise<HistoryPage>(resolve => {
     release = resolve;
   });
   jest
-    .spyOn(services.transactions, 'list')
+    .spyOn(services.transactions, 'listPage')
     .mockImplementationOnce(() => oldRead);
   await press('Historial');
   expect(content()).toContain('Cargando operaciones');
@@ -183,7 +187,7 @@ test('loading has no fabricated rows and a stale pre-edit response cannot overwr
   });
   expect(rowIds()).toEqual([`history-${original.id}`]);
   await act(async () => {
-    release([original]);
+    release({ records: [original], nextCursor: null });
     await oldRead;
   });
   const row = app.root.findAll(

@@ -367,6 +367,8 @@ test('persisted partial tip displays independently and edit refreshes history, d
       netCashCents: 2700,
     }),
   ]);
+  // Save keeps Edit open; return through Details to the focused History screen.
+  await act(async () => ref.goBack());
   await act(async () => ref.goBack());
   await press('Todo');
   const updatedRow = app.root.findAllByProps({
