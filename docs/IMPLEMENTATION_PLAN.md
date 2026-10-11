@@ -1,8 +1,69 @@
 # Implementation plan and acceptance checks
 
+## Calendar/history extension — Phase 6 acceptance handoff (2026-10-11)
+
+Status: **PARTIALLY VERIFIED / NOT COMPLETE**. The owner assigned calendar Phase 6 and explicitly confirmed CashDriver after providing unrelated trading-documentation instructions. This is the current extension status; earlier phase reports below are historical. Available Android volume/build and selected behavioral checks passed. Required iOS and full screen-reader/native matrix checks remain unverified. Phase 7 has not started; retain CALENDAR_HISTORY_PLAN.md.
+
+### Changes and independent review
+
+Read-only data/lifecycle review identified repeated SQL reads for same-turn commit/resume notifications in Historial and Resumen. Shared `src/hooks/app/useCoalescedRefresh.ts` now coalesces those notifications into one microtask refresh. Both consumers invalidate old generations immediately, before queuing the read; History resets its cursor and blocks load-more during refresh. Query/service changes and unmount cancel queued work. Focus/manual Retry remains immediate. A manual/focus refresh between notification and its microtask can still issue an additional generation-safe read; this is not a global debounce or cancellation of already running SQL.
+
+New behavioral tests resolve an old deferred response during 20 commit notifications and verify exactly one replacement read, no stale publication and the latest result. Summary also includes resume in the burst. Existing filter, mutation/page races, failed writes, retry, cleanup and exact arithmetic coverage remains. Data reviewer found no confirmed correctness/lifecycle regression after the fix. UI reviewer inspected fresh dark/landscape/large-text evidence and found no confirmed source/layout defect; TalkBack screenshots do not prove focus or spoken announcements.
+
+### Fixture and reproducible native checks
+
+`__tests__/calendarVolumeFixture.ts` generates 10,000 deterministic synthetic rows across all four platforms: 1,000 equal timestamps on October8,2026; four sparse February2025 dates; two Madrid DST boundary records; remaining rows distributed over 2020–2024. Fare=100 cents, received=101, alternating tip=0/1, exact derived change/net. These are test records, not user history. `calendarNativeChecks.ts` verifies 1,001 October rows over 21 pages, descending timestamp/ID tie ordering without duplicates/gaps, exact aggregates, occupied dates, sparse/empty months and indexed plans. `calendarVolumeAcceptance.test.ts` closes/reopens a real SQLite file and repeats these checks.
+
+Native execution used emulator-5554, sdk_gphone16k_x86_64, API37, Android release property17, density480, original1280x2856/font1.0. A separately built embedded Hermes release APK used `com.tempapp.calendartest` and `calendar-phase6-fixture.sqlite`; the package was absent before installation. `nativeCalendarEntry.tsx` injects real SQLite/repository/services into App; production index/config/persistence is not replaced. Optional read-failure mode executes a SELECT against an absent table on the first listPage, summarize and occupiedDates call, then permits real reads. This establishes those native SQL read failure/retry paths, not arbitrary storage failures.
+
+Retained build helpers are [Gradle init](calendar_phase6_evidence/acceptance.init.gradle) and [test Metro config](calendar_phase6_evidence/metro.config.cjs). From android, reproduce with `./gradlew.bat :app:assembleRelease -I ../docs/calendar_phase6_evidence/acceptance.init.gradle -PreactNativeArchitectures=x86_64`. Before installation verify the APK package is exactly com.tempapp.calendartest and that replacing an existing test package will not erase needed work. Never install this fixture APK as com.tempapp. Select the normal or failure button in the report screen; large text/rotation can recreate the test Activity and return to that screen, requiring reopening App. Restored ordinary debug/release build metadata confirms com.tempapp. Test package was removed after evidence capture; normal app foreground and original display/font/GMT/rotation/accessibility/animation settings restored. Production records/preferences were not mutated in this phase.
+
+### Measurements — observations, not targets
+
+Raw reports: [force-stop/restart](calendar_phase6_evidence/native-restart.json), [restart after native edits/restoration](calendar_phase6_evidence/native-after-edit.json), [original native log lines](calendar_phase6_evidence/native-observations.log). The initial XML export produced empty files; final review caught this and actual JSON was recovered from retained logcat, parsed and independently matched to the corresponding original log lines. No measurement was reconstructed from the rounded table.
+
+| Operation | Restart run | After edit/reinstall run |
+| --- | --- | --- |
+| Compatibility preflight + first page | 129.73ms | 19.25ms |
+| Page traversal after first fetch | 143.55ms | 57.62ms |
+| Validated October summary | 2.06ms | 13.51ms |
+| Madrid occupied-date query | 25.54ms | 26.72ms |
+
+Runs are observations under different warmup/build conditions, not a statistical benchmark or latency guarantee. The traversal timer includes JS processing of the first page and subsequent fetches. Maximum database-to-JS history transfer was51 rows (50+lookahead); summary platform aggregates return at most4 rows. October result: count1001, fare100100/tip501/net100601 cents, average100; platform fares25000/25100/25000/25000. Madrid dates8/25; GMT dates8/24. EXPLAIN uses created_at and platform_created_at indexes with temporary B-trees for tie sorting/grouping; no schema/index change is justified by this evidence. No derived-result cache is introduced. Existing compatibility preflight still scans metadata; bounded result transfer does not mean all query work is O(page size).
+
+`dumpsys meminfo` TOTAL PSS observations were110235kB after initial report/App,120938kB after mixed UI/theme/rotation/timezone activity,137539kB in the later failure-mode process after Load More; corresponding RSS224268/235620/252212kB. These include the test harness and synthetic oracle allocations, different process runs and UI allocations. They are not a controlled production memory comparison or leak proof. SectionList virtualizes rendered views; loaded records/grouping grow as pages are appended. Page LIMIT does not bound total session memory. UI remained navigable during the sampled scroll/month interactions; frame/jank/touch-latency profiling and physical-device memory acceptance are NOT VERIFIED. Numeric performance targets remain NOT DOCUMENTED.
+
+### Per-scenario acceptance
+
+| Scenario | Result and scope |
+| --- | --- |
+| Real Android SQLite, multi-year/ties, all four platforms, sparse/empty reads, 21 dense pages, restart | PASS for isolated native repository helper; raw reports above. Node file-reopen test independently passes. |
+| Dense monthly Resumen | PASS: actual UI count1001, fare1001EUR, tip5.01EUR, retained1006.01EUR, average1EUR. [ES summary](calendar_phase6_evidence/es-summary.png). |
+| Direct historical year/month | PASS: chooser applies February2025, count4/F4/T0.02/N4.02EUR. [Sparse summary](calendar_phase6_evidence/sparse-summary.png). |
+| Draft navigation / native Back | PASS: browsing September then Back preserved applied October history. Footer cancel coverage also remains automated; every native dismissal route is not separately verified here. |
+| Rapid month changes / scrolling / Load More | PASS for sampled sequence of3 previous+4 next from September ending at correct October,20 fast swipes to footer and one Load More preserving visible rows/extending content. Complete UI traversal of all21 pages and frame profiling NOT VERIFIED. |
+| Timezone/day/background-resume | PASS: Madrid marks8/25; selecting25 then GMT resume preserves explicit day25 and shows empty result. [Pinned day](calendar_phase6_evidence/timezone-day.png). |
+| Historical month timezone rebinding / relative local date | PASS: pinned February2025 survives Pacific/Kiritimati resume and changes4 to3 operations because Feb28 UTC12 becomes March1 local; GMT restores4. [Rebound month](calendar_phase6_evidence/timezone-month.png). Hoy changed local date12 back to11 on GMT resume; re-entering Mes restored February. Actual overnight clock rollover NOT VERIFIED. |
+| Native edit / undo | PASS for sampled October8 synthetic row: remove tip saves T0/C1/N100 cents with original date, re-edit All change restores T1/C0/N101; returning to History preserves day8 and updated row. Full restart helper matches restored count/totals. Single deletion confirmation then Undo preserves row. Native committed delete/background cancellation, insert-between-pages and failed-write matrix NOT VERIFIED; existing automated coverage remains. |
+| Native SQL errors / Retry | PASS for first list/summary/activity failures: localized error, no false zero/absence; Retry restores results. [History error](calendar_phase6_evidence/history-error.png), [summary error](calendar_phase6_evidence/summary-error.png), [calendar error](calendar_phase6_evidence/calendar-error.png), [calendar retry](calendar_phase6_evidence/calendar-retry.png). Load-more/refresh error variants remain automated only. |
+| Light/dark and ES/EN/UK | PASS for selected normal-width calendar/summary views, same applied month through preference changes; not every language/theme/screen permutation. [ES light](calendar_phase6_evidence/es-calendar.png), [EN dark](calendar_phase6_evidence/en-dark-calendar.png). |
+| Actual landscape / enlarged text | PASS for selected640x360dp/font1.5 Ukrainian dark calendar after Activity recreation/reopen: seven columns and readable navigation; scrolling reaches Show month/Cancel. [Top](calendar_phase6_evidence/landscape-large-top.png), [footer](calendar_phase6_evidence/landscape-large-footer.png). Phase5's360dp portrait check remains historical evidence; full matrix NOT VERIFIED. |
+| Touch targets | Selected normal-width native calendar bounds144physicalpx at density3 =48dp. Full target/traversal matrix NOT VERIFIED. |
+| TalkBack | ATTEMPTED / NOT VERIFIED: service bound, setup notification prompt required closing, subsequent gestures ambiguously activated day8. Whole-window green outline does not establish date focus. Spoken output, initial/traversal/background isolation/return focus remain unverified; do not classify application accessibility PASS or FAIL from this attempt. |
+| Reduce Motion | PARTIAL: calendar static UI remains usable with animator/transition/window scales0; source animationType=none. Native preference notification/whole-app motion and all controls NOT VERIFIED. Original null/1/1 settings restored. |
+| iOS native build/UI/SQLite/VoiceOver | NOT VERIFIED: this Windows environment has no macOS/Xcode/iOS simulator. Metro compatibility from earlier phases is not native acceptance. |
+
+### Fresh checks and remaining gate
+
+`npm run typecheck` PASS; `npm run lint` PASS; full `npm test -- --runInBand` **38 suites /359 tests PASS in24.765s**. Changed TS/TSX Prettier PASS. Global format:check still fails solely on unchanged metro.config.js; no config was modified to suppress it. Native failure-mode APK build PASS15s; final normal `assembleDebug assembleRelease -PreactNativeArchitectures=x86_64` PASS19s. Existing dependency/Gradle warnings remain. No active Git hooks/CI were found (core.hooksPath unset, samples only, no .github); checks ran directly without bypasses. Read-only agents reviewed data/lifecycle and actual UI evidence.
+
+Full Phase6 remains NOT COMPLETE. Minimum next work is real TalkBack focus/announcements and Reduce Motion checks, remaining Android scenario/adaptive matrix, and macOS/Xcode iOS acceptance. Do not begin Phase7 removal until all required extension gates pass. Earlier tip/haptics/release-signing gates remain independent and unresolved.
+
+When returning to the normal debug app, Metro9356 still answered /status but its bundle requests stalled at0/1 after native builds. Checked its exact CLI/process identity, restarted only that server hidden with two workers/reset-cache (PID31828), and restarted com.tempapp without clearing data. Fresh native hierarchy confirmed the normal Spanish Home UI returned. This is development-server recovery, not a production data fix; no production APK was installed. Final documentation links and diff/whitespace checks PASS. Retained native JSON exports were independently reviewed after recovery.
+
 ## Calendar/history extension — final Phase 5 handoff (2026-10-11)
 
-Status: **COMPLETE for Phase 5 implementation, automated/build checks and selected Android visual verification**. This handoff supersedes the earlier blocked rework below. Phase 6 full native/accessibility/volume acceptance is NOT STARTED; Phase 7 cleanup is NOT STARTED. Keep the temporary plan until its final gates pass.
+Status: **COMPLETE for Phase 5 implementation, automated/build checks and selected Android visual verification**. This historical handoff supersedes the earlier blocked rework below. Current Phase6 status is recorded above; Phase7 cleanup has not started. Keep the temporary plan until its final gates pass.
 
 Compared all four calendar_mockups concepts with the running app. Final presentation follows centered modal01 and month chooser04 with existing reactive palettes; alternative inline/sheet layouts and illustrative platform icons/transactions are not additional features. Width, text scaling and touch targets adapt to the device rather than copying generated image dimensions.
 

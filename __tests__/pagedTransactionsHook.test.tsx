@@ -185,6 +185,28 @@ test('same-query refresh retains data on error and retry replaces the previous p
   }
 });
 
+test('a commit burst shares one page refresh and invalidates an older response immediately', async () => {
+  const f = await fixture();
+  const stale = deferred<HistoryPage>();
+  const latest = deferred<HistoryPage>();
+  f.read.mockReturnValueOnce(stale.promise).mockReturnValueOnce(latest.promise);
+  try {
+    await f.mount();
+    await act(async () => {
+      for (let i = 0; i < 20; i++) {
+        f.services.changes.notify('transactions');
+      }
+      stale.resolve(page(['stale']));
+    });
+    expect(f.read).toHaveBeenCalledTimes(2);
+    expect(f.current().state.records).toBeNull();
+    await act(async () => latest.resolve(page(['latest'])));
+    expect(f.current().state.records?.map(row => row.id)).toEqual(['latest']);
+  } finally {
+    await f.close();
+  }
+});
+
 test('committed write discards an in-flight page; failed write does not invalidate reads', async () => {
   const f = await fixture();
   const stale = deferred<HistoryPage>();

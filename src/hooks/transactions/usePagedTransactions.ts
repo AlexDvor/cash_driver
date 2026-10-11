@@ -3,6 +3,7 @@ import { AppState } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
 import { useDataChanges } from '../app/useDataChanges';
+import { useCoalescedRefresh } from '../app/useCoalescedRefresh';
 import {
   HistoryCursor,
   HistoryReadFilter,
@@ -116,6 +117,34 @@ export function usePagedTransactions(filter: HistoryReadFilter) {
     }
   }, [key, services, publish, isCurrent, readFilter]);
 
+  const invalidate = useCoalescedRefresh(
+    refresh,
+    useCallback(() => {
+      if (
+        !mounted.current ||
+        key !== current.current.key ||
+        services !== current.current.services
+      ) {
+        return false;
+      }
+      generation.current += 1;
+      cursor.current = null;
+      const previous = snapshot.current;
+      const records =
+        previous.key === key && previous.services === services
+          ? previous.state.records
+          : null;
+      publish({
+        ...initialState,
+        status: records ? 'ready' : 'loading',
+        records,
+        refreshing: records !== null,
+        empty: records?.length === 0,
+      });
+      return true;
+    }, [key, services, publish]),
+  );
+
   const loadMore = useCallback(async () => {
     const previous = snapshot.current;
     const state = previous.state;
@@ -185,20 +214,20 @@ export function usePagedTransactions(filter: HistoryReadFilter) {
     useCallback(
       change => {
         if (change === 'transactions') {
-          refresh();
+          invalidate();
         }
       },
-      [refresh],
+      [invalidate],
     ),
   );
   useEffect(() => {
     const subscription = AppState.addEventListener('change', next => {
       if (next === 'active') {
-        refresh();
+        invalidate();
       }
     });
     return () => subscription.remove();
-  }, [refresh]);
+  }, [invalidate]);
 
   const state =
     result.key === key && result.services === services

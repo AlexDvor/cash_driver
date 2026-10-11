@@ -3,6 +3,7 @@ import { AppState } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
 import { useDataChanges } from '../app/useDataChanges';
+import { useCoalescedRefresh } from '../app/useCoalescedRefresh';
 import { useLocalClock } from '../app/useLocalClock';
 import {
   getPeriodBounds,
@@ -105,6 +106,30 @@ export function usePeriodSummary(
     }
   }, [services, key, start, end]);
 
+  const invalidate = useCoalescedRefresh(
+    refresh,
+    useCallback(() => {
+      if (
+        !mounted.current ||
+        key !== currentKey.current ||
+        services !== currentServices.current
+      ) {
+        return false;
+      }
+      request.current += 1;
+      setResult(previous => ({
+        key,
+        services,
+        state: { status: 'loading', summary: null },
+        retainedSummary:
+          previous.key === key && previous.services === services
+            ? previous.state.summary ?? previous.retainedSummary
+            : null,
+      }));
+      return true;
+    }, [key, services]),
+  );
+
   useEffect(() => {
     mounted.current = true;
     return () => {
@@ -122,20 +147,20 @@ export function usePeriodSummary(
     useCallback(
       change => {
         if (change === 'transactions') {
-          refresh();
+          invalidate();
         }
       },
-      [refresh],
+      [invalidate],
     ),
   );
   useEffect(() => {
     const subscription = AppState.addEventListener('change', next => {
       if (next === 'active') {
-        refresh();
+        invalidate();
       }
     });
     return () => subscription.remove();
-  }, [refresh]);
+  }, [invalidate]);
 
   // Do not expose the previous period even before its next effect starts.
   const sameQuery = result.key === key && result.services === services;

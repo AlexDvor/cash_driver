@@ -1,0 +1,11 @@
+allprojects { p ->
+  p.afterEvaluate {
+    if (p.path == ':app') {
+      p.android.defaultConfig.applicationId = 'com.tempapp.calendartest'
+      def taskRoot = p.rootProject.projectDir.parentFile
+      p.extensions.getByName('react').getEntryFile().set(new File(taskRoot, '__tests__/nativeCalendarEntry.tsx'))
+      p.extensions.getByName('react').getBundleConfig().set(new File(taskRoot, 'docs/calendar_phase6_evidence/metro.config.cjs'))
+      p.extensions.getByName('react').getExtraPackagerArgs().set(['--max-workers', '2'])
+    }
+  }
+}

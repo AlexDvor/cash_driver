@@ -188,6 +188,26 @@ test('committed notifications invalidate in-flight reads; preferences do not ref
   await act(async () => older.resolve(summary(1)));
   expect(current.state.summary?.operationCount).toBe(9);
 });
+
+test('a burst of commits and resume shares one read and rejects the pre-commit result', async () => {
+  const older = deferred<CashSummary>();
+  const latest = deferred<CashSummary>();
+  mockServices.transactions.summarize
+    .mockReturnValueOnce(older.promise)
+    .mockReturnValueOnce(latest.promise);
+  await mount();
+  await act(async () => {
+    for (let i = 0; i < 20; i++) {
+      mockServices.changes.notify('transactions');
+    }
+    resume('active');
+    older.resolve(summary(1));
+  });
+  expect(mockServices.transactions.summarize).toHaveBeenCalledTimes(2);
+  expect(current.state.summary).toBeNull();
+  await act(async () => latest.resolve(summary(20)));
+  expect(current.state.summary?.operationCount).toBe(20);
+});
 test('resume refreshes and unmount removes subscriptions and makes retained callbacks inert', async () => {
   await mount();
   await act(async () => resume('background'));
