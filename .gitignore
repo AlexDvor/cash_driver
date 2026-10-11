@@ -1,6 +1,7 @@
 # OSX
 #
 .DS_Store
+node-compile-cache
 
 # Xcode
 #
@@ -74,3 +75,18 @@ docs
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+
+aws configure set role_arn arn:aws:iam::642645270164:role/cli-admin-role --profile admin
+
+aws configure set source_profile student-base --profile admin
+
+aws configure set mfa_serial arn:aws:iam::642645270164:mfa/student-cli-phone --profile admin
+
+aws configure set role_session_name student-cli-admin --profile admin
+
+aws configure set duration_seconds 3600 --profile admin
+
+aws configure set region eu-central-1 --profile admin
+
+aws configure set output json --profile admin
