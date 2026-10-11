@@ -67,7 +67,7 @@ function buttons() {
               node.props.testID === 'calendar-backdrop'),
         )
         .map(node => [
-          node.props.accessibilityLabel ?? node.props.testID,
+          node.props.testID ?? node.props.accessibilityLabel,
           node,
         ]),
     ).values(),
@@ -130,9 +130,50 @@ test('browse, apply and every dismissal delegate separate controlled actions', a
   );
   expect(props.onCancel).toHaveBeenCalledTimes(3);
 });
+
+test('header close and footer cancel discard the same draft without applying it', async () => {
+  await mount();
+  await act(async () => button('Next month').props.onPress());
+  const cancellations = buttons().filter(
+    node => node.props.accessibilityLabel === 'Cancel',
+  );
+  expect(cancellations).toHaveLength(2);
+  for (const cancel of cancellations) {
+    await act(async () => cancel.props.onPress());
+  }
+  expect(props.onCancel).toHaveBeenCalledTimes(2);
+  expect(props.onApplyMonth).not.toHaveBeenCalled();
+  expect(props.onApplyDay).not.toHaveBeenCalled();
+});
+
+test('controlled year and month drafts apply the chosen historical month without hidden navigation', async () => {
+  await mount();
+  expect(
+    app.root.findAll(node => node.props.accessibilityRole === 'adjustable'),
+  ).toHaveLength(0);
+  await act(async () => button('Choose month and year').props.onPress());
+  await act(async () => button('Next year').props.onPress());
+  props.draftMonth = { year: 2027, month: 10 };
+  await act(async () => app.update(<CalendarModal {...props} />));
+  await act(async () => button('March').props.onPress());
+  expect(props.onBrowseMonth).toHaveBeenLastCalledWith({
+    year: 2027,
+    month: 3,
+  });
+  props.draftMonth = { year: 2027, month: 3 };
+  await act(async () => app.update(<CalendarModal {...props} />));
+  expect(button('March').props.accessibilityState.selected).toBe(true);
+  expect(props.onApplyMonth).not.toHaveBeenCalled();
+  await act(async () => button('Show month').props.onPress());
+  expect(props.onApplyMonth).toHaveBeenCalledWith({ year: 2027, month: 3 });
+});
 test('year/month chooser navigates drafts without applying, and closing resets chooser', async () => {
   await mount();
+  expect(button('Choose month and year').props.accessibilityValue.text).toBe(
+    'October 2026',
+  );
   await act(async () => button('Choose month and year').props.onPress());
+  expect(button('Show days').props.accessibilityValue.text).toBe('2026');
   await act(async () => button('Next year').props.onPress());
   expect(props.onBrowseMonth).toHaveBeenCalledWith({ year: 2027, month: 10 });
   await act(async () => button('March').props.onPress());

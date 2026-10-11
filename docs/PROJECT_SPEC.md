@@ -40,6 +40,7 @@ Partial-tip requirements below were documented on 2026-10-09. Phases 2–3 imple
 
 - Newest operations first, grouped by local date.
 - Period filters: Hoy, Semana, Mes, Todo.
+- Calendar/history extension (2026-10-10, Phase 5 implementation and automated checks complete; native acceptance NOT VERIFIED): Mes initially shows the current calendar month and supports previous/next month, direct month/year selection and an explicit selected day. Follow the shared calendar contract below; Hoy/Semana and Todo retain their existing meaning.
 - Platform filter: Todas, Uber, Cabify, Bolt, Otro.
 - Each row shows platform, date/time, fare, and a tip when present.
 - Open details with fare, received cash, change given, tip, and cash retained.
@@ -53,6 +54,21 @@ Partial-tip requirements below were documented on 2026-10-09. Phases 2–3 imple
 - Display fare totals by platform.
 - Refresh after changes and when returning to the screen.
 - Show zero totals for empty periods; do not fabricate charts or records.
+- Use the same calendar interaction as Historial, with independent screen selection. Monthly/day totals cover the applied local period, using the existing monetary formulas.
+
+### Calendar and large-history extension — 2026-10-10
+
+Status: **Phase 5 IMPLEMENTED / automated checks PASS; native acceptance NOT VERIFIED**. This assigned extension expands historical navigation and bounded loading, not payment arithmetic. [UI_DESIGN.md](UI_DESIGN.md#shared-calendar-and-period-navigation) defines presentation; [DATA_AND_CALCULATIONS.md](DATA_AND_CALCULATIONS.md#calendar-selection-and-bounded-reads) defines queries and lifecycle. The phased execution and actual results are in [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
+
+- Share one calendar modal and quick year/month selector across Historial and Resumen. A month grid has green circles on dates with saved cash operations across all platforms. A plain date means no saved cash operation; it does not prove a day off. The selected date and today have separate indicators.
+- Each screen keeps its own session-only applied selection. First Mes entry selects the current local month; later entries restore its prior selection. Automatic current-month selection follows month rollover until explicit month/day navigation, which pins that calendar selection. Theme/language changes and refresh preserve the selection. Restart starts with existing default Hoy; no new persisted preference.
+- Browsing the modal is a draft: Show month applies its month, selecting a day applies that date, and cancel/dismiss/Back preserves the prior filter. Day is a calendar submode of Mes, not a replacement for Hoy. Return to month shows the selected day's full month. Future periods may be viewed as ordinary empty periods after successful loading.
+- Historial keeps its platform filter when applying dates; activity markers remain all-platform with an explicit legend. Resumen keeps all existing statistics and platform totals. No cross-screen selection synchronization.
+- History loads bounded pages into one virtualized viewport. Summary and calendar query only relevant ranges and return compact validated results; do not transfer all stored operations to calculate a period.
+- Provide separate initial, load-more and refresh feedback, empty states only after successful reads, and localized errors/Retry. Unknown calendar activity during loading/error must not look like a confirmed empty month. Prior-period results cannot appear under a newly selected date.
+- Preserve pending deletion in rows/totals/calendar until deletion commits, and preserve all existing Home/edit/settings behavior. Read-only date navigation never creates or modifies records.
+
+No measured capacity, numeric performance target or native acceptance is established by these requirements. Page size/index/cache implementation choices and installed calendar compatibility are later phase gates; do not promise results before verification.
 
 ### Ajustes
 

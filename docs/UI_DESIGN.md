@@ -124,6 +124,62 @@ After confirmed single-operation deletion, show `Eliminación pendiente` with `D
 
 Title `Resumen`, visible selected date range, segmented Hoy/Semana/Mes selector. Large deep-green card: `Efectivo retenido`, total, and operation count. White statistic cards: `Importe de viajes`, `Propinas`, `Promedio por operación`. A simple `Por plataforma` list shows fare totals. Label values explicitly so tips are not counted twice. Charts are unnecessary in v1.
 
+## Shared calendar and period navigation
+
+Calendar/history extension dated 2026-10-10: **Phase 5 COMPLETE for implementation, automated/build checks and selected Android visual checks; full native/accessibility acceptance remains pending Phase 6**. Actual checks/limitations are in IMPLEMENTATION_PLAN.md. Historial retains Hoy/Semana/Mes/Todo and its platform selector; Resumen retains Hoy/Semana/Mes and all existing metrics. In Mes, show a localized month/year row with previous/next controls and a calendar icon button with a localized accessibility label. In explicit day submode keep Mes selected, show the full selected date and a visible Return to month action. A chip press on Hoy/Semana/Todo exits that submode; subsequent Mes entry restores the saved calendar selection for this screen.
+
+Use a **centered modal** on both screens and in both themes, with safe-area constrained scrollable content on short/large-text displays. Do not make a permanent inline calendar or a different dark-theme interaction. This is the selected composition for this phase; generated mockups remain visual guidance, not implemented screenshots.
+
+Phase 5 visual rework follows concepts 1 and 4: compact Select date/Select month heading with an accessible close control; the outlined calendar icon switches between the day grid and twelve short month labels (full month names and the current year/month remain accessible). Month choice updates only the draft and stays in the chooser, with a localized month/year preview above Show month. Selected month uses primary/on-primary tokens and bold text. The day grid has a green selected-day ring, independent of activity fill and today's outline, compact week spacing and a green all-platform legend dot. Activity loading/error feedback belongs to the day grid; the chooser uses its preview instead. Show month and Cancel remain reachable in the scrollable footer. Concepts 2/3 supply visual direction and alternative compositions, not another calendar mode or illustrative transaction fields.
+
+Measure the horizontal calendar viewport with onLayout. Fit seven columns whenever 48-unit touch targets and scaled digits fit; reduce overlay/content horizontal padding on narrow windows and retain horizontal scrolling when they cannot fit safely. Limit modal height to safe areas, clip scrolling content to rounded panel bounds, and preserve vertical scrolling on short/large-text screens. The external month label reserves readable width so the calendar trigger wraps instead of squeezing the month into a vertical column. Do not shrink or disable system text scaling.
+
+Opening starts at the applied month/day's month. Previous/next month controls outside the modal apply and pin a month immediately. Inside the modal, arrows and the quick year/month selector change only its draft month. The year selector navigates years and displays twelve localized month choices, without rendering every historical calendar or an arbitrary year cutoff. Month choice stays in the chooser without applying; Show month applies it, while the calendar icon's Show days action returns to that draft month's day grid. Remove the library's entire header to avoid hidden adjustable navigation bypassing the controlled draft.
+
+Show month applies and pins the draft month, clears day submode and closes the modal. Tapping a day applies and pins that local date and closes the modal; it is an explicit apply action. Cancel, close button, backdrop dismissal and native Back discard draft navigation and preserve applied filters. Return to month applies the selected day's month and clears day submode. Reopening starts from the last applied selection, not the cancelled draft. Month browsing is not payment date editing.
+
+Use Monday-first day columns, one visible calendar month, correctly aligned days and localized month/date names. Adjacent-month dates are not interactive cells; navigate months explicitly. Today has an outline; activity has a filled green circle with on-primary text; selection adds a distinct ring and accessible selected state without erasing activity. Today/selected but inactive dates keep no activity fill. Future days can be selected. A plain date after successful activity loading means no recorded cash operation, not a verified day off.
+
+Legend: Con operaciones en efectivo (todas las plataformas). The Historial platform filter does not change markers; a marked day can have an empty filtered list. Announce full date, activity status (including unknown while loading), today and selection to screen readers. Restore focus to the calendar button on dismissal; keep background controls out of modal focus traversal. Respect existing theme, contrast/touch targets, text scaling and Reduce Motion rules. Language/theme changes preserve modal draft and applied selection; the two screens keep independent state and no persisted new preference.
+
+### Calendar and history loading feedback
+
+| State | Visible behavior |
+| --- | --- |
+| Initial history/summary read | Loader in the data area; no fabricated values or records |
+| Applied period/platform changes | New range is visible with its loading state; hide results for a different query identity |
+| Same-query refresh | Keep prior results explicitly identified as updating; subtle progress; no replacement with fake zeros |
+| History load-more | Footer spinner; existing rows remain; only one load-more request; after failure show footer Retry without discarding loaded rows |
+| Initial read/refresh failure | Localized error and Retry; retained same-query results, if any, are labeled as not updated; empty/success state is not shown |
+| Calendar activity pending/error | Keep calendar navigation usable; visible loading/error message explains activity is unknown; do not show absence as confirmed, and do not show another month's markers |
+| Successful empty month/day | Zero summary totals and period-specific empty history/calendar; no work/day-off assertion |
+| End of history pages | Stop load-more and remove its spinner; no endless request loop |
+
+Historial uses one virtualized scrolling viewport with date-group headers and the period/platform controls reachable. Do not nest it inside ScreenContainer's vertical ScrollView. Empty filtered pages use the period-specific message; show the global first-record CTA only when a separate successful existence result establishes that there are no saved operations anywhere.
+
+### Calendar wording and reference images
+
+Matching centralized keys are implemented in ES/EN/UK. The table below remains the wording contract; dynamic dates/months use existing locale formatting. The month-picker heading is Seleccionar mes / Select month / Вибрати місяць.
+
+| Text purpose | Spanish | English | Ukrainian |
+| --- | --- | --- | --- |
+| Open calendar | Abrir calendario | Open calendar | Відкрити календар |
+| Modal title | Seleccionar fecha | Select date | Вибрати дату |
+| Quick selector | Seleccionar mes y año | Select month and year | Вибрати місяць і рік |
+| Month apply | Mostrar mes | Show month | Показати місяць |
+| Return from day | Volver al mes | Return to month | Повернутися до місяця |
+| Activity legend | Con operaciones en efectivo (todas las plataformas) | With cash operations (all platforms) | Є готівкові операції (усі платформи) |
+| No activity | Sin operaciones en efectivo | No cash operations | Немає готівкових операцій |
+| Activity loading | Cargando días con operaciones… | Loading days with operations… | Завантаження днів з операціями… |
+| Activity error | No se pudieron cargar los días con operaciones. | Could not load days with operations. | Не вдалося завантажити дні з операціями. |
+| Activity unknown | Actividad sin confirmar | Activity not confirmed | Наявність операцій не підтверджено |
+| Refreshing | Actualizando… | Updating… | Оновлення… |
+| Retained results after failure | Datos anteriores; actualización fallida | Previous data; update failed | Попередні дані; оновлення не вдалося |
+
+Reuse existing cancel/retry/loading labels and provide localized previous/next month/year accessibility labels. Do not concatenate month/year strings in a language-specific order. Spinner text must announce pending reads without repeatedly announcing every render.
+
+Owner-requested imagegen concepts: [light modal](calendar_mockups/01-history-calendar-light.png), [inline alternative](calendar_mockups/02-summary-calendar-light.png), [dark sheet alternative](calendar_mockups/03-history-calendar-dark.png), [month/year selector](calendar_mockups/04-month-year-selector.png). Use concept 1's modal composition and concept 4's quick selector with existing reactive dark tokens. Concepts 2/3 compare alternatives; neither requires another presentation mode. All values/records are illustrative. Generated icon/label/order/arrow/arithmetic discrepancies must not override written contracts or imply native validation. Preserve these useful references when the temporary plan is removed.
+
 ## Ajustes
 
 Title `Ajustes`. Theme-colored grouped rows for fixed EUR, language selection, theme selection, preferred platform, confirmation haptics, and version. Destructive action near the bottom: `Eliminar todas las operaciones`. Dialog: `Se eliminarán todas las operaciones guardadas. Esta acción no se puede deshacer.` Actions: `Cancelar`, `Eliminar todo`.

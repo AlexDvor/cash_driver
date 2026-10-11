@@ -9,7 +9,8 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
-  label: { flexGrow: 1, flexShrink: 1 },
+  // Reserve readable space; the calendar trigger wraps on narrow/scaled layouts.
+  label: { flexGrow: 1, flexShrink: 1, minWidth: '40%' },
   button: {
     minHeight: sizing.touchTarget,
     minWidth: sizing.touchTarget,

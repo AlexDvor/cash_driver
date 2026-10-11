@@ -40,7 +40,7 @@ export function CalendarDay({ date }: { date?: DateData }) {
     .filter(Boolean)
     .join(', ');
   const selectionStyle = {
-    borderColor: selected ? colors.text : 'transparent',
+    borderColor: selected ? colors.primary : 'transparent',
   };
   const activityStyle = {
     backgroundColor: occupied ? colors.primary : 'transparent',

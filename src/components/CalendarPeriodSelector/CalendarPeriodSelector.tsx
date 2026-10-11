@@ -10,6 +10,7 @@ import {
 } from '../CalendarModal/calendarPresentation';
 import { CalendarPeriodSelectorProps } from './CalendarPeriodSelector.interface';
 import { styles } from './CalendarPeriodSelector.styles';
+import { CalendarChevron, CalendarIcon } from '../CalendarModal/CalendarIcon';
 
 export function CalendarPeriodSelector({
   selection,
@@ -29,7 +30,7 @@ export function CalendarPeriodSelector({
           onPress={() => onMoveMonth(-1)}
           style={styles.button}
         >
-          <AppText>‹</AppText>
+          <CalendarChevron color={colors.text} previous />
         </Pressable>
         <AppText style={styles.label}>
           {selection.kind === 'day'
@@ -42,7 +43,7 @@ export function CalendarPeriodSelector({
           onPress={() => onMoveMonth(1)}
           style={styles.button}
         >
-          <AppText>›</AppText>
+          <CalendarChevron color={colors.text} />
         </Pressable>
         <Pressable
           ref={calendarButtonRef}
@@ -51,7 +52,7 @@ export function CalendarPeriodSelector({
           onPress={onOpenCalendar}
           style={[styles.button, { backgroundColor: colors.softGreen }]}
         >
-          <AppText>{t('calendarOpen')}</AppText>
+          <CalendarIcon color={colors.primary} />
         </Pressable>
       </View>
       {selection.kind === 'day' && (

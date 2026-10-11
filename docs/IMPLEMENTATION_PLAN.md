@@ -1,5 +1,264 @@
 # Implementation plan and acceptance checks
 
+## Calendar/history extension — final Phase 5 handoff (2026-10-11)
+
+Status: **COMPLETE for Phase 5 implementation, automated/build checks and selected Android visual verification**. This handoff supersedes the earlier blocked rework below. Phase 6 full native/accessibility/volume acceptance is NOT STARTED; Phase 7 cleanup is NOT STARTED. Keep the temporary plan until its final gates pass.
+
+Compared all four calendar_mockups concepts with the running app. Final presentation follows centered modal01 and month chooser04 with existing reactive palettes; alternative inline/sheet layouts and illustrative platform icons/transactions are not additional features. Width, text scaling and touch targets adapt to the device rather than copying generated image dimensions.
+
+### Final changes and review
+
+- CalendarIcon.tsx supplies native View outline calendar/chevron symbols shared by CalendarModal and CalendarPeriodSelector, without dependencies. External navigation now has a compact icon button, keeping month text readable.
+- CalendarModal.tsx/styles provide close/footer actions, separate calendar-icon toggle, compact week spacing, actual-width geometry, safe-area scrolling and a dark scrim that darkens rather than lightens the dark theme. The chooser retains the chosen draft, emphasizes the selected month with color and bold text and shows its month/year preview; Show month applies, Show days returns to the draft grid. Activity feedback remains in the day view.
+- CalendarDay.tsx uses primary for the selected-day outer ring, separate from occupied-day fill and today's outline. Existing repository queries, hooks, day/week rules, date boundaries and transaction writes are unchanged.
+- Read-only review found that renderHeader=null left the library's hidden adjustable header able to change its internal month outside the controlled draft. Stable EmptyCalendarHeader via customHeader removes that path entirely. Final review found no further confirmed code defects; its documentation discrepancies were reconciled.
+- CalendarModal.test.tsx now checks both independent dismissal controls and controlled year/month updates followed by applying the selected historical month, plus absence of hidden adjustable navigation. The earlier cancellation test failed because it queried the wrong renderer layer; stable control IDs distinguish the actual handlers without weakening the two-control assertion. ES/EN/UK title translations are retained.
+
+### Fresh checks
+
+Typecheck PASS; lint PASS; full Jest **37 suites / 356 tests PASS in 15.309s**; Android **assembleDebug + assembleRelease PASS in 52s**. Full Jest ran outside sandbox because sandbox realpath returns EPERM; approval review is available again. Existing Gradle/RN dependency warnings remain, with no suppressions or config changes. core.hooksPath is unset and .git/hooks contains samples only; checks ran directly. Changed-file Prettier and git diff --check PASS. Global format:check reports only the unchanged metro.config.js; this pre-existing formatting issue is outside Phase 5 and remains documented, without changing config or suppressing the check. Older 354-test passes below are historical, not evidence for this patch.
+
+### Selected final Android observations
+
+Pixel_9_Pro emulator-5554, original1280x2856/density480/fontScale1.0: inspected the final light day grid and month/year chooser against concepts01/04. All seven columns, occupied October10 green circle, today's independent outline, legend, outlined toggle and footer are visible. Selected February2025 in the chooser, inspected its preview, applied it and observed Historial's February1–28 range/empty result. Resumen preserved its independent month, selecting the existing October10 record displayed one operation, fare/retained25EUR and zero tips; Return to month restored the month view. No transaction was inserted, edited or deleted.
+
+360x640dp/fontScale1.0: seven columns and 48-unit day targets fit, footer is reachable by scrolling. At fontScale1.5, Android recreated the Activity, so the calendar was explicitly reopened before inspection; month/year wraps readably, seven columns remain visible and scrolling exposes the final dates, Show month and Cancel. Show month was activated successfully. Wide/short override attempts were interrupted by Activity/Metro reloads and do not establish final wide-viewport acceptance; prior selected wide observations below remain historical. TalkBack interaction, iOS, native large-history volume/memory, full adaptive matrix and other Phase6 gates are NOT VERIFIED.
+
+Final dark day grid was inspected after restoring preferences: charcoal card, green occupied-day fill and today's outline, darkened backdrop and readable footer. Actual final emulator screenshots are retained separately from generated concepts: [light calendar](calendar_phase5_evidence/light-calendar.png), [month picker](calendar_phase5_evidence/month-picker.png), [dark calendar](calendar_phase5_evidence/dark-calendar.png), [150% text footer after scrolling](calendar_phase5_evidence/large-text-footer.png). They establish only the observed layouts, not TalkBack or full acceptance.
+
+After repeated Activity configuration changes, the project Metro process38904 stopped responding to /status and debug navigation stalled. Its exact command was checked before restarting it hidden with two workers; replacement PID9356 returned packager-status:running, and app restart without clearing storage restored navigation. Final logs remain in docs/.calendar-native-temp/metro-final*.log. This is dev-server recovery, not an application data/code fix. Emulator size/font and original Español/Oscuro preferences are restored at handoff.
+
+## Historical calendar/history — earlier blocked Phase 5 rework (2026-10-11)
+
+Status: **REWORK IMPLEMENTED; FINAL VERIFICATION BLOCKED / PHASE GATE INCOMPLETE**. Owner explicitly reassigned Phase 5 after selected Android checks. The first Phase 5 completion below is historical evidence; its 354-test/build results do not verify this newer patch. Phase 6 full acceptance remains NOT COMPLETE; Phase 7 has not started and the temporary plan remains.
+
+All four docs/calendar_mockups images were inspected. The rework combines concept 1's centered modal and concept 4's month/year chooser with existing theme tokens and concept 3's green activity treatment. Concept 2's inline calendar and concept 3's sheet remain alternatives, as the permanent UI contract selects one shared centered modal. Illustrative service names/icons/records/amounts and inconsistent arithmetic in generated images are not copied into product data or models.
+
+CalendarModal now has localized Select date / Select month headings, an accessible close control, a tappable month/year heading exposing its current value to accessibility, abbreviated visible months with full accessible names, primary selected-month colors, green legend dot and Show month / Cancel footer actions. Calendar day/year/month callbacks and draft/apply semantics are unchanged. Modal geometry measures its actual horizontal viewport; narrow padding allows seven 48-unit targets at 360dp/normal text, with scrolling retained when scaled text cannot safely fit. Rounded panel clips scroll content; CalendarPeriodSelector reserves readable label width and wraps its trigger. Changes are limited to CalendarModal.tsx/styles, CalendarPeriodSelector.styles.ts, translations.ts and CalendarModal.test.tsx; no SQL, schema, payment/deletion policy or screen query changes.
+
+Read-only agents reviewed presentation/accessibility and both screens' query lifecycle. The presentation review identified the missing current-value announcement on the new month-heading button; accessibilityValue now announces the draft month/year, with regression assertions. Logic review found no confirmed regression in historical month/day queries, independent filters, stale/error handling, all-platform markers, commit invalidation or pending deletion/undo. Added behavioral coverage exercises both header-close and footer-cancel without applying the draft. All prior original UI_DESIGN content was reconciled against HEAD after repairing an accidental P-to-h documentation replacement; only the intended calendar additions remain.
+
+### Selected Android observations before the final mockup patch
+
+Running device: Pixel_9_Pro emulator-5554, sdk_gphone16k_x86_64, physical1280x2856, density480, initial fontScale1.0. No synthetic records were inserted and no transactions were edited/deleted. Existing saved data supplied activity and summary observations.
+
+- Initial calendar clipped its Sunday column at the standard approximately427dp viewport. The viewport-width and ring-padding fix exposed all seven columns; native hierarchy showed 48dp day targets and the existing occupied date's green fill. Selecting that date filtered Historial; Return to month restored month selection.
+- Display override1080x1920 (360x640dp), fontScale1.0: all seven columns fit after compact padding. Vertical scrolling reached the last dates and Show month. At fontScale1.5 the month selector initially squeezed its label into a narrow column; the minimum label width fixed it by wrapping the calendar trigger. Calendar/year-month choices remained reachable with vertical scrolling; historical February2025 applied the correct range and an empty filtered result.
+- Display override1920x1080 (640x360dp), fontScale1.0: Resumen controls and calendar/footer were reachable by vertical scrolling. This is a wide/short viewport observation, not proof of physical orientation/rotation handling. Applying month showed existing native summary data. Browsing the next draft month then native Back retained the applied October2026 range.
+- Original display size and fontScale1.0 were restored. Theme/language checks were then started (Español/Oscuro changed temporarily to English/Light), but subsequent ADB execution was blocked by the automatic approval review service usage limit. **English/Light remains selected pending restoration; final mockup UI has not been visually rechecked.** No screenshot or hierarchy substitutes for TalkBack interaction, native volume/memory, keyboard, iOS or complete acceptance.
+
+The existing Metro process stopped responding to /status and reload left the app loading. Its verified project-specific process was restarted as a hidden dev server with two workers; local bundle request returned HTTP200 and restarting the app without clearing storage restored operation. ADB reverse was configured; the attempted metro.host property override was rejected by Android and not applied. Metro PID15040 remains running, with local logs in docs/.calendar-native-temp/. Existing React Native exports fallback warning remains; this is development environment recovery, not an application code fix.
+
+### Fresh verification and outstanding gates
+
+Latest source/tests: **typecheck PASS; lint PASS; changed-file Prettier PASS; git diff --check PASS**. Active hooks inspected: core.hooksPath unset, only samples; checks ran directly. The prior adaptive-only patch passed Jest37/354 in16.122s before the latest visual rework. **Latest full Jest and updated CalendarModal test NOT VERIFIED:** normal sandbox execution fails EPERM realpath for its temporary directory, including a fresh sandbox-created directory. Approved execution cannot currently be reviewed: the automatic approval service reports a usage limit, not an unsafe-action determination. No permission bypass, test suppression, invented pass or successful-phase commit was used. Final local commit is pending checks; c814540 remains the earlier integration commit.
+
+Minimum next step: run the final full Jest against the current patch, recheck the changed mockup UI on the emulator, restore Español/Oscuro, and resolve any findings before marking this rework COMPLETE. Full Phase 6 native/accessibility/volume and iOS gates remain separate and unpassed.
+
+## Calendar/history extension — Phase 5 screen integration (2026-10-11)
+
+Status: **COMPLETE for implementation and automated/build checks; native acceptance NOT VERIFIED**. Owner assigned Phase 5. Phase 6 is NOT STARTED. Both production screens now use the shared calendar; prior phase entries below are historical handoffs, not the current implementation status.
+
+- HistoryScreen now uses usePagedTransactions with actual period/platform SQL filters and a single SectionList viewport. Stable IDs, local-date sections and explicit load-more/retry preserve page ordering. Grouping and localized row formatting are memoized independently of one-second clock ticks. Initial failure, same-query refresh/stale failure, footer failure and successful empty results have separate feedback.
+- SummaryScreen retains validated SQL aggregates through usePeriodSummary and supplies its independent applied month/day selection. A changed query hides old metrics; same-query refresh can retain explicitly labeled prior values. Hoy/Semana and all monetary formulas remain unchanged.
+- Both screens adopt CalendarNavigation and separate useCalendarSelection instances. Historical month/year, day selection and return-to-month affect real queries. Activity markers are all-platform, loaded for the open draft month; platform-filtered empty history does not erase them. Blur cancels only the modal draft. Theme/language changes preserve applied selection.
+- New useHasTransactions provides a guarded global hasAny read for the empty-history CTA. Unknown/failed existence never means a successfully empty database. Existing focus, commit notifications and AppState hooks are reused; edit/detail useTransactions remains unchanged. Pending deletion and undo preserve rows/totals/markers until commit.
+- ES/EN/UK translations add refresh, stale failure, load-more and existence feedback. No schema, dependency, navigation, payment write or deletion policy changes.
+
+Changed implementation files: src/screens/HistoryScreen/HistoryScreen.tsx and HistoryScreen.styles.ts; src/screens/SummaryScreen/SummaryScreen.tsx; src/hooks/transactions/useHasTransactions.ts; src/i18n/translations.ts. New tests: historyCalendar.test.tsx, summaryCalendar.test.tsx, hasTransactionsHook.test.tsx. Existing Historial/App/Ajustes renderer checks omit React elements when serializing mocked SectionList props to avoid circular JSON; behavioral assertions remain. partialTipForm now returns Edit → Details → Historial before changing filters, rather than interacting with a hidden screen.
+
+Three bounded agents implemented/reviewed history, summary and global-existence coverage. Review found the modal draft persisted across blur; both screens now cancel via a stable focus-cleanup callback. The later partial-tip failure was traced to the test navigation sequence and corrected; no data/query workaround was introduced. Integration tests cover historical years/days, independent selection, platform-independent markers, page boundaries/retry, failed writes, committed deletion/undo/background, stale feedback and skipped local dates.
+
+Fresh checks: **typecheck PASS; lint PASS; changed source/tests Prettier PASS; Jest 37 suites / 354 tests PASS (10.49 s)**. Repository-wide format:check reports the pre-existing unchanged metro.config.js formatting issue; it was not edited. Android :app:assembleDebug and :app:assembleRelease **PASS (41 s, 459 tasks)** with the actual production entry including the calendar. No device install or production database mutation. Existing Gradle deprecation warnings remain. Jest required approved execution outside the sandbox realpath restriction, with command-scoped workspace TEMP/TMP. Git hooks inspected: core.hooksPath unset, only sample hooks; checks ran directly, without hook installation or bypass.
+
+**Remaining Phase 6 gates:** native runtime/rendering, narrow/wide and enlarged text, TalkBack/VoiceOver/focus, touch/scroll/Back, Android/iOS device behavior and measured native large-history responsiveness/memory. iOS native build is unavailable on this Windows host. Build/Jest success does not pass these gates or prove native performance. Earlier tip/haptics/release gates remain unchanged. Keep the temporary plan until Phase 7 requirements pass.
+
+Source/tests committed locally as **c814540**, without push. Documentation remains local/uncommitted alongside prior calendar handoffs; temporary plan/images retain the existing ignore rule. Unrelated .gitignore changes were excluded. Disposable workspace test/build caches were removed after verification. Final git diff --check passed.
+
+## Calendar/history extension — Phase 4 shared calendar UI and localization (2026-10-11)
+
+Status: **COMPLETE for implementation, automated tests and available build/bundle checks; native visual/accessibility acceptance NOT VERIFIED**. Owner assigned Phase 4. Phase 5 screen integration NOT STARTED. No production screen, payment/deletion policy, database/schema or persistent filter changes. The reference docs/screen.png was visually inspected; generated calendar concepts remain design references, not screenshots of the implementation.
+
+### Components and dependency
+
+- Exact react-native-calendars **1.1314.0** installed with package-lock. Official [Calendar API](https://wix.github.io/react-native-calendars/docs/Components/Calendar) supports the custom day renderer and styling used here. Installed package contains declarations and no new native module/podspec; all added dependency paths were inspected. Existing dependencies keep their locked versions; some shared packages become production dependencies. npm ls PASS. npm audit reports 55 affected packages (50 high, 5 moderate), all on preexisting paths/unchanged versions; zero added-path findings. No audit fix, unrelated upgrades or suppression.
+- src/components/CalendarModal/ contains controlled CalendarModal, stable CalendarDay with context, adjacent props/styles and presentation-only date helpers. One centered safe-area/height-constrained scrollable modal, native Back/backdrop/Cancel, month arrows, year arrows/twelve localized month choices, Show month and day apply. Draft navigation is distinct from applied selection. Future dates remain selectable; adjacent-month dates are noninteractive.
+- Occupied ready dates use primary circles/on-primary text; today uses a contrasting border and selection a separate outer ring. Full localized date/activity/today/selection labels do not infer working shifts or days off. Loading/error activity is unknown and suppresses fills, while navigation and day apply remain usable; error has Retry.
+- Names use Intl with explicit UTC for calendar-coordinate formatting, without mutating global LocaleConfig. Theme/language changes preserve the modal draft and month chooser. Calendar's cached library styles remount on palette change; the parent chooser does not. Weekday headings align with the seven day columns; horizontal overflow preserves touch cells and text scaling on narrow/large-text screens. The surrounding panel/actions scroll vertically. These are implemented layout rules, not verified native appearance.
+- src/components/CalendarPeriodSelector/ supplies the applied month/full-day row, external month navigation, calendar trigger and Return to month. src/components/CalendarNavigation/ composes Phase 3 hooks with both components, loads all-platform activity only for the open draft month/zone and schedules accessibility focus back to the trigger after dismissal. Screens must retain their separate calendar hook instances when adopting this composition in Phase 5.
+- Seventeen calendar translation keys added in ES/EN/UK, alongside existing Cancel/Retry. Jest transforms the installed calendar and its JS/TS transitives so tests exercise the actual library; no whole-calendar mock.
+
+### Review and actual checks
+
+phase4_calendar_ui agent implemented modal/selector and seven tests; main integrated translations, shared navigation wrapper and one composition test. phase4_ui_review independently found weekday alignment and occupied-today contrast defects; fixed and rereviewed with no remaining confirmed blocker. phase4_dependency_review audited dependencies and performed Android builds.
+
+Fresh npm run typecheck **PASS**, npm run lint **PASS**, changed-file Prettier check **PASS**, git diff --check **PASS**. TZ=UTC full Jest --runInBand --no-cache --watch=false: **34 suites / 339 tests PASS, 13.520 s**. New tests cover real calendar dates/labels, independent activity/today/selection, unknown/retry, apply/cancel/native Back/backdrop, year/month navigation, selector callbacks, language/theme changes preserving chooser and wrapper draft/activity/focus API calls. Existing all-language completeness and payment/edit/deletion/summary/history regressions pass. Focus API is mocked in Jest; this does not prove native focus traversal.
+
+Android .\\gradlew.bat :app:assembleDebug :app:assembleRelease --no-daemon --console=plain **BUILD SUCCESSFUL**, 3m 50s, 459 tasks (270 executed, 189 up-to-date), JDK 17.0.18. Production entry has not imported the new calendar yet. Separate disposable entry importing CalendarNavigation was therefore bundled through Metro for Android and iOS after final source changes; both **PASS**, and both bundles compiled to Hermes bytecode **PASS**. Temporary bundle artifacts/logs/caches are removed after checks. No app installation, production database access or publication. Existing debug signing is not production approval.
+
+Warnings remain unsuppressed: existing Gradle/AGP/native deprecations, cross-drive hardlink copy fallback, Metro NO_COLOR/private RN export fallback and standalone Hermes runtime-global declaration warnings. Core.hooksPath unset; no active nonsample Git hooks, package checks ran directly. Jest/Metro used approved execution outside sandbox for known Windows realpath restrictions, with workspace TEMP/TMP.
+
+**NOT VERIFIED:** actual native calendar rendering on narrow/wide/large-text light/dark screens, TalkBack/VoiceOver initial/return focus and background traversal, touch/scroll behavior and native runtime performance. Source review, screen.png comparison and renderer tests are not visual acceptance evidence. iOS native build/device unavailable on this Windows host; successful iOS Metro/Hermes compilation is not an Xcode build. Carry these checks into the native Phase 6 matrix after Phase 5 screen integration. Earlier physical haptics/native/release gates remain unchanged. Stop before Phase 5.
+
+Source/tests/dependency changes are in local commit ea2e58c; no push. Documentation remains local/uncommitted with earlier calendar handoffs; temporary plan/images retain the existing ignore rule. Independently present .gitignore changes were preserved and excluded. Disposable Phase 4 bundle/test artifacts were removed after verification.
+
+## Calendar/history extension — Phase 3 hooks and request lifecycle (2026-10-11)
+
+Status: **Phase 3 COMPLETE; Phase 4 calendar UI and Phase 5 screen integration NOT IMPLEMENTED**. Owner assigned Phase 3 after completed Phase 2. No dependency, schema, payment service, deletion provider, edit/detail hook or screen changes.
+
+### Implemented hook contracts
+
+- src/hooks/transactions/usePagedTransactions.ts consumes bounded listPage filters. It returns state, refresh, loadMore and retry; state distinguishes initial loading/error, ready/empty/end, same-query refreshing/refreshError and loadingMore/loadMoreError. Existing same-query records are retained with explicit stale flags; different-filter/service results are hidden immediately. Footer retries preserve pages and cursor. Concurrent load-more calls are guarded synchronously; appended IDs are deduplicated. A committed notification synchronously advances generation, discards cursor and reloads the first page; old page responses cannot merge after reset. useTransactions(id, live) remains unchanged for existing edit/detail loading; HistoryScreen will adopt the paged hook only in Phase 5.
+- src/hooks/summary/usePeriodSummary.ts reuses its current two-argument API and subscriptions but calls validated SQLite summarize(bounds). An optional third CalendarMonth/CalendarDate selects an explicit Mes month/day; Hoy/Semana ignore it. Query identity uses actual UTC boundaries/timezone and service identity, avoiding one-second ticks and irrelevant midnight reloads of pinned/month/week ranges. Legacy state remains loading/error with null summary while reading/failing; future UI can use retainedSummary plus refreshing/refreshError to render labeled stale same-query data. Other-query data is never retained as current.
+- src/hooks/summary/useCalendarSelection.ts owns one independent session selection and modal draft per instance. Automatic month follows the local clock until explicit selection; opening/browsing/canceling does not change applied selection. Apply month/day and external month navigation pin coordinates; return-to-month removes day mode. Zone changes recompute UTC bounds and preserve coordinates/drafts. No persisted preference or global screen selection is introduced.
+- src/hooks/summary/useOccupiedDates.ts calls all-platform occupiedDates only while enabled. Loading/error/disabled activity is unknown (dates null), not an empty successful result. Month/zone/service changes and commits invalidate stale generations. Resume refreshes; subscriptions clean up on unmount. Markers are not affected by preferences, pending deletion or undo because only committed transaction notifications invalidate reads.
+
+No derived multi-query cache is introduced. Hooks retain only their current query/result, accumulated requested history pages, cursor and bounded request metadata; obsolete queries are not cached. Repeated commits for activity are coalesced without sharing stale work across query/service identities. Existing focus, useDataChanges and AppState subscriptions are reused. Clock/format/grouping integration into HistoryScreen remains Phase 5; no claim is made that its existing full-table path is already optimized.
+
+### Verification and handoff
+
+New behavioral hook tests cover deferred/out-of-order responses, rapid filter changes, same-query errors/retry, overlapping pagination, real-service create/edit/remove/removeAll during in-flight pages, failed writes, empty versus failed reads, pinned and automatic dates, timezone/DST, modal draft isolation, resume and cleanup. Resumen's obsolete-response test now spies on summarize rather than list; assertions are preserved. Existing deletion/undo and payment/edit regressions remain in the full suite.
+
+Agents: phase3_calendar owns calendar/activity hooks and tests; phase3_summary owns aggregate hook/tests and independently reviews pagination; phase3_history_tests owns pagination tests and independently reviews the other hooks; main owns pagination implementation/integration/docs. Review identified stale activity callbacks, service replacement and cross-query coalescing hazards; fixed with current-query/service guards before generation changes and keyed scheduling tokens, with regression coverage. Final reviewers found no remaining confirmed blocker.
+
+Fresh npm run typecheck **PASS**, npm run lint **PASS**, targeted Prettier check **PASS**, git diff --check **PASS**. TZ=UTC npm test -- --runInBand --no-cache --watch=false: **32 suites / 331 tests PASS, 11.047 s**. Full checks include unchanged payment/deletion/edit regressions and real-SQLite page/summary/date coverage. Hook tests simulate focus and deferred responses; actual navigation/native/calendar-library/performance acceptance remains NOT VERIFIED and must be covered in later phases. No active nonsample Git hooks; core.hooksPath unset, package checks ran directly without hook bypass/install. Jest required approved execution outside sandbox after EPERM realpath; command-scoped TEMP/TMP used a workspace temporary directory. Generated caches are removed after completion. Prior native gates remain unchanged. Stop before Phase 4.
+
+Source/test changes are recorded in local commit 402b67b; no push. Documentation remains local/uncommitted together with prior calendar documentation; temporary plan/images still follow the existing ignore rule. The independently present .gitignore change was left untouched and excluded from the commit.
+
+## Calendar/history extension — Phase 2 date and bounded-query implementation (2026-10-10)
+
+Status: **Phase 2 COMPLETE for data APIs/tests; calendar UI and hook integration NOT IMPLEMENTED**. Phase 1 contracts are complete and the owner assigned Phase 2. Scope: pure date/summary helpers, typed read contracts, transaction repository/service methods and isolated tests. No screen/hook/provider/navigation/payment-write policy, dependency/configuration or schema migration changes. Phase 3 is not started.
+
+### Implemented files and APIs
+
+- src/features/summary/periods.ts adds CalendarMonth/CalendarDate, getCalendarDayBounds, getCalendarMonthBounds and getCalendarMonthDays using the existing local-midnight resolver. Coordinates are validated without rollover; skipped dates have empty ranges. Existing relative-period tests remain intact.
+- src/features/summary/summary.ts exposes shared averageFareCents integer quotient/remainder rounding for existing and SQL summaries.
+- src/features/transactions/transactionReadContracts.ts defines HistoryReadFilter, HistoryCursor, HistoryPageRequest and HistoryPage. HISTORY_PAGE_SIZE is 50, default and maximum; smaller positive integer requests are allowed. SQL transfers at most pageSize + 1 records for lookahead; the caller receives at most pageSize validated records. This is an implementation bound, not a production target.
+- src/features/transactions/transactionReadRepository.ts implements listPage, summarize, occupiedDates and hasAny. transactionRepository.ts composes these with existing CRUD and invalidates cursors on committed changes; transactionService.ts forwards the APIs. Cursor uses DESC timestamp/DESC ID, range/platform identity and repository revision. Failed/no-op writes preserve cursor validity.
+- src/features/transactions/transactionDecoder.ts moves the existing decoder unchanged for shared use; current list/get/edit behavior is preserved. No new API is wired to hooks/screens yet.
+- New tests: __tests__/calendarPeriods.test.ts, boundedReads.test.ts and boundedReadVolume.test.ts. Existing tests are not weakened.
+
+SQL summary validates all matched rows (types/limits/platform/ID/dates/exact arithmetic) and safe aggregate/count values, returning at most four platform aggregates. Calendar reads independently constructed local-day UTC intervals in one serialized transaction, returning only occupied date keys. Noncanonical legacy updated_at values retain Date.parse validation through bounded batches of exceptional distinct timestamp strings; ordinary timestamps use SQL fast-path validation. Validation and aggregation share one committed snapshot. An empty skipped local-day range returns zero/empty results.
+
+### Compatibility and measurement decisions
+
+Current writer and historical writer commits 46c9d16 and 4a1d1d9 use toISOString(); v4 migration copies dates unchanged. On first optimized read a SQL round-trip preflight checks created_at across the database, returning at most one incompatible ID. This one-time scan is an explicit exception to period-only scanning, preventing silent exclusion of incompatible legacy representations. Cache is one compatibility flag per repository, not monetary data. Canonical repository writes preserve it; incompatible repository-created timestamps reset it. Unsupported raw/external timestamp changes require reopening/recreating the repository. Production composition uses one repository/service instance.
+
+Optimized queries require four-digit canonical UTC created_at and bounds; incompatible representations/extended-year bounds raise TimestampCompatibilityError without rewriting data. Pure helpers support wider representable Gregorian years. Enabling incompatible SQL representations requires an explicit compatibility proposal/owner decision; existing list/get still accept valid Date.parse-compatible legacy strings. Scoped successful reads do not certify unrelated monetary data. No installed user database was opened/migrated.
+
+Observed page candidates 10/25/50 against 10,000 isolated synthetic records across 2020–2026, 1,000 in the selected October 2026 with timestamp ties. Default/cap 50 bounds payload and needs fewer requests than 10/25 for the same range. No derived result cache in Phase 2; any Phase 3 cache must define its bound/identity/invalidation first. Cursor metadata and one compatibility flag are bounded session state.
+
+EXPLAIN QUERY PLAN confirms existing created_at and platform/created_at indexes serve the range predicates. Temporary sorting remains for the ID ordering term and summary grouping. No new index/migration is justified by this isolated fixture; schema stays v4. Phase 6 native volume checks must reassess; Node plans/timing are not Android/iOS performance evidence.
+
+### Verification and review
+
+First run: typecheck/lint PASS; full Jest **28 suites / 295 tests PASS, 13.941 s**, before final corrupt-field/millisecond chronology additions. Synthetic Node observations: preflight plus first page approximately 3.923 ms; pages 10/25/50 approximately 0.488/0.345/0.369 ms; summary 1.035 ms; activity 3.141 ms. These are single-run observations, not thresholds or guarantees. Final checks are recorded after completion below.
+
+Agents: phase2_calendar_dates implemented only date helpers/its tests; phase2_read_tests implemented only boundedReads tests; main agent integrated read APIs/volume fixture/docs. Independent read-only phase2_data_review identified an initial updated_at compatibility restriction; fixed with bounded Date.parse validation and a 58-distinct-value regression. Queued commit/failure tests verify cursor invalidation timing. Final reviewer found no confirmed blocker and requested the preflight/extended-year/native limitations recorded above.
+
+Final fresh checks: typecheck **PASS**, lint **PASS**, TZ=UTC Jest **28 suites / 307 tests PASS, 13.654 s**. Added corrupt-field, unsafe-total, millisecond/year-boundary chronology and malformed-date coverage. Final synthetic observations: preflight plus page 5.132 ms; pages 10/25/50 0.592/0.423/0.439 ms; summary 1.451 ms; activity 4.203 ms. These are isolated Node observations, not native guarantees. Git core.hooksPath is unset and no active nonsample hooks exist; package checks ran directly. Calendar dependency uninstalled; native/UI acceptance NOT VERIFIED. Hooks/screen integration belong to Phases 3–5; single-ID edit loading is intact. Prior native/iOS/accessibility/haptics gates remain unchanged. Stop before Phase 3.
+
+Source/test changes are recorded in local commit 7072d9e; no push. Documentation remains in the working tree together with prior calendar documentation changes; the temporary plan/images remain local under the existing ignore rule. An independently appearing .gitignore change was preserved and excluded from the commit. Generated test/compiler caches were removed after completion; diff whitespace checks passed.
+
+## Calendar/history extension — Phase 1 permanent contracts (2026-10-10)
+
+Status: **Phase 1 COMPLETE for permanent documentation contracts; application extension NOT IMPLEMENTED**. Phase 0 prerequisite is complete; the owner explicitly assigned Phase 1. No src/test/config/script/dependency/database changes are part of this phase. Phases 2–7 remain NOT STARTED. The temporary [calendar plan](CALENDAR_HISTORY_PLAN.md) remains until its Phase 7 completion gates.
+
+### Permanent scope and phase handoff
+
+PROJECT_SPEC.md now defines historical month/year/day navigation as an extension of Mes, independent per-screen session filters and bounded loading. UI_DESIGN.md selects one centered shared modal for both themes/screens, quick year/month navigation, draft/apply/cancel/day/return behavior, all-platform activity legend, accessibility and initial/refresh/load-more/error feedback. DATA_AND_CALCULATIONS.md owns automatic versus explicit calendar selection, local half-open UTC bounds, descending timestamp/ID cursor, query-scoped validation, exact validated aggregate requirements, committed snapshot/invalidation/cache rules and unchanged single-record/edit loading. README.md and AGENTS.md link the active plan and phase boundary. The implementation map and calendar candidate assessment from Phase 0 remain applicable.
+
+The selected visual composition is light concept 1 plus quick selector concept 4, adapted using existing dark tokens; inline calendar and bottom sheet are alternatives, not additional requirements. Generated concepts are now linked in UI_DESIGN.md for durable preservation; their sample values/order/icons do not override written contracts. The owner liked the concepts and assigned the documentation phase; the centered shared presentation is a routine phase design selection, not a claim that every pixel was separately approved.
+
+Scope of invalid-row checking is now explicit: matched summary/month rows and returned history page rows must be valid. Removing full-table transfer changes incidental failure on corruption outside a selected period; a scoped successful result is not a global integrity audit. Lexical cursor optimization remains conditional on Phase 2 representation compatibility tests; incompatible supported legacy data requires an explicit proposal/owner decision, not a silent rewrite or stricter decoder.
+
+### Extension acceptance matrix — required future verification
+
+All entries below are **NOT VERIFIED for the extension**; existing test successes do not exercise the unimplemented calendar/pagination. Add meaningful coverage in each relevant coding phase and native evidence in Phase 6.
+
+| Scenario | Expected behavior | Required phase evidence |
+| --- | --- | --- |
+| Hoy/Semana and Historial Todo/platform | Existing meanings/formulas retained | Phases 2/3/5 regression, Phase 6 native |
+| First Mes, month rollover, explicit historical selection, restart | Automatic current month follows rollover; explicit coordinates remain pinned; session restore; restart Hoy | Phases 2/3/5 tests |
+| Earlier year/month or future month | Applied month drives actual local-range queries; successful empty periods are honest zeros | Phases 2/5 tests, Phase 6 native |
+| Draft arrows/year/month, Cancel/Back/backdrop | Applied filters/results unchanged until apply; day tap applies and closes | Phases 3/4/5 tests, Phase 6 native |
+| Day, Return to month, switching chips | Mes day submode clearly dated; return shows whole day month; Hoy/Semana remain relative | Phases 3/4/5 tests |
+| UTC/local disagreement, DST gaps/repeated midnight, leap/year boundary | Correct explicit-zone half-open bounds, no fixed-day arithmetic | Phase 2 pure and real-SQLite tests |
+| Device zone/language/theme changes and resume | Applied/draft coordinates preserved; recompute zone bounds/markers; strings update; no draft loss | Phases 3/4/5 tests, Phase 6 native |
+| Marker with/without operation, zero tip, today/selection | All-platform valid cash activity, separate accessible states; no day-off assertion | Phases 2/4/5 tests, Phase 6 accessibility |
+| Marked day with selected platform having no records | Marker remains; filtered history empty with explanatory legend | Phases 4/5 tests |
+| Initial/refresh/load-more/marker failures and Retry | Unknown is not empty; existing same-query pages retained/labeled; footer retry | Phases 3/4/5 tests |
+| Rapid selection/out-of-order response/unmount | Stale query/generation cannot replace or merge new result; cleanup | Phases 3/5 tests |
+| Identical timestamps, cross-page dates, end of pages | DESC/DESC cursor, no gaps/duplicates, one combined local-date group, no endless loads | Phase 2 SQLite and Phase 5 screen tests |
+| Insert/edit/delete between or during page reads | Commit resets generation/pages; old page cannot merge; edit date/ID retained | Phases 2/3/5 tests |
+| Pending deletion/undo/background/failure/delete-all | Data/markers retained until actual commit; preferences preserved | Phases 3/5 regression, Phase 6 native |
+| Exact/partial tips, average, grouped fares, unsafe SUM/count and corrupt matched rows | Exact integer results or explicit failure; no floating AVG or silent skip | Phase 2 real-SQLite tests |
+| Noncanonical supported legacy timestamp | Compatibility proved or explicit optimization blocker/proposal; no silent data changes | Phase 2 gate |
+| Genuinely empty database versus empty range/filter | First-record CTA only with successful global existence result | Phases 2/5 tests |
+| Large isolated multiyear fixture, query plans, cache | Bounded transfers/virtualized viewport, recorded actual observations, justified index only | Phases 2/6 measured evidence |
+| Narrow/wide/large text, ES/EN/UK, light/dark, Android/iOS | Readable controls, correct modal focus/Back, accessible markers, preserved drafts | Phases 4/6 native matrix |
+
+### Remaining gates and verification record
+
+Exact page size/cache bound/query strategy and any index migration require Phase 2 inspection/measurement. react-native-calendars 1.1314.0 remains the metadata-checked Phase 0 candidate, not installed or project/native verified; Phase 4 checks its resolved dependencies/type/build integration before acceptance. Numeric production performance targets remain NOT DOCUMENTED; no new promise is introduced.
+
+Phase 1 fresh checks: npm run typecheck **PASS**, npm run lint **PASS**, TZ=UTC npm test -- --runInBand --no-cache --watch=false **25 suites / 266 tests PASS, 10.845 s**. Jest used approved execution outside the sandbox with command-scoped TEMP/TMP in docs/.calendar-phase1-temp because Phase 0 established sandbox realpath restrictions; caches removed after completion. Node experimental SQLite warning remains. These runs validate the unchanged-code baseline, not calendar behavior.
+
+Independent read-only phase1_contract_review agent found no blocking contract defects; its stale concept/cleanup/history wording findings were corrected. Git core.hooksPath remains unset, .git/hooks has no active nonsample hook; no hooks bypassed or installed. Existing package checks ran directly. Documentation diff/whitespace and local links/anchors reviewed. New calendar plan/images remain local and ignored by the existing docs Git rule; references being readable locally do not prove those files are committed. No .gitignore changes made.
+
+Native/performance checks are not run for this documentation-only phase. Prior haptics FAIL and iOS/accessibility/native gates remain unchanged. Phase 2 is the next assigned boundary; stop before its application work.
+
+## Calendar/history extension — Phase 0 inventory and baseline (2026-10-10)
+
+Status: **Phase 0 COMPLETE for read-only inventory and baseline only; calendar/pagination extension NOT IMPLEMENTED**. The owner requested execution of the first stage of [the temporary plan](CALENDAR_HISTORY_PLAN.md); this was announced as Phase 0. Only documentation changed. At this Phase 0 handoff, later phases were NOT STARTED; the Phase 1 entry above records the subsequent assignment. Existing partial-tip/collapsible/native/haptics/iOS gates remain unchanged.
+
+### Actual implementation map
+
+| Responsibility | Inspected paths / behavior |
+| --- | --- |
+| Historial | src/screens/HistoryScreen/HistoryScreen.tsx and adjacent styles: local period/platform, full-array groupHistory, nested group/row map rendering |
+| Resumen | src/screens/SummaryScreen/SummaryScreen.tsx and adjacent styles: local period, usePeriodSummary, explicit count/fare/tip/net/average/platform metrics |
+| History/single-record load | src/hooks/transactions/useTransactions.ts: generation guard, focus/resume and commit subscriptions; preserve id/live edit loading separately from future pagination |
+| Summary load | src/hooks/summary/usePeriodSummary.ts: key includes period/day/timeZone/bounds, generation guard and hidden prior-period result, focus/resume/commit refresh |
+| Shared lifecycle | src/hooks/app/useLocalClock.ts (one-second updates/resume), useDataChanges.ts; src/app/changeNotifier.ts and persistence composition |
+| Calendar/filter/group rules | src/features/summary/periods.ts: explicit zone, local midnight/DST/Monday/half-open bounds; src/features/transactions/history.ts: local grouping and descending timestamp/ID |
+| Money/validation | src/features/summary/summary.ts: exact tip arithmetic, platform checks, safe-integer additions and integer average; transactionRepository.ts: strict row decoder |
+| SQL/service | src/features/transactions/transactionRepository.ts and transactionService.ts: full-table list, single get, serialized mutations and commit notifications |
+| Storage | src/database/migrations.ts schema version 4, indexes created_at and (platform, created_at); connection.ts uses OP-SQLite; serializedConnection.ts queues reads and transactions |
+| Reusable UI | TransactionLoadState, ChoiceGroup, ActionButton, Card, AppText; theme/language providers and src/i18n/formatting.ts/translations.ts |
+| Viewport | src/ui/ScreenContainer/ScreenContainer.tsx wraps a vertical ScrollView; there is no current virtualized history list |
+| Existing test infrastructure | __tests__/sqliteTestDatabase.ts uses real node:sqlite with serialized adapter; periods/history/summary/Historial/Resumen/persistence/deletion tests provide reusable behavioral coverage |
+
+### Confirmed bottlenecks and required contract clarifications
+
+Repository list executes SELECT * over all transactions with ORDER BY created_at DESC, id DESC and no bounds/limit. Both history and summary load it. Historial then filters/sorts/groups in JavaScript and mounts every row; useLocalClock triggers repeated renders every second. Summary filters and aggregates after full-table transfer. Existing refresh replaces results with initial loading; load-more/refresh state separation and request coalescing are absent. These are source observations, not measured latency or capacity claims.
+
+Introduce a single virtualized viewport while preserving safe-area/layout behavior; never nest it in the current ScrollView. Preserve useTransactions' single-record/edit path. Existing generation guards, notifications, pure date functions and loaders should be extended rather than duplicated.
+
+Before bounded reads/SQL aggregation, Phase 1 must define validation scope: currently decoding can reject a corrupt row outside the selected period because the full table is read. Preserve explicit corruption failures for the documented query scope and integer correctness; SQL SUM/number conversion alone does not establish safe totals. Service-created timestamps use toISOString(), but decoder acceptance is broader (Date.parse): specify cursor ordering for supported legacy representations before assuming lexical equality with chronological ordering. No user database was opened to establish legacy data shape.
+
+### Calendar dependency assessment
+
+Actual project package: React 19.2.3, React Native 0.87.1, OP-SQLite 18.2.5, Node engine >=22.11.0; Android gradle.properties enables new architecture and Hermes. No calendar dependency is declared.
+
+Preferred candidate version **react-native-calendars 1.1314.0** was read from npm metadata on 2026-10-10 using npm view, without installation. MIT license; Node >=18; returned metadata declares no peerDependencies. Dependencies: xdate, lodash, prop-types, memoize-one, recyclerlistview, hoist-non-react-statics and react-native-swipe-gestures; optional moment. [Official documentation](https://wix.github.io/react-native-calendars/docs/Intro) describes JavaScript calendar components, customization, date marking and localization; [MIT license](https://github.com/wix/react-native-calendars/blob/master/LICENSE) was checked. Do not infer compatibility from absent peers or from upstream development versions. The master package version differs from the published npm version; use the exact npm candidate for the later installation check.
+
+Assessment: suitable candidate for the required calendar features, **project compile/build/native compatibility NOT VERIFIED** until Phase 4 installation and checks. No new native calendar module/linking is indicated by the documented Calendar approach, but transitive dependencies still require review in the actual resolved graph. No package or lockfile changed. Native/iOS checks were not run in Phase 0.
+
+### Fixture and remaining implementation gates
+
+Future isolated fixtures will use the existing real-SQLite test adapter: deterministic IDs and canonical timestamps; increasing explicitly recorded record counts; multiple years/platforms; sparse/dense months; equal timestamp ties; UTC/local disagreement; DST and leap/year boundaries; mutations between/in flight with pages; corrupt inputs and aggregate overflow failures. Query-plan and volume observations must record actual data sizes/environment. This phase created no large dataset and measured no query plan/memory/latency. Page size, cache bound and need for a new index/migration remain NOT DOCUMENTED pending Phase 2 measurement. No numeric production target is proposed.
+
+### Fresh checks and independent review
+
+- npm run typecheck: **PASS**.
+- npm run lint: **PASS**.
+- TZ=UTC, npm test -- --runInBand --no-cache --watch=false: **PASS, 25 suites / 266 tests, 11.087 s**, after an approved execution outside the sandbox with command-scoped TEMP/TMP in docs/.calendar-phase0-temp. Two initial sandbox attempts failed before test discovery with EPERM realpath (default Temp, then workspace Temp); these were environment failures, not test assertions. Temporary cache files were removed after completion.
+- Existing core.hooksPath is unset; .git/hooks contains sample hooks only. No .husky or .github directory exists. No active Git hook/CI checks were available; none bypassed or installed. Existing package checks ran directly.
+- Independent read-only agent calendar_baseline_review confirmed full reads/nonvirtualized rendering, hook reuse and required preservation of edit loading. Its timestamp/corruption-scope and virtualized-viewport findings were incorporated into the temporary plan. It reported future gaps in pagination/calendar/cache/aggregate overflow coverage; these are later-phase work, not completed tests.
+
+Phase 0 permits proceeding to Phase 1 permanent contracts under its assigned scope. It does not authorize coding later phases or establish installed calendar compatibility, large-history performance or native acceptance.
+
 ## Collapsible-tip extension — current change boundary (2026-10-10)
 
 Phases0–4 COMPLETE in automated scopes; shared collapsed UI/animation and real-SQLite integration verified. Phase5 selected Android acceptance is PARTIALLY VERIFIED / NOT COMPLETE. Phase6 permanent documentation handoff is recorded below. The owner subsequently requested documentation cleanup: temporary plans and duplicate native report/evidence files removed; this permanent document and Git retain the useful history. Full native acceptance remains pending; cleanup does not close or defer gates. New behavior supersedes always-visible presentation: collapsed new form, exact positive T in persistent header, guarded collapse/blur, Remove tip clears/collapses, edit-positive opens, money reset preserves visibility, save failure preserves draft and success-create resets instantly. Shared Home/Edit form and local hook state only; no service/model/schema/dependency changes. Retain historical partial-tip handoffs and unresolved native gates below.
