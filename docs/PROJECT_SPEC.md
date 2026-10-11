@@ -58,7 +58,7 @@ Partial-tip requirements below were documented on 2026-10-09. Phases 2–3 imple
 
 ### Calendar and large-history extension — 2026-10-10
 
-Status: **Phase 5 IMPLEMENTED / automated checks PASS; native acceptance NOT VERIFIED**. This assigned extension expands historical navigation and bounded loading, not payment arithmetic. [UI_DESIGN.md](UI_DESIGN.md#shared-calendar-and-period-navigation) defines presentation; [DATA_AND_CALCULATIONS.md](DATA_AND_CALCULATIONS.md#calendar-selection-and-bounded-reads) defines queries and lifecycle. The phased execution and actual results are in [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
+Status: **Phases 0–5 implementation COMPLETE; Phase 6 PARTIALLY VERIFIED / NOT COMPLETE**. Phase 7 documentation handoff preserves the permanent contracts and evidence; temporary-plan removal remains pending the required acceptance gates. This assigned extension expands historical navigation and bounded loading, not payment arithmetic. [UI_DESIGN.md](UI_DESIGN.md#shared-calendar-and-period-navigation) defines presentation; [DATA_AND_CALCULATIONS.md](DATA_AND_CALCULATIONS.md#calendar-selection-and-bounded-reads) defines queries and lifecycle. Current implementation map, checks and remaining Android/iOS gates are in [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
 
 - Share one calendar modal and quick year/month selector across Historial and Resumen. A month grid has green circles on dates with saved cash operations across all platforms. A plain date means no saved cash operation; it does not prove a day off. The selected date and today have separate indicators.
 - Each screen keeps its own session-only applied selection. First Mes entry selects the current local month; later entries restore its prior selection. Automatic current-month selection follows month rollover until explicit month/day navigation, which pins that calendar selection. Theme/language changes and refresh preserve the selection. Restart starts with existing default Hoy; no new persisted preference.
@@ -68,7 +68,7 @@ Status: **Phase 5 IMPLEMENTED / automated checks PASS; native acceptance NOT VER
 - Provide separate initial, load-more and refresh feedback, empty states only after successful reads, and localized errors/Retry. Unknown calendar activity during loading/error must not look like a confirmed empty month. Prior-period results cannot appear under a newly selected date.
 - Preserve pending deletion in rows/totals/calendar until deletion commits, and preserve all existing Home/edit/settings behavior. Read-only date navigation never creates or modifies records.
 
-No measured capacity, numeric performance target or native acceptance is established by these requirements. Page size/index/cache implementation choices and installed calendar compatibility are later phase gates; do not promise results before verification.
+Installed calendar: react-native-calendars1.1314.0. History uses pages of at most50 records with one-row SQL lookahead; no derived-result cache or new schema/index is introduced. These implementation choices and the selected Android measurements are documented in IMPLEMENTATION_PLAN.md, with their limits. Requirements do not establish a production capacity/latency guarantee or complete native acceptance. iOS, full screen-reader/Reduce Motion and remaining native/adaptive checks stay open.
 
 ### Ajustes
 

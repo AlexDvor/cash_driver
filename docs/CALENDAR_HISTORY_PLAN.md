@@ -1,6 +1,6 @@
 # Calendar and history performance — temporary implementation plan
 
-Date: 2026-10-10; Phase 6 handoff 2026-10-11. Status: **Phases 0–5 COMPLETE for implementation/automated/build scope; Phase 6 PARTIALLY VERIFIED / NOT COMPLETE**. Native Android volume and selected behavior passed; iOS and full accessibility/scenario acceptance remain open. Current evidence is in IMPLEMENTATION_PLAN.md.
+Date: 2026-10-10; Phase7 documentation handoff 2026-10-11. Status: **Phases 0–5 COMPLETE for implementation/automated/build scope; Phase6 PARTIALLY VERIFIED / NOT COMPLETE; Phase7 handoff implemented, removal deferred / NOT COMPLETE**. Native Android volume and selected behavior passed; iOS and full accessibility/scenario acceptance remain open. Current evidence and permanent maintenance map are in IMPLEMENTATION_PLAN.md. Owner requires retaining all calendar_mockups images.
 
 This file covers the owner-requested Historial/Resumen calendar, historical month selection, large-history loading and loading feedback. The owner subsequently authorized the first stage, interpreted and announced as Phase 0 read-only implementation inventory and baseline. Future application changes require their assigned phase. Do not restart historical MVP/refactoring/tip phases.
 
@@ -10,7 +10,7 @@ Read README.md, AGENTS.md, PROJECT_SPEC.md, UI_DESIGN.md, DATA_AND_CALCULATIONS.
 
 Preserve React Native CLI/TypeScript, offline SQLite, four tabs/platforms, integer cents, exact tips, original createdAt on edit, duplicate-save protection, failed drafts, commit-only refresh and deferred deletion. No shifts, expenses, commissions, profit inference, remote services or editable transaction dates. Existing native/iOS/haptics gates remain open independently of this extension.
 
-Phases 0–1 changed documentation only; Phase 2 implements pure dates and bounded repository/service reads with tests; Phase 3 implements query/calendar hooks and request lifecycle; Phase 4 implements the shared localized UI. Phase 5 integrates screens and aligns the final UI to modal01/month chooser04, with icon navigation, draft preview/apply and adaptive geometry. Fresh checks and actual Android evidence live in IMPLEMENTATION_PLAN.md. Phase6 is partially verified; Phase7 is unstarted. Node SQLite results do not establish native performance; selected Android visual checks do not establish complete native/accessibility acceptance.
+Phases 0–1 changed documentation only; Phase 2 implements pure dates and bounded repository/service reads with tests; Phase 3 implements query/calendar hooks and request lifecycle; Phase 4 implements the shared localized UI. Phase 5 integrates screens and aligns the final UI to modal01/month chooser04, with icon navigation, draft preview/apply and adaptive geometry. Fresh checks and actual Android evidence live in IMPLEMENTATION_PLAN.md. Phase6 is partially verified; Phase7 handoff is implemented with removal deferred. Node SQLite results do not establish native performance; selected Android visual checks do not establish complete native/accessibility acceptance.
 
 ## Extension contracts formalized in Phase 1
 
@@ -193,7 +193,7 @@ Gate: temporary file removed only after successful completion and preservation o
 | 4 — shared calendar UI | COMPLETE for code/available checks | Exact library, shared modal/selector/navigation, 3-language keys; independent UI/dependency reviews, typecheck/lint/format PASS, Jest 34/339 PASS; Android builds and separate Android/iOS Metro/Hermes PASS. Native visual/accessibility NOT VERIFIED, retained for Phase 6. |
 | 5 — screen integration | COMPLETE | Final mockup/adaptive rework: read-only review and fixes, fresh typecheck/lint/Jest37/356 PASS; Android debug/release PASS52s; selected light/dark, historical month/day and 360dp/150% text Android checks. Original size/font and Español/Oscuro restored. Full acceptance remains Phase 6; see final handoff. |
 | 6 — acceptance | PARTIALLY VERIFIED / NOT COMPLETE | Native isolated10k SQLite/restart/ties/aggregates/index/transfer checks; selected Android UI/timezone/rotation/large-text/error-retry/edit/undo; coalesced refresh fix, independent reviews, typecheck/lint, Jest38/359 and normal Android debug/release PASS. iOS, TalkBack focus/announcements, complete Reduce Motion/adaptive/native matrix remain NOT VERIFIED; see Phase6 handoff in IMPLEMENTATION_PLAN.md. |
-| 7 — handoff/removal | NOT STARTED | Requires all preceding gates passed |
+| 7 — handoff/removal | HANDOFF IMPLEMENTED / NOT COMPLETE | Permanent contracts/status/file map/evidence and all four mockup references retained; temporary plan/index references remain because Phase6 required native gates are incomplete. Phase7 checks/review are recorded in IMPLEMENTATION_PLAN.md. |
 
 ## Unverified implementation details
 

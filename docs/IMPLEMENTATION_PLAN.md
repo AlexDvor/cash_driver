@@ -1,8 +1,34 @@
 # Implementation plan and acceptance checks
 
+## Calendar/history extension — Phase 7 documentation handoff (2026-10-11)
+
+Status: **DOCUMENTATION HANDOFF IMPLEMENTED; PLAN REMOVAL DEFERRED / PHASE7 NOT COMPLETE**. Owner assigned Phase7 and explicitly required keeping calendar_mockups. Phase6 remains PARTIALLY VERIFIED / NOT COMPLETE at commit21a4a4f; this documentation work does not pass its outstanding native gates. Phase7 step2 requires retaining the temporary plan while a required extension gate is incomplete. CALENDAR_HISTORY_PLAN.md and its active index/instruction references therefore remain. No application code, tests, configurations, dependencies, SQLite/user data or image files are changed by this phase.
+
+### Permanent maintenance map
+
+| Responsibility | Current files / contract |
+| --- | --- |
+| Product and monetary/query rules | PROJECT_SPEC.md defines the extension; DATA_AND_CALCULATIONS.md defines integer cents, local half-open ranges, scoped validation, DESC timestamp/ID cursor, compatibility preflight, transfer bounds and refresh authority. |
+| Calendar UI | UI_DESIGN.md defines one shared centered modal, draft/apply/cancel, all-platform activity, independent today/selection indicators, feedback and accessibility requirements. `src/components/CalendarModal/` contains CalendarModal, CalendarDay, CalendarIcon and calendarPresentation; CalendarPeriodSelector and CalendarNavigation compose shared controls/orchestration. |
+| Applied selection and relative clock | `src/hooks/summary/useCalendarSelection.ts`, `src/features/summary/periods.ts`, `src/hooks/app/useLocalClock.ts`: each screen remembers its own session-only month/day coordinates; relative/current selections follow local rollover, explicit selections stay pinned and rebind UTC bounds after timezone changes. |
+| Reads and lifecycle | `src/hooks/transactions/usePagedTransactions.ts`, `src/hooks/summary/usePeriodSummary.ts`, `src/hooks/summary/useOccupiedDates.ts`, `src/hooks/app/useCoalescedRefresh.ts`: loading/refresh/load-more/error/end states, generation guards, cursor reset and commit/resume coalescing. `src/hooks/transactions/useHasTransactions.ts` distinguishes global existence from an empty filtered result. Existing useTransactions single-ID edit/detail mode remains separate. |
+| Persistence | `src/features/transactions/transactionRepository.ts` composes the bounded read repository; transactionService.ts forwards its read APIs. In that feature folder, transactionReadRepository.ts owns bounded SQL/validation/preflight, transactionReadContracts.ts defines cursor/page contracts and HISTORY_PAGE_SIZE, transactionDecoder.ts shares returned-row decoding, and types.ts defines transaction/platform models. Default/max page50 with lookahead51; current schema v4/range/platform indexes retained, no derived cache/new migration. |
+| Screens and wording | `src/screens/HistoryScreen/HistoryScreen.tsx` uses one SectionList and keeps Todo/platform filtering; `src/screens/SummaryScreen/SummaryScreen.tsx` uses SQL aggregates. `src/i18n/` retains matching ES/EN/UK labels/date/money formatting. |
+| Automated/native evidence | Existing calendar/date/query/hook/screen tests plus calendarVolumeFixture.ts, calendarNativeChecks.ts, calendarVolumeAcceptance.test.ts and nativeCalendarEntry.tsx in __tests__. Native test package/helpers and actual limits are documented in the Phase6 section below; generated concepts are not native evidence. |
+
+Exact calendar dependency remains react-native-calendars **1.1314.0**, locked in package.json/package-lock.json. Its Calendar is customized with app theme/day rendering and a removed library header; the compact year/month chooser uses existing controls. No second picker/styling framework is added. This map describes the existing implementation, not permission to restart phases or redesign it.
+
+### Retained references, evidence and open gates
+
+All four `calendar_mockups/` images remain untouched and permanently linked in UI_DESIGN.md. Concepts01/04 guide the implemented centered modal/month selector;02/03 remain alternative references. Actual calendar_phase5_evidence/ and calendar_phase6_evidence/ screenshots, JSON/logs and reproducible isolated test-build helpers are retained separately. Phase6's38/359 tests, Android builds and query/memory observations remain historical Phase6 evidence, with per-scenario scope below; they are not new Phase7 native checks or capacity guarantees.
+
+Remaining extension acceptance: macOS/Xcode iOS build/SQLite/UI/VoiceOver; real TalkBack initial/traversal/background isolation/return focus and spoken labels; full Reduce Motion/native preference behavior; complete language/theme/adaptive/touch/native mutation/error matrix, actual overnight rollover, complete UI page traversal and frame/memory profiling. Existing tip/haptics/signing/release gates also remain independent. Numeric performance targets are NOT DOCUMENTED. Temporary-plan deletion cannot imply these checks passed.
+
+Fresh Phase7 unchanged-code regression: `npm run typecheck` PASS, `npm run lint` PASS, `npm test -- --runInBand` **38 suites /359 tests PASS in18.783s**. These are new Phase7 runs, separate from historical native/build results below. Local documentation links, full-path file-map references and diff/whitespace checks PASS; SHA256 comparison confirms all four mockups unchanged. Independent read-only review identified a maintenance-map ownership omission: corrected transactionReadRepository/Contracts/Decoder, repository composition/service forwarding and useHasTransactions, then obtained final handoff review PASS. Git hooks remain sample-only/core.hooksPath unset; required checks ran directly without bypasses. No new application tests or native/build runs are needed for this documentation-only change. Removal may proceed only after the required Phase6 gates pass or a later explicit owner instruction authorizes cleanup while retaining the unverified status.
+
 ## Calendar/history extension — Phase 6 acceptance handoff (2026-10-11)
 
-Status: **PARTIALLY VERIFIED / NOT COMPLETE**. The owner assigned calendar Phase 6 and explicitly confirmed CashDriver after providing unrelated trading-documentation instructions. This is the current extension status; earlier phase reports below are historical. Available Android volume/build and selected behavioral checks passed. Required iOS and full screen-reader/native matrix checks remain unverified. Phase 7 has not started; retain CALENDAR_HISTORY_PLAN.md.
+Status: **PARTIALLY VERIFIED / NOT COMPLETE**. The owner assigned calendar Phase 6 and explicitly confirmed CashDriver after providing unrelated trading-documentation instructions. This is the current native acceptance status; earlier phase reports below are historical. Available Android volume/build and selected behavioral checks passed. Required iOS and full screen-reader/native matrix checks remain unverified. Current Phase7 documentation handoff/removal status is recorded above; retain CALENDAR_HISTORY_PLAN.md.
 
 ### Changes and independent review
 
@@ -63,7 +89,7 @@ When returning to the normal debug app, Metro9356 still answered /status but its
 
 ## Calendar/history extension — final Phase 5 handoff (2026-10-11)
 
-Status: **COMPLETE for Phase 5 implementation, automated/build checks and selected Android visual verification**. This historical handoff supersedes the earlier blocked rework below. Current Phase6 status is recorded above; Phase7 cleanup has not started. Keep the temporary plan until its final gates pass.
+Status: **COMPLETE for Phase 5 implementation, automated/build checks and selected Android visual verification**. This historical handoff supersedes the earlier blocked rework below. Current Phase6/7 status is recorded above. Keep the temporary plan until its final gates pass.
 
 Compared all four calendar_mockups concepts with the running app. Final presentation follows centered modal01 and month chooser04 with existing reactive palettes; alternative inline/sheet layouts and illustrative platform icons/transactions are not additional features. Width, text scaling and touch targets adapt to the device rather than copying generated image dimensions.
 

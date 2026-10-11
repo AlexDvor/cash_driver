@@ -126,7 +126,7 @@ Title `Resumen`, visible selected date range, segmented Hoy/Semana/Mes selector.
 
 ## Shared calendar and period navigation
 
-Calendar/history extension dated 2026-10-10: **Phase 5 COMPLETE for implementation, automated/build checks and selected Android visual checks; full native/accessibility acceptance remains pending Phase 6**. Actual checks/limitations are in IMPLEMENTATION_PLAN.md. Historial retains Hoy/Semana/Mes/Todo and its platform selector; Resumen retains Hoy/Semana/Mes and all existing metrics. In Mes, show a localized month/year row with previous/next controls and a calendar icon button with a localized accessibility label. In explicit day submode keep Mes selected, show the full selected date and a visible Return to month action. A chip press on Hoy/Semana/Todo exits that submode; subsequent Mes entry restores the saved calendar selection for this screen.
+Calendar/history extension dated 2026-10-10: **Phases 0–5 implementation COMPLETE; Phase 6 PARTIALLY VERIFIED / NOT COMPLETE**. Phase 7 preserves this permanent UI contract and all four mockups; removal of the temporary plan is pending acceptance gates. Actual Android evidence, unverified TalkBack/VoiceOver/Reduce Motion and remaining native/adaptive checks are in IMPLEMENTATION_PLAN.md. Historial retains Hoy/Semana/Mes/Todo and its platform selector; Resumen retains Hoy/Semana/Mes and all existing metrics. In Mes, show a localized month/year row with previous/next controls and a calendar icon button with a localized accessibility label. In explicit day submode keep Mes selected, show the full selected date and a visible Return to month action. A chip press on Hoy/Semana/Todo exits that submode; subsequent Mes entry restores the saved calendar selection for this screen.
 
 Use a **centered modal** on both screens and in both themes, with safe-area constrained scrollable content on short/large-text displays. Do not make a permanent inline calendar or a different dark-theme interaction. This is the selected composition for this phase; generated mockups remain visual guidance, not implemented screenshots.
 
@@ -179,6 +179,8 @@ Matching centralized keys are implemented in ES/EN/UK. The table below remains t
 Reuse existing cancel/retry/loading labels and provide localized previous/next month/year accessibility labels. Do not concatenate month/year strings in a language-specific order. Spinner text must announce pending reads without repeatedly announcing every render.
 
 Owner-requested imagegen concepts: [light modal](calendar_mockups/01-history-calendar-light.png), [inline alternative](calendar_mockups/02-summary-calendar-light.png), [dark sheet alternative](calendar_mockups/03-history-calendar-dark.png), [month/year selector](calendar_mockups/04-month-year-selector.png). Use concept 1's modal composition and concept 4's quick selector with existing reactive dark tokens. Concepts 2/3 compare alternatives; neither requires another presentation mode. All values/records are illustrative. Generated icon/label/order/arrow/arithmetic discrepancies must not override written contracts or imply native validation. Preserve these useful references when the temporary plan is removed.
+
+Owner instruction for Phase7: retain the entire `calendar_mockups/` folder and all four images. They remain permanent visual references, separate from actual `calendar_phase5_evidence/` and `calendar_phase6_evidence/` captures linked in IMPLEMENTATION_PLAN.md. Retaining alternative concepts does not authorize implementing their additional layouts.
 
 ## Ajustes
 
