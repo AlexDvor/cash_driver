@@ -6,13 +6,13 @@ import { useDataChanges } from '../app/useDataChanges';
 import { useLocalClock } from '../app/useLocalClock';
 import {
   getPeriodBounds,
-  isWithinPeriod,
+  getCalendarDayBounds,
+  getCalendarMonthBounds,
+  CalendarDate,
+  CalendarMonth,
   SummaryPeriod,
 } from '../../features/summary/periods';
-import {
-  CashSummary,
-  summarizeTransactions,
-} from '../../features/summary/summary';
+import { CashSummary } from '../../features/summary/summary';
 
 type SummaryState =
   | { status: 'loading'; summary: null }
@@ -22,47 +22,85 @@ type SummaryState =
 export function usePeriodSummary(
   period: SummaryPeriod,
   clock: ReturnType<typeof useLocalClock>,
+  selection?: Readonly<CalendarMonth | CalendarDate>,
 ) {
   const { services } = usePersistence();
-  const bounds = getPeriodBounds(clock.now, period, clock.timeZone);
+  let bounds = getPeriodBounds(clock.now, period, clock.timeZone);
+  if (period === 'month' && selection) {
+    bounds =
+      'day' in selection
+        ? getCalendarDayBounds(selection, clock.timeZone)
+        : getCalendarMonthBounds(selection, clock.timeZone);
+  }
   const start = bounds.start.getTime();
   const end = bounds.end.getTime();
-  const key = `${period}/${clock.dayKey}/${clock.timeZone}/${start}/${end}`;
+  // Calendar coordinates remain pinned; clock ticks only change queries when
+  // their actual local period or timezone changes.
+  const key = `${period}/${clock.timeZone}/${start}/${end}`;
   const currentKey = useRef(key);
   currentKey.current = key;
+  const currentServices = useRef(services);
+  currentServices.current = services;
   const request = useRef(0);
   const mounted = useRef(true);
-  const [result, setResult] = useState<{ key: string; state: SummaryState }>({
+  const [result, setResult] = useState<{
+    key: string;
+    services: typeof services;
+    state: SummaryState;
+    retainedSummary: CashSummary | null;
+  }>({
     key,
+    services,
     state: { status: 'loading', summary: null },
+    retainedSummary: null,
   });
   const refresh = useCallback(async () => {
+    if (
+      !mounted.current ||
+      key !== currentKey.current ||
+      services !== currentServices.current
+    ) {
+      return;
+    }
     const generation = ++request.current;
-    setResult({ key, state: { status: 'loading', summary: null } });
+    setResult(previous => ({
+      key,
+      services,
+      state: { status: 'loading', summary: null },
+      retainedSummary:
+        previous.key === key && previous.services === services
+          ? previous.state.summary ?? previous.retainedSummary
+          : null,
+    }));
     try {
-      const rows = await services.transactions.list();
-      const summary = summarizeTransactions(
-        rows.filter(row =>
-          isWithinPeriod(new Date(row.createdAt), {
-            start: new Date(start),
-            end: new Date(end),
-          }),
-        ),
-      );
+      const summary = await services.transactions.summarize({
+        start: new Date(start),
+        end: new Date(end),
+      });
       if (
         mounted.current &&
         generation === request.current &&
-        key === currentKey.current
+        key === currentKey.current &&
+        services === currentServices.current
       ) {
-        setResult({ key, state: { status: 'ready', summary } });
+        setResult({
+          key,
+          services,
+          state: { status: 'ready', summary },
+          retainedSummary: null,
+        });
       }
     } catch {
       if (
         mounted.current &&
         generation === request.current &&
-        key === currentKey.current
+        key === currentKey.current &&
+        services === currentServices.current
       ) {
-        setResult({ key, state: { status: 'error', summary: null } });
+        setResult(previous => ({
+          ...previous,
+          state: { status: 'error', summary: null },
+        }));
       }
     }
   }, [services, key, start, end]);
@@ -100,7 +138,17 @@ export function usePeriodSummary(
   }, [refresh]);
 
   // Do not expose the previous period even before its next effect starts.
-  const state: SummaryState =
-    result.key === key ? result.state : { status: 'loading', summary: null };
-  return { state, bounds, refresh };
+  const sameQuery = result.key === key && result.services === services;
+  const state: SummaryState = sameQuery
+    ? result.state
+    : { status: 'loading', summary: null };
+  const retainedSummary = sameQuery ? result.retainedSummary : null;
+  return {
+    state,
+    bounds,
+    refresh,
+    retainedSummary,
+    refreshing: state.status === 'loading' && retainedSummary !== null,
+    refreshError: state.status === 'error' && retainedSummary !== null,
+  };
 }

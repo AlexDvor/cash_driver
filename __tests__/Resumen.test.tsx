@@ -13,7 +13,10 @@ import { Persistence } from '../src/app/persistence';
 import { LanguageProvider } from '../src/providers/LanguageProvider/LanguageProvider';
 import { ThemeProvider } from '../src/providers/ThemeProvider/ThemeProvider';
 import { SqlConnection } from '../src/database/sqlite';
-import { CashTransaction } from '../src/features/transactions/types';
+import {
+  CashSummary,
+  summarizeTransactions,
+} from '../src/features/summary/summary';
 import { createTransactionRepository } from '../src/features/transactions/transactionRepository';
 import { DELETION_UNDO_SECONDS } from '../src/features/transactions/deletionConstants';
 import {
@@ -297,14 +300,14 @@ test.each(['success', 'error'])(
   async outcome => {
     await seed('2026-10-01T08:00:00Z');
     await mount();
-    let resolve: (rows: CashTransaction[]) => void = () => {};
+    let resolve: (summary: CashSummary) => void = () => {};
     let reject: (error: Error) => void = () => {};
-    const old = new Promise<CashTransaction[]>((ok, fail) => {
+    const old = new Promise<CashSummary>((ok, fail) => {
       resolve = ok;
       reject = fail;
     });
     const list = jest
-      .spyOn(services.transactions, 'list')
+      .spyOn(services.transactions, 'summarize')
       .mockImplementationOnce(() => old);
     await press('Semana');
     expect(content()).toContain('Cargando resumen');
@@ -313,7 +316,7 @@ test.each(['success', 'error'])(
     expectCount(1);
     await act(async () => {
       if (outcome === 'success') {
-        resolve([]);
+        resolve(summarizeTransactions([]));
       } else {
         reject(Error('stale'));
       }
