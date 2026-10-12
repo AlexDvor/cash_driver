@@ -1,35 +1,26 @@
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   Modal,
   Pressable,
   ScrollView,
   useWindowDimensions,
   View,
 } from 'react-native';
-import { Calendar } from 'react-native-calendars';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { sizing, spacing, typography } from '../../constants/theme/tokens';
+import { sizing, spacing } from '../../constants/theme/tokens';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../../ui/AppText/AppText';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import {
-  calendarDateKey,
   calendarDisplayDate,
   calendarMonthLabel,
   offsetCalendarMonth,
 } from './calendarPresentation';
 import { CalendarModalProps } from './CalendarModal.interface';
 import { styles } from './CalendarModal.styles';
-import { CalendarDay, CalendarDayContext } from './CalendarDay';
+import { CalendarGrid } from '../CalendarGrid/CalendarGrid';
 import { CalendarChevron, CalendarIcon } from './CalendarIcon';
-
-// Remove the library's adjustable header as well as its visible text. All
-// month navigation belongs to the controlled draft above the calendar grid.
-function EmptyCalendarHeader() {
-  return null;
-}
 
 export function CalendarModal(props: CalendarModalProps) {
   const { draftMonth } = props;
@@ -41,6 +32,7 @@ export function CalendarModal(props: CalendarModalProps) {
 }
 
 function CalendarSession({
+  monthOnly = false,
   draftMonth,
   selectedDate,
   todayDateKey,
@@ -56,37 +48,19 @@ function CalendarSession({
 }) {
   const { t, locale } = useTranslation();
   const { colors, appearance } = useAppTheme();
-  const { height, fontScale, width } = useWindowDimensions();
+  const { height, width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const [pickingMonth, setPickingMonth] = useState(false);
-  const [viewportWidth, setViewportWidth] = useState(0);
+  const [pickingMonth, setPickingMonth] = useState(monthOnly);
   const compact =
     width - insets.left - insets.right <
     sizing.touchTarget * 7 + spacing.lg * 4 + sizing.borderWidth * 2;
   const horizontalPadding = compact ? spacing.xs : spacing.lg;
-  // Fit all seven columns when touch targets and scaled digits fit the panel.
-  // Very narrow windows retain horizontal scrolling rather than shrink targets.
-  const calendarWidth = Math.max(
-    Math.max(
-      sizing.touchTarget,
-      Math.ceil(typography.body * fontScale * 1.5 + spacing.md),
-    ) * 7,
-    viewportWidth,
-  );
   const label = calendarMonthLabel(draftMonth, locale);
   const headingLabel = pickingMonth
     ? new Intl.NumberFormat(locale, { useGrouping: false }).format(
         draftMonth.year,
       )
     : label;
-
-  const dateKey = calendarDateKey({ ...draftMonth, day: 1 });
-  const weekdays = Array.from({ length: 7 }, (_, index) =>
-    new Intl.DateTimeFormat(locale, {
-      weekday: 'short',
-      timeZone: 'UTC',
-    }).format(calendarDisplayDate({ year: 2024, month: 1 }, index + 1)),
-  );
 
   return (
     <Modal transparent visible animationType="none" onRequestClose={onCancel}>
@@ -192,23 +166,27 @@ function CalendarSession({
               >
                 <CalendarChevron color={colors.text} />
               </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t(
-                  pickingMonth ? 'calendarShowDays' : 'calendarSelectMonthYear',
-                )}
-                accessibilityValue={{ text: headingLabel }}
-                style={[
-                  styles.control,
-                  {
-                    borderWidth: sizing.borderWidth,
-                    borderColor: colors.border,
-                  },
-                ]}
-                onPress={() => setPickingMonth(value => !value)}
-              >
-                <CalendarIcon color={colors.secondaryText} />
-              </Pressable>
+              {!monthOnly && (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t(
+                    pickingMonth
+                      ? 'calendarShowDays'
+                      : 'calendarSelectMonthYear',
+                  )}
+                  accessibilityValue={{ text: headingLabel }}
+                  style={[
+                    styles.control,
+                    {
+                      borderWidth: sizing.borderWidth,
+                      borderColor: colors.border,
+                    },
+                  ]}
+                  onPress={() => setPickingMonth(value => !value)}
+                >
+                  <CalendarIcon color={colors.secondaryText} />
+                </Pressable>
+              )}
             </View>
             {pickingMonth ? (
               <View style={styles.grid}>
@@ -266,100 +244,20 @@ function CalendarSession({
                 })}
               </View>
             ) : (
-              <ScrollView
-                horizontal
-                onLayout={event =>
-                  setViewportWidth(event.nativeEvent.layout.width)
-                }
-              >
-                <View style={{ width: calendarWidth }}>
-                  <View style={styles.weekdays}>
-                    {weekdays.map((weekday, index) => (
-                      <View key={index} style={{ width: calendarWidth / 7 }}>
-                        <AppText secondary style={styles.centered}>
-                          {weekday}
-                        </AppText>
-                      </View>
-                    ))}
-                  </View>
-                  <CalendarDayContext.Provider
-                    value={{
-                      draftMonth,
-                      selectedDate,
-                      todayDateKey,
-                      occupiedDates,
-                      activityStatus,
-                      onBrowseMonth,
-                      onApplyMonth,
-                      onApplyDay,
-                      onCancel,
-                      onRetryActivity,
-                    }}
-                  >
-                    <Calendar
-                      key={`${dateKey}-${colors.card}`}
-                      style={[
-                        styles.calendar,
-                        { backgroundColor: colors.card },
-                      ]}
-                      current={dateKey}
-                      firstDay={1}
-                      hideArrows
-                      hideDayNames
-                      hideExtraDays
-                      disableMonthChange
-                      enableSwipeMonths={false}
-                      customHeader={EmptyCalendarHeader}
-                      theme={{
-                        calendarBackground: colors.card,
-                        weekVerticalMargin: spacing.xs,
-                      }}
-                      dayComponent={CalendarDay}
-                    />
-                  </CalendarDayContext.Provider>
-                </View>
-              </ScrollView>
+              <CalendarGrid
+                draftMonth={draftMonth}
+                selectedDate={selectedDate}
+                todayDateKey={todayDateKey}
+                occupiedDates={occupiedDates}
+                activityStatus={activityStatus}
+                onApplyDay={onApplyDay}
+                onRetryActivity={onRetryActivity}
+              />
             )}
-            {pickingMonth ? (
+            {pickingMonth && (
               <AppText variant="heading" style={styles.pickerPreview}>
                 {label}
               </AppText>
-            ) : (
-              <View style={styles.legend}>
-                <View
-                  accessible={false}
-                  style={[
-                    styles.legendDot,
-                    { backgroundColor: colors.primary },
-                  ]}
-                />
-                <AppText secondary style={styles.legendLabel}>
-                  {t('calendarActivityLegend')}
-                </AppText>
-              </View>
-            )}
-            {!pickingMonth && activityStatus === 'loading' && (
-              <View style={styles.row}>
-                <ActivityIndicator color={colors.primary} />
-                <AppText accessibilityLiveRegion="polite">
-                  {t('calendarActivityLoading')}
-                </AppText>
-              </View>
-            )}
-            {!pickingMonth && activityStatus === 'error' && (
-              <>
-                <AppText
-                  accessibilityLiveRegion="polite"
-                  style={{ color: colors.errorText }}
-                >
-                  {t('calendarActivityError')}
-                </AppText>
-                <ActionButton
-                  variant="secondary"
-                  label={t('retry')}
-                  onPress={onRetryActivity}
-                />
-              </>
             )}
             <ActionButton
               label={t('calendarShowMonth')}

@@ -14,7 +14,7 @@ import { platforms, platformLabels } from '../../constants/platforms';
 import { SummaryPeriod } from '../../features/summary/periods';
 import { usePeriodSummary } from '../../hooks/summary/usePeriodSummary';
 import { useCalendarSelection } from '../../hooks/summary/useCalendarSelection';
-import { CalendarNavigation } from '../../components/CalendarNavigation/CalendarNavigation';
+import { SummaryCalendar } from '../../components/SummaryCalendar/SummaryCalendar';
 import { calendarFullDateLabel } from '../../components/CalendarModal/calendarPresentation';
 import { styles } from './SummaryScreen.styles';
 
@@ -42,9 +42,13 @@ export function SummaryScreen() {
         {t('summary')}
       </AppText>
       <ChoiceGroup
+        appearance="segmented"
         label={t('period')}
         value={period}
-        onChange={setPeriod}
+        onChange={next => {
+          calendar.cancelCalendar();
+          setPeriod(next);
+        }}
         options={[
           { value: 'day', label: t('today') },
           { value: 'week', label: t('week') },
@@ -52,7 +56,7 @@ export function SummaryScreen() {
         ]}
       />
       {period === 'month' && (
-        <CalendarNavigation
+        <SummaryCalendar
           calendar={calendar}
           timeZone={clock.timeZone}
           todayDateKey={clock.dayKey}

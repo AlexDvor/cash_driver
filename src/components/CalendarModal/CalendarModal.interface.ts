@@ -1,6 +1,7 @@
 import { CalendarDate, CalendarMonth } from '../../features/summary/periods';
 
 export interface CalendarModalProps {
+  monthOnly?: boolean;
   draftMonth: CalendarMonth | null;
   selectedDate?: CalendarDate | null;
   todayDateKey: string;

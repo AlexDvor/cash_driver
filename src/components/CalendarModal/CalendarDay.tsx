@@ -1,16 +1,14 @@
 import React, { createContext, useContext } from 'react';
 import { Pressable, View } from 'react-native';
 import { DateData } from 'react-native-calendars';
-import { CalendarModalProps } from './CalendarModal.interface';
+import { CalendarGridProps } from '../CalendarGrid/CalendarGrid.interface';
 import { calendarDateKey, calendarFullDateLabel } from './calendarPresentation';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../../ui/AppText/AppText';
 import { styles } from './CalendarModal.styles';
 
-export const CalendarDayContext = createContext<CalendarModalProps | null>(
-  null,
-);
+export const CalendarDayContext = createContext<CalendarGridProps | null>(null);
 
 export function CalendarDay({ date }: { date?: DateData }) {
   const context = useContext(CalendarDayContext);

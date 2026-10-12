@@ -16,6 +16,8 @@ import { SqlConnection } from '../src/database/sqlite';
 import { CashSummary } from '../src/features/summary/summary';
 import { CalendarDay } from '../src/components/CalendarModal/CalendarDay';
 import { CalendarNavigation } from '../src/components/CalendarNavigation/CalendarNavigation';
+import { SummaryCalendar } from '../src/components/SummaryCalendar/SummaryCalendar';
+import { CalendarModal } from '../src/components/CalendarModal/CalendarModal';
 import { HistoryScreen } from '../src/screens/HistoryScreen/HistoryScreen';
 import { DELETION_UNDO_SECONDS } from '../src/features/transactions/deletionConstants';
 import {
@@ -57,7 +59,7 @@ test('a skipped local date displays its selected coordinates rather than a rever
   await press('Mes');
   await act(async () => {
     app.root
-      .findByType(CalendarNavigation)
+      .findByType(SummaryCalendar)
       .props.calendar.applyDay({ year: 2011, month: 12, day: 30 });
   });
   expect(text('summary-count')).toBe('Operaciones: 0');
@@ -124,7 +126,6 @@ async function seed(
 async function historicalFebruary() {
   await press('Mes');
   await press('Abrir calendario');
-  await press('Elegir mes y año');
   await press('Año anterior');
   await press('febrero');
   await press('Mostrar mes');
@@ -171,11 +172,10 @@ test('historical year/month and day drive SQLite totals, draft cancel and period
   expect(text('summary-averageFare')).toContain('11,00');
   expect(text('summary-cabify')).toContain('12,00');
   await press('Abrir calendario');
-  await press('Mes siguiente');
+  await press('Año siguiente');
   expect(text('summary-fareTotal')).toContain('22,00');
   await press('Cancelar');
   expect(text('summary-fareTotal')).toContain('22,00');
-  await press('Abrir calendario');
   await pressDay(3);
   expect(text('summary-count')).toBe('Operaciones: 1');
   expect(text('summary-range')).toContain('3 feb 2025');
@@ -184,8 +184,12 @@ test('historical year/month and day drive SQLite totals, draft cancel and period
   expect(text('summary-fareTotal')).toContain('18,00');
   await press('Mes');
   expect(text('summary-range')).toContain('3 feb 2025');
+  await press('Semana');
+  expect(text('summary-range')).toContain('2026');
+  await press('Mes');
+  expect(text('summary-range')).toContain('3 feb 2025');
   await press('Abrir calendario');
-  await press('Mes siguiente');
+  await press('Año siguiente');
   await press('Inicio');
   expect(content()).not.toContain('Mostrar mes');
   await press('Resumen');
@@ -325,4 +329,86 @@ test('historical selection preserves pending deletion/undo and background cancel
   await act(async () => jest.advanceTimersByTime(DELETION_UNDO_SECONDS * 1000));
   expect(text('summary-count')).toBe('Operaciones: 0');
   expect(text('summary-range')).toContain('2025');
+});
+
+function dayLabel(day: number, month: number, year: number) {
+  const grid = app.root.findByType(SummaryCalendar);
+  const cell = grid
+    .findAllByType(CalendarDay)
+    .find(
+      node =>
+        node.props.date?.day === day &&
+        node.props.date?.month === month &&
+        node.props.date?.year === year,
+    );
+  if (!cell) throw Error('Missing calendar day');
+  return cell.findAll(
+    node =>
+      node.props.accessibilityRole === 'button' &&
+      typeof node.props.onPress === 'function',
+  )[0].props.accessibilityLabel as string;
+}
+
+test('inline activity reads only focused Mes; chooser draft and theme/language changes do not read or apply another month', async () => {
+  await seed('2026-10-11T09:00:00Z');
+  const occupied = jest.spyOn(services.transactions, 'occupiedDates');
+  await mount();
+  expect(occupied).not.toHaveBeenCalled();
+  await press('Mes');
+  expect(occupied).toHaveBeenCalledTimes(1);
+  expect(dayLabel(11, 10, 2026)).toContain('Con operaciones');
+  await press('Abrir calendario');
+  expect(app.root.findByType(CalendarModal).props.monthOnly).toBe(true);
+  await press('Año anterior');
+  await press('febrero');
+  expect(occupied).toHaveBeenCalledTimes(1);
+  expect(text('summary-range')).toContain('2026');
+  await act(async () => {
+    await preferences.updatePreferences({ language: 'en', themeMode: 'dark' });
+  });
+  expect(content()).toContain('February 2025');
+  expect(text('summary-range')).toContain('2026');
+  expect(occupied).toHaveBeenCalledTimes(1);
+  await press('Cancel');
+  expect(text('summary-range')).toContain('2026');
+  await press('Home');
+  await act(async () => {
+    await seed('2026-10-10T09:00:00Z');
+  });
+  expect(occupied).toHaveBeenCalledTimes(1);
+  await press('Summary');
+  expect(occupied).toHaveBeenCalledTimes(2);
+  await press('Today');
+  await act(async () => {
+    await seed('2026-10-09T09:00:00Z');
+  });
+  expect(occupied).toHaveBeenCalledTimes(2);
+});
+
+test('inline markers reject an old-month response and distinguish unknown/error from confirmed empty with retry', async () => {
+  let resolveOld: (dates: string[]) => void = () => {};
+  jest.spyOn(services.transactions, 'occupiedDates').mockImplementationOnce(
+    () =>
+      new Promise(resolve => {
+        resolveOld = resolve;
+      }),
+  );
+  await mount();
+  await press('Mes');
+  expect(dayLabel(11, 10, 2026)).toContain('Actividad sin confirmar');
+  await press('Mes siguiente');
+  expect(dayLabel(11, 11, 2026)).toContain('Sin operaciones');
+  await act(async () => resolveOld(['2026-10-11']));
+  expect(dayLabel(11, 11, 2026)).toContain('Sin operaciones');
+  jest
+    .spyOn(services.transactions, 'occupiedDates')
+    .mockRejectedValueOnce(Error('activity failure'));
+  await press('Mes siguiente');
+  expect(content()).toContain('No se pudieron cargar los días con operaciones');
+  expect(dayLabel(11, 12, 2026)).toContain('Actividad sin confirmar');
+  await press('Reintentar');
+  expect(dayLabel(11, 12, 2026)).toContain('Sin operaciones');
+  await press('Mes siguiente');
+  expect(text('summary-range')).toContain('2027');
+  expect(dayLabel(11, 1, 2027)).toContain('Sin operaciones');
 });
