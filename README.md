@@ -98,8 +98,6 @@ npm test -- --runInBand --watch=false
 
 `npm run format` applies the project's formatting rules to source, tests, and supported root files.
 
-Automated coverage includes monetary rules, form lifecycle, persistence/migrations, history, summaries, and save/retry protection. Selected Android emulator flows have been checked; full native acceptance remains incomplete. Outstanding accessibility, motion, layout, and platform checks are recorded in the [implementation handoff](docs/IMPLEMENTATION_PLAN.md#native-tip-acceptance).
-
 ## Project structure
 
 | Path | Contents |
@@ -108,16 +106,5 @@ Automated coverage includes monetary rules, form lifecycle, persistence/migratio
 | `src/hooks/`, `src/providers/`, `src/navigation/` | Form/data hooks, application state providers, and navigation |
 | `src/features/`, `src/database/` | Domain calculations, services, repositories, and SQLite setup/migrations |
 | `src/i18n/`, `src/constants/`, `src/theme/` | Translations, shared constants, and theme helpers |
-| `__tests__/` | Automated tests and native acceptance entries |
+| `__tests__/` | Automated tests |
 | `android/`, `ios/` | Native projects |
-| `docs/` | Product contracts, coding guidance, and verification history |
-
-## Documentation
-
-- [Documentation index](docs/README.md)
-- [Product specification](docs/PROJECT_SPEC.md)
-- [UI behavior and design](docs/UI_DESIGN.md)
-- [Data and calculation rules](docs/DATA_AND_CALCULATIONS.md)
-- [Implementation handoff and open checks](docs/IMPLEMENTATION_PLAN.md)
-- [Coding standards](docs/CODING_STANDARDS.md)
-- [AI agent instructions](docs/AGENTS.md)
