@@ -1,0 +1,5 @@
+# Match Prettier's endOfLine=lf on Windows checkouts.
+*.js text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
