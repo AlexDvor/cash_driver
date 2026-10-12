@@ -36,6 +36,9 @@ local.properties
 !debug.keystore
 .kotlin/
 
+# Local documentation, plans, reference images and acceptance evidence.
+/docs/
+
 # node.js
 #
 node_modules/
@@ -65,7 +68,6 @@ yarn-error.log
 .metro-health-check
 
 # testing
-docs
 /coverage
 
 # Yarn
