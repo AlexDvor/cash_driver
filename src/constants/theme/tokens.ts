@@ -27,6 +27,7 @@ export const sizing = {
   contentMaxWidth: 640,
 };
 export interface Palette {
+  brandSurface: string;
   background: string;
   card: string;
   primary: string;
@@ -41,6 +42,7 @@ export interface Palette {
 }
 export const palettes: Record<'light' | 'dark', Palette> = {
   light: {
+    brandSurface: '#FFFFFF',
     background: '#F5F7F6',
     card: '#FFFFFF',
     primary: '#0E7A4B',
@@ -54,6 +56,8 @@ export const palettes: Record<'light' | 'dark', Palette> = {
     errorSurface: '#FEF2F2',
   },
   dark: {
+    // Original brand colors need a neutral backing in either appearance.
+    brandSurface: '#FFFFFF',
     background: '#101714',
     card: '#1A2520',
     primary: '#69D9A4',

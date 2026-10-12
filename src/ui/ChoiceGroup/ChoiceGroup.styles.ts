@@ -15,5 +15,11 @@ export const styles = StyleSheet.create({
     flexShrink: 1,
   },
   label: { textAlign: 'center' },
+  segment: {
+    flexBasis: 'auto',
+    flexGrow: 1,
+    borderRadius: radii.button,
+  },
+  pressed: { opacity: 0.8 },
   selected: { fontWeight: '700' },
 });
