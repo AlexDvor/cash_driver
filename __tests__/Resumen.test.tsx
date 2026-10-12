@@ -421,3 +421,35 @@ test('focus, resume, local midnight and timezone changes reload persisted rows a
   await act(async () => app.unmount());
   expect(listeners.size).toBe(0);
 });
+
+test('large saved totals stay complete across ES/EN/UK and all branded platform rows preserve fare-only values', async () => {
+  for (const platform of ['uber', 'cabify', 'bolt', 'other'] as const) {
+    await seed('2026-10-08T08:00:00Z', {
+      platform,
+      fareAmountCents: 999999,
+      cashReceivedCents: 999999,
+      tipCents: 0,
+    });
+  }
+  await mount();
+  for (const language of ['es', 'en', 'uk'] as const) {
+    await act(async () => {
+      await preferences.updatePreferences({
+        language,
+        themeMode: language === 'en' ? 'dark' : 'light',
+      });
+    });
+    const digits = (id: string) => text(id).replace(/\D/g, '');
+    expect(digits('summary-fareTotal')).toBe('3999996');
+    expect(digits('summary-retained')).toBe('3999996');
+    expect(digits('summary-averageFare')).toBe('999999');
+    expect(digits('summary-tipsTotal')).toBe('000');
+    for (const platform of ['uber', 'cabify', 'bolt', 'other']) {
+      expect(digits(`summary-${platform}`)).toBe('999999');
+    }
+    expect(content()).toContain('Uber');
+    expect(content()).toContain('Cabify');
+    expect(content()).toContain('Bolt');
+    expect(content()).toContain('Otro');
+  }
+});

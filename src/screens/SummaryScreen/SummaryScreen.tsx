@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator } from 'react-native';
 import { useLocalClock } from '../../hooks/app/useLocalClock';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
@@ -10,13 +10,18 @@ import { ScreenContainer } from '../../ui/ScreenContainer/ScreenContainer';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { formatMoney, formatPeriodRange } from '../../i18n/formatting';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
-import { platforms, platformLabels } from '../../constants/platforms';
+import { platforms } from '../../constants/platforms';
 import { SummaryPeriod } from '../../features/summary/periods';
 import { usePeriodSummary } from '../../hooks/summary/usePeriodSummary';
 import { useCalendarSelection } from '../../hooks/summary/useCalendarSelection';
 import { SummaryCalendar } from '../../components/SummaryCalendar/SummaryCalendar';
 import { calendarFullDateLabel } from '../../components/CalendarModal/calendarPresentation';
-import { styles } from './SummaryScreen.styles';
+import { PlatformSummaryRow } from '../../components/PlatformSummaryRow/PlatformSummaryRow';
+import {
+  RetainedCashCard,
+  SummaryMetric,
+  SummaryStatCards,
+} from '../../components/SummaryMetrics/SummaryMetrics';
 
 export function SummaryScreen() {
   const { t, locale } = useTranslation();
@@ -100,47 +105,37 @@ export function SummaryScreen() {
           {state.status === 'ready' && summary.operationCount === 0 && (
             <AppText testID="summary-empty">{t('summaryEmpty')}</AppText>
           )}
-          <Card style={{ backgroundColor: colors.primary }}>
-            <AppText variant="heading" style={{ color: colors.onPrimary }}>
-              {t('retainedCash')}
-            </AppText>
-            <AppText
-              testID="summary-retained"
-              style={[styles.money, { color: colors.onPrimary }]}
-            >
-              {formatMoney(summary.netCashTotalCents, locale)}
-            </AppText>
-            <AppText testID="summary-count" style={{ color: colors.onPrimary }}>
-              {t('operationCount')}: {summary.operationCount}
-            </AppText>
-          </Card>
+          <RetainedCashCard
+            label={t('retainedCash')}
+            amount={formatMoney(summary.netCashTotalCents, locale)}
+            countLabel={`${t('operationCount')}: ${summary.operationCount}`}
+          />
+          <SummaryStatCards
+            fareLabel={t('fareTotal')}
+            fareAmount={formatMoney(summary.fareTotalCents, locale)}
+            tipLabel={t('tipsTotal')}
+            tipAmount={formatMoney(summary.tipTotalCents, locale)}
+          />
           <Card>
-            {(
-              [
-                { label: 'fareTotal', cents: summary.fareTotalCents },
-                { label: 'tipsTotal', cents: summary.tipTotalCents },
-                { label: 'averageFare', cents: summary.averageFareCents },
-              ] as const
-            ).map(item => (
-              <View key={item.label} style={styles.row}>
-                <AppText secondary>{t(item.label)}</AppText>
-                <AppText testID={`summary-${item.label}`} style={styles.value}>
-                  {formatMoney(item.cents, locale)}
-                </AppText>
-              </View>
-            ))}
+            <SummaryMetric
+              label={t('averageFare')}
+              amount={formatMoney(summary.averageFareCents, locale)}
+              testID="summary-averageFare"
+            />
           </Card>
           <Card>
             <AppText variant="heading" accessibilityRole="header">
               {t('byPlatform')}
             </AppText>
             {platforms.map(platform => (
-              <View key={platform} style={styles.row}>
-                <AppText>{platformLabels[platform]}</AppText>
-                <AppText testID={`summary-${platform}`} style={styles.value}>
-                  {formatMoney(summary.fareByPlatformCents[platform], locale)}
-                </AppText>
-              </View>
+              <PlatformSummaryRow
+                key={platform}
+                platform={platform}
+                amount={formatMoney(
+                  summary.fareByPlatformCents[platform],
+                  locale,
+                )}
+              />
             ))}
           </Card>
         </>
