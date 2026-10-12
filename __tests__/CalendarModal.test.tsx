@@ -235,3 +235,35 @@ test('a selected occupied today announces all three independent statuses', async
   expect(selected.props.accessibilityLabel).toContain('Today');
   expect(selected.props.accessibilityLabel).toContain('Selected');
 });
+
+test('native modal onShow requests initial heading focus only after the dialog is shown', async () => {
+  jest.useFakeTimers();
+  const native = require('react-native');
+  const focus = jest
+    .spyOn(native.AccessibilityInfo, 'sendAccessibilityEvent')
+    .mockImplementation(() => {});
+  try {
+    props.monthOnly = true;
+    await mount();
+    expect(focus).not.toHaveBeenCalled();
+    const onShow = app.root.findByType(Modal).props.onShow;
+    await act(async () => onShow());
+    expect(focus).not.toHaveBeenCalled();
+    await act(async () => jest.advanceTimersByTime(30));
+    expect(focus).toHaveBeenCalledWith(expect.anything(), 'focus');
+    focus.mockClear();
+    await act(async () => onShow());
+    await act(async () => app.unmount());
+    await act(async () => jest.advanceTimersByTime(30));
+    expect(focus).not.toHaveBeenCalled();
+    focus.mockClear();
+    await act(async () => {
+      onShow();
+      jest.advanceTimersByTime(30);
+    });
+    expect(focus).not.toHaveBeenCalled();
+  } finally {
+    focus.mockRestore();
+    jest.useRealTimers();
+  }
+});

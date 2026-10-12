@@ -33,9 +33,8 @@ test('inline chooser restores focus on cancel/apply, never restores after blur, 
   mockFocused = true;
   jest.useFakeTimers();
   const focus = jest
-    .spyOn(Native.AccessibilityInfo, 'setAccessibilityFocus')
+    .spyOn(Native.AccessibilityInfo, 'sendAccessibilityEvent')
     .mockImplementation(() => {});
-  jest.spyOn(require('react-native'), 'findNodeHandle').mockReturnValue(42);
   jest.spyOn(global, 'requestAnimationFrame').mockImplementation(callback => {
     callback(0);
     return 1;
@@ -99,7 +98,7 @@ test('inline chooser restores focus on cancel/apply, never restores after blur, 
     expect(retry).toHaveBeenCalledTimes(1);
     await act(async () => app.root.findByType(CalendarModal).props.onCancel());
     await act(async () => jest.advanceTimersByTime(20));
-    expect(focus).toHaveBeenCalledWith(42);
+    expect(focus).toHaveBeenCalledWith(expect.anything(), 'focus');
     expect(calendar.selection.kind).toBe('automatic');
     await act(async () => calendar.openCalendar());
     await act(async () => calendar.applyMonth({ year: 2025, month: 2 }));

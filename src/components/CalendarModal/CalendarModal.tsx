@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Modal,
+  AccessibilityInfo,
   Pressable,
   ScrollView,
   useWindowDimensions,
@@ -51,6 +52,14 @@ function CalendarSession({
   const { height, width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [pickingMonth, setPickingMonth] = useState(monthOnly);
+  const heading = useRef<React.ElementRef<typeof View>>(null);
+  const focusFrame = useRef<number | null>(null);
+  useEffect(
+    () => () => {
+      if (focusFrame.current != null) cancelAnimationFrame(focusFrame.current);
+    },
+    [],
+  );
   const compact =
     width - insets.left - insets.right <
     sizing.touchTarget * 7 + spacing.lg * 4 + sizing.borderWidth * 2;
@@ -63,7 +72,20 @@ function CalendarSession({
     : label;
 
   return (
-    <Modal transparent visible animationType="none" onRequestClose={onCancel}>
+    <Modal
+      transparent
+      visible
+      animationType="none"
+      onRequestClose={onCancel}
+      onShow={() => {
+        if (focusFrame.current != null)
+          cancelAnimationFrame(focusFrame.current);
+        focusFrame.current = requestAnimationFrame(() => {
+          if (heading.current != null)
+            AccessibilityInfo.sendAccessibilityEvent(heading.current, 'focus');
+        });
+      }}
+    >
       <View
         style={[
           styles.overlay,
@@ -107,13 +129,19 @@ function CalendarSession({
             keyboardShouldPersistTaps="handled"
           >
             <View style={styles.row}>
-              <AppText
-                variant="heading"
+              <View
+                ref={heading}
+                accessible
                 accessibilityRole="header"
+                accessibilityLabel={t(
+                  pickingMonth ? 'calendarMonthTitle' : 'calendarTitle',
+                )}
                 style={styles.heading}
               >
-                {t(pickingMonth ? 'calendarMonthTitle' : 'calendarTitle')}
-              </AppText>
+                <AppText variant="heading" accessible={false}>
+                  {t(pickingMonth ? 'calendarMonthTitle' : 'calendarTitle')}
+                </AppText>
+              </View>
               <Pressable
                 testID="calendar-close"
                 accessibilityRole="button"

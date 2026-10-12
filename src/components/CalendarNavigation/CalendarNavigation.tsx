@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
-import { AccessibilityInfo, findNodeHandle, View } from 'react-native';
+import { AccessibilityInfo, View } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 import { useOccupiedDates } from '../../hooks/summary/useOccupiedDates';
 import { CalendarModal } from '../CalendarModal/CalendarModal';
 import { CalendarPeriodSelector } from '../CalendarPeriodSelector/CalendarPeriodSelector';
@@ -11,6 +12,7 @@ export function CalendarNavigation({
   timeZone,
   todayDateKey,
 }: CalendarNavigationProps) {
+  const focused = useIsFocused();
   const trigger = useRef<React.ElementRef<typeof View>>(null);
   const open = calendar.draftMonth !== null;
   const wasOpen = useRef(false);
@@ -22,17 +24,16 @@ export function CalendarNavigation({
   useEffect(() => {
     const dismissed = wasOpen.current && !open;
     wasOpen.current = open;
-    if (!dismissed) {
+    if (!dismissed || !focused) {
       return;
     }
     const frame = requestAnimationFrame(() => {
-      const handle = findNodeHandle(trigger.current);
-      if (handle != null) {
-        AccessibilityInfo.setAccessibilityFocus(handle);
+      if (trigger.current != null) {
+        AccessibilityInfo.sendAccessibilityEvent(trigger.current, 'focus');
       }
     });
     return () => cancelAnimationFrame(frame);
-  }, [open]);
+  }, [open, focused]);
 
   return (
     <>

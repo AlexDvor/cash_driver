@@ -9,6 +9,10 @@ import { palettes as mockPalettes } from '../src/constants/theme/tokens';
 import { translate as mockTranslate } from '../src/i18n/translations';
 
 const mockActivity = jest.fn();
+let mockFocused = true;
+jest.mock('@react-navigation/native', () => ({
+  useIsFocused: () => mockFocused,
+}));
 jest.mock('../src/hooks/summary/useOccupiedDates', () => ({
   useOccupiedDates: (...args: unknown[]) => mockActivity(...args),
 }));
@@ -26,11 +30,11 @@ jest.mock('react-native-safe-area-context', () => ({
 }));
 
 test('shared composition loads draft activity, applies a day, and restores trigger focus on cancel', async () => {
+  mockFocused = true;
   jest.useFakeTimers();
   const focus = jest
-    .spyOn(Native.AccessibilityInfo, 'setAccessibilityFocus')
+    .spyOn(Native.AccessibilityInfo, 'sendAccessibilityEvent')
     .mockImplementation(() => {});
-  jest.spyOn(require('react-native'), 'findNodeHandle').mockReturnValue(42);
   jest.spyOn(global, 'requestAnimationFrame').mockImplementation(callback => {
     callback(0);
     return 1;
@@ -65,6 +69,15 @@ test('shared composition loads draft activity, applies a day, and restores trigg
       'UTC',
       false,
     );
+    const priorFocusCalls = focus.mock.calls.length;
+    await act(async () => calendar.openCalendar());
+    mockFocused = false;
+    await act(async () => app.update(<Probe />));
+    await act(async () => calendar.cancelCalendar());
+    await act(async () => jest.advanceTimersByTime(30));
+    expect(focus).toHaveBeenCalledTimes(priorFocusCalls);
+    mockFocused = true;
+    await act(async () => app.update(<Probe />));
     await act(async () =>
       app.root.findByType(CalendarPeriodSelector).props.onOpenCalendar(),
     );
@@ -94,7 +107,7 @@ test('shared composition loads draft activity, applies a day, and restores trigg
     expect(retry).toHaveBeenCalledTimes(1);
     await act(async () => app.root.findByType(CalendarModal).props.onCancel());
     await act(async () => jest.advanceTimersByTime(20));
-    expect(focus).toHaveBeenCalledWith(42);
+    expect(focus).toHaveBeenCalledWith(expect.anything(), 'focus');
     expect(calendar.selection.kind).toBe('automatic');
     await act(async () => calendar.openCalendar());
     await act(async () =>

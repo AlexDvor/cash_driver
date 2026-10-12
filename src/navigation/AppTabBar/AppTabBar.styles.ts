@@ -15,7 +15,8 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingHorizontal: spacing.xs,
   },
-  label: { textAlign: 'center', flexShrink: 1 },
+  // Centered children need an explicit width so scaled labels wrap inside a tab.
+  label: { width: '100%', textAlign: 'center' },
   selected: { fontWeight: '700' },
   pressed: { opacity: 0.7 },
 });

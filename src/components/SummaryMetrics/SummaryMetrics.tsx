@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useWindowDimensions, View } from 'react-native';
+import { ScrollView, useWindowDimensions, View } from 'react-native';
 import { sizing, spacing } from '../../constants/theme/tokens';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../../ui/AppText/AppText';
@@ -23,15 +23,17 @@ export function RetainedCashCard({
     <Card
       style={{ backgroundColor: colors.primary, borderColor: colors.primary }}
     >
-      <AppText variant="heading" style={textColor}>
-        {label}
-      </AppText>
       <View style={styles.heroRow}>
-        <AppText testID="summary-retained" style={[styles.money, textColor]}>
-          {amount.replace(/\u00a0(?=EUR\b)/u, ' ')}
+        <AppText variant="heading" style={[styles.label, textColor]}>
+          {label}
         </AppText>
         <SummaryIcon name="coins" color={colors.onPrimary} />
       </View>
+      <ScrollView key={amount} horizontal>
+        <AppText testID="summary-retained" style={[styles.money, textColor]}>
+          {amount}
+        </AppText>
+      </ScrollView>
       <AppText testID="summary-count" style={textColor}>
         {countLabel}
       </AppText>
@@ -89,11 +91,13 @@ export function SummaryStatCards({
               <AppText variant="supporting" secondary>
                 {metric.label}
               </AppText>
-              <AppText testID={metric.testID} style={styles.statAmount}>
-                {metric.amount}
-              </AppText>
             </View>
           </View>
+          <ScrollView key={metric.amount} horizontal>
+            <AppText testID={metric.testID} style={styles.statAmount}>
+              {metric.amount}
+            </AppText>
+          </ScrollView>
         </Card>
       ))}
     </View>

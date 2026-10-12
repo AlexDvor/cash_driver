@@ -20,11 +20,10 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: spacing.lg,
   },
   money: {
-    flexGrow: 1,
-    flexShrink: 1,
     fontSize: typography.change,
     fontWeight: '700',
     fontVariant: ['tabular-nums'],

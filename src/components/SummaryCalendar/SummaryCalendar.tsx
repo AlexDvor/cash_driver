@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { AccessibilityInfo, findNodeHandle, View } from 'react-native';
+import { AccessibilityInfo, View } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { useOccupiedDates } from '../../hooks/summary/useOccupiedDates';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
@@ -27,8 +27,8 @@ export function SummaryCalendar({
     wasOpen.current = open;
     if (!dismissed || !focused) return;
     const frame = requestAnimationFrame(() => {
-      const handle = findNodeHandle(trigger.current);
-      if (handle != null) AccessibilityInfo.setAccessibilityFocus(handle);
+      if (trigger.current != null)
+        AccessibilityInfo.sendAccessibilityEvent(trigger.current, 'focus');
     });
     return () => cancelAnimationFrame(frame);
   }, [open, focused]);
