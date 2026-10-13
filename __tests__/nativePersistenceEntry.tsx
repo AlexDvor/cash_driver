@@ -139,6 +139,7 @@ async function verifyNativePersistence(): Promise<string> {
       language: 'uk',
       themeMode: 'dark',
       defaultPlatform: 'bolt',
+      enabledPlatforms: ['bolt'],
       hapticsEnabled: true,
     });
     return 'NATIVE FIRST PASS: integer bindings, constraints, migration, retry, rollback; force-stop and relaunch';
@@ -172,6 +173,7 @@ async function verifyNativePersistence(): Promise<string> {
     language: 'es',
     themeMode: 'system',
     defaultPlatform: 'uber',
+    enabledPlatforms: ['uber'],
     hapticsEnabled: false,
   });
   return 'NATIVE RESTART PASS: operations/preferences restored, edit/date preserved, delete';

@@ -1,5 +1,9 @@
 import { randomUUID } from 'node:crypto';
-import { migrateDatabase, transactionSchema } from '../src/database/migrations';
+import {
+  migrateDatabase,
+  SCHEMA_VERSION,
+  transactionSchema,
+} from '../src/database/migrations';
 import { SqlConnection } from '../src/database/sqlite';
 import { calculatePayment } from '../src/features/transactions/payment';
 import { TransactionInput } from '../src/features/transactions/transactionService';
@@ -120,7 +124,7 @@ test.each([1, 2, 3])(
     ).rows;
     await migrateDatabase(db);
     expect((await db.execute('PRAGMA user_version')).rows).toEqual([
-      { user_version: 4 },
+      { user_version: SCHEMA_VERSION },
     ]);
     expect(
       (await db.execute('SELECT * FROM transactions ORDER BY id')).rows,

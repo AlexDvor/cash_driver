@@ -80,7 +80,16 @@ export function PersistenceProvider({
       setErrorKey(null);
       failedPatch.current = null;
       try {
-        const preferences = await ready.services.preferences.update(patch);
+        const compatibilityPatch =
+          patch.defaultPlatform !== undefined &&
+          patch.enabledPlatforms === undefined &&
+          ready.preferences.enabledPlatforms.length === 1 &&
+          !ready.preferences.enabledPlatforms.includes(patch.defaultPlatform)
+            ? { ...patch, enabledPlatforms: [patch.defaultPlatform] }
+            : patch;
+        const preferences = await ready.services.preferences.update(
+          compatibilityPatch,
+        );
         if (mounted.current) {
           setReady(previous => previous && { ...previous, preferences });
         }

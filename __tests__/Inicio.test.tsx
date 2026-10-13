@@ -275,11 +275,11 @@ test('failed default-platform write preserves the active draft and committed def
   expect(button('Cabify').props.accessibilityState.selected).toBe(true);
   expect(field('Importe a cobrar').props.value).toBe('18');
   expect(tipValue()).toBe('2,00');
+  fail = false;
   expect((await services.preferences.read()).defaultPlatform).toBe('cabify');
   expect(JSON.stringify(app.toJSON())).toContain(
     'No se pudo guardar la preferencia',
   );
-  fail = false;
   await press('Bolt');
   expect((await services.preferences.read()).defaultPlatform).toBe('bolt');
 });

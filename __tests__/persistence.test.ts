@@ -95,14 +95,161 @@ test('preference decoding rejects noncanonical platform values rather than guess
     { platform: 'uber' },
   ]) {
     expect(() =>
-      decodePreferences({
-        language: 'es',
-        theme_mode: 'system',
-        default_platform: defaultPlatform,
-        haptics_enabled: 0,
-      }),
+      decodePreferences(
+        {
+          language: 'es',
+          theme_mode: 'system',
+          default_platform: defaultPlatform,
+          haptics_enabled: 0,
+        },
+        ['uber'],
+      ),
     ).toThrow('Corrupt preferences');
   }
+});
+
+test('enabled platform validation rejects empty, duplicate, unknown and mismatched values', async () => {
+  const services = await testPersistence(db);
+  const original = await services.preferences.read();
+  for (const enabledPlatforms of [
+    [],
+    ['uber', 'uber'],
+    ['unknown'],
+    ['Uber'],
+    'uber',
+    null,
+  ]) {
+    await expect(
+      services.preferences.update(
+        JSON.parse(JSON.stringify({ enabledPlatforms })),
+      ),
+    ).rejects.toThrow('enabled platforms');
+  }
+  await expect(
+    services.preferences.update({
+      defaultPlatform: 'uber',
+      enabledPlatforms: ['bolt'],
+    }),
+  ).rejects.toThrow('Corrupt preferences');
+  await expect(
+    services.preferences.update({ defaultPlatform: 'bolt' }),
+  ).rejects.toThrow('Corrupt preferences');
+  expect(await services.preferences.read()).toEqual(original);
+});
+
+test('enabled platform updates use catalog order and atomically replace a removed default', async () => {
+  const services = await testPersistence(db);
+  await services.preferences.update({
+    enabledPlatforms: ['other', 'bolt', 'cabify', 'uber'],
+  });
+  expect(await services.preferences.read()).toMatchObject({
+    defaultPlatform: 'uber',
+    enabledPlatforms: ['uber', 'cabify', 'bolt', 'other'],
+  });
+  await services.preferences.update({ defaultPlatform: 'bolt' });
+  await services.preferences.update({ enabledPlatforms: ['other', 'cabify'] });
+  expect(await services.preferences.read()).toMatchObject({
+    defaultPlatform: 'cabify',
+    enabledPlatforms: ['cabify', 'other'],
+  });
+});
+
+test('corrupt enabled-platform storage fails instead of inventing a fallback', async () => {
+  const services = await testPersistence(db);
+  await db.execute('DELETE FROM preference_enabled_platforms');
+  await expect(services.preferences.read()).rejects.toThrow(
+    'Invalid enabled platforms',
+  );
+  await db.execute(
+    "INSERT INTO preference_enabled_platforms VALUES (1, 'uber')",
+  );
+  await db.execute(
+    "UPDATE preferences SET default_platform = 'bolt' WHERE id = 1",
+  );
+  await expect(services.preferences.read()).rejects.toThrow(
+    'Corrupt preferences',
+  );
+});
+
+test.each(['uber', 'cabify', 'bolt', 'other'] as const)(
+  'v4 migration backfills only the saved %s default',
+  async defaultPlatform => {
+    await migrateDatabase(db);
+    const preservedId = randomUUID();
+    await db.execute(
+      'INSERT INTO transactions VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [
+        preservedId,
+        defaultPlatform,
+        1200,
+        1500,
+        300,
+        0,
+        1200,
+        '2026-10-12T10:00:00.000Z',
+        null,
+      ],
+    );
+    await db.execute(
+      'UPDATE preferences SET default_platform = ? WHERE id = 1',
+      [defaultPlatform],
+    );
+    await db.execute('DROP TABLE preference_enabled_platforms');
+    await db.execute('PRAGMA user_version = 4');
+    await migrateDatabase(db);
+    expect(
+      (
+        await db.execute(
+          'SELECT preference_id, platform FROM preference_enabled_platforms',
+        )
+      ).rows,
+    ).toEqual([{ preference_id: 1, platform: defaultPlatform }]);
+    expect((await db.execute('PRAGMA user_version')).rows).toEqual([
+      { user_version: SCHEMA_VERSION },
+    ]);
+    expect(
+      (
+        await db.execute('SELECT id FROM transactions WHERE id = ?', [
+          preservedId,
+        ])
+      ).rows,
+    ).toEqual([{ id: preservedId }]);
+  },
+);
+
+test('v5 migration failure rolls back its table, data and schema version', async () => {
+  await migrateDatabase(db);
+  await db.execute('DROP TABLE preference_enabled_platforms');
+  await db.execute('PRAGMA user_version = 4');
+  const failing: SqlConnection = {
+    ...db,
+    transaction: work =>
+      db.transaction(tx =>
+        work({
+          async execute(sql, params) {
+            const result = await tx.execute(sql, params);
+            if (sql.startsWith('INSERT INTO preference_enabled_platforms')) {
+              throw new Error('Injected v5 failure');
+            }
+            return result;
+          },
+        }),
+      ),
+  };
+  await expect(migrateDatabase(failing)).rejects.toThrow('Injected v5 failure');
+  expect((await db.execute('PRAGMA user_version')).rows).toEqual([
+    { user_version: 4 },
+  ]);
+  expect(
+    (
+      await db.execute(
+        "SELECT name FROM sqlite_master WHERE name = 'preference_enabled_platforms'",
+      )
+    ).rows,
+  ).toEqual([]);
+  expect(
+    (await db.execute('SELECT default_platform FROM preferences')).rows,
+  ).toEqual([{ default_platform: 'uber' }]);
 });
 
 test('a failing subscriber cannot turn a committed save into an apparent failure or suppress other subscribers', async () => {
@@ -149,6 +296,7 @@ test('initializes once for simultaneous callers, reopens a file without losing o
       language: 'uk',
       themeMode: 'dark',
       defaultPlatform: 'bolt',
+      enabledPlatforms: ['bolt'],
       hapticsEnabled: true,
     });
     first.close();
@@ -159,6 +307,7 @@ test('initializes once for simultaneous callers, reopens a file without losing o
       language: 'uk',
       themeMode: 'dark',
       defaultPlatform: 'bolt',
+      enabledPlatforms: ['bolt'],
       hapticsEnabled: true,
     });
     expect(
@@ -192,6 +341,7 @@ test('migration from v1 preserves rows, IDs, cents and creation time', async () 
     language: 'es',
     themeMode: 'system',
     defaultPlatform: 'uber',
+    enabledPlatforms: ['uber'],
     hapticsEnabled: false,
   });
   await migrateDatabase(db);
@@ -210,12 +360,14 @@ test.each([null, 0, 1])(
       'UPDATE preferences SET language = ?, theme_mode = ?, default_platform = ?, haptics_enabled = ? WHERE id = 1',
       ['uk', 'dark', 'bolt', haptics],
     );
+    await db.execute('DROP TABLE preference_enabled_platforms');
     await db.execute('PRAGMA user_version = 2');
     await migrateDatabase(db);
     expect(await services.preferences.read()).toEqual({
       language: 'uk',
       themeMode: 'dark',
       defaultPlatform: 'bolt',
+      enabledPlatforms: ['bolt'],
       hapticsEnabled: haptics === 1,
     });
     expect(await services.transactions.get(row.id)).toEqual(row);
@@ -481,13 +633,20 @@ test('failed writes roll back, preserve records/preferences and pending ID can r
     'Disk full',
   );
   await expect(services.transactions.removeAll()).rejects.toThrow('Disk full');
-  await expect(services.preferences.update({ language: 'uk' })).rejects.toThrow(
-    'Disk full',
-  );
+  await expect(
+    services.preferences.update({ enabledPlatforms: ['uber', 'bolt'] }),
+  ).rejects.toThrow('Disk full');
   expect(await services.transactions.list()).toEqual([saved]);
-  expect((await services.preferences.read()).language).toBe('es');
-  expect(notify).toHaveBeenCalledTimes(1);
   fail = false;
+  expect(await services.preferences.read()).toMatchObject({
+    language: 'es',
+    defaultPlatform: 'uber',
+    enabledPlatforms: ['uber'],
+  });
+  expect(notify).toHaveBeenCalledTimes(1);
+  await services.preferences.update({
+    enabledPlatforms: ['cabify', 'uber'],
+  });
   await Promise.all([
     services.preferences.update({ language: 'uk' }),
     services.preferences.update({ themeMode: 'dark' }),
@@ -500,6 +659,7 @@ test('failed writes roll back, preserve records/preferences and pending ID can r
     language: 'uk',
     themeMode: 'dark',
     defaultPlatform: 'cabify',
+    enabledPlatforms: ['uber', 'cabify'],
     hapticsEnabled: false,
   });
   await services.transactions.removeAll();

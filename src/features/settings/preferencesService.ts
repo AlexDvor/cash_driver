@@ -1,6 +1,7 @@
 import { createChangeNotifier } from '../../app/changeNotifier';
 import {
   createPreferencesRepository,
+  normalizeEnabledPlatforms,
   Preferences,
 } from './preferencesRepository';
 
@@ -15,7 +16,19 @@ export function createPreferencesService(
       // Serialize partial changes and read the latest committed values so a
       // language write cannot overwrite a concurrent theme/platform selection.
       const write = queue.then(async () => {
-        const preferences = { ...(await repository.read()), ...patch };
+        const current = await repository.read();
+        const preferences = { ...current, ...patch };
+        if (patch.enabledPlatforms !== undefined) {
+          preferences.enabledPlatforms = normalizeEnabledPlatforms(
+            patch.enabledPlatforms,
+          );
+          if (
+            patch.defaultPlatform === undefined &&
+            !preferences.enabledPlatforms.includes(preferences.defaultPlatform)
+          ) {
+            preferences.defaultPlatform = preferences.enabledPlatforms[0];
+          }
+        }
         await repository.write(preferences);
         changes.notify('preferences');
         return preferences;

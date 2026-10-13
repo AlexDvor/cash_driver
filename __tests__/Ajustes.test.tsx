@@ -179,6 +179,7 @@ test('initial EUR/Spanish/system/Uber/disabled haptics and installed metadata; a
     language: 'en',
     themeMode: 'dark',
     defaultPlatform: 'cabify',
+    enabledPlatforms: ['cabify'],
     hapticsEnabled: true,
   });
   await act(async () => app.unmount());

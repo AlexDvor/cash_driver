@@ -62,6 +62,7 @@ test('withholds main UI until settings read succeeds and restores language/theme
     language: 'uk',
     themeMode: 'dark',
     defaultPlatform: 'bolt',
+    enabledPlatforms: ['bolt'],
     hapticsEnabled: true,
   });
   let release: (() => void) | undefined;
@@ -154,11 +155,11 @@ test('failed preference write retains committed language/theme, shows error and 
     mode: 'dark',
     status: 'themeWriteFailed',
   });
+  fail = false;
   expect(await services.preferences.read()).toMatchObject({
     language: 'uk',
     themeMode: 'dark',
   });
-  fail = false;
   await act(async () =>
     app?.root.findByProps({ testID: 'probe' }).props.onPress(),
   );
