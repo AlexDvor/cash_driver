@@ -94,7 +94,7 @@ test('boots in Spanish with four accessible tabs and the payment form', async ()
     JSON.stringify(app.toJSON(), (_key, value: unknown) =>
       React.isValidElement(value) ? undefined : value,
     ),
-  ).toContain('Nuevo cobro');
+  ).toContain('Importe a cobrar');
 });
 
 test('tab presses change routes; details and editing return to the previous tab', async () => {
@@ -166,5 +166,5 @@ test('language and theme changes preserve navigation and localize the mounted UI
     JSON.stringify(app.toJSON(), (_key, value: unknown) =>
       React.isValidElement(value) ? undefined : value,
     ),
-  ).toContain('Нова оплата');
+  ).toContain('Вартість поїздки');
 });

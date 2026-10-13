@@ -53,5 +53,11 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.sm,
   },
-  value: { fontWeight: '600', fontVariant: ['tabular-nums'] },
+  value: {
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+    marginLeft: 'auto',
+    textAlign: 'right',
+    flexShrink: 1,
+  },
 });

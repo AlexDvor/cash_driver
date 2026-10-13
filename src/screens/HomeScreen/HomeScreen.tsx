@@ -69,7 +69,6 @@ export function HomeScreen() {
         form={form}
         platformOptions={preferences.enabledPlatforms}
         preferenceSaving={saving}
-        title={t('newPayment')}
         confirmLabel={t('confirmPayment')}
       />
     </ScreenContainer>

@@ -10,6 +10,7 @@ import { ChoiceGroupProps } from './ChoiceGroup.interface';
 export function ChoiceGroup<Value extends string>({
   appearance = 'chips',
   columns,
+  iconLayout = 'stacked',
   disabled = false,
   label,
   options,
@@ -19,6 +20,13 @@ export function ChoiceGroup<Value extends string>({
   const { colors } = useAppTheme();
   const { fontScale } = useWindowDimensions();
   const [availableWidth, setAvailableWidth] = useState(0);
+  // Reserve space for a brand icon and readable label; stack enlarged controls.
+  const columnCount =
+    columns === 'adaptive'
+      ? availableWidth >= 132 * fontScale * 2 + spacing.sm
+        ? 2
+        : 1
+      : columns;
   return (
     <View style={styles.group}>
       <AppText variant="heading" accessibilityRole="header">
@@ -44,6 +52,7 @@ export function ChoiceGroup<Value extends string>({
               onPress={() => onChange(option.value)}
               style={({ pressed }) => [
                 styles.choice,
+                iconLayout === 'inline' && styles.inline,
                 appearance === 'segmented' && styles.segment,
                 appearance === 'segmented' && {
                   // Wrap segments before enlarged labels become narrow columns.
@@ -55,10 +64,14 @@ export function ChoiceGroup<Value extends string>({
                         )
                       : undefined,
                 },
-                columns !== undefined && {
+                columnCount !== undefined && {
                   width:
                     availableWidth > 0
-                      ? (availableWidth - spacing.sm * (columns - 1)) / columns
+                      ? // Rounding down prevents pixel fractions wrapping both columns.
+                        Math.floor(
+                          (availableWidth - spacing.sm * (columnCount - 1)) /
+                            columnCount,
+                        )
                       : '100%',
                   flexGrow: 1,
                   flexShrink: 0,
@@ -79,6 +92,7 @@ export function ChoiceGroup<Value extends string>({
               <AppText
                 style={[
                   styles.label,
+                  iconLayout === 'inline' && styles.inlineLabel,
                   selected && styles.selected,
                   {
                     color: selected

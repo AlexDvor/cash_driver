@@ -13,10 +13,10 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: spacing.xs,
-    paddingHorizontal: spacing.xs,
+    paddingHorizontal: 2,
   },
   // Centered children need an explicit width so scaled labels wrap inside a tab.
-  label: { width: '100%', textAlign: 'center' },
+  label: { width: '100%', textAlign: 'center', fontSize: 12 },
   selected: { fontWeight: '700' },
   pressed: { opacity: 0.7 },
 });

@@ -8,6 +8,6 @@ export const styles = StyleSheet.create({
     width: '100%',
     maxWidth: sizing.contentMaxWidth,
     alignSelf: 'center',
-    gap: spacing.xxl,
+    gap: spacing.lg,
   },
 });

@@ -5,7 +5,7 @@ export interface PaymentFormProps {
   form: ReturnType<typeof usePaymentForm>;
   platformOptions: readonly Platform[];
   preferenceSaving?: boolean;
-  title: string;
+  title?: string;
   confirmLabel: string;
   mode?: 'create' | 'edit';
 }

@@ -55,7 +55,6 @@ function LoadedEdit({
         mode="edit"
         form={form}
         platformOptions={platforms}
-        title={t('edit')}
         confirmLabel={t('saveChanges')}
         preferenceSaving={deletion.state.id === record.id}
       />

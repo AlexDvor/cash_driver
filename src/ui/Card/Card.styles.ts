@@ -5,7 +5,7 @@ export const styles = StyleSheet.create({
   card: {
     borderRadius: radii.card,
     borderWidth: sizing.borderWidth,
-    padding: spacing.xl,
-    gap: spacing.lg,
+    padding: spacing.lg,
+    gap: spacing.md,
   },
 });

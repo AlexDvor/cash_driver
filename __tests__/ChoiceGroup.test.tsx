@@ -4,7 +4,7 @@ import { ChoiceGroup } from '../src/ui/ChoiceGroup/ChoiceGroup';
 import { palettes as mockPalettes } from '../src/constants/theme/tokens';
 import { PlatformIcon } from '../src/components/PlatformIcon/PlatformIcon';
 import { MultiChoiceGroup } from '../src/ui/MultiChoiceGroup/MultiChoiceGroup';
-import { Image } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 
 jest.mock('../src/providers/ThemeProvider/ThemeProvider', () => ({
   useAppTheme: () => ({ colors: mockPalettes.light }),
@@ -15,6 +15,53 @@ const options = [
   { value: 'week', label: 'Semana' },
   { value: 'month', label: 'Mes' },
 ];
+
+test('adaptive inline choices reflow without changing applied selection or requesting a platform change', async () => {
+  const onChange = jest.fn();
+  let app: Renderer.ReactTestRenderer;
+  await act(async () => {
+    app = Renderer.create(
+      <ChoiceGroup
+        label="Plataforma"
+        columns="adaptive"
+        iconLayout="inline"
+        options={options}
+        value="week"
+        onChange={onChange}
+      />,
+    );
+  });
+  const choices = () =>
+    app.root.findAll(
+      node =>
+        node.props.accessibilityRole === 'radio' &&
+        typeof node.props.onPress === 'function',
+    );
+  const layout = async (width: number) => {
+    const container = app.root
+      .findAllByType(View)
+      .find(node => node.props.onLayout);
+    await act(async () =>
+      container!.props.onLayout({ nativeEvent: { layout: { width } } }),
+    );
+  };
+  await layout(800);
+  const twoColumnWidth = StyleSheet.flatten(
+    choices()[0].props.style({ pressed: false }),
+  ).width;
+  expect(twoColumnWidth).toBeLessThan(400);
+  await layout(220);
+  expect(
+    StyleSheet.flatten(choices()[0].props.style({ pressed: false })).width,
+  ).toBe(220);
+  expect(choices().map(node => node.props.accessibilityState.selected)).toEqual(
+    [false, true, false],
+  );
+  expect(onChange).not.toHaveBeenCalled();
+  await act(async () => choices()[2].props.onPress());
+  expect(onChange).toHaveBeenCalledWith('month');
+  await act(async () => app.unmount());
+});
 
 test('platform decorations preserve choice labels, callbacks and last-checkbox protection', async () => {
   const platformOptions = [

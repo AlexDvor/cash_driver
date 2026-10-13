@@ -1,11 +1,5 @@
 import React, { useRef, type ComponentRef } from 'react';
-import {
-  Keyboard,
-  Pressable,
-  TextInput,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Keyboard, Pressable, TextInput, View } from 'react-native';
 import { CollapsibleTipContent } from '../CollapsibleTipContent/CollapsibleTipContent';
 import { PlatformIcon } from '../PlatformIcon/PlatformIcon';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
@@ -16,7 +10,6 @@ import { MoneyInput } from '../../ui/MoneyInput/MoneyInput';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { formatMoney } from '../../i18n/formatting';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
-import { sizing } from '../../constants/theme/tokens';
 import { MAX_INPUT_CENTS } from '../../features/transactions/money';
 import type { MoneyParseResult } from '../../features/transactions/money';
 import { platformLabels } from '../../constants/platforms';
@@ -33,7 +26,6 @@ export function PaymentForm({
 }: PaymentFormProps) {
   const { t, locale } = useTranslation();
   const { colors } = useAppTheme();
-  const { width, fontScale } = useWindowDimensions();
   const disabled = form.saving;
   const tipInput = useRef<ComponentRef<typeof TextInput>>(null);
   const tipFocused = useRef(false);
@@ -75,9 +67,11 @@ export function PaymentForm({
       : t('addTip');
   return (
     <Card>
-      <AppText variant="heading" accessibilityRole="header">
-        {title}
-      </AppText>
+      {title && (
+        <AppText variant="heading" accessibilityRole="header">
+          {title}
+        </AppText>
+      )}
       <ChoiceGroup
         label={t('platform')}
         options={platformOptions.map(value => ({
@@ -85,9 +79,8 @@ export function PaymentForm({
           label: platformLabels[value],
           icon: <PlatformIcon platform={value} />,
         }))}
-        columns={
-          width / fontScale >= sizing.platformFourColumnScreenWidth ? 4 : 2
-        }
+        iconLayout="inline"
+        columns={platformOptions.length === 1 ? 1 : 'adaptive'}
         value={form.platform}
         onChange={form.choosePlatform}
         disabled={disabled || preferenceSaving}
@@ -180,7 +173,18 @@ export function PaymentForm({
             (pressed || disabled) && styles.pressed,
           ]}
         >
-          <AppText>{tipHeader}</AppText>
+          <AppText style={styles.tipLabel}>{tipHeader}</AppText>
+          <View
+            accessible={false}
+            importantForAccessibility="no-hide-descendants"
+            style={[
+              styles.tipChevron,
+              {
+                borderColor: colors.primary,
+                transform: [{ rotate: form.tipExpanded ? '225deg' : '45deg' }],
+              },
+            ]}
+          />
         </Pressable>
         <CollapsibleTipContent
           expanded={form.tipExpanded}
@@ -234,6 +238,7 @@ export function PaymentForm({
                 onPress={action.onPress}
                 style={({ pressed }) => [
                   styles.quick,
+                  styles.tipAction,
                   {
                     borderColor: colors.border,
                     backgroundColor: colors.background,
@@ -241,7 +246,7 @@ export function PaymentForm({
                   (pressed || action.disabled) && styles.pressed,
                 ]}
               >
-                <AppText>{action.label}</AppText>
+                <AppText style={styles.actionLabel}>{action.label}</AppText>
               </Pressable>
             ))}
           </View>
@@ -267,7 +272,7 @@ export function PaymentForm({
               color:
                 result?.status === 'insufficient'
                   ? colors.errorText
-                  : colors.text,
+                  : colors.primary,
             },
             result?.status === 'insufficient' && styles.missing,
           ]}
