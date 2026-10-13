@@ -31,7 +31,6 @@ import { DeletionProvider } from '../providers/DeletionProvider/DeletionProvider
 import { useDeletion } from '../providers/DeletionProvider/DeletionProvider';
 import { DeletionNotice } from '../components/DeletionNotice/DeletionNotice';
 import { spacing } from '../constants/theme/tokens';
-import { AppText } from '../ui/AppText/AppText';
 import { AppNavigatorProps } from './AppNavigator.interface';
 import { styles } from './AppNavigator.styles';
 import { routes } from './routes';
@@ -51,7 +50,14 @@ function HeaderBackButton() {
       onPress={() => navigation.goBack()}
       style={styles.back}
     >
-      <AppText style={{ color: colors.primary }}>←</AppText>
+      <View
+        style={styles.backIcon}
+        accessible={false}
+        importantForAccessibility="no-hide-descendants"
+      >
+        <View style={[styles.backShaft, { backgroundColor: colors.primary }]} />
+        <View style={[styles.backHead, { borderColor: colors.primary }]} />
+      </View>
     </Pressable>
   );
 }
