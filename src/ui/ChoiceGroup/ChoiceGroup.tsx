@@ -26,6 +26,8 @@ export function ChoiceGroup<Value extends string>({
       ? availableWidth >= 132 * fontScale * 2 + spacing.sm
         ? 2
         : 1
+      : columns === 'equal'
+      ? options.length
       : columns;
   return (
     <View style={styles.group}>
@@ -52,6 +54,7 @@ export function ChoiceGroup<Value extends string>({
               onPress={() => onChange(option.value)}
               style={({ pressed }) => [
                 styles.choice,
+                columns === 'equal' && styles.equalChoice,
                 iconLayout === 'inline' && styles.inline,
                 appearance === 'segmented' && styles.segment,
                 appearance === 'segmented' && {

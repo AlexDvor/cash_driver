@@ -79,8 +79,8 @@ export function PaymentForm({
           label: platformLabels[value],
           icon: <PlatformIcon platform={value} />,
         }))}
-        iconLayout="inline"
-        columns={platformOptions.length === 1 ? 1 : 'adaptive'}
+        iconLayout={platformOptions.length > 2 ? 'stacked' : 'inline'}
+        columns="equal"
         value={form.platform}
         onChange={form.choosePlatform}
         disabled={disabled || preferenceSaving}

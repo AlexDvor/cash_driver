@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ScrollView, useWindowDimensions, View } from 'react-native';
-import { sizing, spacing } from '../../constants/theme/tokens';
+import { sizing, spacing, typography } from '../../constants/theme/tokens';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../../ui/AppText/AppText';
 import { Card } from '../../ui/Card/Card';
@@ -21,15 +21,23 @@ export function RetainedCashCard({
   const { fontScale } = useWindowDimensions();
   const [contentWidth, setContentWidth] = useState(0);
   const coinSize = contentWidth > 0 ? Math.min(144, contentWidth * 0.4) : 44;
+  const textWidth = contentWidth - coinSize - spacing.lg;
+  // Long localized amounts get the full row before fitting the font to its width.
+  const minimumMoneyWidth = amount.length * typography.money * 0.6 * fontScale;
   const sideBySide =
-    contentWidth * 0.6 - spacing.lg >= sizing.touchTarget * 3 * fontScale;
+    textWidth >=
+    Math.max(sizing.touchTarget * 3 * fontScale, minimumMoneyWidth);
   const textColor = { color: colors.onPrimary };
   const money = (
-    <ScrollView key={amount} horizontal>
-      <AppText testID="summary-retained" style={[styles.money, textColor]}>
-        {amount}
-      </AppText>
-    </ScrollView>
+    <AppText
+      testID="summary-retained"
+      numberOfLines={1}
+      adjustsFontSizeToFit
+      minimumFontScale={0.25}
+      style={[styles.money, textColor]}
+    >
+      {amount}
+    </AppText>
   );
   const count = (
     <AppText testID="summary-count" style={textColor}>

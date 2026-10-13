@@ -16,6 +16,7 @@ export const styles = StyleSheet.create({
     flexShrink: 1,
   },
   label: { textAlign: 'center' },
+  equalChoice: { paddingHorizontal: spacing.xs },
   inline: { flexDirection: 'row', gap: spacing.sm },
   inlineLabel: { flexShrink: 1 },
   segment: {

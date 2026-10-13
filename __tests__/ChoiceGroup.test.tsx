@@ -16,6 +16,49 @@ const options = [
   { value: 'month', label: 'Mes' },
 ];
 
+test.each([1, 2, 3, 4])(
+  '%i platform choices share one measured row without changing selection',
+  async count => {
+    const onChange = jest.fn();
+    let app: Renderer.ReactTestRenderer;
+    const platforms = ['uber', 'cabify', 'bolt', 'other'].slice(0, count);
+    await act(async () => {
+      app = Renderer.create(
+        <ChoiceGroup
+          label="Plataforma"
+          columns="equal"
+          options={platforms.map(value => ({ value, label: value }))}
+          value="uber"
+          onChange={onChange}
+        />,
+      );
+    });
+    const container = app!.root
+      .findAllByType(View)
+      .find(node => node.props.onLayout);
+    await act(async () =>
+      container!.props.onLayout({ nativeEvent: { layout: { width: 360.5 } } }),
+    );
+    const buttons = app!.root.findAll(
+      node =>
+        node.props.accessibilityRole === 'radio' &&
+        typeof node.props.onPress === 'function',
+    );
+    const widths = buttons.map(
+      button =>
+        StyleSheet.flatten(button.props.style({ pressed: false })).width,
+    );
+    expect(buttons).toHaveLength(count);
+    expect(new Set(widths).size).toBe(1);
+    expect(Number(widths[0]) * count + 8 * (count - 1)).toBeLessThanOrEqual(
+      360.5,
+    );
+    expect(buttons[0].props.accessibilityState.selected).toBe(true);
+    expect(onChange).not.toHaveBeenCalled();
+    await act(async () => app!.unmount());
+  },
+);
+
 test('adaptive inline choices reflow without changing applied selection or requesting a platform change', async () => {
   const onChange = jest.fn();
   let app: Renderer.ReactTestRenderer;
