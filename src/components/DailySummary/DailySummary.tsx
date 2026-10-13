@@ -8,6 +8,8 @@ import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import type { useDailySummary } from '../../hooks/summary/useDailySummary';
 import { CollapsibleContent } from '../CollapsibleContent/CollapsibleContent';
 import { styles } from './DailySummary.styles';
+import { TabIcon } from '../../ui/TabIcon/TabIcon';
+import { routes } from '../../navigation/routes';
 
 export function DailySummary({
   daily,
@@ -36,10 +38,29 @@ export function DailySummary({
         onPress={onToggle}
         style={({ pressed }) => [styles.header, pressed && styles.pressed]}
       >
+        <TabIcon name={routes.Summary} color={colors.primary} />
         <AppText variant="heading" style={styles.headerText}>
-          {toggleLabel}
+          {t('dailySummaryTitle')}
         </AppText>
-        <AppText accessible={false}>{expanded ? '▴' : '▾'}</AppText>
+        <View
+          style={styles.toggleCircle}
+          accessible={false}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        >
+          <View
+            style={[styles.circleFill, { backgroundColor: colors.primary }]}
+          />
+          <View
+            style={[
+              styles.chevron,
+              {
+                borderColor: colors.text,
+                transform: [{ rotate: expanded ? '225deg' : '45deg' }],
+              },
+            ]}
+          />
+        </View>
       </Pressable>
       <CollapsibleContent
         expanded={expanded}
@@ -64,7 +85,7 @@ export function DailySummary({
             </>
           ) : (
             <>
-              <AppText testID="daily-count">
+              <AppText testID="daily-count" secondary variant="supporting">
                 {t('operationCount')}: {state.summary.operationCount}
               </AppText>
               <View style={styles.totals}>
@@ -78,9 +99,36 @@ export function DailySummary({
                     },
                   ] as const
                 ).map(item => (
-                  <View key={item.label} style={styles.total}>
-                    <AppText variant="supporting">{t(item.label)}</AppText>
-                    <AppText testID={item.label} style={styles.value}>
+                  <View
+                    key={item.label}
+                    style={[
+                      styles.total,
+                      item.label === 'retainedCash' && [
+                        styles.retainedRow,
+                        { borderTopColor: colors.border },
+                      ],
+                    ]}
+                  >
+                    <AppText
+                      variant="supporting"
+                      style={
+                        item.label === 'retainedCash'
+                          ? styles.retainedLabel
+                          : undefined
+                      }
+                    >
+                      {t(item.label)}
+                    </AppText>
+                    <AppText
+                      testID={item.label}
+                      style={[
+                        styles.value,
+                        item.label === 'retainedCash' && [
+                          styles.retainedValue,
+                          { color: colors.primary },
+                        ],
+                      ]}
+                    >
                       {formatMoney(item.cents, locale)}
                     </AppText>
                   </View>

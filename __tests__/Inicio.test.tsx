@@ -7,6 +7,7 @@ import { SqlConnection } from '../src/database/sqlite';
 import { Persistence } from '../src/app/persistence';
 import { openTestDatabase, testPersistence } from './sqliteTestDatabase';
 import { PlatformIcon } from '../src/components/PlatformIcon/PlatformIcon';
+import { AppText } from '../src/ui/AppText/AppText';
 
 let db: SqlConnection;
 let services: Persistence;
@@ -428,6 +429,9 @@ test('daily totals update at local midnight and on resume, with subscription cle
 
 test('summary starts hidden, toggles access and preserves fare and tip draft through rapid taps', async () => {
   await mount();
+  expect(summaryToggle().findByType(AppText).props.children).toBe(
+    'Resumen de hoy',
+  );
   expect(summaryToggle().props.accessibilityState.expanded).toBe(false);
   expect(summaryToggle().props.accessibilityLabel).toBe(
     'Hoy · Mostrar totales',
@@ -441,6 +445,9 @@ test('summary starts hidden, toggles access and preserves fare and tip draft thr
   await press('+ Añadir propina');
   await input('Propina', '5');
   await toggleSummary();
+  expect(summaryToggle().findByType(AppText).props.children).toBe(
+    'Resumen de hoy',
+  );
   expect(summaryContent().props.pointerEvents).toBe('auto');
   expect(summaryContent().props.accessibilityElementsHidden).toBe(false);
   expect(summaryToggle().props.accessibilityLabel).toBe(
