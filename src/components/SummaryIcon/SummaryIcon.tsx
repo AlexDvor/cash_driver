@@ -1,76 +1,31 @@
 import React from 'react';
-import { View } from 'react-native';
+import { Image, type ImageSourcePropType } from 'react-native';
 import { styles } from './SummaryIcon.styles';
 
 export type SummaryIconName = 'coins' | 'car' | 'gift';
 
-// Decorative outline geometry follows the existing native View icon approach.
+const images: Record<SummaryIconName, ImageSourcePropType> = {
+  coins: require('../../assets/summary/coins-3d.png'),
+  car: require('../../assets/summary/car-3d.png'),
+  gift: require('../../assets/summary/gift-3d.png'),
+};
+
 export function SummaryIcon({
   name,
-  color,
+  size = 44,
 }: {
   name: SummaryIconName;
-  color: string;
+  size?: number;
 }) {
-  const outline = { borderColor: color };
   return (
-    <View
-      style={styles.frame}
+    <Image
+      testID={`summary-icon-${name}`}
+      source={images[name]}
+      resizeMode="contain"
+      style={[styles.frame, { width: size, height: size }]}
       accessible={false}
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-    >
-      {name === 'coins' ? (
-        <>
-          {[0, 1, 2].map(index => (
-            <View
-              key={`tall-${index}`}
-              style={[
-                styles.coin,
-                styles.tallCoin,
-                outline,
-                { top: 5 + index * 7 },
-              ]}
-            />
-          ))}
-          {[0, 1].map(index => (
-            <View
-              key={`short-${index}`}
-              style={[
-                styles.coin,
-                styles.shortCoin,
-                outline,
-                { top: 20 + index * 7 },
-              ]}
-            />
-          ))}
-        </>
-      ) : name === 'car' ? (
-        <>
-          <View style={[styles.carRoof, outline]} />
-          <View style={[styles.carBody, outline]} />
-          <View style={[styles.wheel, styles.leftWheel, outline]} />
-          <View style={[styles.wheel, styles.rightWheel, outline]} />
-          <View
-            style={[styles.light, styles.leftLight, { backgroundColor: color }]}
-          />
-          <View
-            style={[
-              styles.light,
-              styles.rightLight,
-              { backgroundColor: color },
-            ]}
-          />
-        </>
-      ) : (
-        <>
-          <View style={[styles.bow, styles.leftBow, outline]} />
-          <View style={[styles.bow, styles.rightBow, outline]} />
-          <View style={[styles.giftBox, outline]} />
-          <View style={[styles.giftLid, outline]} />
-          <View style={[styles.ribbon, { backgroundColor: color }]} />
-        </>
-      )}
-    </View>
+    />
   );
 }

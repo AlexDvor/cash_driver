@@ -18,10 +18,15 @@ export const styles = StyleSheet.create({
   },
   heroRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.lg,
+  },
+  heroText: { flex: 1, gap: spacing.lg },
+  heroIllustration: {
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   money: {
     fontSize: typography.change,

@@ -18,25 +18,45 @@ export function RetainedCashCard({
   countLabel,
 }: RetainedCashCardProps) {
   const { colors } = useAppTheme();
+  const { fontScale } = useWindowDimensions();
+  const [contentWidth, setContentWidth] = useState(0);
+  const coinSize = contentWidth > 0 ? Math.min(144, contentWidth * 0.4) : 44;
+  const sideBySide =
+    contentWidth * 0.6 - spacing.lg >= sizing.touchTarget * 3 * fontScale;
   const textColor = { color: colors.onPrimary };
+  const money = (
+    <ScrollView key={amount} horizontal>
+      <AppText testID="summary-retained" style={[styles.money, textColor]}>
+        {amount}
+      </AppText>
+    </ScrollView>
+  );
+  const count = (
+    <AppText testID="summary-count" style={textColor}>
+      {countLabel}
+    </AppText>
+  );
   return (
     <Card
       style={{ backgroundColor: colors.primary, borderColor: colors.primary }}
     >
-      <View style={styles.heroRow}>
-        <AppText variant="heading" style={[styles.label, textColor]}>
-          {label}
-        </AppText>
-        <SummaryIcon name="coins" color={colors.onPrimary} />
+      <View
+        style={styles.heroRow}
+        onLayout={event => setContentWidth(event.nativeEvent.layout.width)}
+      >
+        <View style={styles.heroText}>
+          <AppText variant="heading" style={textColor}>
+            {label}
+          </AppText>
+          {sideBySide && money}
+          {sideBySide && count}
+        </View>
+        <View style={[styles.heroIllustration, { width: coinSize }]}>
+          <SummaryIcon name="coins" size={coinSize} />
+        </View>
       </View>
-      <ScrollView key={amount} horizontal>
-        <AppText testID="summary-retained" style={[styles.money, textColor]}>
-          {amount}
-        </AppText>
-      </ScrollView>
-      <AppText testID="summary-count" style={textColor}>
-        {countLabel}
-      </AppText>
+      {!sideBySide && money}
+      {!sideBySide && count}
     </Card>
   );
 }
@@ -85,7 +105,7 @@ export function SummaryStatCards({
             <View
               style={[styles.iconBadge, { backgroundColor: colors.softGreen }]}
             >
-              <SummaryIcon name={metric.icon} color={colors.primary} />
+              <SummaryIcon name={metric.icon} />
             </View>
             <View style={styles.statText}>
               <AppText variant="supporting" secondary>
@@ -118,7 +138,7 @@ export function SummaryMetric({
           <View
             style={[styles.iconBadge, { backgroundColor: colors.softGreen }]}
           >
-            <SummaryIcon name={icon} color={colors.primary} />
+            <SummaryIcon name={icon} />
           </View>
         )}
         <AppText secondary style={styles.label}>
