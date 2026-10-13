@@ -18,12 +18,13 @@ import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { sizing } from '../../constants/theme/tokens';
 import { MAX_INPUT_CENTS } from '../../features/transactions/money';
 import type { MoneyParseResult } from '../../features/transactions/money';
-import { platforms, platformLabels } from '../../constants/platforms';
+import { platformLabels } from '../../constants/platforms';
 import type { PaymentFormProps } from './PaymentForm.interface';
 import { styles } from './PaymentForm.styles';
 
 export function PaymentForm({
   form,
+  platformOptions,
   preferenceSaving = false,
   title,
   confirmLabel,
@@ -78,7 +79,7 @@ export function PaymentForm({
       </AppText>
       <ChoiceGroup
         label={t('platform')}
-        options={platforms.map(value => ({
+        options={platformOptions.map(value => ({
           value,
           label: platformLabels[value],
         }))}
@@ -89,6 +90,15 @@ export function PaymentForm({
         onChange={form.choosePlatform}
         disabled={disabled || preferenceSaving}
       />
+      {mode === 'create' && !form.platformAllowed && (
+        <AppText
+          testID="platform-reselection-required"
+          accessibilityRole="alert"
+          style={{ color: colors.errorText }}
+        >
+          {t('platformReselectionRequired')}
+        </AppText>
+      )}
       <MoneyInput
         label={t('fareInput')}
         value={form.fare}

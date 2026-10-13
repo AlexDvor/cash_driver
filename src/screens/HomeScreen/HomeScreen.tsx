@@ -38,6 +38,7 @@ export function HomeScreen() {
   const onSubmit = useCreatePayment(services, preferences.hapticsEnabled);
   const form = usePaymentForm({
     initialPlatform: preferences.defaultPlatform,
+    allowedPlatforms: preferences.enabledPlatforms,
     onSubmit,
     onPlatformChange: platform =>
       updatePreferences({ defaultPlatform: platform }),
@@ -66,6 +67,7 @@ export function HomeScreen() {
       )}
       <PaymentForm
         form={form}
+        platformOptions={preferences.enabledPlatforms}
         preferenceSaving={saving}
         title={t('newPayment')}
         confirmLabel={t('confirmPayment')}

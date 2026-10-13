@@ -15,6 +15,9 @@ beforeEach(async () => {
   jest.setSystemTime(new Date('2026-10-08T10:00:00Z'));
   db = openTestDatabase();
   services = await testPersistence(db, () => new Date());
+  await services.preferences.update({
+    enabledPlatforms: ['uber', 'cabify', 'bolt', 'other'],
+  });
 });
 afterEach(async () => {
   await act(async () => app?.unmount());
@@ -43,6 +46,15 @@ async function press(label: string) {
   await act(async () => {
     await button(label).props.onPress();
   });
+}
+async function toggleWorkingPlatform(label: string) {
+  const choice = app.root.find(
+    node =>
+      node.props.accessibilityRole === 'checkbox' &&
+      node.props.accessibilityLabel === label &&
+      typeof node.props.onPress === 'function',
+  );
+  await act(async () => choice.props.onPress());
 }
 function field(label: string) {
   const found = app.root
@@ -246,6 +258,18 @@ test('real write failure retains complete draft and retry uses the same pending 
   expect(JSON.stringify(app.toJSON())).toContain('No se pudo guardar el cobro');
   expect(await services.transactions.list()).toEqual([]);
   fail = false;
+  await press('Ajustes');
+  await toggleWorkingPlatform('Bolt');
+  await press('Inicio');
+  expect(button('Reintentar cobro').props.disabled).toBe(true);
+  await act(async () => button('Reintentar cobro').props.onPress());
+  expect(save).toHaveBeenCalledTimes(1);
+  expect(field('Importe a cobrar').props.value).toBe('18,50');
+  expect(tipValue()).toBe('1,50');
+  await press('Ajustes');
+  await toggleWorkingPlatform('Bolt');
+  await press('Inicio');
+  expect(button('Reintentar cobro').props.disabled).toBe(false);
   await press('Reintentar cobro');
   expect(save.mock.calls[0][0].id).toBe(save.mock.calls[1][0].id);
   expect(await services.transactions.list()).toHaveLength(1);

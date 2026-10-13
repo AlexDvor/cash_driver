@@ -16,6 +16,7 @@ import { TransactionInput } from '../../features/transactions/transactionService
 
 interface PaymentFormOptions {
   initialPlatform: Platform;
+  allowedPlatforms?: readonly Platform[];
   initialValues?: TransactionInput;
   clearAfterSave?: boolean;
   onSubmit: (input: TransactionInput) => Promise<CashTransaction>;
@@ -24,6 +25,7 @@ interface PaymentFormOptions {
 
 export function usePaymentForm({
   initialPlatform,
+  allowedPlatforms,
   initialValues,
   clearAfterSave = true,
   onSubmit,
@@ -61,6 +63,10 @@ export function usePaymentForm({
   const mounted = useRef(false);
   const latestDefault = useRef(initialPlatform);
   latestDefault.current = initialPlatform;
+  const latestAllowedPlatforms = useRef(allowedPlatforms);
+  latestAllowedPlatforms.current = allowedPlatforms;
+  const platformAllowed =
+    allowedPlatforms === undefined || allowedPlatforms.includes(platform);
   useEffect(() => {
     mounted.current = true;
     return () => {
@@ -212,13 +218,23 @@ export function usePaymentForm({
     }
   }
   async function choosePlatform(next: Platform) {
-    if (busy.current || choosing.current) {
+    if (
+      busy.current ||
+      choosing.current ||
+      (latestAllowedPlatforms.current !== undefined &&
+        !latestAllowedPlatforms.current.includes(next))
+    ) {
       return;
     }
     choosing.current = true;
     try {
       const success = onPlatformChange ? await onPlatformChange(next) : true;
-      if (success && mounted.current) {
+      if (
+        success &&
+        mounted.current &&
+        (latestAllowedPlatforms.current === undefined ||
+          latestAllowedPlatforms.current.includes(next))
+      ) {
         committedDraft.current = false;
         dirty.current = true;
         setPlatform(next);
@@ -234,6 +250,8 @@ export function usePaymentForm({
       busy.current ||
       (!clearAfterSave && committedDraft.current) ||
       choosing.current ||
+      (latestAllowedPlatforms.current !== undefined &&
+        !latestAllowedPlatforms.current.includes(platform)) ||
       payment?.status !== 'valid' ||
       fareParsed.status !== 'valid' ||
       receivedParsed.status !== 'valid' ||
@@ -294,6 +312,7 @@ export function usePaymentForm({
   }
   return {
     platform,
+    platformAllowed,
     fare,
     received,
     tip,
@@ -310,7 +329,10 @@ export function usePaymentForm({
     failed,
     saved,
     canConfirm:
-      payment?.status === 'valid' && !saving && !committedDraft.current,
+      payment?.status === 'valid' &&
+      platformAllowed &&
+      !saving &&
+      !committedDraft.current,
     quickAmounts:
       validFare && fareParsed.status === 'valid'
         ? getQuickAmounts(fareParsed.cents)

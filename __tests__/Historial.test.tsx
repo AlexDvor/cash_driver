@@ -249,6 +249,7 @@ test('details and edit prefill tip, cancel/back do not write; edit preserves ID/
   expect(await services.transactions.get(original.id)).toEqual(original);
   await press('Editar');
   await input('Importe a cobrar', '19');
+  expect(button('Bolt').props.accessibilityState.selected).toBe(false);
   await press('Bolt');
   jest.setSystemTime(new Date('2026-10-08T11:00:00Z'));
   const editWrite = jest.spyOn(services.transactions, 'edit');
@@ -275,6 +276,9 @@ test('details and edit prefill tip, cancel/back do not write; edit preserves ID/
   });
   expect(await services.transactions.list()).toHaveLength(1);
   expect((await services.preferences.read()).defaultPlatform).toBe('uber');
+  expect((await services.preferences.read()).enabledPlatforms).toEqual([
+    'uber',
+  ]);
   expect(content()).toContain('Operación actualizada');
   await press('Cancelar');
   await act(async () => ref.goBack());

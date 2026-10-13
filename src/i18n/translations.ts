@@ -98,6 +98,8 @@ export const es = {
   totalsFailed: 'No se pudieron cargar los totales de hoy. Reintenta.',
   newPayment: 'Nuevo cobro',
   platform: 'Plataforma',
+  platformReselectionRequired:
+    'La plataforma de este borrador ya no está activa. Elige una plataforma disponible para guardar el cobro.',
   otherPlatform: 'Otro',
   fareInput: 'Importe a cobrar',
   receivedInput: 'El cliente entrega',
@@ -251,6 +253,8 @@ export const en: Dictionary = {
   totalsFailed: 'Could not load today’s totals. Retry.',
   newPayment: 'New payment',
   platform: 'Platform',
+  platformReselectionRequired:
+    'This draft’s platform is no longer active. Choose an available platform to save the payment.',
   otherPlatform: 'Other',
   fareInput: 'Trip fare',
   receivedInput: 'Cash received',
@@ -404,6 +408,8 @@ export const uk: Dictionary = {
     'Не вдалося завантажити підсумки за сьогодні. Повторіть спробу.',
   newPayment: 'Нова оплата',
   platform: 'Платформа',
+  platformReselectionRequired:
+    'Платформу цієї чернетки вимкнено. Оберіть доступну платформу, щоб зберегти оплату.',
   otherPlatform: 'Інша',
   fareInput: 'Вартість поїздки',
   receivedInput: 'Отримана готівка',

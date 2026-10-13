@@ -244,10 +244,14 @@ test('working platforms support one through four choices and protect the last ch
 test('removing the saved default chooses the first remaining platform without touching transactions', async () => {
   const row = await seed('bolt');
   await mount();
+  await press('Ajustes');
+  await press('Bolt');
+  await press('Inicio');
   await press('Bolt');
   await press('Ajustes');
   await press('Cabify');
   await press('Bolt');
+  await press('Uber');
   expect(await services.preferences.read()).toMatchObject({
     defaultPlatform: 'cabify',
     enabledPlatforms: ['cabify'],
@@ -271,6 +275,7 @@ test('working-platform labels and minimum-selection explanation follow the langu
 
 test('Settings list preserves Home draft; edit leaves default unchanged', async () => {
   const row = await seed();
+  await services.preferences.update({ enabledPlatforms: ['uber', 'cabify'] });
   await mount();
   await press('Cabify');
   await input('Importe a cobrar', '18.5');
@@ -295,6 +300,112 @@ test('Settings list preserves Home draft; edit leaves default unchanged', async 
   await act(async () => ref.goBack());
   await press('Settings');
   expect(button('Bolt').props.accessibilityState.checked).toBe(true);
+});
+
+test('Home shows only working platforms and requires reselection for a disabled dirty draft', async () => {
+  await mount();
+  const homeChoices = () => [
+    ...new Set(
+      app.root
+        .findAll(
+          node =>
+            node.props.accessibilityRole === 'radio' &&
+            ['Uber', 'Cabify', 'Bolt', 'Otro'].includes(
+              node.props.accessibilityLabel,
+            ),
+        )
+        .map(node => node.props.accessibilityLabel),
+    ),
+  ];
+  expect(homeChoices()).toEqual(['Uber']);
+  expect(button('Uber').props.accessibilityState.selected).toBe(true);
+  await press('Ajustes');
+  await press('Cabify');
+  await press('Inicio');
+  expect(homeChoices()).toEqual(['Uber', 'Cabify']);
+  await input('Importe a cobrar', '18.5');
+  await input('El cliente entrega', '20');
+  await press('+ Añadir propina');
+  await press('Todo el cambio como propina');
+  await press('Ajustes');
+  await press('Uber');
+  expect(await services.preferences.read()).toMatchObject({
+    defaultPlatform: 'cabify',
+    enabledPlatforms: ['cabify'],
+  });
+  await press('Inicio');
+  expect(homeChoices()).toEqual(['Cabify']);
+  expect(button('Cabify').props.accessibilityState.selected).toBe(false);
+  expect(field('Importe a cobrar').props.value).toBe('18.5');
+  expect(field('El cliente entrega').props.value).toBe('20');
+  expect(field('Propina').props.value).toBe('1,50');
+  expect(content()).toContain('Elige una plataforma disponible');
+  expect(button('Confirmar cobro').props.disabled).toBe(true);
+  await act(async () => button('Confirmar cobro').props.onPress());
+  expect(await services.transactions.list()).toHaveLength(0);
+  await press('Cabify');
+  expect(field('Importe a cobrar').props.value).toBe('18.5');
+  expect(field('Propina').props.value).toBe('1,50');
+  await press('Confirmar cobro');
+  expect((await services.transactions.list())[0]).toMatchObject({
+    platform: 'cabify',
+    fareAmountCents: 1850,
+    tipCents: 150,
+  });
+  expect(button('Cabify').props.accessibilityState.selected).toBe(true);
+});
+
+test.each([
+  [['uber'], ['Uber']],
+  [
+    ['uber', 'bolt'],
+    ['Uber', 'Bolt'],
+  ],
+  [
+    ['uber', 'cabify', 'bolt'],
+    ['Uber', 'Cabify', 'Bolt'],
+  ],
+  [
+    ['uber', 'cabify', 'bolt', 'other'],
+    ['Uber', 'Cabify', 'Bolt', 'Otro'],
+  ],
+] as const)(
+  'Home renders the committed %j platform set',
+  async (enabled, labels) => {
+    await services.preferences.update({ enabledPlatforms: [...enabled] });
+    await mount();
+    const visible = [
+      ...new Set(
+        app.root
+          .findAll(
+            node =>
+              node.props.accessibilityRole === 'radio' &&
+              ['Uber', 'Cabify', 'Bolt', 'Otro'].includes(
+                node.props.accessibilityLabel,
+              ),
+          )
+          .map(node => node.props.accessibilityLabel),
+      ),
+    ];
+    expect(visible).toEqual(labels);
+    expect(button('Uber').props.accessibilityState.selected).toBe(true);
+  },
+);
+
+test('pristine Home form follows a changed default after Settings disables its old platform', async () => {
+  await mount();
+  await press('+ Añadir propina');
+  await press('Ajustes');
+  await press('Cabify');
+  await press('Uber');
+  await press('Inicio');
+  expect(button('Cabify').props.accessibilityState.selected).toBe(true);
+  expect(
+    app.root.findByProps({ testID: 'tip-section-toggle' }).props
+      .accessibilityState.expanded,
+  ).toBe(true);
+  expect(content()).not.toContain('Elige una plataforma disponible');
+  expect((await services.preferences.read()).defaultPlatform).toBe('cabify');
 });
 
 test.each(['language', 'theme', 'platform', 'haptics'])(

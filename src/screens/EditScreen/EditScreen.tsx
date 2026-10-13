@@ -14,6 +14,7 @@ import { usePaymentForm } from '../../hooks/transactions/usePaymentForm';
 import { useTransactions } from '../../hooks/transactions/useTransactions';
 import { TransactionLoadState } from '../../components/TransactionLoadState/TransactionLoadState';
 import { useDeletion } from '../../providers/DeletionProvider/DeletionProvider';
+import { platforms } from '../../constants/platforms';
 
 function LoadedEdit({
   record,
@@ -53,6 +54,7 @@ function LoadedEdit({
       <PaymentForm
         mode="edit"
         form={form}
+        platformOptions={platforms}
         title={t('edit')}
         confirmLabel={t('saveChanges')}
         preferenceSaving={deletion.state.id === record.id}
