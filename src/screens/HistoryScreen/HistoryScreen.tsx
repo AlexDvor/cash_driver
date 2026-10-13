@@ -9,6 +9,7 @@ import { useLocalClock } from '../../hooks/app/useLocalClock';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
 import { ChoiceGroup } from '../../ui/ChoiceGroup/ChoiceGroup';
+import { PlatformIcon } from '../../components/PlatformIcon/PlatformIcon';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { formatMoney, formatPeriodRange } from '../../i18n/formatting';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
@@ -159,7 +160,11 @@ export function HistoryScreen() {
         onChange={setPlatform}
         options={[
           { value: 'all', label: t('allPlatforms') },
-          ...platforms.map(value => ({ value, label: platformLabels[value] })),
+          ...platforms.map(value => ({
+            value,
+            label: platformLabels[value],
+            icon: <PlatformIcon platform={value} size={24} />,
+          })),
         ]}
       />
       {state.status !== 'ready' && (
@@ -263,13 +268,16 @@ export function HistoryScreen() {
               ]}
             >
               <View style={styles.rowContent}>
-                <View style={styles.heading}>
-                  <AppText variant="heading">
-                    {platformLabels[record.platform]}
-                  </AppText>
-                  <AppText secondary variant="supporting">
-                    {record.timeLabel}
-                  </AppText>
+                <View style={styles.platformHeading}>
+                  <PlatformIcon platform={record.platform} size={44} />
+                  <View style={styles.heading}>
+                    <AppText variant="heading">
+                      {platformLabels[record.platform]}
+                    </AppText>
+                    <AppText secondary variant="supporting">
+                      {record.timeLabel}
+                    </AppText>
+                  </View>
                 </View>
                 <View style={styles.amounts}>
                   <AppText variant="heading">{record.fareLabel}</AppText>

@@ -15,6 +15,7 @@ import { useTransactions } from '../../hooks/transactions/useTransactions';
 import { TransactionLoadState } from '../../components/TransactionLoadState/TransactionLoadState';
 import { useDeletion } from '../../providers/DeletionProvider/DeletionProvider';
 import { styles } from './DetailsScreen.styles';
+import { PlatformIcon } from '../../components/PlatformIcon/PlatformIcon';
 
 export function DetailsScreen({
   route,
@@ -53,14 +54,21 @@ export function DetailsScreen({
       )}
       {record && (
         <>
-          <AppText variant="heading">{platformLabels[record.platform]}</AppText>
-          <AppText secondary>
-            {formatLocalDateTime(
-              new Date(record.createdAt),
-              locale,
-              clock.timeZone,
-            )}
-          </AppText>
+          <View style={styles.platformHeading}>
+            <PlatformIcon platform={record.platform} size={60} />
+            <View style={styles.headingText}>
+              <AppText variant="heading">
+                {platformLabels[record.platform]}
+              </AppText>
+              <AppText secondary>
+                {formatLocalDateTime(
+                  new Date(record.createdAt),
+                  locale,
+                  clock.timeZone,
+                )}
+              </AppText>
+            </View>
+          </View>
           <Card>
             {[
               { label: t('fareInput'), cents: record.fareAmountCents },

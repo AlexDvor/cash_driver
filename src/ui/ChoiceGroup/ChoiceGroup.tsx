@@ -75,6 +75,7 @@ export function ChoiceGroup<Value extends string>({
                 pressed && appearance === 'segmented' && styles.pressed,
               ]}
             >
+              {option.icon}
               <AppText
                 style={[
                   styles.label,

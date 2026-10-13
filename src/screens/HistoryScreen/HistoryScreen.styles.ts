@@ -14,7 +14,13 @@ export const styles = StyleSheet.create({
   groupHeading: { paddingTop: spacing.xxl, paddingBottom: spacing.md },
   separator: { height: spacing.md },
   footer: { paddingTop: spacing.xxl },
-  heading: { gap: spacing.xs },
+  heading: { gap: spacing.xs, flexShrink: 1 },
+  platformHeading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    flexShrink: 1,
+  },
   row: {
     borderWidth: sizing.borderWidth,
     borderRadius: radii.card,

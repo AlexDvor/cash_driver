@@ -1,5 +1,17 @@
 # Original platform wordmarks
 
+## Official app icons — 2026-10-13 assignment
+
+The owner selected official app icons closest to docs/screen.png and explicitly authorized src/test edits. The separate 512x512 JPEG exports below were downloaded unchanged from the verified publishers' Apple App Store artworkUrl512 through the Apple lookup API (country=es). PlatformIcon bundles them locally; no runtime network access, tint or recoloring. Current Cabify uses a white wordmark on purple, not the illustrative symbol in screen.png. Existing original wordmark PNGs are preserved. App-store availability is not an unrestricted trademark license; existing publication/attribution gates below remain open.
+
+| Asset | Publisher listing | SHA256 |
+| --- | --- | --- |
+| uber-app.jpg | [Uber Technologies, Inc.](https://apps.apple.com/us/app/uber-request-a-ride/id368677368) | F107506E75856612C3E2C744E211DD053B1AF17BA8CE1C92A4950A554A7FC9A0 |
+| cabify-app.jpg | [Cabify Inc.](https://apps.apple.com/us/app/cabify/id476087442) | FD16375CF936C1C7ECB24D93E2D65ADD8D10458698EF7D662A622CBAC6C198AF |
+| bolt-app.jpg | [BOLT TECHNOLOGY OU](https://apps.apple.com/us/app/bolt-request-a-ride/id675033630) | 287CAB79D54D9BA5AC2BAF5B5434574E7622FA1BE0F19BF7A4CC5B4A612D49B2 |
+
+PlatformIcon uses 24 logical units in Summary/History filters, 28 in selectors, 44 in history rows and 60 in Details, with rounded corners and hidden decorative accessibility. Readable labels remain; Otro has no invented brand asset. These dimensions follow reference proportions, not a pixel-identical native acceptance claim. This assignment supersedes Summary's earlier large wordmark badge presentation.
+
 Prepared in Resumen redesign Phase1 on2026-10-12; rendered locally in Por plataforma in assigned Phase3. These are original PNG wordmarks, not fabricated square app icons. No runtime download, tinting, cropping or recoloring. Keep aspect ratios and clear space; pair with the existing readable platform labels. No platform integration or endorsement is implied.
 
 | File | Official source and original export | SHA256 |

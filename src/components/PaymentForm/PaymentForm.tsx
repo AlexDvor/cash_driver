@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { CollapsibleTipContent } from '../CollapsibleTipContent/CollapsibleTipContent';
+import { PlatformIcon } from '../PlatformIcon/PlatformIcon';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
 import { Card } from '../../ui/Card/Card';
@@ -82,6 +83,7 @@ export function PaymentForm({
         options={platformOptions.map(value => ({
           value,
           label: platformLabels[value],
+          icon: <PlatformIcon platform={value} />,
         }))}
         columns={
           width / fontScale >= sizing.platformFourColumnScreenWidth ? 4 : 2

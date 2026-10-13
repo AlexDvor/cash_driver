@@ -12,6 +12,7 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: spacing.xs,
     flexShrink: 1,
   },
   choiceLabel: { textAlign: 'center' },

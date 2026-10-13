@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { Pressable, View } from 'react-native';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../AppText/AppText';
@@ -6,7 +6,7 @@ import { styles } from './MultiChoiceGroup.styles';
 
 interface MultiChoiceGroupProps<Value extends string> {
   label: string;
-  options: { value: Value; label: string }[];
+  options: { value: Value; label: string; icon?: ReactNode }[];
   values: readonly Value[];
   disabled?: boolean;
   lastChoiceHint: string;
@@ -50,6 +50,7 @@ export function MultiChoiceGroup<Value extends string>({
                 pressed && styles.pressed,
               ]}
             >
+              {option.icon}
               <AppText
                 style={[
                   styles.choiceLabel,

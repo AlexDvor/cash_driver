@@ -6,6 +6,7 @@ import { createTransactionRepository } from '../src/features/transactions/transa
 import { SqlConnection } from '../src/database/sqlite';
 import { Persistence } from '../src/app/persistence';
 import { openTestDatabase, testPersistence } from './sqliteTestDatabase';
+import { PlatformIcon } from '../src/components/PlatformIcon/PlatformIcon';
 
 let db: SqlConnection;
 let services: Persistence;
@@ -115,6 +116,11 @@ async function tip(enabled: boolean) {
 
 test('ordinary change, exact and insufficient cash are immediate; malformed/zero/over-limit amounts cannot confirm', async () => {
   await mount();
+  for (const platform of ['Uber', 'Cabify', 'Bolt', 'Otro']) {
+    expect(button(platform).findByType(PlatformIcon).props.platform).toBe(
+      platform === 'Otro' ? 'other' : platform.toLowerCase(),
+    );
+  }
   await enter('20', '50');
   expect(text('change-result')).toMatch(/30,00/);
   expect(button('Confirmar cobro').props.disabled).toBe(false);

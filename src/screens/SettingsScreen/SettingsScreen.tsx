@@ -12,6 +12,7 @@ import { AppText } from '../../ui/AppText/AppText';
 import { Card } from '../../ui/Card/Card';
 import { ChoiceGroup } from '../../ui/ChoiceGroup/ChoiceGroup';
 import { MultiChoiceGroup } from '../../ui/MultiChoiceGroup/MultiChoiceGroup';
+import { PlatformIcon } from '../../components/PlatformIcon/PlatformIcon';
 import { ScreenContainer } from '../../ui/ScreenContainer/ScreenContainer';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { languageOptions } from '../../i18n/translations';
@@ -111,6 +112,7 @@ export function SettingsScreen() {
           options={platforms.map(value => ({
             value,
             label: platformLabels[value],
+            icon: <PlatformIcon platform={value} />,
           }))}
           values={preferences.enabledPlatforms}
           lastChoiceHint={t('workingPlatformsMinimum')}
