@@ -408,6 +408,63 @@ test('pristine Home form follows a changed default after Settings disables its o
   expect((await services.preferences.read()).defaultPlatform).toBe('cabify');
 });
 
+test('two-platform payments remain in history and summary after disabling one, editing it and restarting', async () => {
+  await mount();
+  await press('Ajustes');
+  await press('Bolt');
+  await press('Inicio');
+  await input('Importe a cobrar', '10');
+  await input('El cliente entrega', '20');
+  await press('Confirmar cobro');
+  await press('Bolt');
+  await input('Importe a cobrar', '12');
+  await input('El cliente entrega', '20');
+  await press('Confirmar cobro');
+  const records = await services.transactions.list();
+  expect(records).toHaveLength(2);
+  const bolt = records.find(record => record.platform === 'bolt');
+  expect(bolt).toMatchObject({ fareAmountCents: 1200 });
+  if (!bolt) throw new Error('Missing Bolt payment');
+  await press('Ajustes');
+  await press('Bolt');
+  await press('Inicio');
+  expect(button('Uber').props.accessibilityState.selected).toBe(true);
+  expect(
+    app.root.findAll(
+      node =>
+        node.props.accessibilityRole === 'radio' &&
+        node.props.accessibilityLabel === 'Bolt',
+    ),
+  ).toHaveLength(0);
+  await press('Historial');
+  expect(rowIds()).toHaveLength(2);
+  await details(bolt.id);
+  expect(content()).toContain('Bolt');
+  await press('Editar');
+  await input('Importe a cobrar', '13');
+  await press('Guardar cambios');
+  expect(await services.transactions.get(bolt.id)).toMatchObject({
+    platform: 'bolt',
+    fareAmountCents: 1300,
+  });
+  expect((await services.preferences.read()).enabledPlatforms).toEqual([
+    'uber',
+  ]);
+  await act(async () => ref.goBack());
+  await act(async () => ref.goBack());
+  await press('Resumen');
+  expect(content()).toContain('Bolt');
+  expect(content()).toContain('13,00');
+  await act(async () => app.unmount());
+  await mount();
+  expect((await services.preferences.read()).enabledPlatforms).toEqual([
+    'uber',
+  ]);
+  expect(await services.transactions.list()).toHaveLength(2);
+  await press('Historial');
+  expect(rowIds()).toHaveLength(2);
+});
+
 test.each(['language', 'theme', 'platform', 'haptics'])(
   'failed %s preference keeps committed value and retries original patch',
   async kind => {

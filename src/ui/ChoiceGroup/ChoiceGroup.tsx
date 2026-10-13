@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
-import { sizing } from '../../constants/theme/tokens';
+import { sizing, spacing } from '../../constants/theme/tokens';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 
 import { AppText } from '../AppText/AppText';
@@ -27,7 +27,7 @@ export function ChoiceGroup<Value extends string>({
       <View
         style={styles.choices}
         onLayout={
-          appearance === 'segmented'
+          appearance === 'segmented' || columns !== undefined
             ? event => setAvailableWidth(event.nativeEvent.layout.width)
             : undefined
         }
@@ -56,8 +56,12 @@ export function ChoiceGroup<Value extends string>({
                       : undefined,
                 },
                 columns !== undefined && {
-                  flexBasis: columns === 2 ? '40%' : '20%',
+                  width:
+                    availableWidth > 0
+                      ? (availableWidth - spacing.sm * (columns - 1)) / columns
+                      : '100%',
                   flexGrow: 1,
+                  flexShrink: 0,
                 },
                 {
                   backgroundColor: selected
