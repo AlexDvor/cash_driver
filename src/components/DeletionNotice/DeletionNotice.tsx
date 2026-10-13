@@ -6,6 +6,7 @@ import { Card } from '../../ui/Card/Card';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { useDeletion } from '../../providers/DeletionProvider/DeletionProvider';
+import { UndoCountdownButton } from './UndoCountdownButton';
 
 export function DeletionNotice() {
   const deletion = useDeletion();
@@ -32,7 +33,12 @@ export function DeletionNotice() {
         )}
       </AppText>
       {deletion.state.status === 'pending' && (
-        <ActionButton label={t('undo')} onPress={deletion.undo} />
+        <UndoCountdownButton
+          key={deletion.state.id}
+          label={t('undo')}
+          expiresAt={deletion.state.expiresAt}
+          onPress={deletion.undo}
+        />
       )}
       {deletion.state.status === 'writing' && (
         <ActivityIndicator color={colors.primary} />

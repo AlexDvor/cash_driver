@@ -12,7 +12,8 @@ import { DELETION_UNDO_SECONDS } from '../../features/transactions/deletionConst
 
 type DeletionState =
   | { status: 'idle'; id: null }
-  | { status: 'pending' | 'writing' | 'error'; id: string };
+  | { status: 'pending'; id: string; expiresAt: number }
+  | { status: 'writing' | 'error'; id: string };
 interface DeletionContextValue {
   state: DeletionState;
   begin: (id: string) => void;
@@ -93,7 +94,11 @@ export function DeletionProvider({ children }: React.PropsWithChildren) {
       ) {
         return;
       }
-      change({ status: 'pending', id });
+      change({
+        status: 'pending',
+        id,
+        expiresAt: Date.now() + DELETION_UNDO_SECONDS * 1000,
+      });
       timeout.current = setTimeout(commit, DELETION_UNDO_SECONDS * 1000);
     },
     [change, commit],
