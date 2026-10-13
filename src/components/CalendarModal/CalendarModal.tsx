@@ -212,7 +212,7 @@ function CalendarSession({
                   ]}
                   onPress={() => setPickingMonth(value => !value)}
                 >
-                  <CalendarIcon color={colors.secondaryText} />
+                  <CalendarIcon />
                 </Pressable>
               )}
             </View>

@@ -29,6 +29,42 @@ jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
 
+test('the central month control exposes the date and opens the chooser while arrows request adjacent months', async () => {
+  const onMoveMonth = jest.fn();
+  const onOpenCalendar = jest.fn();
+  let app!: Renderer.ReactTestRenderer;
+  await act(async () => {
+    app = Renderer.create(
+      <CalendarPeriodSelector
+        selection={{ kind: 'month', month: { year: 2026, month: 10 } }}
+        onMoveMonth={onMoveMonth}
+        onOpenCalendar={onOpenCalendar}
+        onReturnToMonth={jest.fn()}
+        calendarButtonRef={React.createRef<
+          React.ElementRef<typeof Native.View>
+        >()}
+      />,
+    );
+  });
+  const control = (label: string) =>
+    app.root.find(
+      node =>
+        node.props.accessibilityLabel === label &&
+        typeof node.props.onPress === 'function',
+    );
+  const open = control(mockTranslate('en', 'calendarOpen'));
+  expect(open.props.accessibilityValue.text).toBe('October 2026');
+  await act(async () => {
+    open.props.onPress();
+    control(mockTranslate('en', 'calendarPreviousMonth')).props.onPress();
+    control(mockTranslate('en', 'calendarNextMonth')).props.onPress();
+  });
+  expect(onOpenCalendar).toHaveBeenCalledTimes(1);
+  expect(onMoveMonth.mock.calls).toEqual([[-1], [1]]);
+  expect(open.props.accessibilityValue.text).toBe('October 2026');
+  await act(async () => app.unmount());
+});
+
 test('shared composition loads draft activity, applies a day, and restores trigger focus on cancel', async () => {
   mockFocused = true;
   jest.useFakeTimers();

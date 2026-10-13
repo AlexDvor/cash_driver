@@ -53,31 +53,9 @@ export const styles = StyleSheet.create({
   month: { flexGrow: 1, flexBasis: '30%' },
   selectedMonth: { fontWeight: '700' },
   pickerPreview: { textAlign: 'center', marginTop: spacing.sm },
-  icon: { width: sizing.icon, height: sizing.icon },
-  calendarOutline: {
-    position: 'absolute',
-    left: 2,
-    right: 2,
-    top: 4,
-    bottom: 1,
-    borderWidth: 2,
-    borderRadius: spacing.xs,
-  },
-  calendarRule: { position: 'absolute', left: 3, right: 3, top: 10, height: 2 },
-  calendarBindingLeft: {
-    position: 'absolute',
-    left: 7,
-    top: 1,
-    width: 2,
-    height: 7,
-  },
-  calendarBindingRight: {
-    position: 'absolute',
-    right: 7,
-    top: 1,
-    width: 2,
-    height: 7,
-  },
+  // Transparent artwork has inner padding; 32 keeps its visible calendar
+  // readable inside the existing 48-unit button with 8-unit outer padding.
+  icon: { width: 32, height: 32, flexShrink: 0 },
   chevron: { width: 10, height: 10, borderTopWidth: 2, borderRightWidth: 2 },
   day: {
     minWidth: sizing.touchTarget,
