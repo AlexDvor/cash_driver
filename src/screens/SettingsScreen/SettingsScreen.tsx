@@ -11,6 +11,7 @@ import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
 import { Card } from '../../ui/Card/Card';
 import { ChoiceGroup } from '../../ui/ChoiceGroup/ChoiceGroup';
+import { MultiChoiceGroup } from '../../ui/MultiChoiceGroup/MultiChoiceGroup';
 import { ScreenContainer } from '../../ui/ScreenContainer/ScreenContainer';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { languageOptions } from '../../i18n/translations';
@@ -105,20 +106,33 @@ export function SettingsScreen() {
         </AppText>
       </Card>
       <Card>
-        <ChoiceGroup
-          label={t('defaultPlatform')}
+        <MultiChoiceGroup
+          label={t('workingPlatforms')}
           options={platforms.map(value => ({
             value,
             label: platformLabels[value],
           }))}
-          value={preferences.defaultPlatform}
-          onChange={value => {
-            updatePreferences({ defaultPlatform: value });
+          values={preferences.enabledPlatforms}
+          lastChoiceHint={t('workingPlatformsMinimum')}
+          onToggle={value => {
+            const enabledPlatforms = preferences.enabledPlatforms.includes(
+              value,
+            )
+              ? preferences.enabledPlatforms.filter(
+                  platform => platform !== value,
+                )
+              : [...preferences.enabledPlatforms, value];
+            if (enabledPlatforms.length > 0) {
+              updatePreferences({ enabledPlatforms });
+            }
           }}
           disabled={disabled}
         />
         <AppText variant="supporting" secondary>
-          {t('defaultPlatformHelp')}
+          {t('workingPlatformsHelp')}
+        </AppText>
+        <AppText variant="supporting" secondary>
+          {t('workingPlatformsMinimum')}
         </AppText>
         <Pressable
           accessibilityRole="switch"

@@ -28,6 +28,10 @@ export const es = {
   defaultPlatform: 'Plataforma predeterminada',
   defaultPlatformHelp:
     'Se actualiza también al elegir una plataforma en Inicio.',
+  workingPlatforms: 'Plataformas de trabajo',
+  workingPlatformsHelp:
+    'Elige las plataformas que usas. Se mostrarán al registrar un cobro en Inicio.',
+  workingPlatformsMinimum: 'Selecciona al menos una plataforma.',
   confirmationHaptics: 'Confirmación háptica',
   hapticsHelp:
     'Solo después de guardar un cobro, si el dispositivo y sus ajustes lo permiten.',
@@ -179,6 +183,10 @@ export const en: Dictionary = {
   currency: 'Currency',
   defaultPlatform: 'Default platform',
   defaultPlatformHelp: 'Also updated when you select a platform in Home.',
+  workingPlatforms: 'Working platforms',
+  workingPlatformsHelp:
+    'Choose the platforms you use. They will appear when recording a payment in Home.',
+  workingPlatformsMinimum: 'Select at least one platform.',
   confirmationHaptics: 'Confirmation haptics',
   hapticsHelp:
     'Only after saving a payment, when the device and its settings allow it.',
@@ -325,6 +333,10 @@ export const uk: Dictionary = {
   currency: 'Валюта',
   defaultPlatform: 'Платформа за замовчуванням',
   defaultPlatformHelp: 'Також оновлюється після вибору платформи на Головній.',
+  workingPlatforms: 'Робочі платформи',
+  workingPlatformsHelp:
+    'Оберіть платформи, з якими працюєте. Вони відображатимуться під час нової оплати на Головній.',
+  workingPlatformsMinimum: 'Оберіть принаймні одну платформу.',
   confirmationHaptics: 'Вібровідгук підтвердження',
   hapticsHelp:
     'Лише після збереження оплати, якщо пристрій і його налаштування дозволяють.',

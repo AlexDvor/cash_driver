@@ -178,8 +178,8 @@ test('initial EUR/Spanish/system/Uber/disabled haptics and installed metadata; a
   expect(saved).toEqual({
     language: 'en',
     themeMode: 'dark',
-    defaultPlatform: 'cabify',
-    enabledPlatforms: ['cabify'],
+    defaultPlatform: 'uber',
+    enabledPlatforms: ['uber', 'cabify'],
     hapticsEnabled: true,
   });
   await act(async () => app.unmount());
@@ -187,11 +187,89 @@ test('initial EUR/Spanish/system/Uber/disabled haptics and installed metadata; a
   await press('Settings');
   expect(content()).toContain('Data stays only on this device');
   expect(button('Dark').props.accessibilityState.selected).toBe(true);
-  expect(button('Cabify').props.accessibilityState.selected).toBe(true);
+  expect(button('Cabify').props.accessibilityState.checked).toBe(true);
   expect(await services.preferences.read()).toEqual(saved);
 });
 
-test('latest explicit Home/Settings platform wins without replacing draft; edit leaves default unchanged', async () => {
+test('working platforms support one through four choices and protect the last choice', async () => {
+  await mount();
+  await press('Ajustes');
+  expect(content()).toContain('Plataformas de trabajo');
+  expect(content()).toContain('Selecciona al menos una plataforma');
+  expect(button('Uber').props.accessibilityRole).toBe('checkbox');
+  expect(button('Uber').props.accessibilityState).toMatchObject({
+    checked: true,
+    disabled: true,
+  });
+  expect(button('Uber').props.accessibilityHint).toBe(
+    'Selecciona al menos una plataforma.',
+  );
+  await press('Bolt');
+  expect(await services.preferences.read()).toMatchObject({
+    defaultPlatform: 'uber',
+    enabledPlatforms: ['uber', 'bolt'],
+  });
+  expect(button('Uber').props.accessibilityState.disabled).toBe(false);
+  await press('Cabify');
+  await press('Otro');
+  expect((await services.preferences.read()).enabledPlatforms).toEqual([
+    'uber',
+    'cabify',
+    'bolt',
+    'other',
+  ]);
+  await press('Uber');
+  expect((await services.preferences.read()).enabledPlatforms).toEqual([
+    'cabify',
+    'bolt',
+    'other',
+  ]);
+  await press('Bolt');
+  await press('Otro');
+  expect(await services.preferences.read()).toMatchObject({
+    defaultPlatform: 'cabify',
+    enabledPlatforms: ['cabify'],
+  });
+  expect(button('Cabify').props.accessibilityState).toMatchObject({
+    checked: true,
+    disabled: true,
+  });
+  await act(async () => app.unmount());
+  await mount();
+  await press('Ajustes');
+  expect(button('Cabify').props.accessibilityState.checked).toBe(true);
+  expect(button('Bolt').props.accessibilityState.checked).toBe(false);
+});
+
+test('removing the saved default chooses the first remaining platform without touching transactions', async () => {
+  const row = await seed('bolt');
+  await mount();
+  await press('Bolt');
+  await press('Ajustes');
+  await press('Cabify');
+  await press('Bolt');
+  expect(await services.preferences.read()).toMatchObject({
+    defaultPlatform: 'cabify',
+    enabledPlatforms: ['cabify'],
+  });
+  expect(await services.transactions.get(row.id)).toEqual(row);
+});
+
+test('working-platform labels and minimum-selection explanation follow the language', async () => {
+  await mount();
+  await press('Ajustes');
+  await press('English');
+  expect(content()).toContain('Working platforms');
+  expect(content()).toContain('Select at least one platform');
+  await press('Українська');
+  expect(content()).toContain('Робочі платформи');
+  expect(content()).toContain('Оберіть принаймні одну платформу');
+  expect(button('Uber').props.accessibilityHint).toBe(
+    'Оберіть принаймні одну платформу.',
+  );
+});
+
+test('Settings list preserves Home draft; edit leaves default unchanged', async () => {
   const row = await seed();
   await mount();
   await press('Cabify');
@@ -207,16 +285,16 @@ test('latest explicit Home/Settings platform wins without replacing draft; edit 
   expect(field('Trip fare').props.value).toBe('18.5');
   expect(button('Cabify').props.accessibilityState.selected).toBe(true);
   expect(field('Tip').props.value).toBe('1,50');
-  await press('Otro');
-  expect((await services.preferences.read()).defaultPlatform).toBe('other');
+  await press('Bolt');
+  expect((await services.preferences.read()).defaultPlatform).toBe('bolt');
   await edit(row.id);
   await input('Trip fare', '19');
   await press('Save changes');
-  expect((await services.preferences.read()).defaultPlatform).toBe('other');
+  expect((await services.preferences.read()).defaultPlatform).toBe('bolt');
   await press('Cancel');
   await act(async () => ref.goBack());
   await press('Settings');
-  expect(button('Otro').props.accessibilityState.selected).toBe(true);
+  expect(button('Bolt').props.accessibilityState.checked).toBe(true);
 });
 
 test.each(['language', 'theme', 'platform', 'haptics'])(
@@ -248,7 +326,7 @@ test.each(['language', 'theme', 'platform', 'haptics'])(
     const changes = {
       language: { language: 'en' },
       theme: { themeMode: 'dark' },
-      platform: { defaultPlatform: 'bolt' },
+      platform: { enabledPlatforms: ['uber', 'bolt'] },
       haptics: { hapticsEnabled: true },
     };
     expect(await services.preferences.read()).toMatchObject(
@@ -280,6 +358,40 @@ test('saving preference disables controls and retains committed state until writ
     await gate;
   });
   expect(content()).toContain('Currency');
+});
+
+test('working-platform write blocks rapid taps and keeps the committed list until completion', async () => {
+  await mount();
+  await press('Ajustes');
+  let release = () => {};
+  const gate = new Promise<void>(resolve => {
+    release = resolve;
+  });
+  const update = services.preferences.update;
+  const write = jest
+    .spyOn(services.preferences, 'update')
+    .mockImplementation(async patch => {
+      await gate;
+      return update(patch);
+    });
+  await act(async () => {
+    button('Bolt').props.onPress();
+    button('Cabify').props.onPress();
+  });
+  expect(write).toHaveBeenCalledTimes(1);
+  expect(button('Bolt').props.accessibilityState.disabled).toBe(true);
+  expect(button('Cabify').props.accessibilityState.disabled).toBe(true);
+  expect((await services.preferences.read()).enabledPlatforms).toEqual([
+    'uber',
+  ]);
+  await act(async () => {
+    release();
+    await gate;
+  });
+  expect((await services.preferences.read()).enabledPlatforms).toEqual([
+    'uber',
+    'bolt',
+  ]);
 });
 
 test('feedback occurs once after successful payment, disabled/failure does not alter committed save', async () => {
