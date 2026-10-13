@@ -1,5 +1,8 @@
 export type Language = 'es' | 'en' | 'uk';
 export const es = {
+  appearanceSection: 'Apariencia',
+  workSection: 'Trabajo',
+  appDataSection: 'App y datos',
   dataRefreshing: 'Actualizando… Se muestran los datos anteriores.',
   dataRefreshFailed: 'Datos anteriores; actualización fallida',
   historyLoadMore: 'Cargar más operaciones',
@@ -29,8 +32,7 @@ export const es = {
   defaultPlatformHelp:
     'Se actualiza también al elegir una plataforma en Inicio.',
   workingPlatforms: 'Plataformas de trabajo',
-  workingPlatformsHelp:
-    'Elige las plataformas que usas. Se mostrarán al registrar un cobro en Inicio.',
+  workingPlatformsHelp: 'Estas plataformas aparecerán en Inicio.',
   workingPlatformsMinimum: 'Selecciona al menos una plataforma.',
   confirmationHaptics: 'Confirmación háptica',
   hapticsHelp:
@@ -153,12 +155,14 @@ export const es = {
   light: 'Claro',
   dark: 'Oscuro',
   system: 'Automático',
-  systemHelp:
-    'Usa el tema del dispositivo. Para cambiar entre día y noche, configura el horario en los ajustes del sistema.',
+  systemHelp: 'Sigue el tema del dispositivo.',
 };
 export type TranslationKey = keyof typeof es;
 type Dictionary = Record<TranslationKey, string>;
 export const en: Dictionary = {
+  appearanceSection: 'Appearance',
+  workSection: 'Work',
+  appDataSection: 'App and data',
   dataRefreshing: 'Updating… Showing previous data.',
   dataRefreshFailed: 'Previous data; update failed',
   historyLoadMore: 'Load more operations',
@@ -187,8 +191,7 @@ export const en: Dictionary = {
   defaultPlatform: 'Default platform',
   defaultPlatformHelp: 'Also updated when you select a platform in Home.',
   workingPlatforms: 'Working platforms',
-  workingPlatformsHelp:
-    'Choose the platforms you use. They will appear when recording a payment in Home.',
+  workingPlatformsHelp: 'These platforms will appear in Home.',
   workingPlatformsMinimum: 'Select at least one platform.',
   confirmationHaptics: 'Confirmation haptics',
   hapticsHelp:
@@ -307,10 +310,12 @@ export const en: Dictionary = {
   light: 'Light',
   dark: 'Dark',
   system: 'Automatic',
-  systemHelp:
-    'Uses the device theme. To switch between day and night, configure the schedule in system settings.',
+  systemHelp: 'Follows the device theme.',
 };
 export const uk: Dictionary = {
+  appearanceSection: 'Вигляд',
+  workSection: 'Робота',
+  appDataSection: 'Застосунок і дані',
   dataRefreshing: 'Оновлення… Показано попередні дані.',
   dataRefreshFailed: 'Попередні дані; оновлення не вдалося',
   historyLoadMore: 'Завантажити більше операцій',
@@ -340,8 +345,7 @@ export const uk: Dictionary = {
   defaultPlatform: 'Платформа за замовчуванням',
   defaultPlatformHelp: 'Також оновлюється після вибору платформи на Головній.',
   workingPlatforms: 'Робочі платформи',
-  workingPlatformsHelp:
-    'Оберіть платформи, з якими працюєте. Вони відображатимуться під час нової оплати на Головній.',
+  workingPlatformsHelp: 'Ці платформи відображатимуться на Головній.',
   workingPlatformsMinimum: 'Оберіть принаймні одну платформу.',
   confirmationHaptics: 'Вібровідгук підтвердження',
   hapticsHelp:
@@ -466,8 +470,7 @@ export const uk: Dictionary = {
   light: 'Світла',
   dark: 'Темна',
   system: 'Автоматична',
-  systemHelp:
-    'Використовує тему пристрою. Для зміни між денною та нічною темами налаштуйте розклад у системних налаштуваннях.',
+  systemHelp: 'Використовує тему пристрою.',
 };
 export const dictionaries: Record<Language, Dictionary> = { es, en, uk };
 export const languageOptions: { value: Language; label: string }[] = [

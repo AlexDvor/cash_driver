@@ -16,6 +16,7 @@ import { TransactionLoadState } from '../../components/TransactionLoadState/Tran
 import { useDeletion } from '../../providers/DeletionProvider/DeletionProvider';
 import { styles } from './DetailsScreen.styles';
 import { PlatformIcon } from '../../components/PlatformIcon/PlatformIcon';
+import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 
 export function DetailsScreen({
   route,
@@ -23,6 +24,7 @@ export function DetailsScreen({
 }: NativeStackScreenProps<RootStackParamList, typeof routes.Details>) {
   const { state, refresh } = useTransactions(route.params.id);
   const { t, locale } = useTranslation();
+  const { colors } = useAppTheme();
   const clock = useLocalClock();
   const deletion = useDeletion();
   const record = state.status === 'ready' ? state.records[0] : undefined;
@@ -75,15 +77,26 @@ export function DetailsScreen({
               { label: t('receivedInput'), cents: record.cashReceivedCents },
               { label: t('changeGiven'), cents: record.changeGivenCents },
               { label: t('tipsTotal'), cents: record.tipCents },
-              { label: t('retainedCash'), cents: record.netCashCents },
             ].map(value => (
-              <View key={value.label} style={styles.value}>
+              <View
+                key={value.label}
+                style={[styles.value, { borderBottomColor: colors.border }]}
+              >
                 <AppText secondary>{value.label}</AppText>
-                <AppText variant="heading">
+                <AppText style={styles.amount}>
                   {formatMoney(value.cents, locale)}
                 </AppText>
               </View>
             ))}
+            <View style={[styles.total, { backgroundColor: colors.softGreen }]}>
+              <AppText style={styles.totalLabel}>{t('retainedCash')}</AppText>
+              <AppText
+                variant="heading"
+                style={[styles.amount, { color: colors.primary }]}
+              >
+                {formatMoney(record.netCashCents, locale)}
+              </AppText>
+            </View>
           </Card>
           <ActionButton
             variant="secondary"

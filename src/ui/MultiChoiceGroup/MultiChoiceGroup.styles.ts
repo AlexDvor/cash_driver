@@ -2,20 +2,21 @@ import { StyleSheet } from 'react-native';
 import { radii, sizing, spacing } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
-  group: { gap: spacing.md },
+  group: { gap: spacing.sm },
   choices: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   choice: {
     minHeight: sizing.touchTarget,
     borderRadius: radii.chip,
     borderWidth: sizing.borderWidth,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.xs,
+    gap: spacing.sm,
     flexShrink: 1,
   },
-  choiceLabel: { textAlign: 'center' },
+  choiceLabel: { textAlign: 'center', flexShrink: 1 },
   checked: { fontWeight: '700' },
   pressed: { opacity: 0.8 },
 });

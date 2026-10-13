@@ -11,4 +11,5 @@ export const styles = StyleSheet.create({
     minHeight: sizing.touchTarget,
   },
   toggleLabel: { flexShrink: 1 },
+  divider: { height: sizing.borderWidth },
 });

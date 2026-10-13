@@ -168,7 +168,8 @@ test('initial EUR/Spanish/system/Uber/disabled haptics and installed metadata; a
   await mount();
   await press('Ajustes');
   expect(content()).toContain('EUR (€)');
-  expect(content()).toContain('0.0.1');
+  expect(content()).toContain('1.0');
+  expect(content()).not.toContain('package JavaScript');
   expect(switchValue()).toBe(false);
   await press('Cabify');
   await toggle(true);
