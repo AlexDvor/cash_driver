@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, ImageSourcePropType } from 'react-native';
+import { Image, ImageSourcePropType, View } from 'react-native';
 import type { Platform } from '../../constants/platforms';
 import { styles } from './PlatformIcon.styles';
 
@@ -17,7 +17,28 @@ export function PlatformIcon({
   size?: 24 | 28 | 44 | 60;
 }) {
   if (platform === 'other') {
-    return null;
+    return (
+      <View
+        testID="platform-icon-other"
+        accessible={false}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={[
+          styles.other,
+          { width: size, height: size, borderRadius: size / 4 },
+        ]}
+      >
+        {[0, 1, 2].map(dot => (
+          <View
+            key={dot}
+            style={[
+              styles.dot,
+              { width: size / 9, height: size / 9, borderRadius: size / 18 },
+            ]}
+          />
+        ))}
+      </View>
+    );
   }
   return (
     <Image

@@ -18,14 +18,17 @@ export function PlatformSummaryRow({
 }) {
   const { colors } = useAppTheme();
   return (
-    <View
-      style={[
-        styles.row,
-        divided && [styles.divided, { borderTopColor: colors.border }],
-      ]}
-    >
+    <View style={styles.row}>
+      {divided && (
+        <View
+          accessible={false}
+          style={[styles.divider, { backgroundColor: colors.border }]}
+        />
+      )}
       <View style={styles.labelRow}>
-        <PlatformIcon platform={platform} size={24} />
+        <View style={styles.iconSlot}>
+          <PlatformIcon platform={platform} size={24} />
+        </View>
         <AppText style={styles.label}>{platformLabels[platform]}</AppText>
       </View>
       <AppText testID={`summary-${platform}`} style={styles.value}>

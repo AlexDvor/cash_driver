@@ -9,8 +9,16 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.sm,
     minHeight: sizing.touchTarget,
+    paddingVertical: spacing.md,
   },
-  divided: { borderTopWidth: sizing.borderWidth, paddingTop: spacing.md },
+  divider: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: sizing.borderWidth,
+  },
+  iconSlot: { width: sizing.icon, height: sizing.icon, flexShrink: 0 },
   labelRow: {
     flexDirection: 'row',
     alignItems: 'center',

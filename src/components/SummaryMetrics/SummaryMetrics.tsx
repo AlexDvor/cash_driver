@@ -38,8 +38,18 @@ export function RetainedCashCard({
   );
   return (
     <Card
-      style={{ backgroundColor: colors.primary, borderColor: colors.primary }}
+      style={[
+        styles.heroCard,
+        { backgroundColor: colors.primary, borderColor: colors.primary },
+      ]}
     >
+      <View
+        pointerEvents="none"
+        accessible={false}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={styles.heroBackdrop}
+      />
       <View
         style={styles.heroRow}
         onLayout={event => setContentWidth(event.nativeEvent.layout.width)}

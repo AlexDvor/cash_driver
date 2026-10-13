@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { ActivityIndicator } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { useLocalClock } from '../../hooks/app/useLocalClock';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
@@ -127,17 +127,19 @@ export function SummaryScreen() {
             <AppText variant="heading" accessibilityRole="header">
               {t('byPlatform')}
             </AppText>
-            {platforms.map((platform, index) => (
-              <PlatformSummaryRow
-                key={platform}
-                platform={platform}
-                divided={index > 0}
-                amount={formatMoney(
-                  summary.fareByPlatformCents[platform],
-                  locale,
-                )}
-              />
-            ))}
+            <View>
+              {platforms.map((platform, index) => (
+                <PlatformSummaryRow
+                  key={platform}
+                  platform={platform}
+                  divided={index > 0}
+                  amount={formatMoney(
+                    summary.fareByPlatformCents[platform],
+                    locale,
+                  )}
+                />
+              ))}
+            </View>
           </Card>
         </>
       ) : null}
