@@ -3,6 +3,7 @@ import { radii, sizing, spacing } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   container: { gap: spacing.sm },
+  embedded: { borderWidth: 0, padding: 0 },
   row: {
     flexDirection: 'row',
     flexWrap: 'wrap',

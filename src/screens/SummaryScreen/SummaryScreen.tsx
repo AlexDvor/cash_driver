@@ -127,10 +127,11 @@ export function SummaryScreen() {
             <AppText variant="heading" accessibilityRole="header">
               {t('byPlatform')}
             </AppText>
-            {platforms.map(platform => (
+            {platforms.map((platform, index) => (
               <PlatformSummaryRow
                 key={platform}
                 platform={platform}
+                divided={index > 0}
                 amount={formatMoney(
                   summary.fareByPlatformCents[platform],
                   locale,

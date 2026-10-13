@@ -8,4 +8,5 @@ export interface CalendarPeriodSelectorProps {
   onOpenCalendar: () => void;
   onReturnToMonth: () => void;
   calendarButtonRef?: React.Ref<React.ElementRef<typeof View>>;
+  embedded?: boolean;
 }

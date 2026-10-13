@@ -53,6 +53,7 @@ export function SummaryCalendar({
       >
         <Card>
           <CalendarPeriodSelector
+            embedded
             selection={{ kind: 'month', month: calendar.month }}
             onMoveMonth={calendar.moveMonth}
             onOpenCalendar={calendar.openCalendar}

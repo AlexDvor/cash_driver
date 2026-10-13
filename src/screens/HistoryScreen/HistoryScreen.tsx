@@ -156,6 +156,7 @@ export function HistoryScreen() {
       )}
       <ChoiceGroup
         label={t('platform')}
+        iconLayout="inline"
         value={platform}
         onChange={setPlatform}
         options={[
@@ -275,7 +276,17 @@ export function HistoryScreen() {
                       {platformLabels[record.platform]}
                     </AppText>
                     <AppText secondary variant="supporting">
-                      {record.timeLabel}
+                      {record.timeLabel} ·{' '}
+                      <AppText
+                        variant="supporting"
+                        style={{ color: colors.primary }}
+                      >
+                        {t(
+                          deletion.state.id === record.id
+                            ? 'deletionPending'
+                            : 'recorded',
+                        )}
+                      </AppText>
                     </AppText>
                   </View>
                 </View>
@@ -288,13 +299,6 @@ export function HistoryScreen() {
                   )}
                 </View>
               </View>
-              <AppText variant="supporting" style={{ color: colors.primary }}>
-                {t(
-                  deletion.state.id === record.id
-                    ? 'deletionPending'
-                    : 'recorded',
-                )}
-              </AppText>
             </Pressable>
           );
         }}

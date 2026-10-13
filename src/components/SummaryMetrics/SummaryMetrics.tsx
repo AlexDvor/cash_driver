@@ -72,10 +72,10 @@ export function SummaryStatCards({
   const [measuredWidth, setMeasuredWidth] = useState(0);
   const availableWidth = measuredWidth || Math.max(0, width - spacing.xl * 2);
   // Reserve readable icon/value space, then stack instead of shrinking text.
-  const minimumWidth = (sizing.touchTarget * 3 + spacing.xxxl) * fontScale;
-  const twoColumns = availableWidth >= minimumWidth * 2 + spacing.lg;
+  const minimumWidth = sizing.touchTarget * 3 * fontScale;
+  const twoColumns = availableWidth >= minimumWidth * 2 + spacing.md;
   const cardWidth = twoColumns
-    ? Math.floor((availableWidth - spacing.lg) / 2)
+    ? Math.floor((availableWidth - spacing.md) / 2)
     : availableWidth;
   const metrics: (SummaryMetricProps & { icon: 'car' | 'gift' })[] = [
     {

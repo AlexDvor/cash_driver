@@ -19,6 +19,7 @@ export function CalendarPeriodSelector({
   onOpenCalendar,
   onReturnToMonth,
   calendarButtonRef,
+  embedded = false,
 }: CalendarPeriodSelectorProps) {
   const { t, locale } = useTranslation();
   const { colors } = useAppTheme();
@@ -58,6 +59,7 @@ export function CalendarPeriodSelector({
         style={[
           styles.row,
           { backgroundColor: colors.card, borderColor: colors.border },
+          embedded && styles.embedded,
         ]}
       >
         {stacked && monthButton}

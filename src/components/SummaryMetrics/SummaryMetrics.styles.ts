@@ -6,7 +6,7 @@ export const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: spacing.lg,
+    gap: spacing.md,
   },
   statCard: { padding: spacing.md },
   statContent: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
@@ -48,5 +48,11 @@ export const styles = StyleSheet.create({
   },
   label: { flexShrink: 1 },
   iconBadge: { padding: spacing.xs, borderRadius: radii.input },
-  value: { flexShrink: 1, fontWeight: '600', fontVariant: ['tabular-nums'] },
+  value: {
+    flexShrink: 1,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+    marginLeft: 'auto',
+    textAlign: 'right',
+  },
 });

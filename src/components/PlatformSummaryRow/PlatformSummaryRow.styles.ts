@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { spacing } from '../../constants/theme/tokens';
+import { sizing, spacing } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   row: {
@@ -8,7 +8,9 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: spacing.sm,
+    minHeight: sizing.touchTarget,
   },
+  divided: { borderTopWidth: sizing.borderWidth, paddingTop: spacing.md },
   labelRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -16,5 +18,11 @@ export const styles = StyleSheet.create({
     gap: spacing.md,
   },
   label: { flexShrink: 1 },
-  value: { flexShrink: 1, fontWeight: '600', fontVariant: ['tabular-nums'] },
+  value: {
+    flexShrink: 1,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+    marginLeft: 'auto',
+    textAlign: 'right',
+  },
 });
