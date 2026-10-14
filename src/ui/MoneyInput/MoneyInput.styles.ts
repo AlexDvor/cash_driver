@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
     borderWidth: sizing.borderWidth,
     borderRadius: radii.input,
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
     fontSize: typography.money,
     fontVariant: ['tabular-nums'],
   },

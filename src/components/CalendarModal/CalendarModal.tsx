@@ -63,7 +63,7 @@ function CalendarSession({
   const compact =
     width - insets.left - insets.right <
     sizing.touchTarget * 7 + spacing.lg * 4 + sizing.borderWidth * 2;
-  const horizontalPadding = compact ? spacing.xs : spacing.lg;
+  const horizontalPadding = compact && !monthOnly ? spacing.xs : spacing.lg;
   const label = calendarMonthLabel(draftMonth, locale);
   const headingLabel = pickingMonth
     ? new Intl.NumberFormat(locale, { useGrouping: false }).format(

@@ -9,6 +9,7 @@ import { CalendarGrid } from '../CalendarGrid/CalendarGrid';
 import { CalendarModal } from '../CalendarModal/CalendarModal';
 import { CalendarPeriodSelector } from '../CalendarPeriodSelector/CalendarPeriodSelector';
 import { CalendarNavigationProps } from '../CalendarNavigation/CalendarNavigation.interface';
+import { styles } from './SummaryCalendar.styles';
 
 export function SummaryCalendar({
   calendar,
@@ -51,15 +52,17 @@ export function SummaryCalendar({
         accessibilityElementsHidden={open}
         importantForAccessibility={open ? 'no-hide-descendants' : 'auto'}
       >
-        <Card>
-          <CalendarPeriodSelector
-            embedded
-            selection={{ kind: 'month', month: calendar.month }}
-            onMoveMonth={calendar.moveMonth}
-            onOpenCalendar={calendar.openCalendar}
-            onReturnToMonth={calendar.returnToMonth}
-            calendarButtonRef={trigger}
-          />
+        <Card style={styles.card}>
+          <View style={styles.navigation}>
+            <CalendarPeriodSelector
+              embedded
+              selection={{ kind: 'month', month: calendar.month }}
+              onMoveMonth={calendar.moveMonth}
+              onOpenCalendar={calendar.openCalendar}
+              onReturnToMonth={calendar.returnToMonth}
+              calendarButtonRef={trigger}
+            />
+          </View>
           <CalendarGrid {...gridProps} />
           {calendar.selection.kind === 'day' && (
             <ActionButton

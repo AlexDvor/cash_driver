@@ -156,7 +156,8 @@ export function HistoryScreen() {
       )}
       <ChoiceGroup
         label={t('platform')}
-        iconLayout="inline"
+        iconLayout="adaptive"
+        columns="filters"
         value={platform}
         onChange={setPlatform}
         options={[

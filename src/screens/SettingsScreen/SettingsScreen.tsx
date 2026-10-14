@@ -78,6 +78,7 @@ export function SettingsScreen() {
         </AppText>
         <ChoiceGroup
           label={t('language')}
+          headingVariant="body"
           options={languageOptions}
           value={language}
           onChange={value => {
@@ -88,6 +89,7 @@ export function SettingsScreen() {
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
         <ChoiceGroup
           label={t('theme')}
+          headingVariant="body"
           value={preferences.themeMode}
           onChange={value => {
             updatePreferences({ themeMode: value });

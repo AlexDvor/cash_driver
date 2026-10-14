@@ -11,6 +11,7 @@ export function ChoiceGroup<Value extends string>({
   appearance = 'chips',
   columns,
   iconLayout = 'stacked',
+  headingVariant = 'heading',
   disabled = false,
   label,
   options,
@@ -22,16 +23,24 @@ export function ChoiceGroup<Value extends string>({
   const [availableWidth, setAvailableWidth] = useState(0);
   // Reserve space for a brand icon and readable label; stack enlarged controls.
   const columnCount =
-    columns === 'adaptive'
+    columns === 'filters' &&
+    availableWidth >=
+      options.length * sizing.touchTarget * fontScale +
+        spacing.sm * (options.length - 1)
+      ? options.length
+      : columns === 'adaptive' || columns === 'filters'
       ? availableWidth >= 132 * fontScale * 2 + spacing.sm
         ? 2
         : 1
       : columns === 'equal'
       ? options.length
       : columns;
+  const inlineIcons =
+    iconLayout === 'inline' ||
+    (iconLayout === 'adaptive' && columnCount !== options.length);
   return (
     <View style={styles.group}>
-      <AppText variant="heading" accessibilityRole="header">
+      <AppText variant={headingVariant} accessibilityRole="header">
         {label}
       </AppText>
       <View
@@ -54,8 +63,9 @@ export function ChoiceGroup<Value extends string>({
               onPress={() => onChange(option.value)}
               style={({ pressed }) => [
                 styles.choice,
-                columns === 'equal' && styles.equalChoice,
-                iconLayout === 'inline' && styles.inline,
+                (columns === 'equal' || columns === 'filters') &&
+                  styles.equalChoice,
+                inlineIcons && styles.inline,
                 appearance === 'segmented' && styles.segment,
                 appearance === 'segmented' && {
                   // Wrap segments before enlarged labels become narrow columns.
@@ -95,7 +105,7 @@ export function ChoiceGroup<Value extends string>({
               <AppText
                 style={[
                   styles.label,
-                  iconLayout === 'inline' && styles.inlineLabel,
+                  inlineIcons && styles.inlineLabel,
                   selected && styles.selected,
                   {
                     color: selected

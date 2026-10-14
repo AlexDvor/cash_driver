@@ -16,6 +16,52 @@ const options = [
   { value: 'month', label: 'Mes' },
 ];
 
+test('platform filters use measured capacity and preserve selection when the row no longer fits', async () => {
+  let app: Renderer.ReactTestRenderer;
+  const onChange = jest.fn();
+  const values = ['all', 'uber', 'cabify', 'bolt', 'other'];
+  await act(async () => {
+    app = Renderer.create(
+      <ChoiceGroup
+        label="Plataforma"
+        columns="filters"
+        iconLayout="adaptive"
+        options={values.map(value => ({ value, label: value }))}
+        value="cabify"
+        onChange={onChange}
+      />,
+    );
+  });
+  const resize = async (width: number) => {
+    const container = app!.root
+      .findAllByType(View)
+      .find(node => node.props.onLayout);
+    await act(async () =>
+      container!.props.onLayout({ nativeEvent: { layout: { width } } }),
+    );
+  };
+  const buttons = () =>
+    app!.root.findAll(
+      node =>
+        node.props.accessibilityRole === 'radio' &&
+        typeof node.props.onPress === 'function',
+    );
+  await resize(800);
+  expect(
+    StyleSheet.flatten(buttons()[0].props.style({ pressed: false })).width,
+  ).toBeLessThan(160);
+  await resize(220);
+  expect(
+    StyleSheet.flatten(buttons()[0].props.style({ pressed: false })).width,
+  ).toBe(220);
+  expect(buttons().map(button => button.props.accessibilityLabel)).toEqual(
+    values,
+  );
+  expect(buttons()[2].props.accessibilityState.selected).toBe(true);
+  expect(onChange).not.toHaveBeenCalled();
+  await act(async () => app!.unmount());
+});
+
 test.each([1, 2, 3, 4])(
   '%i platform choices share one measured row without changing selection',
   async count => {

@@ -1,5 +1,12 @@
-import React, { useRef, type ComponentRef } from 'react';
-import { Keyboard, Pressable, TextInput, View } from 'react-native';
+import React, { useRef, useState, type ComponentRef } from 'react';
+import {
+  Keyboard,
+  Pressable,
+  TextInput,
+  useWindowDimensions,
+  View,
+} from 'react-native';
+import { spacing } from '../../constants/theme/tokens';
 import { CollapsibleTipContent } from '../CollapsibleTipContent/CollapsibleTipContent';
 import { PlatformIcon } from '../PlatformIcon/PlatformIcon';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
@@ -26,6 +33,23 @@ export function PaymentForm({
 }: PaymentFormProps) {
   const { t, locale } = useTranslation();
   const { colors } = useAppTheme();
+  const { fontScale } = useWindowDimensions();
+  const [quickWidth, setQuickWidth] = useState(0);
+  const quickCount = form.quickAmounts.length + (form.validFare ? 1 : 0);
+  const quickColumns =
+    quickCount > 0 &&
+    quickWidth >= quickCount * 78 * fontScale + spacing.sm * (quickCount - 1)
+      ? quickCount
+      : 2;
+  const quickStyle = {
+    width:
+      quickWidth > 0
+        ? Math.floor(
+            (quickWidth - spacing.sm * (quickColumns - 1)) / quickColumns,
+          )
+        : ('100%' as const),
+    flexGrow: 1,
+  };
   const disabled = form.saving;
   const tipInput = useRef<ComponentRef<typeof TextInput>>(null);
   const tipFocused = useRef(false);
@@ -66,7 +90,7 @@ export function PaymentForm({
       ? t('tipInput')
       : t('addTip');
   return (
-    <Card>
+    <Card style={styles.card}>
       {title && (
         <AppText variant="heading" accessibilityRole="header">
           {title}
@@ -112,45 +136,54 @@ export function PaymentForm({
         onFocus={() => form.focus('received')}
         onBlur={() => form.blur('received')}
       />
-      <View style={styles.quickRow}>
-        {form.quickAmounts.map(cents => (
-          <Pressable
-            key={cents}
-            accessibilityRole="button"
-            accessibilityLabel={formatMoney(cents, locale)}
-            disabled={disabled}
-            onPress={() => form.quick(cents)}
-            style={({ pressed }) => [
-              styles.quick,
-              {
-                borderColor: colors.border,
-                backgroundColor: colors.background,
-              },
-              pressed && styles.pressed,
-            ]}
-          >
-            <AppText>{formatMoney(cents, locale)}</AppText>
-          </Pressable>
-        ))}
-        {form.validFare && (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('exact')}
-            disabled={disabled}
-            onPress={() => form.quick()}
-            style={({ pressed }) => [
-              styles.quick,
-              {
-                borderColor: colors.border,
-                backgroundColor: colors.background,
-              },
-              pressed && styles.pressed,
-            ]}
-          >
-            <AppText>{t('exact')}</AppText>
-          </Pressable>
-        )}
-      </View>
+      {quickCount > 0 && (
+        <View
+          style={styles.quickRow}
+          onLayout={event => setQuickWidth(event.nativeEvent.layout.width)}
+        >
+          {form.quickAmounts.map(cents => (
+            <Pressable
+              key={cents}
+              accessibilityRole="button"
+              accessibilityLabel={formatMoney(cents, locale)}
+              disabled={disabled}
+              onPress={() => form.quick(cents)}
+              style={({ pressed }) => [
+                styles.quick,
+                quickStyle,
+                {
+                  borderColor: colors.border,
+                  backgroundColor: colors.background,
+                },
+                pressed && styles.pressed,
+              ]}
+            >
+              <AppText style={styles.actionLabel}>
+                {formatMoney(cents, locale)}
+              </AppText>
+            </Pressable>
+          ))}
+          {form.validFare && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('exact')}
+              disabled={disabled}
+              onPress={() => form.quick()}
+              style={({ pressed }) => [
+                styles.quick,
+                quickStyle,
+                {
+                  borderColor: colors.border,
+                  backgroundColor: colors.background,
+                },
+                pressed && styles.pressed,
+              ]}
+            >
+              <AppText style={styles.actionLabel}>{t('exact')}</AppText>
+            </Pressable>
+          )}
+        </View>
+      )}
       <View style={styles.tipBlock}>
         <Pressable
           testID="tip-section-toggle"

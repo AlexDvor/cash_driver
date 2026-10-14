@@ -9,7 +9,7 @@ export const styles = StyleSheet.create({
     maxWidth: sizing.contentMaxWidth,
     alignSelf: 'center',
   },
-  controls: { gap: spacing.lg },
+  controls: { gap: spacing.md },
   feedback: { gap: spacing.md },
   groupHeading: { paddingTop: spacing.lg, paddingBottom: spacing.sm },
   separator: { height: spacing.md },

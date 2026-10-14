@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
     borderWidth: sizing.borderWidth,
     overflow: 'hidden',
   },
-  content: { padding: spacing.xxl, gap: spacing.lg },
+  content: { padding: spacing.lg, gap: spacing.md },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -31,7 +31,12 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   weekdays: { flexDirection: 'row' },
-  legend: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  legend: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingHorizontal: spacing.sm,
+  },
   legendLabel: { flex: 1 },
   legendDot: {
     width: spacing.md,

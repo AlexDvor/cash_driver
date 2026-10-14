@@ -7,12 +7,13 @@ import {
 } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
+  card: { gap: spacing.sm },
   quickRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   quick: {
     minHeight: sizing.touchTarget,
     borderWidth: sizing.borderWidth,
     borderRadius: radii.chip,
-    paddingHorizontal: spacing.md,
+    paddingHorizontal: spacing.sm,
     paddingVertical: spacing.sm,
     justifyContent: 'center',
     flexShrink: 1,

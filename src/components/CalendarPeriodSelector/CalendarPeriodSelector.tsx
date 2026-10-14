@@ -25,7 +25,9 @@ export function CalendarPeriodSelector({
   const { colors } = useAppTheme();
   const { width, fontScale } = useWindowDimensions();
   const [panelWidth, setPanelWidth] = useState(0);
-  const stacked = (panelWidth || width - spacing.xl * 2) / fontScale < 300;
+  const stacked =
+    (panelWidth || width - spacing.xl * 2) / fontScale <
+    (selection.kind === 'month' ? 280 : 300);
   const dateLabel =
     selection.kind === 'day'
       ? calendarFullDateLabel(selection.date, locale)
