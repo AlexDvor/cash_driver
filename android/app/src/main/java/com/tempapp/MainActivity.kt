@@ -1,6 +1,7 @@
 package com.tempapp
 
 import android.os.Bundle
+import android.view.WindowManager
 import com.swmansion.rnscreens.fragment.restoration.RNScreensFragmentFactory
 
 import com.facebook.react.ReactActivity
@@ -13,6 +14,7 @@ class MainActivity : ReactActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     supportFragmentManager.fragmentFactory = RNScreensFragmentFactory()
     super.onCreate(savedInstanceState)
+    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
   }
 
   /**
