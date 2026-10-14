@@ -1,10 +1,19 @@
 import React from 'react';
-import { View } from 'react-native';
 import { TabParamList } from '../../navigation/navigationTypes';
 import { routes } from '../../navigation/routes';
-import { styles } from './TabIcon.styles';
+import { sizing } from '../../constants/theme/tokens';
+import HomeIcon from '../../assets/navigation/home.svg';
+import HistoryIcon from '../../assets/navigation/history.svg';
+import SummaryIcon from '../../assets/navigation/summary.svg';
+import SettingsIcon from '../../assets/navigation/settings.svg';
 
-// Small outline symbols built from native Views; no additional icon dependency.
+const icons = {
+  [routes.Home]: HomeIcon,
+  [routes.History]: HistoryIcon,
+  [routes.Summary]: SummaryIcon,
+  [routes.Settings]: SettingsIcon,
+};
+
 export function TabIcon({
   name,
   color,
@@ -12,43 +21,14 @@ export function TabIcon({
   name: keyof TabParamList;
   color: string;
 }) {
-  const outline = { borderColor: color };
+  const Icon = icons[name];
   return (
-    <View
-      style={styles.frame}
+    <Icon
+      width={sizing.icon}
+      height={sizing.icon}
+      color={color}
       accessible={false}
       importantForAccessibility="no-hide-descendants"
-    >
-      {name === routes.Home && (
-        <>
-          <View style={[styles.roof, outline]} />
-          <View style={[styles.house, outline]} />
-        </>
-      )}
-      {name === routes.History && (
-        <>
-          <View style={[styles.circle, outline]} />
-          <View style={[styles.clockHand, { backgroundColor: color }]} />
-          <View style={[styles.minuteHand, { backgroundColor: color }]} />
-        </>
-      )}
-      {name === routes.Summary && (
-        <View style={styles.bars}>
-          <View style={[styles.bar, styles.shortBar, outline]} />
-          <View style={[styles.bar, styles.tallBar, outline]} />
-          <View style={[styles.bar, styles.mediumBar, outline]} />
-        </View>
-      )}
-      {name === routes.Settings && (
-        <>
-          <View style={[styles.circle, outline]} />
-          <View style={[styles.innerCircle, outline]} />
-          <View style={[styles.topNotch, { backgroundColor: color }]} />
-          <View style={[styles.bottomNotch, { backgroundColor: color }]} />
-          <View style={[styles.leftNotch, { backgroundColor: color }]} />
-          <View style={[styles.rightNotch, { backgroundColor: color }]} />
-        </>
-      )}
-    </View>
+    />
   );
 }
