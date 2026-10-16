@@ -7,7 +7,9 @@ import {
 } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
-  card: { gap: spacing.sm },
+  card: { gap: spacing.md },
+  stackedActions: { flexDirection: 'column' },
+  fullWidthAction: { flexBasis: 'auto', width: '100%' },
   quickRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   quick: {
     minHeight: sizing.touchTarget,

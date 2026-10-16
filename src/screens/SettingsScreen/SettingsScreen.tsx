@@ -58,7 +58,7 @@ export function SettingsScreen() {
         />
       )}
       {errorKey && (
-        <Card>
+        <Card style={styles.section}>
           <AppText
             accessibilityRole="alert"
             style={{ color: colors.errorText }}
@@ -72,7 +72,7 @@ export function SettingsScreen() {
           />
         </Card>
       )}
-      <Card>
+      <Card style={styles.section}>
         <AppText variant="heading" accessibilityRole="header">
           {t('appearanceSection')}
         </AppText>
@@ -105,7 +105,7 @@ export function SettingsScreen() {
           {t('systemHelp')}
         </AppText>
       </Card>
-      <Card>
+      <Card style={styles.section}>
         <AppText variant="heading" accessibilityRole="header">
           {t('workSection')}
         </AppText>
@@ -170,7 +170,7 @@ export function SettingsScreen() {
           {t('hapticsHelp')}
         </AppText>
       </Card>
-      <Card>
+      <Card style={styles.section}>
         <AppText variant="heading" accessibilityRole="header">
           {t('appDataSection')}
         </AppText>

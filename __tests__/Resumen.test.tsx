@@ -503,9 +503,10 @@ test('period loading preserves long hero sizing without presenting previous-peri
   const money = hero
     .findAllByType(SkeletonText)
     .find(node => node.props.sizingText === amount)!;
-  expect(money.props.numberOfLines).toBe(1);
-  expect(money.props.adjustsFontSizeToFit).toBe(true);
-  expect(money.props.minimumFontScale).toBe(0.25);
+  expect(money.props.adjustsFontSizeToFit).toBeUndefined();
+  let scroll = money.parent;
+  while (scroll && !scroll.props.horizontal) scroll = scroll.parent;
+  expect(scroll?.props.horizontal).toBe(true);
   expect(money).toBe(originalMoney);
   expect(money.findAllByType(AppText).slice(-1)[0]).toBe(nativeMoney);
   await act(async () => resolve(summarizeTransactions([])));

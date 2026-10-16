@@ -10,6 +10,7 @@ export function MoneyInput({
   inputRef,
   groupRef,
   label,
+  hideLabel = false,
   value,
   error,
   disabled,
@@ -24,7 +25,7 @@ export function MoneyInput({
       collapsable={groupRef ? false : undefined}
       style={styles.group}
     >
-      <AppText>{label}</AppText>
+      {!hideLabel && <AppText>{label}</AppText>}
       <TextInput
         ref={inputRef}
         accessibilityLabel={label}

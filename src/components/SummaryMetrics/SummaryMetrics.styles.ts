@@ -3,7 +3,10 @@ import { radii, spacing, typography } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   hidden: { opacity: 0 },
-  heroCard: { overflow: 'hidden' },
+  heroCard: { overflow: 'hidden', gap: spacing.md },
+  heroStack: { flexDirection: 'column', alignItems: 'stretch' },
+  heroFooter: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  heroCount: { flex: 1 },
   heroBackdrop: {
     position: 'absolute',
     top: 0,
@@ -33,9 +36,9 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.lg,
   },
-  heroText: { flex: 1, gap: spacing.lg },
+  heroText: { flex: 1, gap: spacing.md },
   heroIllustration: {
-    alignSelf: 'stretch',
+    alignSelf: 'flex-end',
     alignItems: 'center',
     justifyContent: 'center',
   },

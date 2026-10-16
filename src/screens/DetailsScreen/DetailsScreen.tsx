@@ -99,7 +99,7 @@ export function DetailsScreen({
             </View>
           </Card>
           <ActionButton
-            variant="secondary"
+            variant="primary"
             label={t('editAction')}
             disabled={blocked}
             onPress={() => navigation.navigate(routes.Edit, { id: record.id })}

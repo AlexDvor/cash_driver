@@ -296,3 +296,37 @@ test('segmented choices preserve disabled controls and accessibility semantics',
   }
   await act(async () => app!.unmount());
 });
+
+test('long platform words reflow into wider choices without losing selection', async () => {
+  let app: Renderer.ReactTestRenderer;
+  await act(async () => {
+    app = Renderer.create(
+      <ChoiceGroup
+        label="Platform"
+        columns="filters"
+        iconLayout="adaptive"
+        options={['All platforms', 'Uber', 'Cabify', 'Bolt', 'Other'].map(
+          label => ({ value: label, label }),
+        )}
+        value="Cabify"
+        onChange={jest.fn()}
+      />,
+    );
+  });
+  const container = app!.root
+    .findAllByType(View)
+    .find(node => node.props.onLayout)!;
+  await act(async () =>
+    container.props.onLayout({ nativeEvent: { layout: { width: 360 } } }),
+  );
+  const buttons = app!.root.findAll(
+    node =>
+      node.props.accessibilityRole === 'radio' &&
+      typeof node.props.onPress === 'function',
+  );
+  expect(
+    StyleSheet.flatten(buttons[0].props.style({ pressed: false })).width,
+  ).toBeGreaterThanOrEqual(176);
+  expect(buttons[2].props.accessibilityState.selected).toBe(true);
+  await act(async () => app!.unmount());
+});

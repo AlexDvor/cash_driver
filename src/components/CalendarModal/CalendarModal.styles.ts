@@ -73,6 +73,7 @@ export const styles = StyleSheet.create({
     padding: spacing.xs / 2,
     borderWidth: 2,
   },
+  activityDot: { width: 4, height: 4, borderRadius: 2 },
   circle: {
     minWidth: sizing.touchTarget - spacing.sm,
     minHeight: sizing.touchTarget - spacing.sm,

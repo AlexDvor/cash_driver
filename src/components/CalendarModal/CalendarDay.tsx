@@ -38,12 +38,15 @@ export function CalendarDay({ date }: { date?: DateData }) {
     .filter(Boolean)
     .join(', ');
   const selectionStyle = {
-    borderColor: selected ? colors.primary : 'transparent',
+    borderColor: today ? colors.primary : 'transparent',
   };
   const activityStyle = {
-    backgroundColor: occupied ? colors.primary : 'transparent',
-    borderColor: today
-      ? occupied
+    backgroundColor: selected ? colors.primary : 'transparent',
+    borderColor: 'transparent',
+  };
+  const dotStyle = {
+    backgroundColor: occupied
+      ? selected
         ? colors.onPrimary
         : colors.primary
       : 'transparent',
@@ -58,9 +61,13 @@ export function CalendarDay({ date }: { date?: DateData }) {
     >
       <View style={[styles.ring, selectionStyle]}>
         <View style={[styles.circle, activityStyle]}>
-          <AppText style={{ color: occupied ? colors.onPrimary : colors.text }}>
+          <AppText style={{ color: selected ? colors.onPrimary : colors.text }}>
             {date.day}
           </AppText>
+          <View
+            testID={`calendar-activity-${date.dateString}`}
+            style={[styles.activityDot, dotStyle]}
+          />
         </View>
       </View>
     </Pressable>

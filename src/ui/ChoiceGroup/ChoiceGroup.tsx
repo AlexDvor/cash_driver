@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
-import { sizing, spacing } from '../../constants/theme/tokens';
+import { sizing, spacing, typography } from '../../constants/theme/tokens';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 
 import { AppText } from '../AppText/AppText';
@@ -21,11 +21,22 @@ export function ChoiceGroup<Value extends string>({
   const { colors } = useAppTheme();
   const { fontScale } = useWindowDimensions();
   const [availableWidth, setAvailableWidth] = useState(0);
+  // Keep the longest word readable instead of breaking platform names into letters.
+  const longestWord = Math.max(
+    0,
+    ...options.flatMap(option =>
+      option.label.split(/\s+/).map(word => word.length),
+    ),
+  );
+  const minimumFilterWidth = Math.max(
+    sizing.touchTarget,
+    longestWord * typography.body * 0.6 + spacing.sm,
+  );
   // Reserve space for a brand icon and readable label; stack enlarged controls.
   const columnCount =
     columns === 'filters' &&
     availableWidth >=
-      options.length * sizing.touchTarget * fontScale +
+      options.length * minimumFilterWidth * fontScale +
         spacing.sm * (options.length - 1)
       ? options.length
       : columns === 'adaptive' || columns === 'filters'
@@ -90,11 +101,7 @@ export function ChoiceGroup<Value extends string>({
                   flexShrink: 0,
                 },
                 {
-                  backgroundColor: selected
-                    ? appearance === 'segmented'
-                      ? colors.primary
-                      : colors.softGreen
-                    : colors.card,
+                  backgroundColor: selected ? colors.softGreen : colors.card,
                   borderColor:
                     selected || pressed ? colors.primary : colors.border,
                 },
@@ -108,11 +115,7 @@ export function ChoiceGroup<Value extends string>({
                   inlineIcons && styles.inlineLabel,
                   selected && styles.selected,
                   {
-                    color: selected
-                      ? appearance === 'segmented'
-                        ? colors.onPrimary
-                        : colors.primary
-                      : colors.text,
+                    color: selected ? colors.primary : colors.text,
                   },
                 ]}
               >

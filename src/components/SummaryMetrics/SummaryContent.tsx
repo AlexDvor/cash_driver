@@ -19,9 +19,11 @@ import {
 export function SummaryContent({
   summary,
   showEmpty = false,
+  periodLabel,
 }: {
   summary: CashSummary | null;
   showEmpty?: boolean;
+  periodLabel?: string;
 }) {
   const { t, locale } = useTranslation();
   const loading = summary === null;
@@ -43,6 +45,7 @@ export function SummaryContent({
       style={{ gap: spacing.lg }}
     >
       <RetainedCashCard
+        periodLabel={periodLabel}
         loading={loading}
         label={t('retainedCash')}
         amount={geometry ? formatMoney(geometry.netCashTotalCents, locale) : ''}

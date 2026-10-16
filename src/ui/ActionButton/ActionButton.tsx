@@ -14,29 +14,31 @@ export function ActionButton({
   variant = 'primary',
 }: ActionButtonProps) {
   const { colors } = useAppTheme();
-  const backgroundColor =
-    variant === 'destructive'
-      ? colors.errorSurface
-      : variant === 'secondary'
-      ? colors.softGreen
-      : colors.primary;
-  const textColor =
-    variant === 'destructive'
-      ? colors.errorText
-      : variant === 'secondary'
-      ? colors.primary
-      : colors.onPrimary;
+  const blocked = disabled || loading;
+  const backgroundColor = blocked
+    ? colors.disabledSurface
+    : variant === 'destructive'
+    ? 'transparent'
+    : variant === 'secondary'
+    ? colors.softGreen
+    : colors.primary;
+  const textColor = blocked
+    ? colors.disabledText
+    : variant === 'destructive'
+    ? colors.errorText
+    : variant === 'secondary'
+    ? colors.primary
+    : colors.onPrimary;
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
-      accessibilityState={{ disabled, busy: loading }}
-      disabled={disabled}
+      accessibilityState={{ disabled: blocked, busy: loading }}
+      disabled={blocked}
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
         { backgroundColor, borderColor: pressed ? textColor : 'transparent' },
-        disabled && styles.dimmed,
       ]}
     >
       {loading && <ActivityIndicator color={textColor} />}

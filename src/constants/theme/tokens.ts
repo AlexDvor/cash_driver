@@ -27,6 +27,8 @@ export const sizing = {
   contentMaxWidth: 640,
 };
 export interface Palette {
+  disabledSurface: string;
+  disabledText: string;
   brandSurface: string;
   background: string;
   card: string;
@@ -42,6 +44,8 @@ export interface Palette {
 }
 export const palettes: Record<'light' | 'dark', Palette> = {
   light: {
+    disabledSurface: '#E5E7EB',
+    disabledText: '#626975',
     brandSurface: '#FFFFFF',
     background: '#F5F7F6',
     card: '#FFFFFF',
@@ -56,6 +60,8 @@ export const palettes: Record<'light' | 'dark', Palette> = {
     errorSurface: '#FEF2F2',
   },
   dark: {
+    disabledSurface: '#303C35',
+    disabledText: '#B0BEB6',
     // Original brand colors need a neutral backing in either appearance.
     brandSurface: '#FFFFFF',
     background: '#101714',
@@ -68,6 +74,6 @@ export const palettes: Record<'light' | 'dark', Palette> = {
     secondaryText: '#B0BEB6',
     border: '#405349',
     errorText: '#FFB4B4',
-    errorSurface: '#402626',
+    errorSurface: '#921252',
   },
 };

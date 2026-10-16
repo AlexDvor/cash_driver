@@ -35,6 +35,12 @@ export function SummaryScreen() {
         : calendar.month,
     );
   const summary = state.summary ?? retainedSummary;
+  const periodLabel =
+    period === 'month' &&
+    calendar.selection.kind === 'day' &&
+    bounds.start.getTime() === bounds.end.getTime()
+      ? calendarFullDateLabel(calendar.selection.date, locale)
+      : formatPeriodRange(bounds, locale, clock.timeZone);
   return (
     <ScreenContainer>
       <AppText variant="title" accessibilityRole="header">
@@ -62,11 +68,7 @@ export function SummaryScreen() {
         />
       )}
       <AppText testID="summary-range" secondary>
-        {period === 'month' &&
-        calendar.selection.kind === 'day' &&
-        bounds.start.getTime() === bounds.end.getTime()
-          ? calendarFullDateLabel(calendar.selection.date, locale)
-          : formatPeriodRange(bounds, locale, clock.timeZone)}
+        {periodLabel}
       </AppText>
       {state.status === 'error' && !summary ? (
         <Card>
@@ -80,6 +82,7 @@ export function SummaryScreen() {
         </Card>
       ) : (
         <SummaryContent
+          periodLabel={periodLabel}
           summary={summary}
           showEmpty={state.status === 'ready' && summary?.operationCount === 0}
         />

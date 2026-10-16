@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal } from 'react-native';
+import { Modal, StyleSheet, View } from 'react-native';
 import Renderer, { act } from 'react-test-renderer';
 import { CalendarModal } from '../src/components/CalendarModal/CalendarModal';
 import { CalendarPeriodSelector } from '../src/components/CalendarPeriodSelector/CalendarPeriodSelector';
@@ -267,3 +267,31 @@ test('native modal onShow requests initial heading focus only after the dialog i
     jest.useRealTimers();
   }
 });
+
+test.each([false, true])(
+  'selected occupied today keeps independent visual markers (dark=%s)',
+  async dark => {
+    mockDark = dark;
+    props.todayDateKey = '2026-10-10';
+    await mount();
+    const selected = buttons().find(
+      node => node.props.accessibilityState?.selected,
+    )!;
+    const colors = dark ? mockPalettes.dark : mockPalettes.light;
+    const surfaces = selected
+      .findAllByType(View)
+      .map(node => StyleSheet.flatten(node.props.style));
+    expect(surfaces.some(style => style?.borderColor === colors.primary)).toBe(
+      true,
+    );
+    expect(
+      surfaces.some(style => style?.backgroundColor === colors.primary),
+    ).toBe(true);
+    const dot = selected.findAll(
+      node => node.props.testID === 'calendar-activity-2026-10-10',
+    )[0];
+    expect(StyleSheet.flatten(dot.props.style).backgroundColor).toBe(
+      colors.onPrimary,
+    );
+  },
+);

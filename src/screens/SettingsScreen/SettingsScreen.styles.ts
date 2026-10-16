@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native';
 import { sizing, spacing } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
+  section: { gap: spacing.sm },
   row: {
     flexDirection: 'row',
     flexWrap: 'wrap',

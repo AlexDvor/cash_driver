@@ -5,6 +5,7 @@ export interface MoneyInputProps {
   inputRef?: Ref<ComponentRef<typeof TextInput>>;
   groupRef?: Ref<ComponentRef<typeof View>>;
   label: string;
+  hideLabel?: boolean;
   value: string;
   error?: string;
   disabled: boolean;

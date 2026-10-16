@@ -18,6 +18,7 @@ export function RetainedCashCard({
   label,
   amount,
   countLabel,
+  periodLabel,
   loading = false,
 }: RetainedCashCardProps) {
   const { colors } = useAppTheme();
@@ -35,10 +36,12 @@ export function RetainedCashCard({
         spacing.lg * 2 -
         sizing.borderWidth * 2,
     );
-  const coinSize = Math.min(144, availableWidth * 0.4);
+  const coinSize = 80;
   const textWidth = availableWidth - coinSize - spacing.lg;
-  // Query values must not change the card's composition. Long money fits its slot.
-  const sideBySide = textWidth >= sizing.touchTarget * 3 * fontScale;
+  // Reserve full-size money text before placing the artwork beside it.
+  const sideBySide =
+    textWidth >=
+    Math.max(sizing.touchTarget * 3, amount.length * 34) * fontScale;
   const textColor = { color: colors.onPrimary };
   const money = (
     <SkeletonText
@@ -46,9 +49,6 @@ export function RetainedCashCard({
       testID="summary-retained"
       style={[styles.money, textColor]}
       sizingText={amount}
-      numberOfLines={1}
-      adjustsFontSizeToFit
-      minimumFontScale={0.25}
     />
   );
   const count = (
@@ -77,21 +77,34 @@ export function RetainedCashCard({
         style={styles.heroBackdrop}
       />
       <View
-        style={styles.heroRow}
+        style={[styles.heroRow, !sideBySide && styles.heroStack]}
         onLayout={event => setContentWidth(event.nativeEvent.layout.width)}
       >
         <View style={styles.heroText}>
           <AppText variant="heading" style={textColor}>
             {label}
           </AppText>
-          {sideBySide && money}
+          {periodLabel && (
+            <AppText variant="supporting" style={textColor}>
+              {periodLabel}
+            </AppText>
+          )}
+          <ScrollView horizontal>{money}</ScrollView>
         </View>
-        <View style={[styles.heroIllustration, { width: coinSize }]}>
+        {sideBySide && (
+          <View style={[styles.heroIllustration, { width: coinSize }]}>
+            <SummaryIcon name="coins" size={coinSize} />
+          </View>
+        )}
+      </View>
+      {sideBySide ? (
+        count
+      ) : (
+        <View style={styles.heroFooter}>
+          <View style={styles.heroCount}>{count}</View>
           <SummaryIcon name="coins" size={coinSize} />
         </View>
-      </View>
-      {!sideBySide && money}
-      {count}
+      )}
     </Card>
   );
 }
@@ -141,7 +154,7 @@ export function SummaryStatCards({
             <View
               style={[styles.iconBadge, { backgroundColor: colors.softGreen }]}
             >
-              <SummaryIcon name={metric.icon} />
+              <SummaryIcon name={metric.icon} size={32} />
             </View>
             <View style={styles.statText}>
               <AppText variant="supporting" secondary>

@@ -13,5 +13,4 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: { fontWeight: '600', textAlign: 'center', flexShrink: 1 },
-  dimmed: { opacity: 0.7 },
 });

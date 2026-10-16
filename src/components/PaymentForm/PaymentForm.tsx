@@ -6,6 +6,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { useKeyboardVisible } from '../../hooks/app/useKeyboardVisible';
 import { spacing } from '../../constants/theme/tokens';
 import { CollapsibleTipContent } from '../CollapsibleTipContent/CollapsibleTipContent';
 import { PlatformIcon } from '../PlatformIcon/PlatformIcon';
@@ -34,7 +35,9 @@ export function PaymentForm({
 }: PaymentFormProps) {
   const { t, locale } = useTranslation();
   const { colors } = useAppTheme();
-  const { fontScale } = useWindowDimensions();
+  const { width, fontScale } = useWindowDimensions();
+  const keyboardVisible = useKeyboardVisible();
+  const stackedTipActions = width / fontScale < 400;
   const [quickWidth, setQuickWidth] = useState(0);
   const quickCount = form.quickAmounts.length + (form.validFare ? 1 : 0);
   const quickColumns =
@@ -226,7 +229,9 @@ export function PaymentForm({
           testID="tip-section-toggle"
           accessibilityRole="button"
           accessibilityLabel={tipHeader}
-          accessibilityHint={t(form.tipExpanded ? 'collapseTip' : 'expandTip')}
+          accessibilityHint={`${t(
+            form.tipExpanded ? 'collapseTip' : 'expandTip',
+          )}. ${t('optionalTip')}`}
           accessibilityState={{ expanded: form.tipExpanded, disabled }}
           disabled={disabled}
           onPress={() => {
@@ -244,7 +249,11 @@ export function PaymentForm({
             (pressed || disabled) && styles.pressed,
           ]}
         >
-          <AppText style={styles.tipLabel}>{tipHeader}</AppText>
+          <AppText style={styles.tipLabel}>
+            {form.tipExpanded
+              ? `${tipHeader} (${t('optionalTip')})`
+              : tipHeader}
+          </AppText>
           <View
             accessible={false}
             importantForAccessibility="no-hide-descendants"
@@ -261,12 +270,10 @@ export function PaymentForm({
           expanded={form.tipExpanded}
           resetCount={form.tipResetCount}
         >
-          <AppText variant="supporting" secondary>
-            {t('optionalTip')}
-          </AppText>
           <MoneyInput
             inputRef={tipInput}
             label={t('tipInput')}
+            hideLabel
             value={form.tip}
             error={tipError}
             disabled={disabled || !form.tipExpanded}
@@ -281,7 +288,12 @@ export function PaymentForm({
               form.blur('tip');
             }}
           />
-          <View style={styles.quickRow}>
+          <View
+            style={[
+              styles.quickRow,
+              stackedTipActions && styles.stackedActions,
+            ]}
+          >
             {[
               {
                 label: t('removeTip'),
@@ -314,6 +326,7 @@ export function PaymentForm({
                 style={({ pressed }) => [
                   styles.quick,
                   styles.tipAction,
+                  stackedTipActions && styles.fullWidthAction,
                   {
                     borderColor: colors.border,
                     backgroundColor: colors.background,
@@ -369,19 +382,21 @@ export function PaymentForm({
           </AppText>
         )}
       </View>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('dismissKeyboard')}
-        onPress={() => {
-          entryNavigation?.cancel();
-          Keyboard.dismiss();
-        }}
-        style={styles.dismiss}
-      >
-        <AppText variant="supporting" style={{ color: colors.primary }}>
-          {t('dismissKeyboard')}
-        </AppText>
-      </Pressable>
+      {keyboardVisible && (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('dismissKeyboard')}
+          onPress={() => {
+            entryNavigation?.cancel();
+            Keyboard.dismiss();
+          }}
+          style={styles.dismiss}
+        >
+          <AppText variant="supporting" style={{ color: colors.primary }}>
+            {t('dismissKeyboard')}
+          </AppText>
+        </Pressable>
+      )}
       {form.failed && (
         <AppText accessibilityRole="alert" style={{ color: colors.errorText }}>
           {t(mode === 'edit' ? 'editFailed' : 'paymentFailed')}
