@@ -9,8 +9,8 @@
     "android:rebuild": "npm run android:clean && npm run android",
     "ios": "react-native run-ios",
     "lint": "eslint .",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"__tests__/**/*.{ts,tsx}\" \"*.{js,ts,tsx,json}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx}\" \"__tests__/**/*.{ts,tsx}\" \"*.{js,ts,tsx,json}\"",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js}\" \"*.{js,ts,tsx,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js}\" \"*.{js,ts,tsx,json}\"",
     "start": "react-native start",
     "start:reset": "react-native start --reset-cache",
     "test": "jest"

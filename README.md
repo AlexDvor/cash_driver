@@ -106,5 +106,15 @@ npm test -- --runInBand --watch=false
 | `src/hooks/`, `src/providers/`, `src/navigation/` | Form/data hooks, application state providers, and navigation |
 | `src/features/`, `src/database/` | Domain calculations, services, repositories, and SQLite setup/migrations |
 | `src/i18n/`, `src/constants/`, `src/theme/` | Translations, shared constants, and theme helpers |
-| `__tests__/` | Automated tests |
+| `src/**/*.test.ts`, `src/**/*.test.tsx` | Tests beside their components, screens, hooks, providers, and domain modules; cross-cutting integration tests live in `src/test/` |
+| `src/test/` | Shared Jest setup, SVG mock, real SQLite test adapter, and calendar fixtures/checks |
+| `src/test/native/` | Eight isolated native acceptance entrypoints; never imported by the production entry |
 | `android/`, `ios/` | Native projects |
+
+## Test organization and native acceptance entries
+
+Jest discovers only `*.test.ts` and `*.test.tsx` under `src/` (including `src/test/`). Shared helpers and native entries are not Jest suites. Tests keep relative imports; no module aliases are required.
+
+The former root `__tests__/` directory has been removed. Historical validation records retain their original paths and results. For current runs, native entry names are unchanged but their directory is now `src/test/native/`. Shared `sqliteTestDatabase.ts`, `calendarVolumeFixture.ts`, and `calendarNativeChecks.ts` live in `src/test/`.
+
+For an existing isolated native acceptance workflow, use the new entry path, for example `ENTRY_FILE=src/test/native/nativeAjustesEntry.tsx`. If using temporary Metro middleware, map `index.bundle` to `src/test/native/nativePersistenceEntry.bundle` instead of its former `__tests__` path. Keep the workflow's separate package/database, temporary configuration, and cleanup rules; never replace the production `index.js` or reset the user's database. Moving these entries does not establish new native acceptance results.
