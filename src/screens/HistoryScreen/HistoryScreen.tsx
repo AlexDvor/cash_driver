@@ -32,6 +32,7 @@ import {
 import { spacing } from '../../constants/theme/tokens';
 import { TransactionLoadState } from '../../components/TransactionLoadState/TransactionLoadState';
 import { styles } from './HistoryScreen.styles';
+import { HistorySkeleton } from '../../components/HistorySkeleton/HistorySkeleton';
 
 function HistorySeparator() {
   return <View style={styles.separator} />;
@@ -72,6 +73,9 @@ export function HistoryScreen() {
     [bounds, platform],
   );
   const { state, refresh, loadMore } = usePagedTransactions(filter);
+  const readyContentHeight = useRef(0);
+  const currentStatus = useRef(state.status);
+  currentStatus.current = state.status;
   const existence = useHasTransactions();
   const groups = useMemo(
     () =>
@@ -169,22 +173,8 @@ export function HistoryScreen() {
           })),
         ]}
       />
-      {state.status !== 'ready' && (
+      {state.status === 'error' && (
         <TransactionLoadState status={state.status} retry={refresh} />
-      )}
-      {state.refreshing && (
-        <View style={styles.feedback}>
-          <ActivityIndicator color={colors.primary} />
-          <AppText accessibilityLiveRegion="polite">
-            {t('dataRefreshing')}
-          </AppText>
-        </View>
-      )}
-      {state.refreshError && (
-        <View style={styles.feedback}>
-          <AppText accessibilityRole="alert">{t('dataRefreshFailed')}</AppText>
-          <ActionButton label={t('retry')} onPress={refresh} />
-        </View>
       )}
       {empty && existence.state.status === 'loading' && (
         <ActivityIndicator
@@ -235,8 +225,15 @@ export function HistoryScreen() {
         stickySectionHeadersEnabled={false}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
+        onContentSizeChange={(_width, height) => {
+          if (currentStatus.current === 'ready')
+            readyContentHeight.current = height;
+        }}
         contentContainerStyle={[
           styles.content,
+          state.status === 'loading' && {
+            minHeight: readyContentHeight.current,
+          },
           {
             paddingTop: spacing.xl,
             paddingBottom: spacing.xl,
@@ -303,32 +300,52 @@ export function HistoryScreen() {
             </Pressable>
           );
         }}
+        ListEmptyComponent={
+          state.status === 'loading' ? <HistorySkeleton /> : undefined
+        }
         ListFooterComponent={
-          state.status === 'ready' &&
-          !state.refreshing &&
-          !state.refreshError ? (
+          state.status === 'ready' ? (
             <View style={styles.footer}>
-              {state.loadingMore ? (
+              {state.refreshing && (
                 <View style={styles.feedback}>
                   <ActivityIndicator color={colors.primary} />
                   <AppText accessibilityLiveRegion="polite">
-                    {t('historyLoadingMore')}
+                    {t('dataRefreshing')}
                   </AppText>
                 </View>
-              ) : state.loadMoreError ? (
+              )}
+              {state.refreshError && (
                 <View style={styles.feedback}>
                   <AppText accessibilityRole="alert">
-                    {t('historyLoadMoreFailed')}
+                    {t('dataRefreshFailed')}
                   </AppText>
-                  <ActionButton label={t('retry')} onPress={loadMore} />
+                  <ActionButton label={t('retry')} onPress={refresh} />
                 </View>
-              ) : state.hasMore ? (
-                <ActionButton
-                  label={t('historyLoadMore')}
-                  variant="secondary"
-                  onPress={loadMore}
-                />
-              ) : null}
+              )}
+
+              {!state.refreshing &&
+                !state.refreshError &&
+                (state.loadingMore ? (
+                  <View style={styles.feedback}>
+                    <ActivityIndicator color={colors.primary} />
+                    <AppText accessibilityLiveRegion="polite">
+                      {t('historyLoadingMore')}
+                    </AppText>
+                  </View>
+                ) : state.loadMoreError ? (
+                  <View style={styles.feedback}>
+                    <AppText accessibilityRole="alert">
+                      {t('historyLoadMoreFailed')}
+                    </AppText>
+                    <ActionButton label={t('retry')} onPress={loadMore} />
+                  </View>
+                ) : state.hasMore ? (
+                  <ActionButton
+                    label={t('historyLoadMore')}
+                    variant="secondary"
+                    onPress={loadMore}
+                  />
+                ) : null)}
             </View>
           ) : undefined
         }

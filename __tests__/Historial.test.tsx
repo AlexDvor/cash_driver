@@ -1,5 +1,6 @@
 import React from 'react';
-import { Alert, AppState, TextInput } from 'react-native';
+import { HistorySkeleton } from '../src/components/HistorySkeleton/HistorySkeleton';
+import { Alert, AppState, TextInput, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createNavigationContainerRef } from '@react-navigation/native';
 import ReactTestRenderer, { act } from 'react-test-renderer';
@@ -123,6 +124,38 @@ function content() {
     React.isValidElement(value) ? undefined : value,
   );
 }
+
+test('period loading preserves the measured list extent without exposing old rows', async () => {
+  const row = await seed();
+  await mount();
+  await press('Historial');
+  const list = () =>
+    app.root
+      .findAllByProps({ testID: 'history-list' })
+      .find(node => node.props.onContentSizeChange)!;
+  await act(async () => list().props.onContentSizeChange(360, 1800));
+  let resolve!: (page: HistoryPage) => void;
+  jest.spyOn(services.transactions, 'listPage').mockImplementationOnce(
+    () =>
+      new Promise(done => {
+        resolve = done;
+      }),
+  );
+  await press('Semana');
+  expect(rowIds()).toEqual([]);
+  expect(StyleSheet.flatten(list().props.contentContainerStyle).minHeight).toBe(
+    1800,
+  );
+  await act(async () => list().props.onContentSizeChange(360, 400));
+  expect(StyleSheet.flatten(list().props.contentContainerStyle).minHeight).toBe(
+    1800,
+  );
+  await act(async () => resolve({ records: [row], nextCursor: null }));
+  expect(
+    StyleSheet.flatten(list().props.contentContainerStyle).minHeight,
+  ).toBeUndefined();
+  expect(rowIds()).toEqual([`history-${row.id}`]);
+});
 async function details(id: string) {
   await act(async () => ref.navigate('Details', { id }));
 }
@@ -177,6 +210,7 @@ test('loading has no fabricated rows and a stale pre-edit response cannot overwr
     .mockImplementationOnce(() => oldRead);
   await press('Historial');
   expect(content()).toContain('Cargando operaciones');
+  expect(app.root.findAllByType(HistorySkeleton)).toHaveLength(1);
   expect(rowIds()).toEqual([]);
   await act(async () => {
     await services.transactions.edit(original.id, {
@@ -186,6 +220,7 @@ test('loading has no fabricated rows and a stale pre-edit response cannot overwr
     });
   });
   expect(rowIds()).toEqual([`history-${original.id}`]);
+  expect(app.root.findAllByType(HistorySkeleton)).toHaveLength(0);
   await act(async () => {
     release({ records: [original], nextCursor: null });
     await oldRead;

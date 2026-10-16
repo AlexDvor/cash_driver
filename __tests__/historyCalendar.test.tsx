@@ -13,7 +13,7 @@ import { SqlConnection } from '../src/database/sqlite';
 import { HistoryScreen } from '../src/screens/HistoryScreen/HistoryScreen';
 import { CalendarDay } from '../src/components/CalendarModal/CalendarDay';
 import { CalendarNavigation } from '../src/components/CalendarNavigation/CalendarNavigation';
-import { SummaryCalendar } from '../src/components/SummaryCalendar/SummaryCalendar';
+import { SummaryScreen } from '../src/screens/SummaryScreen/SummaryScreen';
 import {
   openTestDatabase,
   testPersistence,
@@ -146,7 +146,8 @@ test('past-year month/day queries preserve platform, all-platform markers and in
   await press('Mes');
   expect(
     app.root
-      .findAllByType(SummaryCalendar)
+      .findByType(SummaryScreen)
+      .findAllByType(CalendarNavigation)
       .some(node => node.props.calendar.month.year === 2026),
   ).toBe(true);
   await press('Historial');

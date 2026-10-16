@@ -20,6 +20,7 @@ export const styles = StyleSheet.create({
   },
   iconSlot: { width: sizing.icon, height: sizing.icon, flexShrink: 0 },
   labelRow: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     flexShrink: 1,
@@ -27,7 +28,8 @@ export const styles = StyleSheet.create({
   },
   label: { flexShrink: 1 },
   value: {
-    flexShrink: 1,
+    width: '40%',
+    flexShrink: 0,
     fontWeight: '600',
     fontVariant: ['tabular-nums'],
     marginLeft: 'auto',

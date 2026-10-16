@@ -2,6 +2,7 @@ import { StyleSheet } from 'react-native';
 import { radii, spacing, typography } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
+  hidden: { opacity: 0 },
   heroCard: { overflow: 'hidden' },
   heroBackdrop: {
     position: 'absolute',
@@ -51,6 +52,7 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   labelRow: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     flexShrink: 1,
@@ -59,7 +61,8 @@ export const styles = StyleSheet.create({
   label: { flexShrink: 1 },
   iconBadge: { padding: spacing.xs, borderRadius: radii.input },
   value: {
-    flexShrink: 1,
+    width: '40%',
+    flexShrink: 0,
     fontWeight: '600',
     fontVariant: ['tabular-nums'],
     marginLeft: 'auto',

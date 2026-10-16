@@ -20,6 +20,15 @@ export const styles = StyleSheet.create({
   headerText: { flex: 1 },
   pressed: { opacity: 0.7 },
   content: { paddingTop: spacing.md, gap: spacing.md },
+  refreshFeedback: { gap: spacing.sm },
+  hiddenFeedback: { opacity: 0 },
+  refreshStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  progressSlot: { width: sizing.icon, height: sizing.icon },
+  refreshText: { flex: 1 },
   totals: { gap: spacing.md },
   toggleCircle: {
     width: 36,

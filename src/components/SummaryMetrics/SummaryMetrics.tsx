@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ScrollView, useWindowDimensions, View } from 'react-native';
-import { sizing, spacing, typography } from '../../constants/theme/tokens';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { sizing, spacing } from '../../constants/theme/tokens';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../../ui/AppText/AppText';
 import { Card } from '../../ui/Card/Card';
@@ -11,38 +12,55 @@ import {
   SummaryStatCardsProps,
 } from './SummaryMetrics.interface';
 import { styles } from './SummaryMetrics.styles';
+import { SkeletonText } from '../../ui/Skeleton/SkeletonText';
 
 export function RetainedCashCard({
   label,
   amount,
   countLabel,
+  loading = false,
 }: RetainedCashCardProps) {
   const { colors } = useAppTheme();
-  const { fontScale } = useWindowDimensions();
+  const { width, fontScale } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const [contentWidth, setContentWidth] = useState(0);
-  const coinSize = contentWidth > 0 ? Math.min(144, contentWidth * 0.4) : 44;
-  const textWidth = contentWidth - coinSize - spacing.lg;
-  // Long localized amounts get the full row before fitting the font to its width.
-  const minimumMoneyWidth = amount.length * typography.money * 0.6 * fontScale;
-  const sideBySide =
-    textWidth >=
-    Math.max(sizing.touchTarget * 3 * fontScale, minimumMoneyWidth);
+  const availableWidth =
+    contentWidth ||
+    Math.max(
+      0,
+      Math.min(
+        sizing.contentMaxWidth,
+        width - spacing.xl * 2 - insets.left - insets.right,
+      ) -
+        spacing.lg * 2 -
+        sizing.borderWidth * 2,
+    );
+  const coinSize = Math.min(144, availableWidth * 0.4);
+  const textWidth = availableWidth - coinSize - spacing.lg;
+  // Query values must not change the card's composition. Long money fits its slot.
+  const sideBySide = textWidth >= sizing.touchTarget * 3 * fontScale;
   const textColor = { color: colors.onPrimary };
   const money = (
-    <AppText
+    <SkeletonText
+      loading={loading}
       testID="summary-retained"
+      style={[styles.money, textColor]}
+      sizingText={amount}
       numberOfLines={1}
       adjustsFontSizeToFit
       minimumFontScale={0.25}
-      style={[styles.money, textColor]}
-    >
-      {amount}
-    </AppText>
+    />
   );
   const count = (
-    <AppText testID="summary-count" style={textColor}>
-      {countLabel}
-    </AppText>
+    <SkeletonText
+      loading={loading}
+      testID="summary-count"
+      style={textColor}
+      sizingText={countLabel}
+      numberOfLines={1}
+      adjustsFontSizeToFit
+      minimumFontScale={0.5}
+    />
   );
   return (
     <Card
@@ -67,14 +85,13 @@ export function RetainedCashCard({
             {label}
           </AppText>
           {sideBySide && money}
-          {sideBySide && count}
         </View>
         <View style={[styles.heroIllustration, { width: coinSize }]}>
           <SummaryIcon name="coins" size={coinSize} />
         </View>
       </View>
       {!sideBySide && money}
-      {!sideBySide && count}
+      {count}
     </Card>
   );
 }
@@ -84,6 +101,7 @@ export function SummaryStatCards({
   fareAmount,
   tipLabel,
   tipAmount,
+  loading = false,
 }: SummaryStatCardsProps) {
   const { colors } = useAppTheme();
   const { width, fontScale } = useWindowDimensions();
@@ -131,10 +149,13 @@ export function SummaryStatCards({
               </AppText>
             </View>
           </View>
-          <ScrollView key={metric.amount} horizontal>
-            <AppText testID={metric.testID} style={styles.statAmount}>
-              {metric.amount}
-            </AppText>
+          <ScrollView horizontal>
+            <SkeletonText
+              loading={loading}
+              testID={metric.testID}
+              style={styles.statAmount}
+              sizingText={metric.amount}
+            />
           </ScrollView>
         </Card>
       ))}
@@ -147,6 +168,7 @@ export function SummaryMetric({
   amount,
   testID,
   icon,
+  loading = false,
 }: SummaryMetricProps) {
   const { colors } = useAppTheme();
   return (
@@ -163,9 +185,15 @@ export function SummaryMetric({
           {label}
         </AppText>
       </View>
-      <AppText testID={testID} style={styles.value}>
-        {amount}
-      </AppText>
+      <SkeletonText
+        loading={loading}
+        testID={testID}
+        style={styles.value}
+        sizingText={amount}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.25}
+      />
     </View>
   );
 }

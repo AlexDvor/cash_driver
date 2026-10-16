@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { ActivityIndicator, Pressable, View } from 'react-native';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
@@ -10,6 +10,7 @@ import { CollapsibleContent } from '../CollapsibleContent/CollapsibleContent';
 import { styles } from './DailySummary.styles';
 import { TabIcon } from '../../ui/TabIcon/TabIcon';
 import { routes } from '../../navigation/routes';
+import { DailySummarySkeleton } from './DailySummarySkeleton';
 
 export function DailySummary({
   daily,
@@ -25,6 +26,11 @@ export function DailySummary({
   const { t, locale } = useTranslation();
   const { colors } = useAppTheme();
   const state = daily.state;
+  const summary = state.summary ?? daily.retainedSummary;
+  const readyHeight = useRef(0);
+  const currentSummary = useRef(summary);
+  currentSummary.current = summary;
+  const hasRefreshFeedback = daily.refreshing || daily.refreshError;
   const toggleLabel = `${t('today')} · ${t(
     expanded ? 'hideTotals' : 'showTotals',
   )}`;
@@ -67,13 +73,20 @@ export function DailySummary({
         resetCount={resetCount}
         testID="daily-summary-content"
       >
-        <View style={styles.content}>
-          {state.status === 'loading' ? (
-            <ActivityIndicator
-              accessibilityLabel={t('totalsLoading')}
-              color={colors.primary}
-            />
-          ) : state.status === 'error' ? (
+        <View
+          style={[
+            styles.content,
+            state.status === 'loading' &&
+              !summary && { minHeight: readyHeight.current },
+          ]}
+          onLayout={event => {
+            if (currentSummary.current)
+              readyHeight.current = event.nativeEvent.layout.height;
+          }}
+        >
+          {state.status === 'loading' && !summary ? (
+            <DailySummarySkeleton />
+          ) : state.status === 'error' && !summary ? (
             <>
               <AppText
                 accessibilityRole="alert"
@@ -83,19 +96,19 @@ export function DailySummary({
               </AppText>
               <ActionButton label={t('retry')} onPress={daily.refresh} />
             </>
-          ) : (
+          ) : summary ? (
             <>
               <AppText testID="daily-count" secondary variant="supporting">
-                {t('operationCount')}: {state.summary.operationCount}
+                {t('operationCount')}: {summary.operationCount}
               </AppText>
               <View style={styles.totals}>
                 {(
                   [
-                    { label: 'fareTotal', cents: state.summary.fareTotalCents },
-                    { label: 'tipsTotal', cents: state.summary.tipTotalCents },
+                    { label: 'fareTotal', cents: summary.fareTotalCents },
+                    { label: 'tipsTotal', cents: summary.tipTotalCents },
                     {
                       label: 'retainedCash',
-                      cents: state.summary.netCashTotalCents,
+                      cents: summary.netCashTotalCents,
                     },
                   ] as const
                 ).map(item => (
@@ -135,7 +148,38 @@ export function DailySummary({
                 ))}
               </View>
             </>
-          )}
+          ) : null}
+          {/* Reserve normal feedback below totals, so updates do not move their rows. */}
+          <View
+            pointerEvents={hasRefreshFeedback ? 'auto' : 'none'}
+            accessibilityElementsHidden={!hasRefreshFeedback}
+            importantForAccessibility={
+              hasRefreshFeedback ? 'auto' : 'no-hide-descendants'
+            }
+            style={[
+              styles.refreshFeedback,
+              !hasRefreshFeedback && styles.hiddenFeedback,
+            ]}
+          >
+            <View style={styles.refreshStatus}>
+              <View style={styles.progressSlot}>
+                {daily.refreshing && (
+                  <ActivityIndicator color={colors.primary} />
+                )}
+              </View>
+              <AppText
+                style={styles.refreshText}
+                variant="supporting"
+                accessibilityLiveRegion="polite"
+                secondary
+              >
+                {t(daily.refreshError ? 'dataRefreshFailed' : 'dataRefreshing')}
+              </AppText>
+            </View>
+            {daily.refreshError && (
+              <ActionButton label={t('retry')} onPress={daily.refresh} />
+            )}
+          </View>
         </View>
       </CollapsibleContent>
     </View>

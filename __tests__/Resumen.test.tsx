@@ -1,5 +1,9 @@
 import React from 'react';
-import { Alert, AppState, AppStateStatus } from 'react-native';
+import { SummaryContent } from '../src/components/SummaryMetrics/SummaryContent';
+import { RetainedCashCard } from '../src/components/SummaryMetrics/SummaryMetrics';
+import { Alert, AppState, AppStateStatus, View } from 'react-native';
+import { SkeletonText } from '../src/ui/Skeleton/SkeletonText';
+import { AppText } from '../src/ui/AppText/AppText';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createNavigationContainerRef } from '@react-navigation/native';
 import ReactTestRenderer, { act } from 'react-test-renderer';
@@ -300,6 +304,7 @@ test.each(['success', 'error'])(
   async outcome => {
     await seed('2026-10-01T08:00:00Z');
     await mount();
+    const originalHero = app.root.findByType(RetainedCashCard);
     let resolve: (summary: CashSummary) => void = () => {};
     let reject: (error: Error) => void = () => {};
     const old = new Promise<CashSummary>((ok, fail) => {
@@ -311,8 +316,14 @@ test.each(['success', 'error'])(
       .mockImplementationOnce(() => old);
     await press('Semana');
     expect(content()).toContain('Cargando resumen');
+    const loadingContent = app.root.findByType(SummaryContent);
+    expect(loadingContent.props.summary).toBeNull();
+    expect(app.root.findByType(RetainedCashCard)).toBe(originalHero);
     expect(text('summary-fareTotal')).toBe('undefined');
     await press('Mes');
+    expect(app.root.findByType(SummaryContent)).toBe(loadingContent);
+    expect(loadingContent.props.summary).not.toBeNull();
+    expect(app.root.findByType(RetainedCashCard)).toBe(originalHero);
     expectCount(1);
     await act(async () => {
       if (outcome === 'success') {
@@ -325,6 +336,7 @@ test.each(['success', 'error'])(
     list.mockRejectedValueOnce(Error('read failure'));
     await press('Hoy');
     expect(content()).toContain('No se pudo cargar el resumen');
+    expect(app.root.findAllByType(SummaryContent)).toHaveLength(0);
     expect(text('summary-fareTotal')).toBe('undefined');
     expect(text('summary-count')).toBe('undefined');
     await press('Reintentar');
@@ -452,4 +464,56 @@ test('large saved totals stay complete across ES/EN/UK and all branded platform 
     expect(content()).toContain('Bolt');
     expect(content()).toContain('Otro');
   }
+});
+
+test('period loading preserves long hero sizing without presenting previous-period values', async () => {
+  await seed('2026-10-08T08:00:00Z', {
+    ...validInput,
+    fareAmountCents: 999999,
+    cashReceivedCents: 999999,
+    tipCents: 0,
+  });
+  await mount();
+  const hero = app.root.findByType(RetainedCashCard);
+  const amount = hero.props.amount;
+  const countLabel = hero.props.countLabel;
+  await act(async () =>
+    hero
+      .findAllByType(View)
+      .find(node => node.props.onLayout)
+      ?.props.onLayout({ nativeEvent: { layout: { width: 320 } } }),
+  );
+  const originalMoney = hero
+    .findAllByType(SkeletonText)
+    .find(node => node.props.testID === 'summary-retained')!;
+  const nativeMoney = originalMoney.findAllByType(AppText).slice(-1)[0];
+  let resolve!: (summary: CashSummary) => void;
+  jest.spyOn(services.transactions, 'summarize').mockImplementationOnce(
+    () =>
+      new Promise(done => {
+        resolve = done;
+      }),
+  );
+  await press('Semana');
+  expect(hero.props.loading).toBe(true);
+  expect(hero.props.amount).toBe(amount);
+  expect(hero.props.countLabel).toBe(countLabel);
+  expect(text('summary-retained')).toBe('undefined');
+  expect(text('summary-count')).toBe('undefined');
+  const money = hero
+    .findAllByType(SkeletonText)
+    .find(node => node.props.sizingText === amount)!;
+  expect(money.props.numberOfLines).toBe(1);
+  expect(money.props.adjustsFontSizeToFit).toBe(true);
+  expect(money.props.minimumFontScale).toBe(0.25);
+  expect(money).toBe(originalMoney);
+  expect(money.findAllByType(AppText).slice(-1)[0]).toBe(nativeMoney);
+  await act(async () => resolve(summarizeTransactions([])));
+  expectCount(0);
+  expect(
+    hero
+      .findAllByType(SkeletonText)
+      .find(node => node.props.testID === 'summary-retained'),
+  ).toBe(originalMoney);
+  expect(originalMoney.findAllByType(AppText).slice(-1)[0]).toBe(nativeMoney);
 });

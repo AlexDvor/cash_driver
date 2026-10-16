@@ -6,15 +6,18 @@ import { PlatformIcon } from '../PlatformIcon/PlatformIcon';
 import { AppText } from '../../ui/AppText/AppText';
 import { styles } from './PlatformSummaryRow.styles';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
+import { SkeletonText } from '../../ui/Skeleton/SkeletonText';
 
 export function PlatformSummaryRow({
   platform,
   amount,
   divided = false,
+  loading = false,
 }: {
   platform: Platform;
   amount: string;
   divided?: boolean;
+  loading?: boolean;
 }) {
   const { colors } = useAppTheme();
   return (
@@ -31,9 +34,15 @@ export function PlatformSummaryRow({
         </View>
         <AppText style={styles.label}>{platformLabels[platform]}</AppText>
       </View>
-      <AppText testID={`summary-${platform}`} style={styles.value}>
-        {amount}
-      </AppText>
+      <SkeletonText
+        loading={loading}
+        testID={`summary-${platform}`}
+        style={styles.value}
+        sizingText={amount}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.25}
+      />
     </View>
   );
 }
