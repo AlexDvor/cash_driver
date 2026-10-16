@@ -30,6 +30,7 @@ export function PaymentForm({
   title,
   confirmLabel,
   mode = 'create',
+  entryNavigation,
 }: PaymentFormProps) {
   const { t, locale } = useTranslation();
   const { colors } = useAppTheme();
@@ -38,7 +39,7 @@ export function PaymentForm({
   const quickCount = form.quickAmounts.length + (form.validFare ? 1 : 0);
   const quickColumns =
     quickCount > 0 &&
-    quickWidth >= quickCount * 78 * fontScale + spacing.sm * (quickCount - 1)
+    quickWidth >= quickCount * 64 * fontScale + spacing.sm * (quickCount - 1)
       ? quickCount
       : 2;
   const quickStyle = {
@@ -106,7 +107,10 @@ export function PaymentForm({
         iconLayout={platformOptions.length > 2 ? 'stacked' : 'inline'}
         columns="equal"
         value={form.platform}
-        onChange={form.choosePlatform}
+        onChange={platform => {
+          entryNavigation?.cancel();
+          return form.choosePlatform(platform);
+        }}
         disabled={disabled || preferenceSaving}
       />
       {mode === 'create' && !form.platformAllowed && (
@@ -119,22 +123,43 @@ export function PaymentForm({
         </AppText>
       )}
       <MoneyInput
+        groupRef={entryNavigation?.fareRef}
         label={t('fareInput')}
         value={form.fare}
         error={fieldError(form.fareParsed, true)}
         disabled={disabled}
-        onChange={raw => form.changeField('fare', raw)}
-        onFocus={() => form.focus('fare')}
-        onBlur={() => form.blur('fare')}
+        onChange={raw => {
+          entryNavigation?.changedFare();
+          form.changeField('fare', raw);
+        }}
+        onFocus={() => {
+          form.focus('fare');
+          entryNavigation?.focus('fare');
+        }}
+        onBlur={() => {
+          entryNavigation?.blur('fare');
+          form.blur('fare');
+        }}
       />
       <MoneyInput
+        groupRef={entryNavigation?.receivedRef}
+        inputRef={entryNavigation?.receivedInputRef}
         label={t('receivedInput')}
         value={form.received}
         error={fieldError(form.receivedParsed, false)}
         disabled={disabled}
-        onChange={raw => form.changeField('received', raw)}
-        onFocus={() => form.focus('received')}
-        onBlur={() => form.blur('received')}
+        onChange={raw => {
+          entryNavigation?.changedReceived();
+          form.changeField('received', raw);
+        }}
+        onFocus={() => {
+          form.focus('received');
+          entryNavigation?.focus('received');
+        }}
+        onBlur={() => {
+          entryNavigation?.blur('received');
+          form.blur('received');
+        }}
       />
       {quickCount > 0 && (
         <View
@@ -147,19 +172,24 @@ export function PaymentForm({
               accessibilityRole="button"
               accessibilityLabel={formatMoney(cents, locale)}
               disabled={disabled}
-              onPress={() => form.quick(cents)}
+              onPress={() => {
+                entryNavigation?.cancel();
+                if (form.quick(cents)) entryNavigation?.quickReceived();
+              }}
               style={({ pressed }) => [
                 styles.quick,
                 quickStyle,
                 {
-                  borderColor: colors.border,
-                  backgroundColor: colors.background,
+                  backgroundColor: colors.softGreen,
                 },
                 pressed && styles.pressed,
               ]}
             >
-              <AppText style={styles.actionLabel}>
-                {formatMoney(cents, locale)}
+              <AppText
+                variant="supporting"
+                style={[styles.quickLabel, { color: colors.primary }]}
+              >
+                {formatMoney(cents, locale, true)}
               </AppText>
             </Pressable>
           ))}
@@ -168,18 +198,25 @@ export function PaymentForm({
               accessibilityRole="button"
               accessibilityLabel={t('exact')}
               disabled={disabled}
-              onPress={() => form.quick()}
+              onPress={() => {
+                entryNavigation?.cancel();
+                if (form.quick()) entryNavigation?.quickReceived();
+              }}
               style={({ pressed }) => [
                 styles.quick,
                 quickStyle,
                 {
-                  borderColor: colors.border,
-                  backgroundColor: colors.background,
+                  backgroundColor: colors.softGreen,
                 },
                 pressed && styles.pressed,
               ]}
             >
-              <AppText style={styles.actionLabel}>{t('exact')}</AppText>
+              <AppText
+                variant="supporting"
+                style={[styles.quickLabel, { color: colors.primary }]}
+              >
+                {t('exact')}
+              </AppText>
             </Pressable>
           )}
         </View>
@@ -193,6 +230,7 @@ export function PaymentForm({
           accessibilityState={{ expanded: form.tipExpanded, disabled }}
           disabled={disabled}
           onPress={() => {
+            entryNavigation?.cancel();
             if (disabled) return;
             if (form.tipExpanded) {
               if (form.collapseTip()) finishTipFocus();
@@ -234,6 +272,7 @@ export function PaymentForm({
             disabled={disabled || !form.tipExpanded}
             onChange={raw => form.changeField('tip', raw)}
             onFocus={() => {
+              entryNavigation?.cancel();
               tipFocused.current = true;
               form.focus('tip');
             }}
@@ -268,7 +307,10 @@ export function PaymentForm({
                 accessibilityLabel={action.label}
                 accessibilityState={{ disabled: action.disabled }}
                 disabled={action.disabled}
-                onPress={action.onPress}
+                onPress={() => {
+                  entryNavigation?.cancel();
+                  action.onPress();
+                }}
                 style={({ pressed }) => [
                   styles.quick,
                   styles.tipAction,
@@ -330,7 +372,10 @@ export function PaymentForm({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={t('dismissKeyboard')}
-        onPress={Keyboard.dismiss}
+        onPress={() => {
+          entryNavigation?.cancel();
+          Keyboard.dismiss();
+        }}
         style={styles.dismiss}
       >
         <AppText variant="supporting" style={{ color: colors.primary }}>
@@ -353,6 +398,7 @@ export function PaymentForm({
         }
         disabled={!form.canConfirm || preferenceSaving}
         onPress={async () => {
+          entryNavigation?.cancel();
           if (await form.submit()) {
             Keyboard.dismiss();
           }

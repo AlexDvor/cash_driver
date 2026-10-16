@@ -1,16 +1,21 @@
 // Formatting never feeds decimal euros back into arithmetic or editable inputs.
-export function formatMoney(cents: number, locale: string): string {
+export function formatMoney(
+  cents: number,
+  locale: string,
+  hideZeroFraction = false,
+): string {
   if (!Number.isSafeInteger(cents) || cents < 0) {
     throw new RangeError('Invalid cents');
   }
   const whole = Math.floor(cents / 100);
   const fraction = String(cents % 100).padStart(2, '0');
+  const fractionDigits = hideZeroFraction && cents % 100 === 0 ? 0 : 2;
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: 'EUR',
     currencyDisplay: 'narrowSymbol',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
   })
     .formatToParts(whole)
     .map(part => (part.type === 'fraction' ? fraction : part.value))

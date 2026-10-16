@@ -201,7 +201,7 @@ export function usePaymentForm({
   }
   function quick(cents?: number) {
     if (busy.current || !validFare || fareParsed.status !== 'valid') {
-      return;
+      return false;
     }
     const amounts = {
       fareAmountCents: fareParsed.cents,
@@ -215,7 +215,9 @@ export function usePaymentForm({
         : applyQuickAmount(amounts, cents);
     if (next) {
       changeField('received', centsToInput(next.cashReceivedCents));
+      return true;
     }
+    return false;
   }
   async function choosePlatform(next: Platform) {
     if (

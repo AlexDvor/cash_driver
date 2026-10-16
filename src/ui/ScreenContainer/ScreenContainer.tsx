@@ -9,6 +9,11 @@ import { ScreenContainerProps } from './ScreenContainer.interface';
 export function ScreenContainer({
   children,
   hasHeader = false,
+  scrollRef,
+  contentRef,
+  onInteraction,
+  keyboardInset = 0,
+  onContentSizeChange,
 }: ScreenContainerProps) {
   const insets = useSafeAreaInsets();
   const { colors } = useAppTheme();
@@ -26,19 +31,30 @@ export function ScreenContainer({
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <ScrollView
+        ref={scrollRef}
+        onTouchStart={onInteraction}
+        onScrollBeginDrag={onInteraction}
+        onContentSizeChange={onContentSizeChange}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         contentContainerStyle={[
           styles.scroll,
           {
             paddingTop: spacing.xl,
-            paddingBottom: spacing.xl + (hasHeader ? insets.bottom : 0),
+            paddingBottom:
+              spacing.xl + (hasHeader ? insets.bottom : 0) + keyboardInset,
             paddingLeft: spacing.xl + insets.left,
             paddingRight: spacing.xl + insets.right,
           },
         ]}
       >
-        <View style={styles.content}>{children}</View>
+        <View
+          ref={contentRef}
+          collapsable={contentRef ? false : undefined}
+          style={styles.content}
+        >
+          {children}
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -102,11 +102,15 @@ test('delayed blur preserves quick, Exacto and newly typed amounts', async () =>
       form().changeField('received', '20');
     });
     const oldBlur = form().blur;
-    await act(async () => form().quick(5000));
+    await act(async () => {
+      expect(form().quick(5000)).toBe(true);
+    });
     await act(async () => oldBlur('received'));
     expect(form().received).toBe('50,00');
     expect(form().payment).toMatchObject({ changeGivenCents: 3200 });
-    await act(async () => form().quick());
+    await act(async () => {
+      expect(form().quick()).toBe(true);
+    });
     await act(async () => oldBlur('received'));
     expect(form().received).toBe('18,00');
     await act(async () => form().changeField('fare', '25,'));

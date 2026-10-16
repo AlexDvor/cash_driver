@@ -8,6 +8,7 @@ import { MoneyInputProps } from './MoneyInput.interface';
 
 export function MoneyInput({
   inputRef,
+  groupRef,
   label,
   value,
   error,
@@ -18,7 +19,11 @@ export function MoneyInput({
 }: MoneyInputProps) {
   const { colors } = useAppTheme();
   return (
-    <View style={styles.group}>
+    <View
+      ref={groupRef}
+      collapsable={groupRef ? false : undefined}
+      style={styles.group}
+    >
       <AppText>{label}</AppText>
       <TextInput
         ref={inputRef}

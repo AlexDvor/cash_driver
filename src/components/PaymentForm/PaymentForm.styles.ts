@@ -11,7 +11,6 @@ export const styles = StyleSheet.create({
   quickRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   quick: {
     minHeight: sizing.touchTarget,
-    borderWidth: sizing.borderWidth,
     borderRadius: radii.chip,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.sm,
@@ -19,7 +18,12 @@ export const styles = StyleSheet.create({
     flexShrink: 1,
   },
   pressed: { opacity: 0.7 },
-  tipAction: { flexBasis: '45%', flexGrow: 1 },
+  quickLabel: { textAlign: 'center', fontWeight: '700' },
+  tipAction: {
+    flexBasis: '45%',
+    flexGrow: 1,
+    borderWidth: sizing.borderWidth,
+  },
   actionLabel: { textAlign: 'center' },
   result: {
     borderRadius: radii.input,

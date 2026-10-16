@@ -1,5 +1,13 @@
 import React from 'react';
-import { AppState, AppStateStatus, Switch, TextInput } from 'react-native';
+import { DailySummarySkeleton } from '../src/components/DailySummary/DailySummarySkeleton';
+import type { CashTransaction } from '../src/features/transactions/types';
+import {
+  AppState,
+  AppStateStatus,
+  Keyboard,
+  Switch,
+  TextInput,
+} from 'react-native';
 import ReactTestRenderer, { act } from 'react-test-renderer';
 import App from '../App';
 import { createTransactionRepository } from '../src/features/transactions/transactionRepository';
@@ -77,6 +85,31 @@ async function enter(fare: string, received: string) {
   await input('Importe a cobrar', fare);
   await input('El cliente entrega', received);
 }
+
+test.each(['50,00 €', 'Exacto'])(
+  'quick shortcut %s uses the received idle dismissal without saving',
+  async label => {
+    const originalState = AppState.currentState;
+    AppState.currentState = 'active';
+    jest.spyOn(Keyboard, 'isVisible').mockReturnValue(true);
+    jest.spyOn(Keyboard, 'dismiss').mockImplementation(() => {});
+    try {
+      await mount();
+      await input('Importe a cobrar', '18');
+      await press(label);
+      expect(field('El cliente entrega').props.value).toBe(
+        label === 'Exacto' ? '18,00' : '50,00',
+      );
+      await act(async () => jest.advanceTimersByTime(1999));
+      expect(Keyboard.dismiss).not.toHaveBeenCalled();
+      await act(async () => jest.advanceTimersByTime(1));
+      expect(Keyboard.dismiss).toHaveBeenCalledTimes(1);
+      expect(await services.transactions.list()).toHaveLength(0);
+    } finally {
+      AppState.currentState = originalState;
+    }
+  },
+);
 function summaryToggle() {
   return app.root.findByProps({ testID: 'daily-summary-toggle' });
 }
@@ -348,14 +381,68 @@ test('daily loading/error never render fake zero totals and retry loads genuine 
     .mockImplementation(list);
   await mount();
   expect(app.root.findAllByProps({ testID: 'fareTotal' })).toHaveLength(0);
+  expect(app.root.findAllByType(DailySummarySkeleton)).toHaveLength(1);
   await openSummary();
   expect(JSON.stringify(app.toJSON())).toContain('Cargando los totales');
   await act(async () => reject?.(new Error('Cannot read')));
+  expect(app.root.findAllByType(DailySummarySkeleton)).toHaveLength(0);
   expect(app.root.findAllByProps({ testID: 'fareTotal' })).toHaveLength(0);
   expect(JSON.stringify(app.toJSON())).toContain('No se pudieron cargar');
   await press('Reintentar');
+  expect(app.root.findAllByType(DailySummarySkeleton)).toHaveLength(0);
   expect(text('fareTotal')).toMatch(/0,00/);
   expect(text('daily-count')).toContain('0');
+  let finishRefresh: (rows: CashTransaction[]) => void = () => {};
+  const refreshRead = new Promise<CashTransaction[]>(resolve => {
+    finishRefresh = resolve;
+  });
+  jest
+    .spyOn(services.transactions, 'list')
+    .mockImplementationOnce(() => refreshRead);
+  await act(async () => services.changes.notify('transactions'));
+  expect(app.root.findAllByType(DailySummarySkeleton)).toHaveLength(0);
+  expect(JSON.stringify(app.toJSON())).toContain('Actualizando');
+  expect(text('daily-count')).toContain('0');
+  await act(async () => finishRefresh([]));
+  expect(text('daily-count')).toContain('0');
+});
+
+test('daily refresh failure retains labeled totals and payment draft through Retry', async () => {
+  await mount();
+  await enter('20', '20');
+  await press('Confirmar cobro');
+  await openSummary();
+  await enter('18', '50');
+  await tip(true);
+  const fareInput = field('Importe a cobrar');
+  const receivedInput = field('El cliente entrega');
+  const draftTip = tipValue();
+  let failRefresh: (error: Error) => void = () => {};
+  const pending = new Promise<CashTransaction[]>((_resolve, reject) => {
+    failRefresh = reject;
+  });
+  jest.spyOn(services.transactions, 'list').mockReturnValueOnce(pending);
+  await act(async () => services.changes.notify('transactions'));
+  expect(text('fareTotal')).toMatch(/20,00/);
+  expect(app.root.findAllByType(DailySummarySkeleton)).toHaveLength(0);
+  expect(JSON.stringify(app.toJSON())).toContain('Actualizando');
+  await act(async () => failRefresh(Error('read failed')));
+  expect(text('fareTotal')).toMatch(/20,00/);
+  expect(JSON.stringify(app.toJSON())).toContain(
+    'Datos anteriores; actualización fallida',
+  );
+  expect(field('Importe a cobrar')).toBe(fareInput);
+  expect(field('El cliente entrega')).toBe(receivedInput);
+  expect(fareInput.props.value).toBe('18');
+  expect(receivedInput.props.value).toBe('50');
+  expect(tipValue()).toBe(draftTip);
+  await press('Reintentar');
+  expect(text('fareTotal')).toMatch(/20,00/);
+  expect(JSON.stringify(app.toJSON())).not.toContain(
+    'Datos anteriores; actualización fallida',
+  );
+  expect(fareInput.props.value).toBe('18');
+  expect(tipValue()).toBe(draftTip);
 });
 
 test.each(['success', 'error'])(

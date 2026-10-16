@@ -5,6 +5,13 @@ import {
   formatPeriodRange,
 } from '../src/i18n/formatting';
 import { translate } from '../src/i18n/translations';
+
+test('compact quick amounts hide only zero fractions', () => {
+  expect(formatMoney(2000, 'es-ES', true)).toMatch(/^20\s*€$/);
+  expect(formatMoney(2000, 'en-GB', true)).toBe('€20');
+  expect(formatMoney(2050, 'es-ES', true)).toMatch(/^20,50\s*€$/);
+  expect(formatMoney(2000, 'es-ES')).toMatch(/^20,00\s*€$/);
+});
 test('formats integer cents in all supported locales without feeding grouping into raw inputs', () => {
   expect(formatMoney(2050, 'es-ES')).toMatch(/20,50.*€/);
   expect(formatMoney(2050, 'en-GB')).toBe('€20.50');

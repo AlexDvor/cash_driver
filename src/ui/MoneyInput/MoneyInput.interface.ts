@@ -1,8 +1,9 @@
 import type { Ref, ComponentRef } from 'react';
-import type { TextInput } from 'react-native';
+import type { TextInput, View } from 'react-native';
 
 export interface MoneyInputProps {
   inputRef?: Ref<ComponentRef<typeof TextInput>>;
+  groupRef?: Ref<ComponentRef<typeof View>>;
   label: string;
   value: string;
   error?: string;

@@ -13,6 +13,7 @@ import { useDailySummary } from '../../hooks/summary/useDailySummary';
 import { PaymentForm } from '../../components/PaymentForm/PaymentForm';
 import { usePaymentForm } from '../../hooks/transactions/usePaymentForm';
 import { useCreatePayment } from '../../hooks/transactions/useCreatePayment';
+import { useHomePaymentScroll } from '../../hooks/transactions/useHomePaymentScroll';
 import { styles } from './HomeScreen.styles';
 
 export function HomeScreen() {
@@ -43,8 +44,22 @@ export function HomeScreen() {
     onPlatformChange: platform =>
       updatePreferences({ defaultPlatform: platform }),
   });
+  const entryNavigation = useHomePaymentScroll({
+    fare: form.fare,
+    validFare: form.validFare && form.fareParsed.status === 'valid',
+    received: form.received,
+    validReceived:
+      form.receivedParsed.status === 'valid' && form.receivedParsed.cents > 0,
+    saving: form.saving,
+  });
   return (
-    <ScreenContainer>
+    <ScreenContainer
+      scrollRef={entryNavigation.scrollRef}
+      contentRef={entryNavigation.contentRef}
+      onInteraction={entryNavigation.cancel}
+      keyboardInset={entryNavigation.keyboardInset}
+      onContentSizeChange={entryNavigation.contentResized}
+    >
       <View style={styles.header}>
         <AppText variant="title" accessibilityRole="header">
           {t('appName')}
@@ -66,6 +81,7 @@ export function HomeScreen() {
         </AppText>
       )}
       <PaymentForm
+        entryNavigation={entryNavigation}
         form={form}
         platformOptions={preferences.enabledPlatforms}
         preferenceSaving={saving}
