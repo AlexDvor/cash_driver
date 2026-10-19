@@ -1,4 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { spacing } from '../../constants/theme/tokens';
-
-export const styles = StyleSheet.create({ header: { gap: spacing.xs } });
+export const styles = StyleSheet.create({
+  header: { gap: spacing.xs },
+  title: { fontSize: 24, fontWeight: '700' },
+});

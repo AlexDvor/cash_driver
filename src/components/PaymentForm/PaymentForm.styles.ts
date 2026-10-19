@@ -1,13 +1,23 @@
 import { StyleSheet } from 'react-native';
-import {
-  radii,
-  sizing,
-  spacing,
-  typography,
-} from '../../constants/theme/tokens';
+import { radii, sizing, spacing } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   card: { gap: spacing.md },
+  platformRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  platformLabel: { flexShrink: 1 },
+  singlePlatform: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    minHeight: sizing.touchTarget,
+    paddingHorizontal: spacing.sm,
+  },
   stackedActions: { flexDirection: 'column' },
   fullWidthAction: { flexBasis: 'auto', width: '100%' },
   quickRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
@@ -27,24 +37,6 @@ export const styles = StyleSheet.create({
     borderWidth: sizing.borderWidth,
   },
   actionLabel: { textAlign: 'center' },
-  result: {
-    borderRadius: radii.input,
-    padding: spacing.md,
-    gap: spacing.sm,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  amount: {
-    fontSize: typography.money,
-    flexShrink: 1,
-    textAlign: 'right',
-    marginLeft: 'auto',
-    fontWeight: '700',
-    fontVariant: ['tabular-nums'],
-  },
-  missing: { fontSize: typography.money },
   tipBlock: { gap: spacing.sm },
   tipLabel: { flex: 1 },
   tipChevron: {
@@ -63,5 +55,4 @@ export const styles = StyleSheet.create({
     padding: spacing.sm,
     justifyContent: 'center',
   },
-  dismiss: { minHeight: sizing.touchTarget, justifyContent: 'center' },
 });

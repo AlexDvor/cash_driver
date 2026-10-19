@@ -11,7 +11,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { spacing } from '../../constants/theme/tokens';
 
-type Field = 'fare' | 'received';
+type Field = 'fare' | 'received' | 'tip';
 
 export function useHomePaymentScroll({
   fare,
@@ -19,19 +19,24 @@ export function useHomePaymentScroll({
   received,
   validReceived,
   saving,
+  automaticEntry = true,
 }: {
   fare: string;
   validFare: boolean;
   received: string;
   validReceived: boolean;
   saving: boolean;
+  automaticEntry?: boolean;
 }) {
   const scrollRef = useRef<ComponentRef<typeof ScrollView>>(null);
   const contentRef = useRef<ComponentRef<typeof View>>(null);
   const fareRef = useRef<ComponentRef<typeof View>>(null);
   const receivedRef = useRef<ComponentRef<typeof View>>(null);
+  const tipRef = useRef<ComponentRef<typeof View>>(null);
   const receivedInputRef = useRef<ComponentRef<typeof TextInput>>(null);
   const focused = useRef<Field | null>(null);
+  const requested = useRef<Field | null>(null);
+  const tipFrame = useRef<number | null>(null);
   const visible = useRef(Keyboard.isVisible());
   const active = useRef(AppState.currentState === 'active');
   const onScreen = useRef(false);
@@ -49,6 +54,9 @@ export function useHomePaymentScroll({
   latest.current = { validFare, validReceived, received, saving };
 
   const cancel = useCallback(() => {
+    requested.current = null;
+    if (tipFrame.current !== null) cancelAnimationFrame(tipFrame.current);
+    tipFrame.current = null;
     quickEntry.current = false;
     endAfterHide.current = false;
     pendingEndScroll.current = false;
@@ -73,7 +81,12 @@ export function useHomePaymentScroll({
   }, []);
 
   const scrollToField = useCallback((field: Field) => {
-    const group = field === 'fare' ? fareRef.current : receivedRef.current;
+    const group =
+      field === 'fare'
+        ? fareRef.current
+        : field === 'received'
+        ? receivedRef.current
+        : tipRef.current;
     const content = contentRef.current;
     if (!group || !content || !onScreen.current || !active.current) return;
     const request = ++generation.current;
@@ -84,7 +97,7 @@ export function useHomePaymentScroll({
           request !== generation.current ||
           !onScreen.current ||
           !active.current ||
-          focused.current !== field
+          (focused.current !== field && requested.current !== field)
         )
           return;
         // ScreenContainer has xl top padding; keep the field label lg below its viewport.
@@ -96,6 +109,36 @@ export function useHomePaymentScroll({
       () => {},
     );
   }, []);
+
+  const positionSection = useCallback(() => {
+    const field = requested.current;
+    if (field === 'tip' || field === 'received') scrollToField(field);
+  }, [scrollToField]);
+
+  const openTip = useCallback(() => {
+    cancel();
+    setEdit(0);
+    requested.current = 'tip';
+    tipFrame.current = requestAnimationFrame(() => {
+      tipFrame.current = null;
+      positionSection();
+    });
+  }, [cancel, positionSection]);
+
+  const closedTip = useCallback(
+    (returnToReceived = true) => {
+      cancel();
+      if (!returnToReceived) {
+        return;
+      }
+      requested.current = 'received';
+      tipFrame.current = requestAnimationFrame(() => {
+        tipFrame.current = null;
+        positionSection();
+      });
+    },
+    [cancel, positionSection],
+  );
 
   useFocusEffect(
     useCallback(() => {
@@ -173,7 +216,14 @@ export function useHomePaymentScroll({
   }, [cancel, scrollToField, finishEndScroll]);
 
   useEffect(() => {
-    if (!edit || saving || !onScreen.current || !active.current) return;
+    if (
+      !automaticEntry ||
+      !edit ||
+      saving ||
+      !onScreen.current ||
+      !active.current
+    )
+      return;
     const fromQuick = quickEntry.current;
     const field = fromQuick ? 'received' : focused.current;
     if (
@@ -216,7 +266,16 @@ export function useHomePaymentScroll({
       clearTimeout(timeout);
       if (timer.current === timeout) timer.current = null;
     };
-  }, [fare, edit, validFare, received, validReceived, saving, finishEndScroll]);
+  }, [
+    automaticEntry,
+    fare,
+    edit,
+    validFare,
+    received,
+    validReceived,
+    saving,
+    finishEndScroll,
+  ]);
 
   function focus(field: Field) {
     cancel();
@@ -248,6 +307,10 @@ export function useHomePaymentScroll({
   }
   function contentResized() {
     finishEndScroll();
+    if (requested.current === 'tip' || requested.current === 'received') {
+      positionSection();
+      return;
+    }
     if (needsLayoutScroll.current && visible.current && focused.current) {
       needsLayoutScroll.current = false;
       scrollToField(focused.current);
@@ -259,6 +322,7 @@ export function useHomePaymentScroll({
     contentRef,
     fareRef,
     receivedRef,
+    tipRef,
     receivedInputRef,
     focus,
     blur,
@@ -267,6 +331,8 @@ export function useHomePaymentScroll({
     quickReceived,
     cancel,
     keyboardInset,
+    openTip,
+    closedTip,
     contentResized,
   };
 }

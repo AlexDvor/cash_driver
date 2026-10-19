@@ -8,11 +8,19 @@ import {
 
 export const styles = StyleSheet.create({
   group: { gap: spacing.sm },
-  input: {
-    minHeight: sizing.primaryButton,
+  field: {
+    flexDirection: 'row',
+    alignItems: 'center',
     borderWidth: sizing.borderWidth,
     borderRadius: radii.input,
     paddingHorizontal: spacing.lg,
+    gap: spacing.sm,
+  },
+  suffix: { fontSize: typography.heading },
+  input: {
+    flex: 1,
+    minWidth: 0,
+    minHeight: sizing.primaryButton,
     paddingVertical: spacing.sm,
     fontSize: typography.money,
     fontVariant: ['tabular-nums'],

@@ -19,6 +19,9 @@ import {
 } from '../../test/sqliteTestDatabase';
 import { PlatformIcon } from '../../components/PlatformIcon/PlatformIcon';
 import { AppText } from '../../ui/AppText/AppText';
+import { PaymentForm } from '../../components/PaymentForm/PaymentForm';
+import { PaymentOutcome } from '../../components/PaymentOutcome/PaymentOutcome';
+import { ScrollView } from 'react-native';
 
 let db: SqlConnection;
 let services: Persistence;
@@ -151,6 +154,52 @@ async function tip(enabled: boolean) {
   await press(enabled ? 'Todo el cambio como propina' : 'Quitar propina');
 }
 
+test('change and confirmation stay in scrolling content with only one save action', async () => {
+  await mount();
+  const scroll = app.root
+    .findAllByType(ScrollView)
+    .find(node => node.findAllByType(PaymentForm).length > 0);
+  expect(scroll?.findAllByType(PaymentOutcome)).toHaveLength(1);
+  expect(app.root.findAllByType(PaymentOutcome)).toHaveLength(1);
+});
+
+test('tip input focus requests scrolling without changing the draft or saving', async () => {
+  await mount();
+  await enter('18', '20');
+  await act(async () =>
+    app.root.findByProps({ testID: 'tip-section-toggle' }).props.onPress(),
+  );
+  const navigation = app.root.findByType(PaymentForm).props.entryNavigation;
+  const focus = jest.spyOn(navigation, 'focus');
+  await input('Propina', '1');
+  expect(focus).toHaveBeenCalledWith('tip');
+  const blur = jest.spyOn(
+    app.root.findByType(PaymentForm).props.entryNavigation,
+    'blur',
+  );
+  await act(async () => field('Propina').props.onBlur());
+  expect(blur).toHaveBeenCalledWith('tip');
+  expect(field('Importe a cobrar').props.value).toBe('18');
+  expect(field('El cliente entrega').props.value).toBe('20');
+  expect(tipValue()).toBe('1,00');
+  expect(await services.transactions.list()).toHaveLength(0);
+});
+
+test('opening the tip section requests upward scroll without focusing an input', async () => {
+  await mount();
+  const navigation = app.root.findByType(PaymentForm).props.entryNavigation;
+  const open = jest.spyOn(navigation, 'openTip');
+  const focus = jest.spyOn(navigation, 'focus');
+  await act(async () =>
+    app.root.findByProps({ testID: 'tip-section-toggle' }).props.onPress(),
+  );
+  expect(open).toHaveBeenCalledTimes(1);
+  expect(focus).not.toHaveBeenCalled();
+  expect(field('Importe a cobrar').props.value).toBe('');
+  expect(tipValue()).toBe('');
+  expect(await services.transactions.list()).toHaveLength(0);
+});
+
 test('ordinary change, exact and insufficient cash are immediate; malformed/zero/over-limit amounts cannot confirm', async () => {
   await mount();
   for (const platform of ['Uber', 'Cabify', 'Bolt', 'Otro']) {
@@ -210,8 +259,8 @@ test('committed tip payment clears money fields, retains platform and updates se
   });
   expect(field('Importe a cobrar').props.value).toBe('');
   expect(field('El cliente entrega').props.value).toBe('');
-  expect(text('payment-success')).toMatch(
-    /Importe de viaje:.*18,00.*Propina:.*2,00/,
+  expect(app.root.findAllByProps({ testID: 'payment-success' })).toHaveLength(
+    0,
   );
   expect(summaryToggle().props.accessibilityState.expanded).toBe(false);
   await openSummary();

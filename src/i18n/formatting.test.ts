@@ -1,10 +1,26 @@
 import {
   centsToInput,
   formatLocalDateTime,
+  formatLocalDate,
   formatMoney,
   formatPeriodRange,
 } from './formatting';
 import { translate } from './translations';
+
+test('Home date follows the explicit local day without displaying time', () => {
+  const instant = new Date('2026-10-18T23:30:00Z');
+  expect(formatLocalDate(instant, 'en-GB', 'Europe/Madrid')).toBe(
+    '19 Oct 2026',
+  );
+  expect(formatLocalDate(instant, 'en-GB', 'America/New_York')).toBe(
+    '18 Oct 2026',
+  );
+  for (const locale of ['es-ES', 'en-GB', 'uk-UA']) {
+    expect(formatLocalDate(instant, locale, 'Europe/Madrid')).not.toMatch(
+      /\d:\d/,
+    );
+  }
+});
 
 test('compact quick amounts hide only zero fractions', () => {
   expect(formatMoney(2000, 'es-ES', true)).toMatch(/^20\s*€$/);

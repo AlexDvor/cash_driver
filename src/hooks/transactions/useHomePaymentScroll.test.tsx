@@ -76,6 +76,12 @@ beforeEach(async () => {
     },
   });
   Object.assign(hook.receivedInputRef, { current: { focus: focusReceived } });
+  Object.assign(hook.tipRef, {
+    current: {
+      measureLayout: (_target: unknown, done: (x: number, y: number) => void) =>
+        done(0, 800),
+    },
+  });
 });
 afterEach(async () => {
   await act(async () => app.unmount());
@@ -91,6 +97,106 @@ async function edit(fare = '12', validFare = true) {
     app.update(<Probe />);
   });
 }
+
+test('opening tips scrolls the section before input focus without opening the keyboard', async () => {
+  await act(async () => hook.openTip());
+  await act(async () => jest.advanceTimersByTime(20));
+  expect(scrollTo).toHaveBeenLastCalledWith({ y: 804, animated: true });
+  expect(focusReceived).not.toHaveBeenCalled();
+  expect(Keyboard.dismiss).not.toHaveBeenCalled();
+  await act(async () => hook.contentResized());
+  expect(scrollTo).toHaveBeenLastCalledWith({ y: 804, animated: true });
+});
+
+test('opening and closing tips add no artificial space below payment', async () => {
+  const measureViewport = jest.fn();
+  Object.assign(hook.scrollRef, {
+    current: { scrollTo, measureInWindow: measureViewport },
+  });
+  await act(async () => hook.openTip());
+  await act(async () => jest.advanceTimersByTime(20));
+  expect(hook.keyboardInset).toBe(0);
+  expect(measureViewport).not.toHaveBeenCalled();
+  await act(async () => hook.closedTip());
+  await act(async () => jest.advanceTimersByTime(20));
+  expect(hook.keyboardInset).toBe(0);
+  expect(scrollTo).toHaveBeenLastCalledWith({ y: 504, animated: true });
+});
+
+test('manual interaction cancels a queued section-opening scroll', async () => {
+  await act(async () => hook.openTip());
+  hook.cancel();
+  await act(async () => jest.advanceTimersByTime(20));
+  expect(scrollTo).not.toHaveBeenCalled();
+});
+
+test('a cancelled opening measurement cannot scroll later', async () => {
+  let measure: ((x: number, y: number) => void) | undefined;
+  Object.assign(hook.tipRef, {
+    current: {
+      measureLayout: (_target: unknown, done: typeof measure) => {
+        measure = done;
+      },
+    },
+  });
+  await act(async () => hook.openTip());
+  await act(async () => jest.advanceTimersByTime(20));
+  hook.cancel();
+  await act(async () => measure?.(0, 800));
+  expect(hook.keyboardInset).toBe(0);
+  expect(scrollTo).not.toHaveBeenCalled();
+});
+
+test('tip focus aligns its header/input and follows keyboard/content resizing without an idle action', async () => {
+  await act(async () => hook.focus('fare'));
+  await edit();
+  await act(async () => hook.focus('tip'));
+  expect(scrollTo).toHaveBeenLastCalledWith({ y: 804, animated: true });
+  await act(async () =>
+    keyboard.get('keyboardDidShow')?.({
+      duration: 250,
+      easing: 'keyboard',
+      isEventFromThisApp: true,
+      startCoordinates: { height: 0, width: 360, screenX: 0, screenY: 800 },
+      endCoordinates: { height: 300, width: 360, screenX: 0, screenY: 500 },
+    }),
+  );
+  expect(scrollTo).toHaveBeenLastCalledWith({ y: 804, animated: true });
+  await act(async () => hook.contentResized());
+  await act(async () => jest.advanceTimersByTime(6000));
+  expect(focusReceived).not.toHaveBeenCalled();
+  expect(Keyboard.dismiss).not.toHaveBeenCalled();
+  expect(scrollToEnd).not.toHaveBeenCalled();
+});
+
+test('late tip measurement cannot scroll after collapse/blur', async () => {
+  let finish: ((x: number, y: number) => void) | undefined;
+  Object.assign(hook.tipRef, {
+    current: {
+      measureLayout: (_target: unknown, done: typeof finish) => {
+        finish = done;
+      },
+    },
+  });
+  await act(async () => hook.focus('tip'));
+  await act(async () => hook.blur('tip'));
+  await act(async () => finish?.(0, 800));
+  expect(scrollTo).not.toHaveBeenCalled();
+});
+
+test('Edit keeps focus scrolling while disabling Home automatic entry timers', async () => {
+  props = { ...props, automaticEntry: false };
+  await act(async () => app.update(<Probe />));
+  await act(async () => hook.focus('fare'));
+  await edit();
+  await act(async () => jest.advanceTimersByTime(6000));
+  expect(focusReceived).not.toHaveBeenCalled();
+  await act(async () => hook.focus('tip'));
+  expect(scrollTo).toHaveBeenLastCalledWith({ y: 804, animated: true });
+  await quickReceived();
+  await act(async () => jest.advanceTimersByTime(3000));
+  expect(Keyboard.dismiss).not.toHaveBeenCalled();
+});
 
 test('focus and keyboard resize smoothly align the whole field; five idle seconds focus received', async () => {
   await act(async () => hook.focus('fare'));
@@ -242,6 +348,17 @@ test('Reduce Motion disables animated scrolling', async () => {
   preference(true);
   await act(async () => hook.focus('fare'));
   expect(scrollTo).toHaveBeenLastCalledWith({ y: 304, animated: false });
+  Object.assign(hook.tipRef, {
+    current: {
+      measureLayout: (_target: unknown, done: (x: number, y: number) => void) =>
+        done(0, 800),
+    },
+  });
+  await act(async () => hook.focus('tip'));
+  expect(scrollTo).toHaveBeenLastCalledWith({ y: 804, animated: false });
+  await act(async () => hook.openTip());
+  await act(async () => jest.advanceTimersByTime(20));
+  expect(scrollTo).toHaveBeenLastCalledWith({ y: 804, animated: false });
 });
 
 async function enterReceived(received = '20', validReceived = true) {

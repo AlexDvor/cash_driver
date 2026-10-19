@@ -670,7 +670,7 @@ test('feedback occurs once after successful payment, disabled/failure does not a
   expect(feedback.trigger).toHaveBeenCalledTimes(1);
   expect(await services.transactions.list()).toHaveLength(1);
   expect(field('Importe a cobrar').props.value).toBe('');
-  expect(content()).toContain('Cobro registrado');
+  expect(content()).not.toContain('Cobro registrado');
   await press('Ajustes');
   await toggle(false);
   await press('Inicio');

@@ -9,7 +9,8 @@ import {
 export const styles = StyleSheet.create({
   container: {
     borderRadius: radii.input,
-    padding: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
   },
   header: {
     minHeight: sizing.touchTarget,

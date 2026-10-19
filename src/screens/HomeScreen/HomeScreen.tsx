@@ -6,7 +6,7 @@ import { ScreenContainer } from '../../ui/ScreenContainer/ScreenContainer';
 import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
 import { useLocalClock } from '../../hooks/app/useLocalClock';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
-import { formatLocalDateTime } from '../../i18n/formatting';
+import { formatLocalDate } from '../../i18n/formatting';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { DailySummary } from '../../components/DailySummary/DailySummary';
 import { useDailySummary } from '../../hooks/summary/useDailySummary';
@@ -61,12 +61,11 @@ export function HomeScreen() {
       onContentSizeChange={entryNavigation.contentResized}
     >
       <View style={styles.header}>
-        <AppText variant="title" accessibilityRole="header">
+        <AppText style={styles.title} accessibilityRole="header">
           {t('appName')}
         </AppText>
-        <AppText secondary>{t('subtitle')}</AppText>
         <AppText variant="supporting" secondary>
-          {formatLocalDateTime(clock.now, locale, clock.timeZone)}
+          {formatLocalDate(clock.now, locale, clock.timeZone)}
         </AppText>
       </View>
       <DailySummary

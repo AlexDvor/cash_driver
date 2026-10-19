@@ -308,8 +308,8 @@ test('persisted partial tip displays independently and edit refreshes history, d
     changeGivenCents: 2500,
     netCashCents: 2500,
   });
-  expect(displayedText('payment-success')).toMatch(
-    /Importe de viaje:.*20,00.*Propina:.*5,00/,
+  expect(app.root.findAllByProps({ testID: 'payment-success' })).toHaveLength(
+    0,
   );
   await press('Hoy · Mostrar totales');
   expect(displayedText('fareTotal')).toMatch(/20,00/);

@@ -1,7 +1,9 @@
 import type { Ref, ComponentRef } from 'react';
-import type { TextInput, View } from 'react-native';
+import type { LayoutChangeEvent, TextInput, View } from 'react-native';
 
 export interface MoneyInputProps {
+  showCurrency?: boolean;
+  onLayout?: (event: LayoutChangeEvent) => void;
   inputRef?: Ref<ComponentRef<typeof TextInput>>;
   groupRef?: Ref<ComponentRef<typeof View>>;
   label: string;

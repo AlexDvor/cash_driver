@@ -61,3 +61,16 @@ export function formatPeriodRange(
   const last = formatter.format(new Date(bounds.end.getTime() - 1));
   return first === last ? first : `${first} – ${last}`;
 }
+
+export function formatLocalDate(
+  date: Date,
+  locale: string,
+  timeZone: string,
+): string {
+  return new Intl.DateTimeFormat(locale, {
+    timeZone,
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
+}
