@@ -10,6 +10,7 @@ export interface Preferences {
   defaultPlatform: Platform;
   enabledPlatforms: Platform[];
   hapticsEnabled: boolean;
+  soundEnabled: boolean;
 }
 
 export function normalizeEnabledPlatforms(values: unknown): Platform[] {
@@ -35,6 +36,7 @@ export function decodePreferences(
     theme_mode: themeMode,
     default_platform: defaultPlatform,
     haptics_enabled: haptics,
+    sound_enabled: sound,
   } = row;
   const enabledPlatforms = normalizeEnabledPlatforms(enabledValues);
   if (
@@ -42,7 +44,8 @@ export function decodePreferences(
     (themeMode !== 'light' && themeMode !== 'dark' && themeMode !== 'system') ||
     !isPlatform(defaultPlatform) ||
     !enabledPlatforms.includes(defaultPlatform) ||
-    (haptics !== 0 && haptics !== 1)
+    (haptics !== 0 && haptics !== 1) ||
+    (sound !== 0 && sound !== 1)
   ) {
     throw new Error('Corrupt preferences');
   }
@@ -52,6 +55,7 @@ export function decodePreferences(
     defaultPlatform,
     enabledPlatforms,
     hapticsEnabled: haptics === 1,
+    soundEnabled: sound === 1,
   };
 }
 
@@ -83,6 +87,9 @@ export function createPreferencesRepository(db: SqlConnection) {
       if (typeof preferences.hapticsEnabled !== 'boolean') {
         throw new Error('Invalid haptics preference');
       }
+      if (typeof preferences.soundEnabled !== 'boolean') {
+        throw new Error('Invalid sound preference');
+      }
       const haptics = Number(preferences.hapticsEnabled);
       decodePreferences(
         {
@@ -90,17 +97,19 @@ export function createPreferencesRepository(db: SqlConnection) {
           theme_mode: preferences.themeMode,
           default_platform: preferences.defaultPlatform,
           haptics_enabled: haptics,
+          sound_enabled: Number(preferences.soundEnabled),
         },
         preferences.enabledPlatforms,
       );
       await db.transaction(async tx => {
         const result = await tx.execute(
-          'UPDATE preferences SET language = ?, theme_mode = ?, default_platform = ?, haptics_enabled = ? WHERE id = 1',
+          'UPDATE preferences SET language = ?, theme_mode = ?, default_platform = ?, haptics_enabled = ?, sound_enabled = ? WHERE id = 1',
           [
             preferences.language,
             preferences.themeMode,
             preferences.defaultPlatform,
             haptics,
+            Number(preferences.soundEnabled),
           ],
         );
         if (result.rowsAffected !== 1) {

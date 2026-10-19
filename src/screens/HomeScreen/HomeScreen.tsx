@@ -36,7 +36,11 @@ export function HomeScreen() {
   }, [hideSummary]);
   const clock = useLocalClock();
   const daily = useDailySummary(clock);
-  const onSubmit = useCreatePayment(services, preferences.hapticsEnabled);
+  const onSubmit = useCreatePayment(
+    services,
+    preferences.hapticsEnabled,
+    preferences.soundEnabled,
+  );
   const form = usePaymentForm({
     initialPlatform: preferences.defaultPlatform,
     allowedPlatforms: preferences.enabledPlatforms,

@@ -209,6 +209,7 @@ export function SettingsScreen() {
           </View>
           <View
             pointerEvents="none"
+            accessibilityElementsHidden
             importantForAccessibility="no-hide-descendants"
           >
             <Switch
@@ -216,6 +217,41 @@ export function SettingsScreen() {
               importantForAccessibility="no"
               testID="settings-haptics-switch"
               value={preferences.hapticsEnabled}
+              disabled={disabled}
+              trackColor={{ false: colors.border, true: colors.primary }}
+            />
+          </View>
+        </Pressable>
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+        <Pressable
+          accessibilityRole="switch"
+          accessibilityLabel={t('confirmationSound')}
+          accessibilityState={{ checked: preferences.soundEnabled, disabled }}
+          disabled={disabled}
+          onPress={() => {
+            updatePreferences({ soundEnabled: !preferences.soundEnabled });
+          }}
+          style={({ pressed }) => [
+            styles.hapticsRow,
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          <View style={styles.hapticsText}>
+            <AppText>{t('confirmationSound')}</AppText>
+            <AppText variant="supporting" secondary>
+              {t('soundHelp')}
+            </AppText>
+          </View>
+          <View
+            pointerEvents="none"
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+          >
+            <Switch
+              accessible={false}
+              importantForAccessibility="no"
+              testID="settings-sound-switch"
+              value={preferences.soundEnabled}
               disabled={disabled}
               trackColor={{ false: colors.border, true: colors.primary }}
             />

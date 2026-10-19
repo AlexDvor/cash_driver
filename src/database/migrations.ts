@@ -1,7 +1,7 @@
 import { SqlConnection } from './sqlite';
 import { DEFAULT_HAPTICS_ENABLED } from '../features/settings/settingsDefaults';
 
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 // Version 1 is the documented transaction schema, with explicit SQLite type
 // and input-bound checks so INTEGER affinity cannot silently accept fractions.
@@ -102,12 +102,17 @@ export async function migrateDatabase(db: SqlConnection): Promise<void> {
         SELECT id, default_platform FROM preferences WHERE id = 1`);
       await tx.execute('PRAGMA user_version = 5');
     }
+    if (version < 6) {
+      await tx.execute(`ALTER TABLE preferences ADD COLUMN sound_enabled INTEGER NOT NULL DEFAULT 1
+        CHECK (typeof(sound_enabled) = 'integer' AND sound_enabled IN (0,1))`);
+      await tx.execute('PRAGMA user_version = 6');
+    }
     // Fail on missing tables even if user_version incorrectly claims readiness.
     await tx.execute(
       'SELECT id, platform, fare_amount_cents, cash_received_cents, change_given_cents, tip_cents, net_cash_cents, created_at, updated_at FROM transactions LIMIT 0',
     );
     await tx.execute(
-      'SELECT language, theme_mode, default_platform, haptics_enabled FROM preferences WHERE id = 1',
+      'SELECT language, theme_mode, default_platform, haptics_enabled, sound_enabled FROM preferences WHERE id = 1',
     );
     await tx.execute(
       'SELECT preference_id, platform FROM preference_enabled_platforms WHERE preference_id = 1 LIMIT 0',

@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+        A719C0340300000000000001 /* ConfirmationSound.mm in Sources */ = {isa = PBXBuildFile; fileRef = A719C0340300000000000002; };
+        A719C0340300000000000003 /* payment_confirmation.wav in Resources */ = {isa = PBXBuildFile; fileRef = A719C0340300000000000004; };
+        A719C0340300000000000005 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A719C0340300000000000006; };
 		A719C0340200000000000001 /* LocationPermission.mm in Sources */ = {isa = PBXBuildFile; fileRef = A719C0340200000000000002 /* LocationPermission.mm */; };
 		A719C0340200000000000003 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A719C0340200000000000004 /* InfoPlist.strings */; };
 		A719C0340100000000000001 /* AppVersion.mm in Sources */ = {isa = PBXBuildFile; fileRef = A719C0340100000000000002 /* AppVersion.mm */; };
@@ -17,6 +20,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+        A719C0340300000000000002 /* ConfirmationSound.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = ConfirmationSound.mm; path = CashDriver/ConfirmationSound.mm; sourceTree = "<group>"; };
+        A719C0340300000000000004 /* payment_confirmation.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; name = payment_confirmation.wav; path = CashDriver/payment_confirmation.wav; sourceTree = "<group>"; };
+        A719C0340300000000000006 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		A719C0340200000000000002 /* LocationPermission.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = LocationPermission.mm; path = CashDriver/LocationPermission.mm; sourceTree = "<group>"; };
 		A719C0340200000000000005 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = CashDriver/en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		A719C0340200000000000006 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = CashDriver/es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -40,6 +46,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0C80B921A6F3F58F76C31292 /* libPods-CashDriver.a in Frameworks */,
+                A719C0340300000000000005 /* AVFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -53,6 +60,8 @@
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
 				A719C0340100000000000002 /* AppVersion.mm */,
 				A719C0340200000000000002 /* LocationPermission.mm */,
+                A719C0340300000000000002 /* ConfirmationSound.mm */,
+                A719C0340300000000000004 /* payment_confirmation.wav */,
 				A719C0340200000000000004 /* InfoPlist.strings */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
@@ -65,6 +74,7 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
+                A719C0340300000000000006 /* AVFoundation.framework */,
 				5DCACB8F33CDC322A6C60F78 /* libPods-CashDriver.a */,
 			);
 			name = Frameworks;
@@ -173,6 +183,7 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				A719C0340200000000000003 /* InfoPlist.strings in Resources */,
+                A719C0340300000000000003 /* payment_confirmation.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -261,6 +272,7 @@
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
 				A719C0340100000000000001 /* AppVersion.mm in Sources */,
 				A719C0340200000000000001 /* LocationPermission.mm in Sources */,
+                A719C0340300000000000001 /* ConfirmationSound.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

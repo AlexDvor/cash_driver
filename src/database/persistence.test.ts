@@ -101,6 +101,7 @@ test('preference decoding rejects noncanonical platform values rather than guess
           theme_mode: 'system',
           default_platform: defaultPlatform,
           haptics_enabled: 0,
+          sound_enabled: 1,
         },
         ['uber'],
       ),
@@ -195,6 +196,7 @@ test.each(['uber', 'cabify', 'bolt', 'other'] as const)(
       [defaultPlatform],
     );
     await db.execute('DROP TABLE preference_enabled_platforms');
+    await db.execute('ALTER TABLE preferences DROP COLUMN sound_enabled');
     await db.execute('PRAGMA user_version = 4');
     await migrateDatabase(db);
     expect(
@@ -220,6 +222,7 @@ test.each(['uber', 'cabify', 'bolt', 'other'] as const)(
 test('v5 migration failure rolls back its table, data and schema version', async () => {
   await migrateDatabase(db);
   await db.execute('DROP TABLE preference_enabled_platforms');
+  await db.execute('ALTER TABLE preferences DROP COLUMN sound_enabled');
   await db.execute('PRAGMA user_version = 4');
   const failing: SqlConnection = {
     ...db,
@@ -298,6 +301,7 @@ test('initializes once for simultaneous callers, reopens a file without losing o
       defaultPlatform: 'bolt',
       enabledPlatforms: ['bolt'],
       hapticsEnabled: true,
+      soundEnabled: true,
     });
     first.close();
     connection = openTestDatabase(path);
@@ -309,6 +313,7 @@ test('initializes once for simultaneous callers, reopens a file without losing o
       defaultPlatform: 'bolt',
       enabledPlatforms: ['bolt'],
       hapticsEnabled: true,
+      soundEnabled: true,
     });
     expect(
       (await connection.execute('PRAGMA user_version')).rows[0].user_version,
@@ -343,9 +348,79 @@ test('migration from v1 preserves rows, IDs, cents and creation time', async () 
     defaultPlatform: 'uber',
     enabledPlatforms: ['uber'],
     hapticsEnabled: false,
+    soundEnabled: true,
   });
   await migrateDatabase(db);
   expect(await services.transactions.list()).toHaveLength(1);
+});
+
+test('v5 sound migration preserves history/settings and later disabled choice survives migration', async () => {
+  const services = await testPersistence(db);
+  const saved = await services.transactions.save(
+    services.transactions.newPendingOperation(),
+    validInput,
+  );
+  await services.preferences.update({
+    language: 'uk',
+    themeMode: 'dark',
+    hapticsEnabled: true,
+    enabledPlatforms: ['cabify', 'bolt'],
+  });
+  const previous = await services.preferences.read();
+  await db.execute('ALTER TABLE preferences DROP COLUMN sound_enabled');
+  await db.execute('PRAGMA user_version = 5');
+  await migrateDatabase(db);
+  expect(await services.transactions.list()).toEqual([saved]);
+  expect(await services.preferences.read()).toEqual({
+    ...previous,
+    soundEnabled: true,
+  });
+  await services.preferences.update({ soundEnabled: false });
+  await migrateDatabase(db);
+  expect((await services.preferences.read()).soundEnabled).toBe(false);
+  await expect(
+    services.preferences.update(JSON.parse('{"soundEnabled":1}')),
+  ).rejects.toThrow('Invalid sound');
+  await expect(
+    db.execute('UPDATE preferences SET sound_enabled = 2'),
+  ).rejects.toThrow();
+  expect((await services.preferences.read()).soundEnabled).toBe(false);
+});
+
+test('failed v6 migration rolls back the added column and keeps history for retry', async () => {
+  const services = await testPersistence(db);
+  const saved = await services.transactions.save(
+    services.transactions.newPendingOperation(),
+    validInput,
+  );
+  await db.execute('ALTER TABLE preferences DROP COLUMN sound_enabled');
+  await db.execute('PRAGMA user_version = 5');
+  const failing: SqlConnection = {
+    ...db,
+    transaction: work =>
+      db.transaction(tx =>
+        work({
+          async execute(sql, params) {
+            const result = await tx.execute(sql, params);
+            if (sql.includes('ADD COLUMN sound_enabled'))
+              throw new Error('Injected v6 failure');
+            return result;
+          },
+        }),
+      ),
+  };
+  await expect(migrateDatabase(failing)).rejects.toThrow('Injected v6 failure');
+  expect((await db.execute('PRAGMA user_version')).rows[0].user_version).toBe(
+    5,
+  );
+  expect(
+    (await db.execute('PRAGMA table_info(preferences)')).rows.some(
+      row => row.name === 'sound_enabled',
+    ),
+  ).toBe(false);
+  expect(await services.transactions.list()).toEqual([saved]);
+  await migrateDatabase(db);
+  expect((await services.preferences.read()).soundEnabled).toBe(true);
 });
 
 test.each([null, 0, 1])(
@@ -361,6 +436,7 @@ test.each([null, 0, 1])(
       ['uk', 'dark', 'bolt', haptics],
     );
     await db.execute('DROP TABLE preference_enabled_platforms');
+    await db.execute('ALTER TABLE preferences DROP COLUMN sound_enabled');
     await db.execute('PRAGMA user_version = 2');
     await migrateDatabase(db);
     expect(await services.preferences.read()).toEqual({
@@ -369,6 +445,7 @@ test.each([null, 0, 1])(
       defaultPlatform: 'bolt',
       enabledPlatforms: ['bolt'],
       hapticsEnabled: haptics === 1,
+      soundEnabled: true,
     });
     expect(await services.transactions.get(row.id)).toEqual(row);
     await migrateDatabase(db);
@@ -653,6 +730,7 @@ test('failed writes roll back, preserve records/preferences and pending ID can r
     services.preferences.update({
       defaultPlatform: 'cabify',
       hapticsEnabled: false,
+      soundEnabled: true,
     }),
   ]);
   expect(await services.preferences.read()).toEqual({
@@ -661,6 +739,7 @@ test('failed writes roll back, preserve records/preferences and pending ID can r
     defaultPlatform: 'cabify',
     enabledPlatforms: ['uber', 'cabify'],
     hapticsEnabled: false,
+    soundEnabled: true,
   });
   await services.transactions.removeAll();
   expect((await services.preferences.read()).language).toBe('uk');

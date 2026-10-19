@@ -42,6 +42,7 @@ afterEach(async () => {
   await act(async () => app?.unmount());
   db.close();
   AppState.currentState = originalState;
+  delete NativeModules.CashDriverConfirmationSound;
   jest.restoreAllMocks();
   jest.useRealTimers();
 });
@@ -184,6 +185,7 @@ test('initial EUR/Spanish/system/Uber/disabled haptics and installed metadata; a
     defaultPlatform: 'uber',
     enabledPlatforms: ['uber', 'cabify'],
     hapticsEnabled: true,
+    soundEnabled: true,
   });
   await act(async () => app.unmount());
   await mount();
@@ -254,13 +256,67 @@ test('haptics has one accessible switch and one press persists one toggle', asyn
   const switches = app.root.findAll(
     node =>
       node.props.accessibilityRole === 'switch' &&
-      typeof node.props.onPress === 'function',
+      typeof node.props.onPress === 'function' &&
+      node.props.accessibilityLabel === 'Vibración al guardar',
   );
   expect(switches).toHaveLength(1);
   await press('Vibración al guardar');
   expect(update).toHaveBeenCalledTimes(1);
   expect(switchValue()).toBe(true);
   expect((await services.preferences.read()).hapticsEnabled).toBe(true);
+});
+
+test('sound has one accessible switch, toggles once and stays disabled after remount', async () => {
+  await mount();
+  await press('Ajustes');
+  const update = jest.spyOn(services.preferences, 'update');
+  expect(button('Sonido al guardar').props.accessibilityState.checked).toBe(
+    true,
+  );
+  const switches = app.root.findAll(
+    node =>
+      node.props.accessibilityRole === 'switch' &&
+      node.props.accessibilityLabel === 'Sonido al guardar' &&
+      typeof node.props.onPress === 'function',
+  );
+  expect(switches).toHaveLength(1);
+  await press('Sonido al guardar');
+  expect(update).toHaveBeenCalledTimes(1);
+  expect((await services.preferences.read()).soundEnabled).toBe(false);
+  expect(
+    app.root.findByProps({ testID: 'settings-sound-switch' }).props.accessible,
+  ).toBe(false);
+  await act(async () => app.unmount());
+  await mount();
+  await press('Ajustes');
+  expect(button('Sonido al guardar').props.accessibilityState.checked).toBe(
+    false,
+  );
+});
+
+test('sound failure cannot fail a committed payment; disabled sound and duplicate taps never replay', async () => {
+  const play = jest.fn(() => {
+    throw new Error('Audio unavailable');
+  });
+  NativeModules.CashDriverConfirmationSound = { play };
+  await mount();
+  await input('Importe a cobrar', '18');
+  await input('El cliente entrega', '20');
+  const confirm = button('Confirmar cobro').props.onPress;
+  await act(async () => {
+    await Promise.all([confirm(), confirm()]);
+  });
+  expect(play).toHaveBeenCalledTimes(1);
+  expect(await services.transactions.list()).toHaveLength(1);
+  expect(field('Importe a cobrar').props.value).toBe('');
+  await press('Ajustes');
+  await press('Sonido al guardar');
+  await press('Inicio');
+  await input('Importe a cobrar', '10');
+  await input('El cliente entrega', '10');
+  await press('Confirmar cobro');
+  expect(play).toHaveBeenCalledTimes(1);
+  expect(await services.transactions.list()).toHaveLength(2);
 });
 
 test('working platforms support one through four choices and protect the last choice', async () => {
@@ -537,7 +593,7 @@ test('two-platform payments remain in history and summary after disabling one, e
   expect(rowIds()).toHaveLength(2);
 });
 
-test.each(['language', 'theme', 'platform', 'haptics'])(
+test.each(['language', 'theme', 'platform', 'haptics', 'sound'])(
   'failed %s preference keeps committed value and retries original patch',
   async kind => {
     await mount();
@@ -558,6 +614,9 @@ test.each(['language', 'theme', 'platform', 'haptics'])(
     if (kind === 'haptics') {
       await toggle(true);
     }
+    if (kind === 'sound') {
+      await press('Sonido al guardar');
+    }
     expect(await services.preferences.read()).toEqual(original);
     expect(content()).toContain('No se pudo guardar');
     expect(switchValue()).toBe(false);
@@ -568,6 +627,7 @@ test.each(['language', 'theme', 'platform', 'haptics'])(
       theme: { themeMode: 'dark' },
       platform: { enabledPlatforms: ['uber', 'bolt'] },
       haptics: { hapticsEnabled: true },
+      sound: { soundEnabled: false },
     };
     expect(await services.preferences.read()).toMatchObject(
       changes[kind as keyof typeof changes],

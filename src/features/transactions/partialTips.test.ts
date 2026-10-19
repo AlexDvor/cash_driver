@@ -149,6 +149,7 @@ test.each([1, 2, 3])(
           theme_mode: 'dark',
           default_platform: 'bolt',
           haptics_enabled: 0,
+          sound_enabled: 1,
         },
       ]);
     }

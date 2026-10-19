@@ -48,6 +48,9 @@ export const es = {
   workingPlatformsHelp: 'Selecciona una o varias. Se mostrarán en Inicio.',
   workingPlatformsMinimum: 'Selecciona al menos una plataforma.',
   confirmationHaptics: 'Vibración al guardar',
+  confirmationSound: 'Sonido al guardar',
+  soundHelp:
+    'Señal breve al guardar un cobro. Respeta el volumen y el modo silencioso.',
   hapticsHelp:
     'Solo después de guardar un cobro, si el dispositivo y sus ajustes lo permiten.',
   appVersion: 'Versión de la aplicación',
@@ -221,6 +224,9 @@ export const en: Dictionary = {
   workingPlatformsHelp: 'Select one or more. They will appear in Home.',
   workingPlatformsMinimum: 'Select at least one platform.',
   confirmationHaptics: 'Vibration on save',
+  confirmationSound: 'Sound on save',
+  soundHelp:
+    'A short chime after saving a payment. Respects volume and silent mode.',
   hapticsHelp:
     'Only after saving a payment, when the device and its settings allow it.',
   appVersion: 'App version',
@@ -389,6 +395,9 @@ export const uk: Dictionary = {
   workingPlatformsHelp: 'Оберіть одну або кілька. Вони з’являться на Головній.',
   workingPlatformsMinimum: 'Оберіть принаймні одну платформу.',
   confirmationHaptics: 'Вібрація після збереження',
+  confirmationSound: 'Звук після збереження',
+  soundHelp:
+    'Короткий сигнал після збереження оплати. Враховує гучність і беззвучний режим.',
   hapticsHelp:
     'Лише після збереження оплати, якщо пристрій і його налаштування дозволяють.',
   appVersion: 'Версія застосунку',
