@@ -27,6 +27,7 @@ export const sizing = {
   contentMaxWidth: 640,
 };
 export interface Palette {
+  transparent: string;
   disabledSurface: string;
   disabledText: string;
   brandSurface: string;
@@ -44,6 +45,7 @@ export interface Palette {
 }
 export const palettes: Record<'light' | 'dark', Palette> = {
   light: {
+    transparent: 'transparent',
     disabledSurface: '#E5E7EB',
     disabledText: '#626975',
     brandSurface: '#FFFFFF',
@@ -60,6 +62,7 @@ export const palettes: Record<'light' | 'dark', Palette> = {
     errorSurface: '#FEF2F2',
   },
   dark: {
+    transparent: 'transparent',
     disabledSurface: '#303C35',
     disabledText: '#B0BEB6',
     // Original brand colors need a neutral backing in either appearance.
@@ -76,4 +79,8 @@ export const palettes: Record<'light' | 'dark', Palette> = {
     errorText: '#FFB4B4',
     errorSurface: '#921252',
   },
+};
+export const gradients = {
+  summaryHeroOverlay:
+    'radial-gradient(ellipse at 82% 38%, rgba(255, 255, 255, 0.19) 0%, transparent 68%), linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 35%, rgba(0, 0, 0, 0.23) 100%)',
 };

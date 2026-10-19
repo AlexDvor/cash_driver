@@ -18,7 +18,7 @@ export function ActionButton({
   const backgroundColor = blocked
     ? colors.disabledSurface
     : variant === 'destructive'
-    ? 'transparent'
+    ? colors.transparent
     : variant === 'secondary'
     ? colors.softGreen
     : colors.primary;
@@ -38,7 +38,10 @@ export function ActionButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
-        { backgroundColor, borderColor: pressed ? textColor : 'transparent' },
+        {
+          backgroundColor,
+          borderColor: pressed ? textColor : colors.transparent,
+        },
       ]}
     >
       {loading && <ActivityIndicator color={textColor} />}

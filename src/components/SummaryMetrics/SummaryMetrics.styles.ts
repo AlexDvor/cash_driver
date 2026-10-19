@@ -1,5 +1,10 @@
 import { StyleSheet } from 'react-native';
-import { radii, spacing, typography } from '../../constants/theme/tokens';
+import {
+  gradients,
+  radii,
+  spacing,
+  typography,
+} from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   hidden: { opacity: 0 },
@@ -13,8 +18,7 @@ export const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     left: 0,
-    backgroundImage:
-      'radial-gradient(ellipse at 82% 38%, rgba(255, 255, 255, 0.19) 0%, transparent 68%), linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 35%, rgba(0, 0, 0, 0.23) 100%)',
+    backgroundImage: gradients.summaryHeroOverlay,
   },
   statCards: {
     width: '100%',
