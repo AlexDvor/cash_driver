@@ -10,6 +10,7 @@ import ReactTestRenderer, { act } from 'react-test-renderer';
 import { ThemeProvider, useAppTheme } from './ThemeProvider';
 import { ChoiceGroup } from '../../ui/ChoiceGroup/ChoiceGroup';
 import { ThemeMode } from '../../theme/resolveTheme';
+import { requestSolarLocationPermission } from '../../features/settings/solarLocation';
 import { PersistenceProvider } from '../PersistenceProvider/PersistenceProvider';
 import {
   openTestDatabase,
@@ -18,6 +19,13 @@ import {
 
 // Exercise the real subscription hook instead of the preset's fixed light mock.
 jest.unmock('react-native/Libraries/Utilities/useColorScheme');
+jest.mock('../../features/settings/solarLocation', () => ({
+  hasSolarLocationPermission: jest.fn(async () => false),
+  requestSolarLocationPermission: jest.fn(async () => false),
+  watchSolarLocation: jest.fn(),
+}));
+
+beforeEach(() => jest.clearAllMocks());
 
 function ThemeProbe() {
   const { appearance, mode, setMode } = useAppTheme();
@@ -38,6 +46,58 @@ function ThemeProbe() {
     </>
   );
 }
+
+test('only an explicit successfully committed Automatic selection requests location', async () => {
+  jest.mocked(requestSolarLocationPermission).mockClear();
+  const db = openTestDatabase();
+  const services = await testPersistence(db);
+  await services.preferences.update({ themeMode: 'light' });
+  const initialize = async () => services;
+  const initialState = AppState.currentState;
+  AppState.currentState = 'active';
+  let app: ReactTestRenderer.ReactTestRenderer | undefined;
+  const mount = async () => {
+    await act(async () => {
+      app = ReactTestRenderer.create(
+        <PersistenceProvider initialize={initialize}>
+          <ThemeProvider>
+            <ThemeProbe />
+          </ThemeProvider>
+        </PersistenceProvider>,
+      );
+    });
+  };
+  const selectSystem = async () => {
+    const button = app!.root.findAll(
+      node =>
+        node.props.accessibilityRole === 'radio' &&
+        node.props.accessibilityLabel === 'system' &&
+        typeof node.props.onPress === 'function',
+    )[0];
+    await act(async () => button.props.onPress());
+  };
+  try {
+    await mount();
+    expect(requestSolarLocationPermission).not.toHaveBeenCalled();
+    jest
+      .spyOn(services.preferences, 'update')
+      .mockRejectedValueOnce(new Error('write failed'));
+    await selectSystem();
+    expect(requestSolarLocationPermission).not.toHaveBeenCalled();
+    expect((await services.preferences.read()).themeMode).toBe('light');
+    await selectSystem();
+    expect((await services.preferences.read()).themeMode).toBe('system');
+    expect(requestSolarLocationPermission).toHaveBeenCalledTimes(1);
+    await act(async () => app!.unmount());
+    await mount();
+    expect(requestSolarLocationPermission).toHaveBeenCalledTimes(1);
+  } finally {
+    await act(async () => app?.unmount());
+    AppState.currentState = initialState;
+    jest.restoreAllMocks();
+    db.close();
+  }
+});
 
 test('reacts to system changes, keeps explicit override, and unsubscribes on unmount', async () => {
   jest.replaceProperty(Platform, 'OS', 'android');

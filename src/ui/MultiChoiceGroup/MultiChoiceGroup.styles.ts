@@ -12,11 +12,11 @@ export const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     gap: spacing.sm,
     flexShrink: 1,
   },
-  choiceLabel: { textAlign: 'center', flexShrink: 1 },
+  choiceLabel: { flex: 1, flexShrink: 1 },
   checked: { fontWeight: '700' },
   pressed: { opacity: 0.8 },
 });

@@ -7,6 +7,7 @@ import { styles } from './ActionButton.styles';
 import { ActionButtonProps } from './ActionButton.interface';
 
 export function ActionButton({
+  renderIcon,
   label,
   onPress,
   disabled = false,
@@ -45,6 +46,7 @@ export function ActionButton({
       ]}
     >
       {loading && <ActivityIndicator color={textColor} />}
+      {!loading && renderIcon?.(textColor)}
       <AppText style={[styles.label, { color: textColor }]}>{label}</AppText>
     </Pressable>
   );

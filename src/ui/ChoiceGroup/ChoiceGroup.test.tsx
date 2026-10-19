@@ -4,7 +4,8 @@ import { ChoiceGroup } from './ChoiceGroup';
 import { palettes as mockPalettes } from '../../constants/theme/tokens';
 import { PlatformIcon } from '../../components/PlatformIcon/PlatformIcon';
 import { MultiChoiceGroup } from '../MultiChoiceGroup/MultiChoiceGroup';
-import { Image, StyleSheet, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, View } from 'react-native';
+import { SelectionIndicator } from '../SelectionIndicator/SelectionIndicator';
 
 jest.mock('../../providers/ThemeProvider/ThemeProvider', () => ({
   useAppTheme: () => ({ colors: mockPalettes.light }),
@@ -15,6 +16,174 @@ const options = [
   { value: 'week', label: 'Semana' },
   { value: 'month', label: 'Mes' },
 ];
+
+test.each([1, 1.1, 1.8])(
+  'single-row choices retain full-size labels and selection at font scale %s',
+  async fontScale => {
+    const dimensions = jest
+      .spyOn(
+        jest.requireActual<typeof import('react-native')>('react-native'),
+        'useWindowDimensions',
+      )
+      .mockReturnValue({ width: 384, height: 800, scale: 1, fontScale });
+    const onChange = jest.fn();
+    let app: Renderer.ReactTestRenderer;
+    try {
+      await act(async () => {
+        app = Renderer.create(
+          <ChoiceGroup
+            layout="single-row"
+            showSelectionIndicator
+            label="Language"
+            options={['Español', 'English', 'Українська'].map(value => ({
+              value,
+              label: value,
+            }))}
+            value="English"
+            onChange={onChange}
+          />,
+        );
+      });
+      const row = app!.root.findByType(ScrollView);
+      expect(row.props.horizontal).toBe(true);
+      expect(
+        StyleSheet.flatten(row.props.contentContainerStyle).flexWrap,
+      ).toBeUndefined();
+      await act(async () =>
+        row.props.onLayout({ nativeEvent: { layout: { width: 312 } } }),
+      );
+      const buttons = app!.root.findAll(
+        node =>
+          node.props.accessibilityRole === 'radio' &&
+          typeof node.props.onPress === 'function',
+      );
+      const extent =
+        buttons.reduce(
+          (sum, node) =>
+            sum +
+            StyleSheet.flatten(node.props.style({ pressed: false })).width,
+          0,
+        ) + 16;
+      if (fontScale <= 1.1) {
+        expect(extent).toBeLessThanOrEqual(312);
+      } else {
+        expect(extent).toBeGreaterThan(312);
+      }
+      expect(buttons.map(node => node.props.accessibilityLabel)).toEqual([
+        'Español',
+        'English',
+        'Українська',
+      ]);
+      expect(buttons[1].props.accessibilityState.selected).toBe(true);
+      await act(async () => buttons[2].props.onPress());
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith('Українська');
+    } finally {
+      await act(async () => app!?.unmount());
+      dimensions.mockRestore();
+    }
+  },
+);
+
+test('selection indicators are opt-in, decorative, and follow the controlled selection', async () => {
+  let app: Renderer.ReactTestRenderer;
+  const onChange = jest.fn();
+  const render = (showSelectionIndicator?: boolean, value = 'day') => (
+    <ChoiceGroup
+      label="Period"
+      options={options}
+      value={value}
+      onChange={onChange}
+      showSelectionIndicator={showSelectionIndicator}
+    />
+  );
+  await act(async () => {
+    app = Renderer.create(render());
+  });
+  expect(app!.root.findAllByType(SelectionIndicator)).toHaveLength(0);
+  await act(async () => app!.update(render(true)));
+  expect(
+    app!.root.findAllByType(SelectionIndicator).map(node => node.props.checked),
+  ).toEqual([true, false, false]);
+  const hidden = app!.root
+    .findAllByType(View)
+    .filter(node => node.props.accessibilityElementsHidden);
+  expect(hidden).toHaveLength(3);
+  hidden.forEach(node => {
+    expect(node.props.accessible).toBe(false);
+    expect(node.props.importantForAccessibility).toBe('no-hide-descendants');
+    expect(node.props.onPress).toBeUndefined();
+  });
+  await act(async () => app!.update(render(true, 'month')));
+  expect(
+    app!.root.findAllByType(SelectionIndicator).map(node => node.props.checked),
+  ).toEqual([false, false, true]);
+  expect(onChange).not.toHaveBeenCalled();
+  await act(async () => app!.unmount());
+});
+
+test('platform checkboxes reflow with marker space while preserving the applied list', async () => {
+  const dimensions = jest
+    .spyOn(
+      jest.requireActual<typeof import('react-native')>('react-native'),
+      'useWindowDimensions',
+    )
+    .mockReturnValue({
+      width: 400,
+      height: 800,
+      scale: 1,
+      fontScale: 1,
+    });
+  let app: Renderer.ReactTestRenderer;
+  const onToggle = jest.fn();
+  await act(async () => {
+    app = Renderer.create(
+      <MultiChoiceGroup
+        label="Platforms"
+        options={['Uber', 'Cabify', 'Bolt', 'Otro'].map(value => ({
+          value,
+          label: value,
+        }))}
+        values={['Uber', 'Bolt']}
+        lastChoiceHint="Keep one"
+        onToggle={onToggle}
+      />,
+    );
+  });
+  const buttons = () =>
+    app!.root.findAll(
+      node =>
+        node.props.accessibilityRole === 'checkbox' &&
+        typeof node.props.onPress === 'function',
+    );
+  const container = app!.root
+    .findAllByType(View)
+    .find(node => node.props.onLayout)!;
+  await act(async () =>
+    container.props.onLayout({ nativeEvent: { layout: { width: 360 } } }),
+  );
+  expect(
+    StyleSheet.flatten(buttons()[0].props.style({ pressed: false })).width,
+  ).toBe(176);
+  expect(
+    app!.root.findAllByType(SelectionIndicator).map(node => node.props.checked),
+  ).toEqual([true, false, true, false]);
+  await act(async () =>
+    container.props.onLayout({ nativeEvent: { layout: { width: 220 } } }),
+  );
+  expect(
+    StyleSheet.flatten(buttons()[0].props.style({ pressed: false })).width,
+  ).toBe(220);
+  expect(buttons().map(node => node.props.accessibilityState.checked)).toEqual([
+    true,
+    false,
+    true,
+    false,
+  ]);
+  expect(onToggle).not.toHaveBeenCalled();
+  await act(async () => app!.unmount());
+  dimensions.mockRestore();
+});
 
 test('platform filters use measured capacity and preserve selection when the row no longer fits', async () => {
   let app: Renderer.ReactTestRenderer;

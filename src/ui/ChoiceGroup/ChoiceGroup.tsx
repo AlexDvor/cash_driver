@@ -1,13 +1,16 @@
 import React, { useState } from 'react';
-import { Pressable, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { sizing, spacing, typography } from '../../constants/theme/tokens';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 
 import { AppText } from '../AppText/AppText';
 import { styles } from './ChoiceGroup.styles';
 import { ChoiceGroupProps } from './ChoiceGroup.interface';
+import { SelectionIndicator } from '../SelectionIndicator/SelectionIndicator';
 
 export function ChoiceGroup<Value extends string>({
+  layout = 'wrap',
+  showSelectionIndicator = false,
   appearance = 'chips',
   columns,
   iconLayout = 'stacked',
@@ -19,8 +22,24 @@ export function ChoiceGroup<Value extends string>({
   onChange,
 }: ChoiceGroupProps<Value>) {
   const { colors } = useAppTheme();
-  const { fontScale } = useWindowDimensions();
+  const { fontScale = 1 } = useWindowDimensions();
   const [availableWidth, setAvailableWidth] = useState(0);
+  const singleRow = layout === 'single-row';
+  const Container = singleRow ? ScrollView : View;
+  const minimumWidths = options.map(option =>
+    Math.max(
+      sizing.touchTarget,
+      // Reserve full labels at the current font scale; scroll rather than shrink.
+      option.label.length * typography.body * 0.6 * fontScale + spacing.sm,
+      option.icon && showSelectionIndicator ? sizing.icon * 3 + spacing.sm : 0,
+    ),
+  );
+  const spareWidth = Math.max(
+    0,
+    availableWidth -
+      spacing.sm * (options.length - 1) -
+      minimumWidths.reduce((sum, width) => sum + width, 0),
+  );
   // Keep the longest word readable instead of breaking platform names into letters.
   const longestWord = Math.max(
     0,
@@ -54,15 +73,22 @@ export function ChoiceGroup<Value extends string>({
       <AppText variant={headingVariant} accessibilityRole="header">
         {label}
       </AppText>
-      <View
-        style={styles.choices}
+      <Container
+        style={singleRow ? styles.singleRowViewport : styles.choices}
+        {...(singleRow
+          ? {
+              horizontal: true,
+              showsHorizontalScrollIndicator: true,
+              contentContainerStyle: styles.singleRow,
+            }
+          : {})}
         onLayout={
-          appearance === 'segmented' || columns !== undefined
+          singleRow || appearance === 'segmented' || columns !== undefined
             ? event => setAvailableWidth(event.nativeEvent.layout.width)
             : undefined
         }
       >
-        {options.map(option => {
+        {options.map((option, index) => {
           const selected = option.value === value;
           return (
             <Pressable
@@ -76,7 +102,16 @@ export function ChoiceGroup<Value extends string>({
                 styles.choice,
                 (columns === 'equal' || columns === 'filters') &&
                   styles.equalChoice,
-                inlineIcons && styles.inline,
+                !singleRow &&
+                  (inlineIcons || showSelectionIndicator) &&
+                  styles.inline,
+                singleRow && styles.compactChoice,
+                singleRow && {
+                  width: Math.floor(
+                    minimumWidths[index] + spareWidth / options.length,
+                  ),
+                  flexShrink: 0,
+                },
                 appearance === 'segmented' && styles.segment,
                 appearance === 'segmented' && {
                   // Wrap segments before enlarged labels become narrow columns.
@@ -108,11 +143,37 @@ export function ChoiceGroup<Value extends string>({
                 pressed && appearance === 'segmented' && styles.pressed,
               ]}
             >
-              {option.icon}
+              {singleRow && (Boolean(option.icon) || showSelectionIndicator) ? (
+                <View
+                  style={[
+                    styles.decorationRow,
+                    Boolean(option.icon) &&
+                      showSelectionIndicator &&
+                      styles.centeredDecoration,
+                  ]}
+                >
+                  {Boolean(option.icon) && showSelectionIndicator && (
+                    <View style={styles.decorationSide} />
+                  )}
+                  {option.icon}
+                  {showSelectionIndicator &&
+                    (option.icon ? (
+                      <View style={styles.decorationSide}>
+                        <SelectionIndicator checked={selected} round />
+                      </View>
+                    ) : (
+                      <SelectionIndicator checked={selected} round />
+                    ))}
+                </View>
+              ) : (
+                option.icon
+              )}
               <AppText
                 style={[
                   styles.label,
-                  inlineIcons && styles.inlineLabel,
+                  !singleRow &&
+                    (inlineIcons || showSelectionIndicator) &&
+                    styles.inlineLabel,
                   selected && styles.selected,
                   {
                     color: selected ? colors.primary : colors.text,
@@ -121,10 +182,13 @@ export function ChoiceGroup<Value extends string>({
               >
                 {option.label}
               </AppText>
+              {!singleRow && showSelectionIndicator && (
+                <SelectionIndicator checked={selected} round />
+              )}
             </Pressable>
           );
         })}
-      </View>
+      </Container>
     </View>
   );
 }

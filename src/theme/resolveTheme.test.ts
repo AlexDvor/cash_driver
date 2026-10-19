@@ -1,6 +1,6 @@
 import { resolveTheme } from './resolveTheme';
 
-test('automatic mode follows the system and falls back to light', () => {
+test('automatic fallback follows the system and falls back to light', () => {
   expect(resolveTheme('system', 'dark')).toBe('dark');
   expect(resolveTheme('system', 'light')).toBe('light');
   expect(resolveTheme('system', null)).toBe('light');

@@ -3,6 +3,17 @@ export const es = {
   appearanceSection: 'Apariencia',
   workSection: 'Trabajo',
   appDataSection: 'App y datos',
+  appSection: 'App',
+  deviceDataSection: 'Datos del dispositivo',
+  localStorageTitle: 'Historial guardado solo en este dispositivo',
+  lightThemeHelp: 'Tema claro activado.',
+  darkThemeHelp: 'Tema oscuro activado.',
+  solarThemeHelp:
+    'Tema claro de día y oscuro de noche, según el amanecer y el anochecer de tu ubicación. La ubicación no se guarda ni se comparte.',
+  solarThemeLocating:
+    'Obteniendo ubicación para calcular el amanecer y el anochecer. Mientras tanto se usa el tema del dispositivo.',
+  solarThemeFallback:
+    'Sin ubicación disponible: se usa el tema del dispositivo. Permite la ubicación en los ajustes del teléfono y vuelve a seleccionar Automático.',
   dataRefreshing: 'Actualizando… Se muestran los datos anteriores.',
   dataRefreshFailed: 'Datos anteriores; actualización fallida',
   historyLoadMore: 'Cargar más operaciones',
@@ -34,9 +45,9 @@ export const es = {
   defaultPlatformHelp:
     'Se actualiza también al elegir una plataforma en Inicio.',
   workingPlatforms: 'Plataformas de trabajo',
-  workingPlatformsHelp: 'Estas plataformas aparecerán en Inicio.',
+  workingPlatformsHelp: 'Selecciona una o varias. Se mostrarán en Inicio.',
   workingPlatformsMinimum: 'Selecciona al menos una plataforma.',
-  confirmationHaptics: 'Confirmación háptica',
+  confirmationHaptics: 'Vibración al guardar',
   hapticsHelp:
     'Solo después de guardar un cobro, si el dispositivo y sus ajustes lo permiten.',
   appVersion: 'Versión de la aplicación',
@@ -165,6 +176,17 @@ export const en: Dictionary = {
   appearanceSection: 'Appearance',
   workSection: 'Work',
   appDataSection: 'App and data',
+  appSection: 'App',
+  deviceDataSection: 'Device data',
+  localStorageTitle: 'History saved only on this device',
+  lightThemeHelp: 'Light theme enabled.',
+  darkThemeHelp: 'Dark theme enabled.',
+  solarThemeHelp:
+    'Light by day and dark by night, using sunrise and sunset at your location. Location is not saved or shared.',
+  solarThemeLocating:
+    'Getting location to calculate sunrise and sunset. The device theme is used in the meantime.',
+  solarThemeFallback:
+    'Location unavailable: using the device theme. Allow location in phone settings, then select Automatic again.',
   dataRefreshing: 'Updating… Showing previous data.',
   dataRefreshFailed: 'Previous data; update failed',
   historyLoadMore: 'Load more operations',
@@ -195,9 +217,9 @@ export const en: Dictionary = {
   defaultPlatform: 'Default platform',
   defaultPlatformHelp: 'Also updated when you select a platform in Home.',
   workingPlatforms: 'Working platforms',
-  workingPlatformsHelp: 'These platforms will appear in Home.',
+  workingPlatformsHelp: 'Select one or more. They will appear in Home.',
   workingPlatformsMinimum: 'Select at least one platform.',
-  confirmationHaptics: 'Confirmation haptics',
+  confirmationHaptics: 'Vibration on save',
   hapticsHelp:
     'Only after saving a payment, when the device and its settings allow it.',
   appVersion: 'App version',
@@ -320,6 +342,17 @@ export const uk: Dictionary = {
   appearanceSection: 'Вигляд',
   workSection: 'Робота',
   appDataSection: 'Застосунок і дані',
+  appSection: 'Застосунок',
+  deviceDataSection: 'Дані пристрою',
+  localStorageTitle: 'Історія зберігається лише на цьому пристрої',
+  lightThemeHelp: 'Увімкнено світлу тему.',
+  darkThemeHelp: 'Увімкнено темну тему.',
+  solarThemeHelp:
+    'Світла вдень і темна вночі — за сходом та заходом сонця у вашому місці перебування. Геопозиція не зберігається й не передається.',
+  solarThemeLocating:
+    'Визначаємо місце для розрахунку сходу й заходу сонця. Поки використовується тема пристрою.',
+  solarThemeFallback:
+    'Геопозиція недоступна: використовується тема пристрою. Дозвольте геолокацію в налаштуваннях телефона й повторно оберіть «Автоматична».',
   dataRefreshing: 'Оновлення… Показано попередні дані.',
   dataRefreshFailed: 'Попередні дані; оновлення не вдалося',
   historyLoadMore: 'Завантажити більше операцій',
@@ -351,9 +384,9 @@ export const uk: Dictionary = {
   defaultPlatform: 'Платформа за замовчуванням',
   defaultPlatformHelp: 'Також оновлюється після вибору платформи на Головній.',
   workingPlatforms: 'Робочі платформи',
-  workingPlatformsHelp: 'Ці платформи відображатимуться на Головній.',
+  workingPlatformsHelp: 'Оберіть одну або кілька. Вони з’являться на Головній.',
   workingPlatformsMinimum: 'Оберіть принаймні одну платформу.',
-  confirmationHaptics: 'Вібровідгук підтвердження',
+  confirmationHaptics: 'Вібрація після збереження',
   hapticsHelp:
     'Лише після збереження оплати, якщо пристрій і його налаштування дозволяють.',
   appVersion: 'Версія застосунку',

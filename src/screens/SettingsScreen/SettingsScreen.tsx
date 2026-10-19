@@ -13,6 +13,7 @@ import { Card } from '../../ui/Card/Card';
 import { ChoiceGroup } from '../../ui/ChoiceGroup/ChoiceGroup';
 import { MultiChoiceGroup } from '../../ui/MultiChoiceGroup/MultiChoiceGroup';
 import { PlatformIcon } from '../../components/PlatformIcon/PlatformIcon';
+import { SettingsIcon } from '../../components/SettingsIcon/SettingsIcon';
 import { ScreenContainer } from '../../ui/ScreenContainer/ScreenContainer';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { languageOptions } from '../../i18n/translations';
@@ -24,7 +25,7 @@ import { styles } from './SettingsScreen.styles';
 
 export function SettingsScreen() {
   const { t, language } = useTranslation();
-  const { colors } = useAppTheme();
+  const { colors, setMode, automaticThemeStatus } = useAppTheme();
   const { preferences, saving, errorKey, updatePreferences, retryPreferences } =
     usePersistence();
   const deletion = useDeletion();
@@ -77,6 +78,7 @@ export function SettingsScreen() {
           {t('appearanceSection')}
         </AppText>
         <ChoiceGroup
+          layout="single-row"
           label={t('language')}
           headingVariant="body"
           options={languageOptions}
@@ -88,21 +90,70 @@ export function SettingsScreen() {
         />
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
         <ChoiceGroup
+          layout="single-row"
           label={t('theme')}
+          iconLayout="inline"
           headingVariant="body"
           value={preferences.themeMode}
-          onChange={value => {
-            updatePreferences({ themeMode: value });
-          }}
+          onChange={setMode}
           disabled={disabled}
           options={[
-            { value: 'light', label: t('light') },
-            { value: 'dark', label: t('dark') },
-            { value: 'system', label: t('system') },
+            {
+              value: 'light',
+              label: t('light'),
+              icon: (
+                <SettingsIcon
+                  name="sun"
+                  color={
+                    preferences.themeMode === 'light'
+                      ? colors.primary
+                      : colors.text
+                  }
+                />
+              ),
+            },
+            {
+              value: 'dark',
+              label: t('dark'),
+              icon: (
+                <SettingsIcon
+                  name="moon"
+                  color={
+                    preferences.themeMode === 'dark'
+                      ? colors.primary
+                      : colors.text
+                  }
+                />
+              ),
+            },
+            {
+              value: 'system',
+              label: t('system'),
+              icon: (
+                <SettingsIcon
+                  name="phone"
+                  color={
+                    preferences.themeMode === 'system'
+                      ? colors.primary
+                      : colors.text
+                  }
+                />
+              ),
+            },
           ]}
         />
         <AppText variant="supporting" secondary>
-          {t('systemHelp')}
+          {t(
+            preferences.themeMode === 'system'
+              ? automaticThemeStatus === 'solar'
+                ? 'solarThemeHelp'
+                : automaticThemeStatus === 'locating'
+                ? 'solarThemeLocating'
+                : 'solarThemeFallback'
+              : preferences.themeMode === 'dark'
+              ? 'darkThemeHelp'
+              : 'lightThemeHelp',
+          )}
         </AppText>
       </Card>
       <Card style={styles.section}>
@@ -111,6 +162,7 @@ export function SettingsScreen() {
         </AppText>
         <MultiChoiceGroup
           label={t('workingPlatforms')}
+          description={t('workingPlatformsHelp')}
           options={platforms.map(value => ({
             value,
             label: platformLabels[value],
@@ -133,9 +185,6 @@ export function SettingsScreen() {
           disabled={disabled}
         />
         <AppText variant="supporting" secondary>
-          {t('workingPlatformsHelp')}
-        </AppText>
-        <AppText variant="supporting" secondary>
           {t('workingPlatformsMinimum')}
         </AppText>
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
@@ -147,11 +196,17 @@ export function SettingsScreen() {
           onPress={() => {
             updatePreferences({ hapticsEnabled: !preferences.hapticsEnabled });
           }}
-          style={({ pressed }) => [styles.row, pressed && { opacity: 0.7 }]}
+          style={({ pressed }) => [
+            styles.hapticsRow,
+            pressed && { opacity: 0.7 },
+          ]}
         >
-          <AppText style={styles.toggleLabel}>
-            {t('confirmationHaptics')}
-          </AppText>
+          <View style={styles.hapticsText}>
+            <AppText>{t('confirmationHaptics')}</AppText>
+            <AppText variant="supporting" secondary>
+              {t('hapticsHelp')}
+            </AppText>
+          </View>
           <View
             pointerEvents="none"
             importantForAccessibility="no-hide-descendants"
@@ -166,40 +221,57 @@ export function SettingsScreen() {
             />
           </View>
         </Pressable>
-        <AppText variant="supporting" secondary>
-          {t('hapticsHelp')}
-        </AppText>
       </Card>
       <Card style={styles.section}>
         <AppText variant="heading" accessibilityRole="header">
-          {t('appDataSection')}
+          {t('appSection')}
         </AppText>
-        <View style={styles.row}>
-          <AppText>{t('currency')}</AppText>
-          <AppText>EUR (€)</AppText>
-        </View>
-        {version ? (
+        <View>
           <View style={styles.row}>
-            <AppText style={styles.toggleLabel}>{t('appVersion')}</AppText>
-            <AppText testID="app-version">
-              {version.version} ({version.build})
+            <AppText style={styles.toggleLabel}>{t('currency')}</AppText>
+            <AppText>EUR (€)</AppText>
+          </View>
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
+          {version ? (
+            <View style={styles.row}>
+              <AppText style={styles.toggleLabel}>{t('appVersion')}</AppText>
+              <AppText testID="app-version">
+                {version.version} ({version.build})
+              </AppText>
+            </View>
+          ) : (
+            <View style={[styles.section, styles.versionError]}>
+              <AppText accessibilityRole="alert">
+                {t('versionUnavailable')}
+              </AppText>
+              <ActionButton
+                label={t('retryVersion')}
+                onPress={() => setVersion(readAppVersion())}
+              />
+            </View>
+          )}
+        </View>
+      </Card>
+      <Card style={styles.section}>
+        <AppText variant="heading" accessibilityRole="header">
+          {t('deviceDataSection')}
+        </AppText>
+        <View style={styles.storageRow}>
+          <SettingsIcon
+            name="database"
+            color={colors.secondaryText}
+            size={32}
+          />
+          <View style={styles.storageText}>
+            <AppText style={styles.storageTitle}>
+              {t('localStorageTitle')}
+            </AppText>
+            <AppText variant="supporting" secondary>
+              {t('localStorageHelp')}
             </AppText>
           </View>
-        ) : (
-          <>
-            <AppText accessibilityRole="alert">
-              {t('versionUnavailable')}
-            </AppText>
-            <ActionButton
-              label={t('retryVersion')}
-              onPress={() => setVersion(readAppVersion())}
-            />
-          </>
-        )}
+        </View>
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
-        <AppText variant="supporting" secondary>
-          {t('localStorageHelp')}
-        </AppText>
         {deletion.allStatus === 'error' && (
           <AppText
             accessibilityRole="alert"
@@ -213,16 +285,27 @@ export function SettingsScreen() {
             {t('deleteAllSuccess')}
           </AppText>
         )}
-        <ActionButton
-          variant="destructive"
-          label={deleting ? t('deletingAll') : t('deleteAll')}
-          loading={deleting}
-          disabled={disabled || deletion.state.status !== 'idle'}
-          onPress={confirmClear}
-        />
+        <View style={styles.destructiveAction}>
+          <View
+            pointerEvents="none"
+            style={[
+              styles.destructiveBackground,
+              { backgroundColor: colors.errorText },
+            ]}
+          />
+          <ActionButton
+            variant="destructive"
+            renderIcon={color => <SettingsIcon name="trash" color={color} />}
+            label={deleting ? t('deletingAll') : t('deleteAll')}
+            loading={deleting}
+            disabled={disabled || deletion.state.status !== 'idle'}
+            onPress={confirmClear}
+          />
+        </View>
         {deletion.allStatus === 'error' && (
           <ActionButton
             variant="destructive"
+            renderIcon={color => <SettingsIcon name="trash" color={color} />}
             label={t('retryDeleteAll')}
             disabled={disabled || deletion.state.status !== 'idle'}
             onPress={confirmClear}

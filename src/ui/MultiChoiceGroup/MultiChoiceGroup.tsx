@@ -1,12 +1,14 @@
 import React, { useState, type ReactNode } from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
-import { spacing } from '../../constants/theme/tokens';
+import { sizing, spacing, typography } from '../../constants/theme/tokens';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../AppText/AppText';
 import { styles } from './MultiChoiceGroup.styles';
+import { SelectionIndicator } from '../SelectionIndicator/SelectionIndicator';
 
 interface MultiChoiceGroupProps<Value extends string> {
   label: string;
+  description?: string;
   options: { value: Value; label: string; icon?: ReactNode }[];
   values: readonly Value[];
   disabled?: boolean;
@@ -16,6 +18,7 @@ interface MultiChoiceGroupProps<Value extends string> {
 
 export function MultiChoiceGroup<Value extends string>({
   label,
+  description,
   options,
   values,
   disabled = false,
@@ -25,10 +28,25 @@ export function MultiChoiceGroup<Value extends string>({
   const { colors } = useAppTheme();
   const { fontScale } = useWindowDimensions();
   const [width, setWidth] = useState(0);
-  const columns = width >= 132 * fontScale * 2 + spacing.sm ? 2 : 1;
+  // Brand icon, checkbox, padding and gaps stay fixed; reserve scaled label width.
+  const minimumChoiceWidth =
+    28 +
+    sizing.icon +
+    spacing.md * 2 +
+    spacing.sm * 2 +
+    Math.max(...options.map(option => option.label.length), 0) *
+      typography.body *
+      0.55 *
+      fontScale;
+  const columns = width >= minimumChoiceWidth * 2 + spacing.sm ? 2 : 1;
   return (
     <View style={styles.group}>
       <AppText accessibilityRole="header">{label}</AppText>
+      {description && (
+        <AppText variant="supporting" secondary>
+          {description}
+        </AppText>
+      )}
       <View
         style={styles.choices}
         onLayout={event => setWidth(event.nativeEvent.layout.width)}
@@ -74,6 +92,7 @@ export function MultiChoiceGroup<Value extends string>({
               >
                 {option.label}
               </AppText>
+              <SelectionIndicator checked={checked} />
             </Pressable>
           );
         })}

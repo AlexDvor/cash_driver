@@ -5,7 +5,9 @@ import {
   TextInput,
   Switch,
   NativeModules,
+  View,
 } from 'react-native';
+import { SettingsIcon } from '../../components/SettingsIcon/SettingsIcon';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createNavigationContainerRef } from '@react-navigation/native';
 import ReactTestRenderer, { act } from 'react-test-renderer';
@@ -153,7 +155,7 @@ function switchValue() {
 }
 async function toggle(enabled: boolean) {
   if (switchValue() !== enabled) {
-    await press('Confirmación háptica');
+    await press('Vibración al guardar');
   }
 }
 async function confirmAll() {
@@ -190,6 +192,75 @@ test('initial EUR/Spanish/system/Uber/disabled haptics and installed metadata; a
   expect(button('Dark').props.accessibilityState.selected).toBe(true);
   expect(button('Cabify').props.accessibilityState.checked).toBe(true);
   expect(await services.preferences.read()).toEqual(saved);
+});
+
+test('the five settings icons are decorative and theme icons follow the selected option', async () => {
+  await mount();
+  await press('Ajustes');
+  const icons = () => app.root.findAllByType(SettingsIcon);
+  expect(icons().map(icon => icon.props.name)).toEqual([
+    'sun',
+    'moon',
+    'phone',
+    'database',
+    'trash',
+  ]);
+  for (const icon of icons()) {
+    const wrapper = icon.findByType(View);
+    expect(wrapper.props.accessible).toBe(false);
+    expect(wrapper.props.accessibilityElementsHidden).toBe(true);
+    expect(wrapper.props.importantForAccessibility).toBe('no-hide-descendants');
+    expect(wrapper.props.pointerEvents).toBe('none');
+  }
+  await press('Oscuro');
+  const moon = icons().find(icon => icon.props.name === 'moon')!;
+  const sun = icons().find(icon => icon.props.name === 'sun')!;
+  const trash = icons().find(icon => icon.props.name === 'trash')!;
+  expect(moon.props.color).not.toBe(sun.props.color);
+  expect(trash.props.color).not.toBe(moon.props.color);
+  expect(button('Oscuro').props.accessibilityState.selected).toBe(true);
+});
+
+test('theme explanation follows the committed mode and a failed write keeps the prior explanation', async () => {
+  await mount();
+  await press('Ajustes');
+  expect(content()).toContain(
+    'Sin ubicación disponible: se usa el tema del dispositivo.',
+  );
+  await press('Oscuro');
+  expect(content()).toContain('Tema oscuro activado.');
+  expect(content()).not.toContain(
+    'Sin ubicación disponible: se usa el tema del dispositivo.',
+  );
+  await press('Claro');
+  expect(content()).toContain('Tema claro activado.');
+  jest
+    .spyOn(services.preferences, 'update')
+    .mockRejectedValueOnce(new Error('write failed'));
+  await press('Oscuro');
+  expect(content()).toContain('Tema claro activado.');
+  expect(content()).not.toContain('Tema oscuro activado.');
+  expect((await services.preferences.read()).themeMode).toBe('light');
+  await press('Automático');
+  expect(content()).toContain(
+    'Sin ubicación disponible: se usa el tema del dispositivo.',
+  );
+});
+
+test('haptics has one accessible switch and one press persists one toggle', async () => {
+  await mount();
+  await press('Ajustes');
+  const update = jest.spyOn(services.preferences, 'update');
+  const switches = app.root.findAll(
+    node =>
+      node.props.accessibilityRole === 'switch' &&
+      typeof node.props.onPress === 'function',
+  );
+  expect(switches).toHaveLength(1);
+  await press('Vibración al guardar');
+  expect(update).toHaveBeenCalledTimes(1);
+  expect(switchValue()).toBe(true);
+  expect((await services.preferences.read()).hapticsEnabled).toBe(true);
 });
 
 test('working platforms support one through four choices and protect the last choice', async () => {
