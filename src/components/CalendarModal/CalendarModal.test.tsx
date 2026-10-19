@@ -2,6 +2,8 @@ import React from 'react';
 import { Modal, StyleSheet, View } from 'react-native';
 import Renderer, { act } from 'react-test-renderer';
 import { CalendarModal } from './CalendarModal';
+import { Calendar } from 'react-native-calendars';
+import { CalendarDay } from './CalendarDay';
 import { CalendarPeriodSelector } from '../CalendarPeriodSelector/CalendarPeriodSelector';
 import { CalendarModalProps } from './CalendarModal.interface';
 import { palettes as mockPalettes } from '../../constants/theme/tokens';
@@ -56,6 +58,52 @@ async function mount() {
     app = Renderer.create(<CalendarModal {...props} />);
   });
 }
+test.each([false, true])(
+  'month tiles highlight activity in dark theme %s while retaining selection',
+  async dark => {
+    mockDark = dark;
+    props = {
+      ...props,
+      monthOnly: true,
+      occupiedMonths: [2, 10],
+      monthActivityStatus: 'ready',
+    };
+    await mount();
+    const colors = dark ? mockPalettes.dark : mockPalettes.light;
+    const tile = (month: number) =>
+      app.root.findAll(
+        node =>
+          node.props.testID === `calendar-month-${month}` &&
+          typeof node.props.onPress === 'function',
+      )[0];
+    const activity = tile(2).findAll(
+      node => node.props.testID === 'calendar-month-activity',
+    )[0];
+    expect(StyleSheet.flatten(activity.props.style).backgroundColor).toBe(
+      colors.softGreen,
+    );
+    expect(StyleSheet.flatten(activity.props.style).opacity.__getValue()).toBe(
+      1,
+    );
+    expect(StyleSheet.flatten(tile(10).props.style).backgroundColor).toBe(
+      colors.primary,
+    );
+    expect(StyleSheet.flatten(tile(3).props.style).backgroundColor).toBe(
+      colors.background,
+    );
+    expect(tile(2).props.accessibilityHint).toBe(
+      mockTranslate('en', 'calendarActivityLegend'),
+    );
+    props = { ...props, monthActivityStatus: 'error' };
+    await act(async () => app.update(<CalendarModal {...props} />));
+    expect(StyleSheet.flatten(tile(2).props.style).backgroundColor).toBe(
+      colors.background,
+    );
+    expect(tile(2).props.accessibilityHint).toBe(
+      mockTranslate('en', 'calendarActivityUnknown'),
+    );
+  },
+);
 function buttons() {
   return Array.from(
     new Map(
@@ -76,6 +124,51 @@ function buttons() {
 function button(label: string) {
   return buttons().find(node => node.props.accessibilityLabel === label)!;
 }
+
+test('month arrows retain six equal-height week rows and hide adjacent dates across four, five and six week months', async () => {
+  props.draftMonth = { year: 2021, month: 2 };
+  await mount();
+  for (const [year, month, days] of [
+    [2021, 2, 28],
+    [2026, 10, 31],
+    [2021, 5, 31],
+    [2024, 2, 29],
+  ]) {
+    props = { ...props, draftMonth: { year, month } };
+    await act(async () => app.update(<CalendarModal {...props} />));
+    const calendar = app.root.findByType(Calendar);
+    expect(calendar.props.showSixWeeks).toBe(false);
+    expect(calendar.props.hideExtraDays).toBe(false);
+    const cells = app.root.findAllByType(CalendarDay);
+    expect(cells).toHaveLength(42);
+    const placeholders = cells.filter(
+      cell => cell.findAllByProps({ testID: 'calendar-empty-day' }).length > 0,
+    );
+    expect(placeholders).toHaveLength(42 - days);
+    for (const cell of placeholders) {
+      const placeholder = cell.findAllByProps({
+        testID: 'calendar-empty-day',
+      })[0];
+      expect(placeholder.props.importantForAccessibility).toBe(
+        'no-hide-descendants',
+      );
+      expect(placeholder.props.onPress).toBeUndefined();
+      expect(StyleSheet.flatten(placeholder.props.style)).toEqual(
+        expect.objectContaining({ minHeight: 48, opacity: 0 }),
+      );
+    }
+    expect(
+      app.root.findAllByProps({ testID: 'calendar-visible-heading' })[0].props
+        .children,
+    ).toBe(
+      new Intl.DateTimeFormat('en-GB', {
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC',
+      }).format(new Date(Date.UTC(year, month - 1, 1))),
+    );
+  }
+});
 
 test('real calendar exposes localized full dates, selection, activity and today independently', async () => {
   await mount();
@@ -111,8 +204,70 @@ test('loading and failed activity keep days selectable and never claim no activi
   ).toHaveLength(31);
   props.activityStatus = 'error';
   await act(async () => app.update(<CalendarModal {...props} />));
-  await act(async () => button('Retry').props.onPress());
+  await act(async () =>
+    buttons()
+      .find(node => node.props.testID === 'calendar-activity-retry')!
+      .props.onPress(),
+  );
   expect(props.onRetryActivity).toHaveBeenCalledTimes(1);
+});
+
+test.each(['en', 'es', 'uk'] as Language[])(
+  'header status reserves space across loading, error and success in %s',
+  async language => {
+    mockLanguage = language;
+    props.activityStatus = 'loading';
+    await mount();
+    const footprint = () => ({
+      track: app.root.findAll(
+        node => node.props.testID === 'calendar-progress-track',
+      )[0].props.style,
+      footer: button(mockTranslate(language, 'calendarShowMonth')).props.style({
+        pressed: false,
+      }),
+      close: app.root.findAll(node => node.props.testID === 'calendar-close')[0]
+        .props.style,
+    });
+    const initial = footprint();
+    props = { ...props, activityStatus: 'error' };
+    await act(async () => app.update(<CalendarModal {...props} />));
+    expect(footprint()).toEqual(initial);
+    const retry = buttons().find(
+      node => node.props.testID === 'calendar-activity-retry',
+    )!;
+    expect(retry.props.accessibilityLabel).toContain(
+      mockTranslate(language, 'calendarActivityError'),
+    );
+    expect(
+      StyleSheet.flatten(retry.props.style).minHeight,
+    ).toBeGreaterThanOrEqual(48);
+    props = { ...props, activityStatus: 'ready' };
+    await act(async () => app.update(<CalendarModal {...props} />));
+    expect(footprint()).toEqual(initial);
+    expect(
+      buttons().some(node => node.props.testID === 'calendar-activity-retry'),
+    ).toBe(false);
+  },
+);
+
+test('retained activity is announced as updating or unverified after an error', async () => {
+  props = { ...props, activityHasData: true, activityStatus: 'loading' };
+  await mount();
+  const day = () =>
+    buttons().find(node =>
+      node.props.accessibilityLabel?.includes('10 October 2026'),
+    )!;
+  expect(day().props.accessibilityLabel).toContain(
+    mockTranslate('en', 'dataRefreshing'),
+  );
+  expect(day().props.accessibilityLabel).toContain(
+    mockTranslate('en', 'calendarActivityLegend'),
+  );
+  props = { ...props, activityStatus: 'error' };
+  await act(async () => app.update(<CalendarModal {...props} />));
+  expect(day().props.accessibilityLabel).toContain(
+    mockTranslate('en', 'dataRefreshFailed'),
+  );
 });
 test('browse, apply and every dismissal delegate separate controlled actions', async () => {
   await mount();

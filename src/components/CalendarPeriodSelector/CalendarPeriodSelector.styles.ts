@@ -2,6 +2,22 @@ import { StyleSheet } from 'react-native';
 import { radii, sizing, spacing } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
+  labelFrame: { flex: 1 },
+  labelMeasure: {
+    width: '100%',
+    flexDirection: 'row',
+    opacity: 0,
+    overflow: 'hidden',
+  },
+  labelSample: { width: '100%', flexShrink: 0 },
+  labelOverlay: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    justifyContent: 'center',
+  },
   container: { gap: spacing.sm },
   embedded: { borderWidth: 0, padding: 0 },
   row: {

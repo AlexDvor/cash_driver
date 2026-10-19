@@ -1,7 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, View } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { useOccupiedDates } from '../../hooks/summary/useOccupiedDates';
+import { useOccupiedMonths } from '../../hooks/summary/useOccupiedMonths';
 import { CalendarModal } from '../CalendarModal/CalendarModal';
 import { CalendarPeriodSelector } from '../CalendarPeriodSelector/CalendarPeriodSelector';
 import { CalendarNavigationProps } from './CalendarNavigation.interface';
@@ -15,11 +16,17 @@ export function CalendarNavigation({
   const focused = useIsFocused();
   const trigger = useRef<React.ElementRef<typeof View>>(null);
   const open = calendar.draftMonth !== null;
+  const [pickingMonth, setPickingMonth] = useState(false);
+  const monthActivity = useOccupiedMonths(
+    (calendar.draftMonth ?? calendar.month).year,
+    timeZone,
+    open && pickingMonth,
+  );
   const wasOpen = useRef(false);
   const activity = useOccupiedDates(
     calendar.draftMonth ?? calendar.month,
     timeZone,
-    open,
+    open && !pickingMonth,
   );
   useEffect(() => {
     const dismissed = wasOpen.current && !open;
@@ -45,6 +52,18 @@ export function CalendarNavigation({
         calendarButtonRef={trigger}
       />
       <CalendarModal
+        activityHasData={activity.state.dates !== null}
+        monthActivityHasData={monthActivity.state.months !== null}
+        activityRequestId={activity.requestId}
+        monthActivityRequestId={monthActivity.requestId}
+        occupiedMonths={monthActivity.state.months ?? []}
+        monthActivityStatus={
+          monthActivity.state.status === 'idle'
+            ? 'loading'
+            : monthActivity.state.status
+        }
+        onRetryMonthActivity={monthActivity.retry}
+        onMonthPickerChange={setPickingMonth}
         draftMonth={calendar.draftMonth}
         selectedDate={
           calendar.selection.kind === 'day' ? calendar.selection.date : null

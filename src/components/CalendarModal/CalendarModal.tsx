@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Modal,
   AccessibilityInfo,
@@ -22,6 +22,11 @@ import { CalendarModalProps } from './CalendarModal.interface';
 import { styles } from './CalendarModal.styles';
 import { CalendarGrid } from '../CalendarGrid/CalendarGrid';
 import { CalendarChevron, CalendarIcon } from './CalendarIcon';
+import { useCalendarMotion } from '../../hooks/app/useCalendarMotion';
+import {
+  CalendarActivityFeedback,
+  CalendarMonthActivity,
+} from './CalendarActivityFeedback';
 
 export function CalendarModal(props: CalendarModalProps) {
   const { draftMonth } = props;
@@ -34,6 +39,14 @@ export function CalendarModal(props: CalendarModalProps) {
 
 function CalendarSession({
   monthOnly = false,
+  activityHasData,
+  monthActivityHasData,
+  activityRequestId = 0,
+  monthActivityRequestId = 0,
+  occupiedMonths = [],
+  monthActivityStatus = 'loading',
+  onRetryMonthActivity,
+  onMonthPickerChange,
   draftMonth,
   selectedDate,
   todayDateKey,
@@ -52,6 +65,25 @@ function CalendarSession({
   const { height, width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [pickingMonth, setPickingMonth] = useState(monthOnly);
+  useEffect(() => {
+    onMonthPickerChange?.(pickingMonth);
+    return () => onMonthPickerChange?.(false);
+  }, [pickingMonth, onMonthPickerChange]);
+  const motion = useCalendarMotion();
+  const hasDates = activityHasData ?? activityStatus === 'ready';
+  const hasMonths = monthActivityHasData ?? monthActivityStatus === 'ready';
+  const status = pickingMonth ? monthActivityStatus : activityStatus;
+  const hasData = pickingMonth ? hasMonths : hasDates;
+  const retry = pickingMonth ? onRetryMonthActivity : onRetryActivity;
+  const errorMessage = t(
+    pickingMonth ? 'calendarMonthsError' : 'calendarActivityError',
+  );
+  const message =
+    status === 'error'
+      ? `${errorMessage} ${hasData ? t('dataRefreshFailed') : ''} ${t('retry')}`
+      : hasData
+      ? t('dataRefreshing')
+      : t(pickingMonth ? 'calendarMonthsLoading' : 'calendarActivityLoading');
   const heading = useRef<React.ElementRef<typeof View>>(null);
   const focusFrame = useRef<number | null>(null);
   useEffect(
@@ -70,6 +102,13 @@ function CalendarSession({
         draftMonth.year,
       )
     : label;
+  const headingSamples = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, index) =>
+        calendarMonthLabel({ year: draftMonth.year, month: index + 1 }, locale),
+      ),
+    [draftMonth.year, locale],
+  );
 
   return (
     <Modal
@@ -142,6 +181,36 @@ function CalendarSession({
                   {t(pickingMonth ? 'calendarMonthTitle' : 'calendarTitle')}
                 </AppText>
               </View>
+              <View style={styles.retrySlot}>
+                <Pressable
+                  testID="calendar-activity-retry"
+                  accessible={status === 'error' && !!retry}
+                  accessibilityElementsHidden={status !== 'error' || !retry}
+                  importantForAccessibility={
+                    status === 'error' && retry ? 'yes' : 'no-hide-descendants'
+                  }
+                  accessibilityRole={
+                    status === 'error' && retry ? 'button' : undefined
+                  }
+                  accessibilityLabel={
+                    status === 'error' && retry
+                      ? `${errorMessage} ${t('retry')}`
+                      : undefined
+                  }
+                  disabled={status !== 'error' || !retry}
+                  onPress={status === 'error' ? retry : undefined}
+                  style={[
+                    styles.control,
+                    status === 'error' && retry
+                      ? styles.visibleFeedback
+                      : styles.hiddenFeedback,
+                  ]}
+                >
+                  <AppText variant="heading" style={{ color: colors.primary }}>
+                    ↻
+                  </AppText>
+                </Pressable>
+              </View>
               <Pressable
                 testID="calendar-close"
                 accessibilityRole="button"
@@ -174,9 +243,36 @@ function CalendarSession({
                 <CalendarChevron color={colors.text} previous />
               </Pressable>
               <View style={[styles.control, styles.heading]}>
-                <AppText variant="heading" style={styles.centered}>
-                  {headingLabel}
-                </AppText>
+                <View
+                  testID="calendar-heading-measure"
+                  style={styles.headingMeasureRow}
+                  accessible={false}
+                  accessibilityElementsHidden
+                  importantForAccessibility="no-hide-descendants"
+                  pointerEvents="none"
+                >
+                  {(pickingMonth ? [headingLabel] : headingSamples).map(
+                    sample => (
+                      <AppText
+                        key={sample}
+                        variant="heading"
+                        accessible={false}
+                        style={[styles.centered, styles.headingMeasureText]}
+                      >
+                        {sample}
+                      </AppText>
+                    ),
+                  )}
+                </View>
+                <View style={styles.headingOverlay} pointerEvents="none">
+                  <AppText
+                    testID="calendar-visible-heading"
+                    variant="heading"
+                    style={styles.centered}
+                  >
+                    {headingLabel}
+                  </AppText>
+                </View>
               </View>
               <Pressable
                 accessibilityRole="button"
@@ -216,10 +312,21 @@ function CalendarSession({
                 </Pressable>
               )}
             </View>
+            <CalendarActivityFeedback
+              status={status}
+              message={message}
+              motion={motion}
+              requestKey={`${draftMonth.year}/${
+                pickingMonth ? 'year' : draftMonth.month
+              }/${pickingMonth}/${
+                pickingMonth ? monthActivityRequestId : activityRequestId
+              }`}
+            />
             {pickingMonth ? (
               <View style={styles.grid}>
                 {Array.from({ length: 12 }, (_, index) => {
                   const month = index + 1;
+                  const occupied = hasMonths && occupiedMonths.includes(month);
                   const monthLabel = new Intl.DateTimeFormat(locale, {
                     month: 'long',
                     timeZone: 'UTC',
@@ -234,9 +341,28 @@ function CalendarSession({
                   );
                   return (
                     <Pressable
-                      key={month}
+                      key={`${draftMonth.year}/${month}`}
                       accessibilityRole="button"
                       accessibilityLabel={monthLabel}
+                      accessibilityHint={[
+                        t(
+                          !hasMonths
+                            ? 'calendarActivityUnknown'
+                            : occupied
+                            ? 'calendarActivityLegend'
+                            : 'calendarNoActivity',
+                        ),
+                        hasMonths && monthActivityStatus !== 'ready'
+                          ? t(
+                              monthActivityStatus === 'error'
+                                ? 'dataRefreshFailed'
+                                : 'dataRefreshing',
+                            )
+                          : '',
+                      ]
+                        .filter(Boolean)
+                        .join(', ')}
+                      testID={`calendar-month-${month}`}
                       accessibilityState={{
                         selected: month === draftMonth.month,
                       }}
@@ -254,6 +380,10 @@ function CalendarSession({
                         onBrowseMonth({ year: draftMonth.year, month });
                       }}
                     >
+                      <CalendarMonthActivity
+                        occupied={occupied && month !== draftMonth.month}
+                        motion={motion}
+                      />
                       <AppText
                         style={[
                           month === draftMonth.month && styles.selectedMonth,
@@ -278,6 +408,7 @@ function CalendarSession({
                 todayDateKey={todayDateKey}
                 occupiedDates={occupiedDates}
                 activityStatus={activityStatus}
+                activityHasData={hasDates}
                 onApplyDay={onApplyDay}
                 onRetryActivity={onRetryActivity}
               />

@@ -4,11 +4,21 @@ import Renderer, { act } from 'react-test-renderer';
 import { CalendarNavigation } from './CalendarNavigation';
 import { CalendarModal } from '../CalendarModal/CalendarModal';
 import { CalendarPeriodSelector } from '../CalendarPeriodSelector/CalendarPeriodSelector';
-import { useCalendarSelection } from '../../hooks/summary/useCalendarSelection';
+import {
+  useCalendarSelection,
+  CalendarSelection,
+} from '../../hooks/summary/useCalendarSelection';
 import { palettes as mockPalettes } from '../../constants/theme/tokens';
 import { translate as mockTranslate } from '../../i18n/translations';
 
 const mockActivity = jest.fn();
+const mockMonthActivity = jest.fn().mockReturnValue({
+  state: { status: 'ready', months: [] },
+  retry: jest.fn(),
+});
+jest.mock('../../hooks/summary/useOccupiedMonths', () => ({
+  useOccupiedMonths: (...args: unknown[]) => mockMonthActivity(...args),
+}));
 let mockFocused = true;
 jest.mock('@react-navigation/native', () => ({
   useIsFocused: () => mockFocused,
@@ -28,6 +38,66 @@ jest.mock('../../providers/ThemeProvider/ThemeProvider', () => ({
 jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
+
+test('automatic and explicit months retain the same responsive row and reserve all month-label heights', async () => {
+  let selection: CalendarSelection = {
+    kind: 'automatic',
+    month: { year: 2021, month: 2 },
+  };
+  const trigger = React.createRef<React.ElementRef<typeof Native.View>>();
+  const render = () => (
+    <CalendarPeriodSelector
+      selection={selection}
+      onMoveMonth={jest.fn()}
+      onOpenCalendar={jest.fn()}
+      onReturnToMonth={jest.fn()}
+      calendarButtonRef={trigger}
+    />
+  );
+  let app!: Renderer.ReactTestRenderer;
+  try {
+    await act(async () => {
+      app = Renderer.create(render());
+    });
+    await act(async () =>
+      app.root
+        .find(node => typeof node.props.onLayout === 'function')
+        .props.onLayout({
+          nativeEvent: {
+            layout: { width: 290 * Native.Dimensions.get('window').fontScale },
+          },
+        }),
+    );
+    const control = () =>
+      app.root.find(
+        node =>
+          node.props.accessibilityLabel ===
+            mockTranslate('en', 'calendarOpen') &&
+          typeof node.props.onPress === 'function',
+      );
+    const initial = Native.StyleSheet.flatten(
+      control().props.style({ pressed: false }),
+    );
+    selection = { kind: 'month', month: { year: 2021, month: 9 } };
+    await act(async () => {
+      app.update(render());
+    });
+    expect(
+      Native.StyleSheet.flatten(control().props.style({ pressed: false })),
+    ).toEqual(initial);
+    const measure = app.root.findAllByProps({
+      testID: 'calendar-period-label-measure',
+    })[0];
+    expect(measure.props.importantForAccessibility).toBe('no-hide-descendants');
+    expect(measure.props.children).toHaveLength(12);
+    expect(
+      app.root.findAllByProps({ testID: 'calendar-period-visible-label' })[0]
+        .props.children,
+    ).toBe('September 2021');
+  } finally {
+    await act(async () => app?.unmount());
+  }
+});
 
 test('the central month control exposes the date and opens the chooser while arrows request adjacent months', async () => {
   const onMoveMonth = jest.fn();
@@ -122,6 +192,33 @@ test('shared composition loads draft activity, applies a day, and restores trigg
       'UTC',
       true,
     );
+    await act(async () =>
+      app.root
+        .find(
+          node =>
+            node.props.accessibilityLabel ===
+              mockTranslate('en', 'calendarSelectMonthYear') &&
+            typeof node.props.onPress === 'function',
+        )
+        .props.onPress(),
+    );
+    expect(mockActivity).toHaveBeenLastCalledWith(
+      { year: 2026, month: 10 },
+      'UTC',
+      false,
+    );
+    expect(mockMonthActivity).toHaveBeenLastCalledWith(2026, 'UTC', true);
+    await act(async () =>
+      app.root
+        .find(
+          node =>
+            node.props.accessibilityLabel ===
+              mockTranslate('en', 'calendarShowDays') &&
+            typeof node.props.onPress === 'function',
+        )
+        .props.onPress(),
+    );
+    expect(mockMonthActivity).toHaveBeenLastCalledWith(2026, 'UTC', false);
     await act(async () =>
       app.root
         .findByType(CalendarModal)

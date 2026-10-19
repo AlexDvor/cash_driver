@@ -18,6 +18,27 @@ beforeEach(() => {
 afterEach(() => db.close());
 const october = getCalendarMonthBounds({ year: 2026, month: 10 }, 'UTC');
 
+test('occupied months include all platforms and zero tips, honor local year boundaries and committed deletion', async () => {
+  const f = await fixture();
+  const first = await f.save('2025-12-31T23:30:00.000Z', 'bolt');
+  const second = await f.save('2026-01-10T10:00:00.000Z', 'uber');
+  await f.save('2026-09-30T22:30:00.000Z', 'bolt');
+  await f.save('2026-12-31T23:30:00.000Z', 'uber');
+  expect(await f.transactions.occupiedMonths(2026, 'Europe/Madrid')).toEqual([
+    1, 10,
+  ]);
+  expect(await f.transactions.occupiedMonths(2026, 'UTC')).toEqual([1, 9, 12]);
+  expect(await f.transactions.occupiedMonths(2024, 'UTC')).toEqual([]);
+  await f.transactions.remove(first.id);
+  expect(await f.transactions.occupiedMonths(2026, 'Europe/Madrid')).toEqual([
+    1, 10,
+  ]);
+  await f.transactions.remove(second.id);
+  expect(await f.transactions.occupiedMonths(2026, 'Europe/Madrid')).toEqual([
+    10,
+  ]);
+});
+
 async function fixture(connection = db) {
   let clock = new Date('2026-10-08T10:00:00.000Z');
   const services = await testPersistence(connection, () => clock);

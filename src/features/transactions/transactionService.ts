@@ -57,6 +57,7 @@ export function createTransactionService(
     listPage: repository.listPage,
     summarize: repository.summarize,
     occupiedDates: repository.occupiedDates,
+    occupiedMonths: repository.occupiedMonths,
     hasAny: repository.hasAny,
     save(
       pending: PendingOperation,

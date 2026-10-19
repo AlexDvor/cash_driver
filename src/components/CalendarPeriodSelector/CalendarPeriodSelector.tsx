@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
@@ -27,11 +27,21 @@ export function CalendarPeriodSelector({
   const [panelWidth, setPanelWidth] = useState(0);
   const stacked =
     (panelWidth || width - spacing.xl * 2) / fontScale <
-    (selection.kind === 'month' ? 280 : 300);
+    (selection.kind === 'day' ? 300 : 280);
   const dateLabel =
     selection.kind === 'day'
       ? calendarFullDateLabel(selection.date, locale)
       : calendarMonthLabel(selection.month, locale);
+  const monthLabels = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, index) =>
+        calendarMonthLabel(
+          { year: selection.month.year, month: index + 1 },
+          locale,
+        ),
+      ),
+    [selection.month.year, locale],
+  );
   const monthButton = (
     <Pressable
       ref={calendarButtonRef}
@@ -46,7 +56,33 @@ export function CalendarPeriodSelector({
       ]}
     >
       <CalendarIcon />
-      <AppText style={styles.label}>{dateLabel}</AppText>
+      <View style={styles.labelFrame}>
+        <View
+          testID="calendar-period-label-measure"
+          style={styles.labelMeasure}
+          accessible={false}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          pointerEvents="none"
+        >
+          {(selection.kind === 'day' ? [dateLabel] : monthLabels).map(
+            sample => (
+              <AppText
+                key={sample}
+                accessible={false}
+                style={[styles.label, styles.labelSample]}
+              >
+                {sample}
+              </AppText>
+            ),
+          )}
+        </View>
+        <View style={styles.labelOverlay} pointerEvents="none">
+          <AppText testID="calendar-period-visible-label" style={styles.label}>
+            {dateLabel}
+          </AppText>
+        </View>
+      </View>
       <View
         accessible={false}
         importantForAccessibility="no-hide-descendants"

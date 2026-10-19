@@ -1,20 +1,15 @@
 import React, { useState } from 'react';
-import {
-  ActivityIndicator,
-  ScrollView,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { ScrollView, useWindowDimensions, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { sizing, spacing, typography } from '../../constants/theme/tokens';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../../ui/AppText/AppText';
-import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { CalendarDay, CalendarDayContext } from '../CalendarModal/CalendarDay';
 import {
   calendarDateKey,
   calendarDisplayDate,
+  offsetCalendarMonth,
 } from '../CalendarModal/calendarPresentation';
 import { styles } from '../CalendarModal/CalendarModal.styles';
 import { CalendarGridProps } from './CalendarGrid.interface';
@@ -25,7 +20,7 @@ function EmptyCalendarHeader() {
 }
 
 export function CalendarGrid(props: CalendarGridProps) {
-  const { draftMonth, activityStatus, onRetryActivity } = props;
+  const { draftMonth } = props;
   const { t, locale } = useTranslation();
   const { colors } = useAppTheme();
   const { fontScale } = useWindowDimensions();
@@ -40,6 +35,12 @@ export function CalendarGrid(props: CalendarGridProps) {
     viewportWidth,
   );
   const dateKey = calendarDateKey({ ...draftMonth, day: 1 });
+  const firstWeekday = (calendarDisplayDate(draftMonth, 1).getUTCDay() + 6) % 7;
+  const daysInMonth = calendarDisplayDate(
+    offsetCalendarMonth(draftMonth, 1),
+    0,
+  ).getUTCDate();
+  const paddingWeeks = 6 - Math.ceil((firstWeekday + daysInMonth) / 7);
   const weekdays = Array.from({ length: 7 }, (_, index) =>
     new Intl.DateTimeFormat(locale, {
       weekday: 'short',
@@ -70,7 +71,10 @@ export function CalendarGrid(props: CalendarGridProps) {
               firstDay={1}
               hideArrows
               hideDayNames
-              hideExtraDays
+              // The installed library's showSixWeeks adds only one row to a
+              // four-week February. Pad natural weeks ourselves to guarantee six.
+              hideExtraDays={false}
+              showSixWeeks={false}
               disableMonthChange
               enableSwipeMonths={false}
               customHeader={EmptyCalendarHeader}
@@ -80,6 +84,19 @@ export function CalendarGrid(props: CalendarGridProps) {
               }}
               dayComponent={CalendarDay}
             />
+            {Array.from({ length: paddingWeeks }, (_week, week) => (
+              <View
+                key={week}
+                testID={`calendar-padding-week-${week}`}
+                style={styles.calendarPaddingWeek}
+              >
+                {Array.from({ length: 7 }, (_day, day) => (
+                  <View key={day} style={{ width: calendarWidth / 7 }}>
+                    <CalendarDay />
+                  </View>
+                ))}
+              </View>
+            ))}
           </CalendarDayContext.Provider>
         </View>
       </ScrollView>
@@ -92,29 +109,6 @@ export function CalendarGrid(props: CalendarGridProps) {
           {t('calendarActivityLegend')}
         </AppText>
       </View>
-      {activityStatus === 'loading' && (
-        <View style={styles.row}>
-          <ActivityIndicator color={colors.primary} />
-          <AppText accessibilityLiveRegion="polite">
-            {t('calendarActivityLoading')}
-          </AppText>
-        </View>
-      )}
-      {activityStatus === 'error' && (
-        <>
-          <AppText
-            accessibilityLiveRegion="polite"
-            style={{ color: colors.errorText }}
-          >
-            {t('calendarActivityError')}
-          </AppText>
-          <ActionButton
-            variant="secondary"
-            label={t('retry')}
-            onPress={onRetryActivity}
-          />
-        </>
-      )}
     </>
   );
 }

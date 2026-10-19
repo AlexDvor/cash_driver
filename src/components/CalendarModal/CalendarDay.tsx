@@ -14,15 +14,40 @@ export function CalendarDay({ date }: { date?: DateData }) {
   const context = useContext(CalendarDayContext);
   const { t, locale } = useTranslation();
   const { colors } = useAppTheme();
-  if (!date || !context || date.month !== context.draftMonth?.month) {
-    return <View />;
+  if (
+    !date ||
+    !context ||
+    date.month !== context.draftMonth?.month ||
+    date.year !== context.draftMonth?.year
+  ) {
+    return (
+      <View
+        testID="calendar-empty-day"
+        style={[styles.day, styles.hiddenFeedback]}
+        accessible={false}
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        pointerEvents="none"
+      >
+        <View style={styles.ring}>
+          <View style={styles.circle}>
+            <AppText accessible={false} style={styles.hiddenFeedback}>
+              {'\u00a0'}
+            </AppText>
+            <View style={styles.activityDot} />
+          </View>
+        </View>
+      </View>
+    );
   }
   const coordinate = { year: date.year, month: date.month, day: date.day };
   const selected =
     !!context.selectedDate &&
     calendarDateKey(context.selectedDate) === date.dateString;
   const today = context.todayDateKey === date.dateString;
-  const unknown = context.activityStatus !== 'ready';
+  const unknown = !(
+    context.activityHasData ?? context.activityStatus === 'ready'
+  );
   const occupied = !unknown && context.occupiedDates.includes(date.dateString);
   const activity = unknown
     ? t('calendarActivityUnknown')
@@ -32,24 +57,31 @@ export function CalendarDay({ date }: { date?: DateData }) {
   const label = [
     calendarFullDateLabel(coordinate, locale),
     activity,
+    !unknown && context.activityStatus !== 'ready'
+      ? t(
+          context.activityStatus === 'error'
+            ? 'dataRefreshFailed'
+            : 'dataRefreshing',
+        )
+      : '',
     today ? t('calendarToday') : '',
     selected ? t('calendarSelected') : '',
   ]
     .filter(Boolean)
     .join(', ');
   const selectionStyle = {
-    borderColor: today ? colors.primary : 'transparent',
+    borderColor: today ? colors.primary : colors.transparent,
   };
   const activityStyle = {
-    backgroundColor: selected ? colors.primary : 'transparent',
-    borderColor: 'transparent',
+    backgroundColor: selected ? colors.primary : colors.transparent,
+    borderColor: colors.transparent,
   };
   const dotStyle = {
     backgroundColor: occupied
       ? selected
         ? colors.onPrimary
         : colors.primary
-      : 'transparent',
+      : colors.transparent,
   };
   return (
     <Pressable

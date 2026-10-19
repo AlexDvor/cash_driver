@@ -411,10 +411,21 @@ test('modal markers reject old-month responses and retry unknown/error activity 
   expect(dayLabel(11, 11, 2026)).toContain('Sin operaciones');
   occupied.mockRejectedValueOnce(Error('activity failure'));
   await press('Mes siguiente');
-  expect(content()).toContain('No se pudieron cargar los días con operaciones');
+  expect(
+    app.root.findAll(node => node.props.testID === 'calendar-activity-retry')[0]
+      .props.accessibilityLabel,
+  ).toContain('No se pudieron cargar los días con operaciones');
   expect(dayLabel(11, 12, 2026)).toContain('Actividad sin confirmar');
   expect(text('summary-range')).toContain('oct');
-  await press('Reintentar');
+  await act(async () =>
+    app.root
+      .findAll(
+        node =>
+          node.props.testID === 'calendar-activity-retry' &&
+          typeof node.props.onPress === 'function',
+      )[0]
+      .props.onPress(),
+  );
   expect(dayLabel(11, 12, 2026)).toContain('Sin operaciones');
   await press('Mostrar mes');
   expect(text('summary-range')).toContain('dic');

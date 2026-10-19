@@ -2,6 +2,7 @@ import { SqlConnection, SqlExecutor, SqlValue } from '../../database/sqlite';
 import { isPlatform } from '../../constants/platforms';
 import {
   CalendarMonth,
+  getCalendarMonthBounds,
   getCalendarMonthDays,
   PeriodBounds,
 } from '../summary/periods';
@@ -308,6 +309,45 @@ export function createTransactionReadRepository(db: SqlConnection) {
           }
           if (nonnegativeInteger(row.operation_count) > 0) {
             occupied.push(day.dateKey);
+          }
+        }
+      });
+      return occupied;
+    },
+    async occupiedMonths(year: number, timeZone: string): Promise<number[]> {
+      const ranges = Array.from({ length: 12 }, (_, index) => ({
+        month: index + 1,
+        range: rangeValues(
+          getCalendarMonthBounds({ year, month: index + 1 }, timeZone),
+        ),
+      }));
+      const occupied: number[] = [];
+      await db.transaction(async tx => {
+        await checkTimestamps(tx);
+        await checkUpdatedTimestamps(
+          tx,
+          readFilter({
+            bounds: {
+              start: new Date(ranges[0].range[0]),
+              end: new Date(ranges[11].range[1]),
+            },
+          }),
+        );
+        // Twelve indexed local-month ranges in one snapshot; no history rows
+        // are transferred, and all platforms count, including zero-tip payments.
+        for (const month of ranges) {
+          const result = await tx.execute(
+            `SELECT COUNT(*) AS operation_count,
+              COALESCE(SUM(CASE WHEN ${validRowSql} THEN 0 ELSE 1 END), 0) AS invalid_count
+              FROM transactions WHERE created_at >= ? AND created_at < ?`,
+            month.range,
+          );
+          const row = result.rows[0];
+          if (!row || nonnegativeInteger(row.invalid_count) !== 0) {
+            throw new Error('Corrupt matched transaction values');
+          }
+          if (nonnegativeInteger(row.operation_count) > 0) {
+            occupied.push(month.month);
           }
         }
       });

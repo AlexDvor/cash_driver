@@ -7,6 +7,7 @@ export type CalendarGridProps = Pick<
   | 'todayDateKey'
   | 'occupiedDates'
   | 'activityStatus'
+  | 'activityHasData'
   | 'onApplyDay'
   | 'onRetryActivity'
 >;

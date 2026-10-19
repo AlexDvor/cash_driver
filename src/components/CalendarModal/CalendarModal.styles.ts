@@ -1,7 +1,42 @@
 import { StyleSheet } from 'react-native';
 import { radii, sizing, spacing } from '../../constants/theme/tokens';
+import { calendarFeedback } from '../../constants/theme/calendar';
 
 export const styles = StyleSheet.create({
+  calendarPaddingWeek: { flexDirection: 'row', marginVertical: spacing.xs },
+  // A single nonwrapping row takes the height of its tallest full-width label.
+  headingMeasureRow: {
+    width: '100%',
+    flexDirection: 'row',
+    opacity: 0,
+    overflow: 'hidden',
+  },
+  headingMeasureText: { width: '100%', flexShrink: 0 },
+  headingOverlay: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    justifyContent: 'center',
+    padding: spacing.sm,
+  },
+  visibleFeedback: { opacity: 1 },
+  hiddenFeedback: { opacity: 0 },
+  progressTrack: {
+    height: calendarFeedback.progressHeight,
+    overflow: 'hidden',
+  },
+  progressSegment: { height: calendarFeedback.progressHeight },
+  retrySlot: { width: sizing.touchTarget, minHeight: sizing.touchTarget },
+  monthActivity: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    borderRadius: radii.chip,
+  },
   overlay: {
     flex: 1,
     justifyContent: 'center',
