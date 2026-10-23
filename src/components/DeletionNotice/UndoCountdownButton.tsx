@@ -1,3 +1,4 @@
+import { deletionTiming } from '../../constants/timing';
 import React, { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, Pressable } from 'react-native';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
@@ -46,7 +47,10 @@ export function UndoCountdownButton({
       Math.max(0, expiresAt - Date.now()) / (DELETION_UNDO_SECONDS * 1000);
     progress.setValue(remaining());
     if (reduceMotion) {
-      const timer = setInterval(() => progress.setValue(remaining()), 1000);
+      const timer = setInterval(
+        () => progress.setValue(remaining()),
+        deletionTiming.countdownRefreshIntervalMs,
+      );
       return () => clearInterval(timer);
     }
     const animation = Animated.timing(progress, {

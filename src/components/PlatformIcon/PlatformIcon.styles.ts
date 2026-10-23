@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { palettes } from '../../constants/theme/tokens';
+import { palettes, iconSizing } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   icon: { flexShrink: 0 },
@@ -9,7 +9,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 3,
+    gap: iconSizing.platformDotGap,
   },
   dot: { backgroundColor: palettes.light.text },
 });

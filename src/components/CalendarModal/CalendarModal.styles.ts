@@ -1,5 +1,11 @@
 import { StyleSheet } from 'react-native';
-import { radii, sizing, spacing } from '../../constants/theme/tokens';
+import {
+  radii,
+  sizing,
+  spacing,
+  opacity,
+  iconSizing,
+} from '../../constants/theme/tokens';
 import { calendarFeedback } from '../../constants/theme/calendar';
 
 export const styles = StyleSheet.create({
@@ -49,7 +55,7 @@ export const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     left: 0,
-    opacity: 0.6,
+    opacity: opacity.calendarBackdrop,
   },
   panel: {
     width: '100%',
@@ -93,10 +99,18 @@ export const styles = StyleSheet.create({
   month: { flexGrow: 1, flexBasis: '30%' },
   selectedMonth: { fontWeight: '700' },
   pickerPreview: { textAlign: 'center', marginTop: spacing.sm },
-  // Transparent artwork has inner padding; 32 keeps its visible calendar
-  // readable inside the existing 48-unit button with 8-unit outer padding.
-  icon: { width: 32, height: 32, flexShrink: 0 },
-  chevron: { width: 10, height: 10, borderTopWidth: 2, borderRightWidth: 2 },
+  // Transparent artwork needs a larger image inside the existing touch target.
+  icon: {
+    width: iconSizing.calendar,
+    height: iconSizing.calendar,
+    flexShrink: 0,
+  },
+  chevron: {
+    width: iconSizing.calendarChevron,
+    height: iconSizing.calendarChevron,
+    borderTopWidth: iconSizing.chevronStroke,
+    borderRightWidth: iconSizing.chevronStroke,
+  },
   day: {
     minWidth: sizing.touchTarget,
     minHeight: sizing.touchTarget,
@@ -106,9 +120,13 @@ export const styles = StyleSheet.create({
   ring: {
     borderRadius: sizing.touchTarget,
     padding: spacing.xs / 2,
-    borderWidth: 2,
+    borderWidth: iconSizing.calendarSelectionStroke,
   },
-  activityDot: { width: 4, height: 4, borderRadius: 2 },
+  activityDot: {
+    width: iconSizing.calendarActivityDot,
+    height: iconSizing.calendarActivityDot,
+    borderRadius: iconSizing.calendarActivityDot / 2,
+  },
   circle: {
     minWidth: sizing.touchTarget - spacing.sm,
     minHeight: sizing.touchTarget - spacing.sm,

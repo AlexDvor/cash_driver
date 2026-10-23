@@ -1,3 +1,7 @@
+import {
+  solarThemeTiming,
+  solarLocationOptions,
+} from '../../constants/solarTheme';
 import { NativeModules, PermissionsAndroid, Platform } from 'react-native';
 import type { SolarCoordinates } from '../../theme/solarTheme';
 
@@ -51,7 +55,10 @@ export async function requestSolarLocationPermission(): Promise<boolean> {
     }
     if (Platform.OS === 'ios') {
       return await new Promise<boolean>(resolve => {
-        const timeout = setTimeout(() => resolve(false), 30_000);
+        const timeout = setTimeout(
+          () => resolve(false),
+          solarThemeTiming.iosPermissionTimeoutMs,
+        );
         const finish = (granted: boolean) => {
           clearTimeout(timeout);
           resolve(granted);
@@ -88,12 +95,7 @@ export function watchSolarLocation(
         timestamp: position.timestamp,
       }),
     error => onUnavailable(error.code === 1),
-    {
-      enableHighAccuracy: false,
-      distanceFilter: 1000,
-      interval: 60_000,
-      fastestInterval: 30_000,
-    },
+    solarLocationOptions,
   );
   return () => api.clearWatch(watch);
 }

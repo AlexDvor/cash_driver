@@ -1,5 +1,10 @@
 import { StyleSheet } from 'react-native';
-import { sizing, spacing } from '../../constants/theme/tokens';
+import {
+  sizing,
+  spacing,
+  opacity,
+  typography,
+} from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   bar: {
@@ -16,7 +21,7 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 2,
   },
   // Centered children need an explicit width so scaled labels wrap inside a tab.
-  label: { width: '100%', textAlign: 'center', fontSize: 12 },
+  label: { width: '100%', textAlign: 'center', fontSize: typography.tabLabel },
   selected: { fontWeight: '700' },
-  pressed: { opacity: 0.7 },
+  pressed: { opacity: opacity.pressed },
 });

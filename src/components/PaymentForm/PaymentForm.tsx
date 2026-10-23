@@ -1,3 +1,4 @@
+import { paymentLayout } from '../../constants/theme/layout';
 import React, { useEffect, useRef, useState, type ComponentRef } from 'react';
 import {
   Keyboard,
@@ -6,7 +7,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { spacing } from '../../constants/theme/tokens';
+import { spacing, sizing } from '../../constants/theme/tokens';
 import { CollapsibleTipContent } from '../CollapsibleTipContent/CollapsibleTipContent';
 import { PlatformIcon } from '../PlatformIcon/PlatformIcon';
 import { AppText } from '../../ui/AppText/AppText';
@@ -35,12 +36,15 @@ export function PaymentForm({
   const { t, locale } = useTranslation();
   const { colors } = useAppTheme();
   const { width, fontScale } = useWindowDimensions();
-  const stackedTipActions = width / fontScale < 400;
+  const stackedTipActions =
+    width / fontScale < paymentLayout.tipActionsStackWidth;
   const [quickWidth, setQuickWidth] = useState(0);
   const quickCount = form.quickAmounts.length + (form.validFare ? 1 : 0);
   const quickColumns =
     quickCount > 0 &&
-    quickWidth >= quickCount * 64 * fontScale + spacing.sm * (quickCount - 1)
+    quickWidth >=
+      quickCount * paymentLayout.quickAmountMinimumWidth * fontScale +
+        spacing.sm * (quickCount - 1)
       ? quickCount
       : 2;
   const quickStyle = {
@@ -256,7 +260,7 @@ export function PaymentForm({
                   {
                     backgroundColor: colors.card,
                     borderColor: colors.primary,
-                    borderWidth: 1,
+                    borderWidth: sizing.borderWidth,
                   },
                   pressed && styles.pressed,
                 ]}

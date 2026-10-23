@@ -1,3 +1,4 @@
+import { motion } from '../../constants/theme/motion';
 import { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, AppState, Easing } from 'react-native';
 
@@ -37,10 +38,10 @@ export function useSkeletonPulse(loading: boolean) {
     if (!loading || reduceMotion || !active) return;
     const animation = Animated.loop(
       Animated.sequence(
-        [0.55, 1].map(toValue =>
+        [motion.skeletonMinimumOpacity, 1].map(toValue =>
           Animated.timing(opacity, {
             toValue,
-            duration: 750,
+            duration: motion.skeletonHalfCycleDurationMs,
             easing: Easing.inOut(Easing.ease),
             useNativeDriver: true,
             isInteraction: false,

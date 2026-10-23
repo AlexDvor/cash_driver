@@ -1,3 +1,4 @@
+import { choiceLayout } from '../../constants/theme/layout';
 import React, { useState } from 'react';
 import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { sizing, spacing, typography } from '../../constants/theme/tokens';
@@ -30,7 +31,11 @@ export function ChoiceGroup<Value extends string>({
     Math.max(
       sizing.touchTarget,
       // Reserve full labels at the current font scale; scroll rather than shrink.
-      option.label.length * typography.body * 0.6 * fontScale + spacing.sm,
+      option.label.length *
+        typography.body *
+        choiceLayout.labelCharacterWidthFactor *
+        fontScale +
+        spacing.sm,
       option.icon && showSelectionIndicator ? sizing.icon * 3 + spacing.sm : 0,
     ),
   );
@@ -49,7 +54,8 @@ export function ChoiceGroup<Value extends string>({
   );
   const minimumFilterWidth = Math.max(
     sizing.touchTarget,
-    longestWord * typography.body * 0.6 + spacing.sm,
+    longestWord * typography.body * choiceLayout.labelCharacterWidthFactor +
+      spacing.sm,
   );
   // Reserve space for a brand icon and readable label; stack enlarged controls.
   const columnCount =
@@ -59,7 +65,8 @@ export function ChoiceGroup<Value extends string>({
         spacing.sm * (options.length - 1)
       ? options.length
       : columns === 'adaptive' || columns === 'filters'
-      ? availableWidth >= 132 * fontScale * 2 + spacing.sm
+      ? availableWidth >=
+        choiceLayout.adaptiveColumnMinimumWidth * fontScale * 2 + spacing.sm
         ? 2
         : 1
       : columns === 'equal'

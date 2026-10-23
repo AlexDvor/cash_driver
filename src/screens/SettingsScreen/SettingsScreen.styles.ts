@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { radii, sizing, spacing } from '../../constants/theme/tokens';
+import { radii, sizing, spacing, opacity } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   section: { gap: spacing.sm },
@@ -24,7 +24,7 @@ export const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     left: 0,
-    opacity: 0.08,
+    opacity: opacity.destructiveBackground,
   },
   row: {
     flexDirection: 'row',

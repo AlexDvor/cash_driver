@@ -1,3 +1,4 @@
+import { solarThemeTiming } from '../../constants/solarTheme';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import {
@@ -13,9 +14,6 @@ import {
 import type { ThemeMode } from '../../theme/resolveTheme';
 
 export type AutomaticThemeStatus = 'idle' | 'locating' | 'solar' | 'fallback';
-const FIX_TIMEOUT_MS = 20_000;
-const MAX_INITIAL_FIX_AGE_MS = 15 * 60_000;
-const CLOCK_CHECK_MS = 60_000;
 
 export function useSolarTheme(mode: ThemeMode) {
   const [fix, setFix] = useState<SolarLocationFix | null>(null);
@@ -92,7 +90,7 @@ export function useSolarTheme(mode: ThemeMode) {
           unavailable();
           return;
         }
-        timeout = setTimeout(unavailable, FIX_TIMEOUT_MS);
+        timeout = setTimeout(unavailable, solarThemeTiming.fixTimeoutMs);
         try {
           const release = watchSolarLocation(
             value => {
@@ -102,7 +100,7 @@ export function useSolarTheme(mode: ThemeMode) {
                 !validSolarCoordinates(value) ||
                 !Number.isFinite(value.timestamp) ||
                 age < 0 ||
-                age > MAX_INITIAL_FIX_AGE_MS
+                age > solarThemeTiming.maxInitialFixAgeMs
               ) {
                 // Providers may emit a cached fix before a fresh one. Ignore it
                 // and keep waiting within the existing acquisition timeout.
@@ -123,7 +121,11 @@ export function useSolarTheme(mode: ThemeMode) {
               // Temporary provider outages may recover without another tap.
               setFix(null);
               setStatus('fallback');
-              if (!timeout) timeout = setTimeout(unavailable, FIX_TIMEOUT_MS);
+              if (!timeout)
+                timeout = setTimeout(
+                  unavailable,
+                  solarThemeTiming.fixTimeoutMs,
+                );
             },
           );
           if (current()) stop = release;
@@ -157,8 +159,11 @@ export function useSolarTheme(mode: ThemeMode) {
     if (mode !== 'system' || !fix) return;
     // Exact next solar boundary, with a bounded recheck for wall-clock changes.
     const delay = solar?.nextChangeAt
-      ? Math.min(CLOCK_CHECK_MS, Math.max(1, solar.nextChangeAt - Date.now()))
-      : CLOCK_CHECK_MS;
+      ? Math.min(
+          solarThemeTiming.clockCheckIntervalMs,
+          Math.max(1, solar.nextChangeAt - Date.now()),
+        )
+      : solarThemeTiming.clockCheckIntervalMs;
     const timer = setTimeout(() => setNow(Date.now()), delay);
     return () => clearTimeout(timer);
   }, [mode, fix, now, solar]);

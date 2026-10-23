@@ -31,7 +31,10 @@ test('pulse uses the native driver without blocking interactions and stops on re
   expect(loop).toHaveBeenCalled();
   expect(
     timing.mock.calls.every(
-      ([, config]) => config.useNativeDriver && config.isInteraction === false,
+      ([, config]) =>
+        config.useNativeDriver &&
+        config.isInteraction === false &&
+        config.duration === 750,
     ),
   ).toBe(true);
   await act(async () => stateChange('background'));

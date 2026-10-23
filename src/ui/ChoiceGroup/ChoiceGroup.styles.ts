@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { radii, sizing, spacing } from '../../constants/theme/tokens';
+import { radii, sizing, spacing, opacity } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   group: { gap: spacing.sm },
@@ -39,6 +39,6 @@ export const styles = StyleSheet.create({
     flexGrow: 1,
     borderRadius: radii.button,
   },
-  pressed: { opacity: 0.8 },
+  pressed: { opacity: opacity.choicePressed },
   selected: { fontWeight: '700' },
 });

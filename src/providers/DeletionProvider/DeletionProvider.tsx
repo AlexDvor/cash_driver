@@ -1,3 +1,4 @@
+import { deletionTiming } from '../../constants/timing';
 import React, {
   createContext,
   useCallback,
@@ -148,7 +149,10 @@ export function DeletionProvider({ children }: React.PropsWithChildren) {
     if (allStatus !== 'success') {
       return;
     }
-    const timer = setTimeout(() => setAllStatus('idle'), 4000);
+    const timer = setTimeout(
+      () => setAllStatus('idle'),
+      deletionTiming.resultMessageDurationMs,
+    );
     return () => clearTimeout(timer);
   }, [allStatus]);
   return (

@@ -1,5 +1,11 @@
 import { StyleSheet } from 'react-native';
-import { radii, sizing, spacing } from '../../constants/theme/tokens';
+import {
+  radii,
+  sizing,
+  spacing,
+  opacity,
+  iconSizing,
+} from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   card: { gap: spacing.md },
@@ -29,7 +35,7 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     flexShrink: 1,
   },
-  pressed: { opacity: 0.7 },
+  pressed: { opacity: opacity.pressed },
   quickLabel: { textAlign: 'center', fontWeight: '700' },
   tipAction: {
     flexBasis: '45%',
@@ -40,10 +46,10 @@ export const styles = StyleSheet.create({
   tipBlock: { gap: spacing.sm },
   tipLabel: { flex: 1 },
   tipChevron: {
-    width: 8,
-    height: 8,
-    borderRightWidth: 2,
-    borderBottomWidth: 2,
+    width: iconSizing.tipChevron,
+    height: iconSizing.tipChevron,
+    borderRightWidth: iconSizing.chevronStroke,
+    borderBottomWidth: iconSizing.chevronStroke,
   },
   tipHeader: {
     flexDirection: 'row',

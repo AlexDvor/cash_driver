@@ -1,3 +1,4 @@
+import { iconSizing } from '../../constants/theme/tokens';
 import React from 'react';
 import { View } from 'react-native';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
@@ -25,7 +26,10 @@ export function HistorySkeleton() {
             ]}
           >
             <View style={styles.row}>
-              <Skeleton width={44} height={44} />
+              <Skeleton
+                width={iconSizing.historyPlatform}
+                height={iconSizing.historyPlatform}
+              />
               <View style={styles.details}>
                 <SkeletonText variant="heading" />
                 <SkeletonText variant="supporting" />

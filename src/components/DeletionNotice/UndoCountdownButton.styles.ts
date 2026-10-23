@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { radii, sizing, spacing } from '../../constants/theme/tokens';
+import { radii, sizing, spacing, opacity } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   button: {
@@ -16,8 +16,8 @@ export const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     left: 0,
-    opacity: 0.18,
+    opacity: opacity.undoProgress,
   },
   label: { fontWeight: '600', textAlign: 'center' },
-  pressed: { opacity: 0.7 },
+  pressed: { opacity: opacity.pressed },
 });

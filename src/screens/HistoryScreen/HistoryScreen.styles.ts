@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { radii, sizing, spacing } from '../../constants/theme/tokens';
+import { radii, sizing, spacing, opacity } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   fill: { flex: 1 },
@@ -40,5 +40,5 @@ export const styles = StyleSheet.create({
     marginLeft: 'auto',
     alignItems: 'flex-end',
   },
-  pressed: { opacity: 0.7 },
+  pressed: { opacity: opacity.pressed },
 });

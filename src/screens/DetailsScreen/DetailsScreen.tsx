@@ -1,3 +1,4 @@
+import { iconSizing } from '../../constants/theme/tokens';
 import React from 'react';
 import { Alert, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -57,7 +58,10 @@ export function DetailsScreen({
       {record && (
         <>
           <View style={styles.platformHeading}>
-            <PlatformIcon platform={record.platform} size={60} />
+            <PlatformIcon
+              platform={record.platform}
+              size={iconSizing.detailsPlatform}
+            />
             <View style={styles.headingText}>
               <AppText variant="heading">
                 {platformLabels[record.platform]}

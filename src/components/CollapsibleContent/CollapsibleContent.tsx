@@ -1,3 +1,4 @@
+import { motion } from '../../constants/theme/motion';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, View } from 'react-native';
 import type { CollapsibleContentProps } from './CollapsibleContent.interface';
@@ -69,13 +70,13 @@ export function CollapsibleContent({
     const animation = Animated.parallel([
       Animated.timing(height, {
         toValue: targetHeight,
-        duration: 180,
+        duration: motion.collapsibleDurationMs,
         easing: Easing.inOut(Easing.ease),
         useNativeDriver: false,
       }),
       Animated.timing(opacity, {
         toValue: targetOpacity,
-        duration: 180,
+        duration: motion.collapsibleDurationMs,
         easing: Easing.inOut(Easing.ease),
         useNativeDriver: false,
       }),

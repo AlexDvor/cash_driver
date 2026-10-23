@@ -1,3 +1,4 @@
+import { paymentTiming } from '../../constants/timing';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ComponentRef } from 'react';
 import {
@@ -259,7 +260,9 @@ export function useHomePaymentScroll({
           }
         }
       },
-      field === 'fare' ? 5000 : 2000,
+      field === 'fare'
+        ? paymentTiming.fareAdvanceDelayMs
+        : paymentTiming.receivedDismissDelayMs,
     );
     timer.current = timeout;
     return () => {

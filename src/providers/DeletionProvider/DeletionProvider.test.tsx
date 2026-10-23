@@ -35,6 +35,18 @@ test('stale confirmation callbacks cannot start single or all deletion after unm
   expect(await services.transactions.get(id)).not.toBeNull();
 });
 
+test('delete-all feedback lasts four seconds without repeating the write', async () => {
+  const removeAll = jest.spyOn(services.transactions, 'removeAll');
+  await act(async () => expect(await deletion.clearAll()).toBe(true));
+  expect(deletion.allStatus).toBe('success');
+  await act(async () => jest.advanceTimersByTime(3999));
+  expect(deletion.allStatus).toBe('success');
+  await act(async () => jest.advanceTimersByTime(1));
+  expect(deletion.allStatus).toBe('idle');
+  expect(removeAll).toHaveBeenCalledTimes(1);
+  expect(await services.transactions.list()).toHaveLength(0);
+});
+
 function Probe() {
   deletion = useDeletion();
   return null;

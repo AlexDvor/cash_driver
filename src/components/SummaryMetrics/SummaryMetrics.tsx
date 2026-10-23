@@ -1,7 +1,8 @@
+import { summaryLayout } from '../../constants/theme/layout';
 import React, { useState } from 'react';
 import { ScrollView, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { sizing, spacing } from '../../constants/theme/tokens';
+import { sizing, spacing, iconSizing } from '../../constants/theme/tokens';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../../ui/AppText/AppText';
 import { Card } from '../../ui/Card/Card';
@@ -36,12 +37,16 @@ export function RetainedCashCard({
         spacing.lg * 2 -
         sizing.borderWidth * 2,
     );
-  const coinSize = 80;
+  const coinSize = iconSizing.summaryHero;
   const textWidth = availableWidth - coinSize - spacing.lg;
   // Reserve full-size money text before placing the artwork beside it.
   const sideBySide =
     textWidth >=
-    Math.max(sizing.touchTarget * 3, amount.length * 34) * fontScale;
+    Math.max(
+      sizing.touchTarget * 3,
+      amount.length * summaryLayout.moneyCharacterWidth,
+    ) *
+      fontScale;
   const textColor = { color: colors.onPrimary };
   const money = (
     <SkeletonText
@@ -59,7 +64,7 @@ export function RetainedCashCard({
       sizingText={countLabel}
       numberOfLines={1}
       adjustsFontSizeToFit
-      minimumFontScale={0.5}
+      minimumFontScale={summaryLayout.countMinimumFontScale}
     />
   );
   return (
@@ -154,7 +159,7 @@ export function SummaryStatCards({
             <View
               style={[styles.iconBadge, { backgroundColor: colors.softGreen }]}
             >
-              <SummaryIcon name={metric.icon} size={32} />
+              <SummaryIcon name={metric.icon} size={iconSizing.summaryMetric} />
             </View>
             <View style={styles.statText}>
               <AppText variant="supporting" secondary>
@@ -205,7 +210,7 @@ export function SummaryMetric({
         sizingText={amount}
         numberOfLines={1}
         adjustsFontSizeToFit
-        minimumFontScale={0.25}
+        minimumFontScale={summaryLayout.labelMinimumFontScale}
       />
     </View>
   );

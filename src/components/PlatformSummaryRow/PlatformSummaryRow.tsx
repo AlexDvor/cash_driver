@@ -1,3 +1,5 @@
+import { summaryLayout } from '../../constants/theme/layout';
+import { sizing } from '../../constants/theme/tokens';
 import React from 'react';
 import { View } from 'react-native';
 import { Platform } from '../../features/transactions/types';
@@ -30,7 +32,7 @@ export function PlatformSummaryRow({
       )}
       <View style={styles.labelRow}>
         <View style={styles.iconSlot}>
-          <PlatformIcon platform={platform} size={24} />
+          <PlatformIcon platform={platform} size={sizing.icon} />
         </View>
         <AppText style={styles.label}>{platformLabels[platform]}</AppText>
       </View>
@@ -41,7 +43,7 @@ export function PlatformSummaryRow({
         sizingText={amount}
         numberOfLines={1}
         adjustsFontSizeToFit
-        minimumFontScale={0.25}
+        minimumFontScale={summaryLayout.labelMinimumFontScale}
       />
     </View>
   );

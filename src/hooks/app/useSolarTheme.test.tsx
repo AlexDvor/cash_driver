@@ -144,7 +144,10 @@ test('pending permission checks cannot start observation after background', asyn
 
 test('no fix timeout and provider error both stop observation and use fallback', async () => {
   await mount();
-  await act(async () => jest.advanceTimersByTime(20_001));
+  await act(async () => jest.advanceTimersByTime(19_999));
+  expect(result.status).toBe('locating');
+  expect(stop).not.toHaveBeenCalled();
+  await act(async () => jest.advanceTimersByTime(1));
   expect(result.status).toBe('fallback');
   expect(stop).toHaveBeenCalledTimes(1);
   await state('background');

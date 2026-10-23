@@ -1,3 +1,4 @@
+import { paymentTiming } from '../../constants/timing';
 import { useEffect, useRef, useState } from 'react';
 import { centsToInput } from '../../i18n/formatting';
 import {
@@ -82,7 +83,10 @@ export function usePaymentForm({
     if (!saved) {
       return;
     }
-    const timeout = setTimeout(() => setSaved(null), 4000);
+    const timeout = setTimeout(
+      () => setSaved(null),
+      paymentTiming.successMessageDurationMs,
+    );
     return () => clearTimeout(timeout);
   }, [saved]);
   const fareParsed = parseMoneyInput(

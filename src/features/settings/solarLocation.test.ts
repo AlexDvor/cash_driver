@@ -71,6 +71,27 @@ test('missing native support and permission failures fall back without throwing'
   expect(await requestSolarLocationPermission()).toBe(false);
 });
 
+test('a pending iOS permission request falls back at thirty seconds', async () => {
+  jest.useFakeTimers();
+  try {
+    jest.replaceProperty(Platform, 'OS', 'ios');
+    NativeModules.CashDriverLocationPermission = {
+      isAuthorized: jest.fn().mockResolvedValue(false),
+      requestAuthorization: jest.fn(() => new Promise<boolean>(() => {})),
+    };
+    const settled = jest.fn();
+    const request = requestSolarLocationPermission().then(settled);
+    await jest.advanceTimersByTimeAsync(29_999);
+    expect(settled).not.toHaveBeenCalled();
+    await jest.advanceTimersByTimeAsync(1);
+    await request;
+    expect(settled).toHaveBeenCalledWith(false);
+    expect(Geolocation.watchPosition).not.toHaveBeenCalled();
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
 test('watch is low-accuracy, has no background permission, and releases its subscription', () => {
   const onFix = jest.fn();
   const stop = watchSolarLocation(onFix, jest.fn());
@@ -80,6 +101,16 @@ test('watch is low-accuracy, has no background permission, and releases its subs
       authorizationLevel: 'whenInUse',
       enableBackgroundLocationUpdates: false,
     }),
+  );
+  expect(Geolocation.watchPosition).toHaveBeenCalledWith(
+    expect.any(Function),
+    expect.any(Function),
+    {
+      enableHighAccuracy: false,
+      distanceFilter: 1000,
+      interval: 60_000,
+      fastestInterval: 30_000,
+    },
   );
   const success = jest.mocked(Geolocation.watchPosition).mock.calls[0][0];
   success({

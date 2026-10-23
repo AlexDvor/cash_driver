@@ -1,3 +1,4 @@
+import { iconSizing } from '../../constants/theme/tokens';
 import React from 'react';
 import { Image, type ImageSourcePropType } from 'react-native';
 import { styles } from './SummaryIcon.styles';
@@ -12,7 +13,7 @@ const images: Record<SummaryIconName, ImageSourcePropType> = {
 
 export function SummaryIcon({
   name,
-  size = 44,
+  size = iconSizing.summary,
 }: {
   name: SummaryIconName;
   size?: number;

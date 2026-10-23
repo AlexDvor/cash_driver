@@ -1,3 +1,4 @@
+import { opacity, iconSizing } from '../../constants/theme/tokens';
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
@@ -198,7 +199,7 @@ export function SettingsScreen() {
           }}
           style={({ pressed }) => [
             styles.hapticsRow,
-            pressed && { opacity: 0.7 },
+            pressed && { opacity: opacity.pressed },
           ]}
         >
           <View style={styles.hapticsText}>
@@ -233,7 +234,7 @@ export function SettingsScreen() {
           }}
           style={({ pressed }) => [
             styles.hapticsRow,
-            pressed && { opacity: 0.7 },
+            pressed && { opacity: opacity.pressed },
           ]}
         >
           <View style={styles.hapticsText}>
@@ -296,7 +297,7 @@ export function SettingsScreen() {
           <SettingsIcon
             name="database"
             color={colors.secondaryText}
-            size={32}
+            size={iconSizing.storage}
           />
           <View style={styles.storageText}>
             <AppText style={styles.storageTitle}>

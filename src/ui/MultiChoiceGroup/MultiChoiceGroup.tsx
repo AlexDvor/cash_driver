@@ -1,6 +1,12 @@
+import { choiceLayout } from '../../constants/theme/layout';
 import React, { useState, type ReactNode } from 'react';
 import { Pressable, useWindowDimensions, View } from 'react-native';
-import { sizing, spacing, typography } from '../../constants/theme/tokens';
+import {
+  sizing,
+  spacing,
+  typography,
+  iconSizing,
+} from '../../constants/theme/tokens';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../AppText/AppText';
 import { styles } from './MultiChoiceGroup.styles';
@@ -30,13 +36,13 @@ export function MultiChoiceGroup<Value extends string>({
   const [width, setWidth] = useState(0);
   // Brand icon, checkbox, padding and gaps stay fixed; reserve scaled label width.
   const minimumChoiceWidth =
-    28 +
+    iconSizing.platform +
     sizing.icon +
     spacing.md * 2 +
     spacing.sm * 2 +
     Math.max(...options.map(option => option.label.length), 0) *
       typography.body *
-      0.55 *
+      choiceLayout.multiChoiceLabelCharacterWidthFactor *
       fontScale;
   const columns = width >= minimumChoiceWidth * 2 + spacing.sm ? 2 : 1;
   return (

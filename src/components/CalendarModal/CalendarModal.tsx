@@ -154,7 +154,7 @@ function CalendarSession({
           style={[
             styles.panel,
             {
-              maxHeight: height - insets.top - insets.bottom - 32,
+              maxHeight: height - insets.top - insets.bottom - spacing.lg * 2,
               backgroundColor: colors.card,
               borderColor: colors.border,
             },

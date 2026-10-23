@@ -4,6 +4,8 @@ import {
   sizing,
   spacing,
   typography,
+  opacity,
+  iconSizing,
 } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
@@ -19,7 +21,7 @@ export const styles = StyleSheet.create({
     gap: spacing.md,
   },
   headerText: { flex: 1 },
-  pressed: { opacity: 0.7 },
+  pressed: { opacity: opacity.pressed },
   content: { paddingTop: spacing.md, gap: spacing.md },
   refreshFeedback: { gap: spacing.sm },
   hiddenFeedback: { opacity: 0 },
@@ -32,9 +34,9 @@ export const styles = StyleSheet.create({
   refreshText: { flex: 1 },
   totals: { gap: spacing.md },
   toggleCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: iconSizing.summaryToggle,
+    height: iconSizing.summaryToggle,
+    borderRadius: iconSizing.summaryToggle / 2,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
@@ -46,9 +48,14 @@ export const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     left: 0,
-    opacity: 0.12,
+    opacity: opacity.summaryCircleFill,
   },
-  chevron: { width: 9, height: 9, borderRightWidth: 2, borderBottomWidth: 2 },
+  chevron: {
+    width: iconSizing.summaryChevron,
+    height: iconSizing.summaryChevron,
+    borderRightWidth: iconSizing.chevronStroke,
+    borderBottomWidth: iconSizing.chevronStroke,
+  },
   retainedRow: {
     borderTopWidth: sizing.borderWidth,
     paddingTop: spacing.md,

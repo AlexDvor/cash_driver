@@ -29,7 +29,7 @@ import {
   getCalendarDayBounds,
   getPeriodBounds,
 } from '../../features/summary/periods';
-import { spacing } from '../../constants/theme/tokens';
+import { spacing, sizing, iconSizing } from '../../constants/theme/tokens';
 import { TransactionLoadState } from '../../components/TransactionLoadState/TransactionLoadState';
 import { styles } from './HistoryScreen.styles';
 import { HistorySkeleton } from '../../components/HistorySkeleton/HistorySkeleton';
@@ -169,7 +169,7 @@ export function HistoryScreen() {
           ...platforms.map(value => ({
             value,
             label: platformLabels[value],
-            icon: <PlatformIcon platform={value} size={24} />,
+            icon: <PlatformIcon platform={value} size={sizing.icon} />,
           })),
         ]}
       />
@@ -268,7 +268,10 @@ export function HistoryScreen() {
             >
               <View style={styles.rowContent}>
                 <View style={styles.platformHeading}>
-                  <PlatformIcon platform={record.platform} size={44} />
+                  <PlatformIcon
+                    platform={record.platform}
+                    size={iconSizing.historyPlatform}
+                  />
                   <View style={styles.heading}>
                     <AppText variant="heading">
                       {platformLabels[record.platform]}

@@ -1,86 +1,135 @@
+// Основні параметри оформлення. Відступи й розміри задані у dp, текст враховує системний масштаб.
 export const spacing = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
-  xxxl: 32,
+  xs: 4, // Найменший відступ, dp.
+  sm: 8, // Малий відступ, dp.
+  md: 12, // Середній відступ, dp.
+  lg: 16, // Основний відступ, dp.
+  xl: 20, // Збільшений відступ, dp.
+  xxl: 24, // Великий відступ, dp.
+  xxxl: 32, // Найбільший відступ, dp.
 };
 export const typography = {
-  title: 30,
-  heading: 20,
-  body: 16,
-  supporting: 14,
-  money: 32,
-  change: 56,
+  title: 30, // Розмір основного заголовка.
+  homeTitle: 24, // Розмір назви Cash Driver на головній.
+  tabLabel: 12, // Розмір підписів нижньої навігації.
+  heading: 20, // Розмір заголовків секцій.
+  body: 16, // Розмір основного тексту.
+  supporting: 14, // Розмір пояснень і допоміжного тексту.
+  money: 32, // Розмір цифр у грошових полях.
+  change: 56, // Розмір суми решти.
 };
-export const radii = { card: 24, input: 16, button: 16, chip: 12 };
+// Наскільки заокруглені кути елементів, dp.
+export const radii = {
+  card: 24, // Картки.
+  input: 16, // Поля введення.
+  button: 16, // Кнопки.
+  chip: 12, // Компактні кнопки та позначки.
+};
 export const sizing = {
-  // Four platform chips need space for scaled text and card/screen padding.
-  platformFourColumnScreenWidth: 440,
-  primaryButton: 56,
-  touchTarget: 48,
-  icon: 24,
-  borderWidth: 1,
-  // Keep forms readable on tablets without tying layout to a device model.
-  contentMaxWidth: 640,
-};
+  platformFourColumnScreenWidth: 440, // Старий поріг чотирьох платформ у ряд, dp; зараз не використовується.
+  primaryButton: 56, // Мінімальна висота основної кнопки, dp.
+  touchTarget: 48, // Мінімальний розмір доступної області натискання, dp.
+  icon: 24, // Базовий розмір іконки, dp.
+  borderWidth: 1, // Товщина звичайної рамки, dp.
+  contentMaxWidth: 640, // Максимальна ширина вмісту, щоб форма не розтягувалась на планшеті, dp.
+  skeletonTextMinWidth: 64, // Мінімальна ширина текстової заглушки завантаження, dp.
+} as const;
+// Непрозорість: 0 — невидимо, 1 — повністю видно.
+export const opacity = {
+  pressed: 0.7, // Непрозорість звичайної кнопки під час натискання.
+  choicePressed: 0.8, // Непрозорість кнопки вибору під час натискання.
+  calendarBackdrop: 0.6, // Непрозорість затемнення за вікном календаря.
+  summaryCircleFill: 0.12, // Непрозорість фону круглої кнопки підсумку дня.
+  destructiveBackground: 0.08, // Непрозорість кольорової підкладки кнопки видалення.
+  undoProgress: 0.18, // Непрозорість смуги відліку скасування видалення.
+} as const;
+// Розміри іконок і стрілок, dp.
+export const iconSizing = {
+  platform: 28, // Розмір логотипа платформи у формі й налаштуваннях, dp.
+  historyPlatform: 44, // Розмір логотипа платформи в історії, dp.
+  detailsPlatform: 60, // Розмір логотипа платформи в деталях операції, dp.
+  platformDotGap: 3, // Відстань між крапками іконки іншої платформи, dp.
+  summary: 44, // Звичайний розмір ілюстрації підсумків, dp.
+  summaryHero: 80, // Розмір великої ілюстрації монет у підсумках, dp.
+  summaryMetric: 32, // Розмір іконок показників підсумків, dp.
+  storage: 32, // Розмір іконки даних пристрою в налаштуваннях, dp.
+  calendar: 32, // Розмір іконки календаря, dp.
+  summaryToggle: 36, // Розмір круга кнопки розгортання підсумку дня, dp.
+  chevronStroke: 2, // Товщина ліній маленьких стрілок, dp.
+  calendarChevron: 10, // Розмір стрілки у вікні календаря, dp.
+  periodChevron: 7, // Розмір стрілки вибору періоду, dp.
+  summaryChevron: 9, // Розмір стрілки підсумку дня, dp.
+  tipChevron: 8, // Розмір стрілки секції чайових, dp.
+  calendarActivityDot: 4, // Діаметр крапки дня з операціями, dp.
+  calendarSelectionStroke: 2, // Товщина обведення вибраного дня, dp.
+  back: {
+    shaftLeft: 3, // Відступ прямої частини стрілки Назад зліва, dp.
+    shaftTop: 11, // Відступ прямої частини стрілки Назад зверху, dp.
+    shaftWidth: 20, // Довжина прямої частини стрілки Назад, dp.
+    stroke: 2.5, // Товщина ліній стрілки Назад, dp.
+    shaftRadius: 2, // Заокруглення прямої частини стрілки Назад, dp.
+    headLeft: 4, // Відступ вістря стрілки Назад зліва, dp.
+    headTop: 6, // Відступ вістря стрілки Назад зверху, dp.
+    headSize: 12, // Розмір вістря стрілки Назад, dp.
+  },
+} as const;
 export interface Palette {
-  transparent: string;
-  disabledSurface: string;
-  disabledText: string;
-  brandSurface: string;
-  background: string;
-  card: string;
-  primary: string;
-  onPrimary: string;
-  secondaryGreen: string;
-  softGreen: string;
-  text: string;
-  secondaryText: string;
-  border: string;
-  errorText: string;
-  errorSurface: string;
+  transparent: string; // Прозорий колір без заливки.
+  disabledSurface: string; // Фон недоступних кнопок.
+  disabledText: string; // Текст недоступних кнопок.
+  brandSurface: string; // Нейтральна підкладка під оригінальні логотипи.
+  background: string; // Загальний фон екранів.
+  card: string; // Фон карток і звичайних елементів вибору.
+  primary: string; // Основний акцентний колір і правильний результат оплати.
+  onPrimary: string; // Текст та іконки на основному акцентному фоні.
+  secondaryGreen: string; // Додатковий зелений акцент.
+  softGreen: string; // М’який зелений фон вибору та швидких сум.
+  text: string; // Основний текст.
+  secondaryText: string; // Пояснення й другорядний текст.
+  border: string; // Рамки та роздільники.
+  errorText: string; // Текст помилок і небезпечних дій.
+  errorSurface: string; // Фон помилок і небезпечних дій.
 }
 export const palettes: Record<'light' | 'dark', Palette> = {
+  // Кольори світлої теми.
   light: {
-    transparent: 'transparent',
-    disabledSurface: '#E5E7EB',
-    disabledText: '#626975',
-    brandSurface: '#FFFFFF',
-    background: '#F5F7F6',
-    card: '#FFFFFF',
-    primary: '#0E7A4B',
-    onPrimary: '#FFFFFF',
-    secondaryGreen: '#1F9D62',
-    softGreen: '#E8F5EE',
-    text: '#111827',
-    secondaryText: '#626975',
-    border: '#E5E7EB',
-    errorText: '#B91C1C',
-    errorSurface: '#FEF2F2',
+    transparent: 'transparent', // Прозорий колір без заливки.
+    disabledSurface: '#E5E7EB', // Фон недоступних кнопок.
+    disabledText: '#626975', // Текст недоступних кнопок.
+    brandSurface: '#FFFFFF', // Нейтральна підкладка під оригінальні логотипи.
+    background: '#F5F7F6', // Загальний фон екранів.
+    card: '#FFFFFF', // Фон карток і звичайних елементів вибору.
+    primary: '#0E7A4B', // Основний акцентний колір і правильний результат оплати.
+    onPrimary: '#FFFFFF', // Текст та іконки на основному акцентному фоні.
+    secondaryGreen: '#1F9D62', // Додатковий зелений акцент.
+    softGreen: '#E8F5EE', // М’який зелений фон вибору та швидких сум.
+    text: '#111827', // Основний текст.
+    secondaryText: '#626975', // Пояснення й другорядний текст.
+    border: '#E5E7EB', // Рамки та роздільники.
+    errorText: '#B91C1C', // Текст помилок і небезпечних дій.
+    errorSurface: '#FEF2F2', // Фон помилок і небезпечних дій.
   },
+  // Кольори темної теми.
   dark: {
-    transparent: 'transparent',
-    disabledSurface: '#303C35',
-    disabledText: '#B0BEB6',
-    // Original brand colors need a neutral backing in either appearance.
-    brandSurface: '#FFFFFF',
-    background: '#101714',
-    card: '#1A2520',
-    primary: '#69D9A4',
-    onPrimary: '#102219',
-    secondaryGreen: '#86E5BA',
-    softGreen: '#203B2D',
-    text: '#F0F5F2',
-    secondaryText: '#B0BEB6',
-    border: '#405349',
-    errorText: '#FFB4B4',
-    errorSurface: '#921252',
+    transparent: 'transparent', // Прозорий колір без заливки.
+    disabledSurface: '#303C35', // Фон недоступних кнопок.
+    disabledText: '#B0BEB6', // Текст недоступних кнопок.
+    brandSurface: '#FFFFFF', // Нейтральна підкладка під оригінальні логотипи.
+    background: '#101714', // Загальний фон екранів.
+    card: '#1A2520', // Фон карток і звичайних елементів вибору.
+    primary: '#69D9A4', // Основний акцентний колір і правильний результат оплати.
+    onPrimary: '#102219', // Текст та іконки на основному акцентному фоні.
+    secondaryGreen: '#86E5BA', // Додатковий зелений акцент.
+    softGreen: '#203B2D', // М’який зелений фон вибору та швидких сум.
+    text: '#F0F5F2', // Основний текст.
+    secondaryText: '#B0BEB6', // Пояснення й другорядний текст.
+    border: '#405349', // Рамки та роздільники.
+    errorText: '#FFB4B4', // Текст помилок і небезпечних дій.
+    errorSurface: '#921252', // Фон помилок і небезпечних дій.
   },
 };
 export const gradients = {
+  // Декоративний градієнт великої картки підсумків.
   summaryHeroOverlay:
     'radial-gradient(ellipse at 82% 38%, rgba(255, 255, 255, 0.19) 0%, transparent 68%), linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 35%, rgba(0, 0, 0, 0.23) 100%)',
 };

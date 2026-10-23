@@ -9,6 +9,46 @@ import {
   testPersistence,
 } from '../../test/sqliteTestDatabase';
 
+test('successful-save feedback expires at four seconds without changing the committed payment', async () => {
+  jest.useFakeTimers();
+  const db = openTestDatabase();
+  let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+  try {
+    const services = await testPersistence(db);
+    let current!: ReturnType<typeof usePaymentForm>;
+    function Probe() {
+      current = usePaymentForm({
+        initialPlatform: 'uber',
+        onSubmit: input =>
+          services.transactions.save(
+            services.transactions.newPendingOperation(),
+            input,
+          ),
+      });
+      return null;
+    }
+    await act(async () => {
+      renderer = ReactTestRenderer.create(<Probe />);
+    });
+    await act(async () => {
+      current.changeField('fare', '18');
+      current.changeField('received', '20');
+    });
+    await act(async () => expect(await current.submit()).toBe(true));
+    await act(async () => jest.advanceTimersByTime(3999));
+    expect(current.saved).toMatchObject({ changeGivenCents: 200 });
+    await act(async () => jest.advanceTimersByTime(1));
+    expect(current.saved).toBeNull();
+    expect(current.fare).toBe('');
+    expect(current.received).toBe('');
+    expect(await services.transactions.list()).toHaveLength(1);
+  } finally {
+    await act(async () => renderer?.unmount());
+    db.close();
+    jest.useRealTimers();
+  }
+});
+
 test('the shared form retains exact partial tips across edit commit', async () => {
   const db = openTestDatabase();
   const services = await testPersistence(db);

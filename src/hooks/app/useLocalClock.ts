@@ -1,3 +1,4 @@
+import { clockTiming } from '../../constants/timing';
 import { useEffect, useState } from 'react';
 import { AppState } from 'react-native';
 
@@ -17,7 +18,7 @@ export function useLocalClock() {
   const [clock, setClock] = useState(readClock);
   useEffect(() => {
     const update = () => setClock(readClock());
-    const interval = setInterval(update, 1000);
+    const interval = setInterval(update, clockTiming.refreshIntervalMs);
     const subscription = AppState.addEventListener('change', state => {
       if (state === 'active') {
         update();

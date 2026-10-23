@@ -1,3 +1,4 @@
+import { iconSizing } from '../../constants/theme/tokens';
 import React from 'react';
 import { Image, ImageSourcePropType, View } from 'react-native';
 import type { Platform } from '../../constants/platforms';
@@ -11,10 +12,10 @@ const images: Record<Exclude<Platform, 'other'>, ImageSourcePropType> = {
 
 export function PlatformIcon({
   platform,
-  size = 28,
+  size = iconSizing.platform,
 }: {
   platform: Platform;
-  size?: 24 | 28 | 44 | 60;
+  size?: number;
 }) {
   if (platform === 'other') {
     return (
