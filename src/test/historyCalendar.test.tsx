@@ -120,6 +120,7 @@ test('past-year month/day queries preserve platform, all-platform markers and in
   expect(rows()).toEqual([uber.id]);
   await press('Abrir calendario');
   const day = history()
+    .findAllByProps({ testID: 'calendar-current-page' })[0]
     .findAllByType(CalendarDay)
     .find(node => node.props.date?.day === 4)!;
   const dayButtons = day.findAll(
@@ -202,6 +203,7 @@ test('committed removal updates historical rows and open activity markers while 
   await press('Abrir calendario');
   function marked() {
     const day = history()
+      .findAllByProps({ testID: 'calendar-current-page' })[0]
       .findAllByType(CalendarDay)
       .find(node => node.props.date?.day === 4)!;
     return day

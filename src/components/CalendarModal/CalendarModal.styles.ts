@@ -9,6 +9,9 @@ import {
 import { calendarFeedback } from '../../constants/theme/calendar';
 
 export const styles = StyleSheet.create({
+  pageViewport: { overflow: 'hidden' },
+  // Compact grids keep 4dp padding; the title still gets the normal 16dp inset.
+  compactTitleInset: { paddingHorizontal: spacing.lg - spacing.xs },
   calendarPaddingWeek: { flexDirection: 'row', marginVertical: spacing.xs },
   // A single nonwrapping row takes the height of its tallest full-width label.
   headingMeasureRow: {

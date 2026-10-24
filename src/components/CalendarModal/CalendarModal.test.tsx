@@ -1,11 +1,12 @@
 import React from 'react';
-import { Modal, StyleSheet, View } from 'react-native';
+import { Modal, StyleSheet, View, ScrollView } from 'react-native';
 import Renderer, { act } from 'react-test-renderer';
 import { CalendarModal } from './CalendarModal';
 import { Calendar } from 'react-native-calendars';
 import { CalendarDay } from './CalendarDay';
 import { CalendarPeriodSelector } from '../CalendarPeriodSelector/CalendarPeriodSelector';
 import { CalendarModalProps } from './CalendarModal.interface';
+import { calendarMonthLabel } from './calendarPresentation';
 import { palettes as mockPalettes } from '../../constants/theme/tokens';
 import {
   translate as mockTranslate,
@@ -15,6 +16,7 @@ import {
 
 let mockLanguage: Language = 'en';
 let mockDark = false;
+let mockReduced = true;
 
 jest.mock('../../providers/LanguageProvider/LanguageProvider', () => ({
   useTranslation: () => ({
@@ -28,6 +30,9 @@ jest.mock('../../providers/ThemeProvider/ThemeProvider', () => ({
     colors: mockDark ? mockPalettes.dark : mockPalettes.light,
   }),
 }));
+jest.mock('../../hooks/app/useCalendarMotion', () => ({
+  useCalendarMotion: () => ({ reduced: mockReduced, active: true }),
+}));
 jest.mock('react-native-safe-area-context', () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 0, left: 0, right: 0 }),
 }));
@@ -37,6 +42,7 @@ let props: CalendarModalProps;
 beforeEach(() => {
   mockLanguage = 'en';
   mockDark = false;
+  mockReduced = true;
   props = {
     draftMonth: { year: 2026, month: 10 },
     selectedDate: { year: 2026, month: 10, day: 10 },
@@ -104,12 +110,29 @@ test.each([false, true])(
     );
   },
 );
+function isVisible(node: Renderer.ReactTestInstance) {
+  let parent: Renderer.ReactTestInstance | null = node;
+  while (parent) {
+    if (
+      ['calendar-previous-preview', 'calendar-next-preview'].includes(
+        parent.props.testID,
+      )
+    )
+      return false;
+    parent = parent.parent;
+  }
+  return true;
+}
+function currentPage() {
+  return app.root.findAllByProps({ testID: 'calendar-current-page' })[0];
+}
 function buttons() {
   return Array.from(
     new Map(
       app.root
         .findAll(
           node =>
+            isVisible(node) &&
             typeof node.props.onPress === 'function' &&
             (node.props.accessibilityRole === 'button' ||
               node.props.testID === 'calendar-backdrop'),
@@ -125,6 +148,387 @@ function button(label: string) {
   return buttons().find(node => node.props.accessibilityLabel === label)!;
 }
 
+test('native pager browses draft months, protects previews and retains overflow scrolling', async () => {
+  const surface = () =>
+    app.root.findAllByProps({ testID: 'calendar-swipe-surface' })[0];
+  const layout = async (width: number) =>
+    act(async () =>
+      surface().props.onLayout({ nativeEvent: { layout: { width } } }),
+    );
+  const beginSwipe = async () =>
+    act(async () => {
+      app.root
+        .findAllByProps({ testID: 'calendar-page-track' })[0]
+        .props.onScrollBeginDrag();
+    });
+  const release = async (dx: number) =>
+    act(async () => {
+      app.root
+        .findAllByProps({ testID: 'calendar-page-track' })[0]
+        .props.onMomentumScrollEnd({
+          nativeEvent: { contentOffset: { x: dx < 0 ? 1400 : 0 } },
+        });
+    });
+  await mount();
+  await layout(700);
+  const lateDayPress = currentPage()
+    .findAllByType(CalendarDay)
+    .find(node => node.props.date?.dateString === '2026-10-10')!
+    .findAll(node => typeof node.props.onPress === 'function')[0].props.onPress;
+  expect(
+    app.root.findAllByType(ScrollView).filter(node => node.props.horizontal),
+  ).toHaveLength(1);
+  await beginSwipe();
+  await act(async () => lateDayPress());
+  expect(props.onApplyDay).not.toHaveBeenCalled();
+  for (const id of ['calendar-previous-preview', 'calendar-next-preview']) {
+    const preview = app.root.findAllByProps({ testID: id })[0];
+    expect(preview.props.pointerEvents).toBe('none');
+    expect(preview.props.importantForAccessibility).toBe('no-hide-descendants');
+    expect(
+      preview
+        .findAllByType(CalendarDay)
+        .filter(node => node.props.date)
+        .some(node =>
+          node
+            .findAllByType(View)
+            .some(
+              view =>
+                view.props.testID?.startsWith('calendar-activity-') &&
+                StyleSheet.flatten(view.props.style).backgroundColor ===
+                  mockPalettes.light.primary,
+            ),
+        ),
+    ).toBe(false);
+  }
+  await release(-240);
+  expect(props.onBrowseMonth).toHaveBeenLastCalledWith({
+    year: 2026,
+    month: 11,
+  });
+  expect(props.onApplyDay).not.toHaveBeenCalled();
+  expect(props.onApplyMonth).not.toHaveBeenCalled();
+  expect(
+    app.root.findAllByProps({ testID: 'calendar-close' })[0].props.disabled,
+  ).not.toBe(true);
+  expect(button('Next month').props.disabled).toBe(true);
+  props = { ...props, draftMonth: { year: 2026, month: 12 } };
+  await act(async () => app.update(<CalendarModal {...props} />));
+  await beginSwipe();
+  await release(-240);
+  expect(props.onBrowseMonth).toHaveBeenLastCalledWith({
+    year: 2027,
+    month: 1,
+  });
+  props = { ...props, draftMonth: { year: 2026, month: 1 } };
+  await act(async () => app.update(<CalendarModal {...props} />));
+  await beginSwipe();
+  await release(240);
+  expect(props.onBrowseMonth).toHaveBeenLastCalledWith({
+    year: 2025,
+    month: 12,
+  });
+  await layout(200);
+  expect(
+    app.root.findAllByType(ScrollView).some(node => node.props.horizontal),
+  ).toBe(true);
+  expect(surface().props.onMoveShouldSetResponderCapture).toBeUndefined();
+  const heading = app.root.findAllByProps({
+    testID: 'calendar-month-swipe-heading',
+  })[0];
+  expect(typeof heading.props.onTouchStart).toBe('function');
+  expect(typeof heading.props.onTouchEnd).toBe('function');
+  await act(async () =>
+    button(mockTranslate('en', 'calendarSelectMonthYear')).props.onPress(),
+  );
+  expect(props.onBrowseMonth).toHaveBeenCalledTimes(3);
+});
+
+test('native month paging blocks day taps and commits exactly one adjacent draft', async () => {
+  await mount();
+  await act(async () =>
+    app.root
+      .findAllByProps({ testID: 'calendar-swipe-surface' })[0]
+      .props.onLayout({ nativeEvent: { layout: { width: 700 } } }),
+  );
+  const track = () =>
+    app.root.findAllByProps({ testID: 'calendar-page-track' })[0];
+  const lateDayPress = currentPage()
+    .findAllByType(CalendarDay)
+    .find(node => node.props.date?.dateString === '2026-10-10')!
+    .findAll(node => typeof node.props.onPress === 'function')[0].props.onPress;
+  expect(track().props.pagingEnabled).toBe(true);
+  expect(track().props.snapToInterval).toBe(700);
+  expect(track().props.disableIntervalMomentum).toBe(true);
+  expect(track().props.contentOffset.x).toBe(700);
+  await act(async () => track().props.onScrollBeginDrag());
+  await act(async () => lateDayPress());
+  expect(props.onApplyDay).not.toHaveBeenCalled();
+  expect(button('Next month').props.disabled).toBe(true);
+  await act(async () =>
+    track().props.onMomentumScrollEnd({
+      nativeEvent: { contentOffset: { x: 1400 } },
+    }),
+  );
+  expect(props.onBrowseMonth).toHaveBeenCalledTimes(1);
+  expect(props.onBrowseMonth).toHaveBeenCalledWith({
+    year: 2026,
+    month: 11,
+  });
+  await act(async () =>
+    track().props.onMomentumScrollEnd({
+      nativeEvent: { contentOffset: { x: 1400 } },
+    }),
+  );
+  expect(props.onBrowseMonth).toHaveBeenCalledTimes(1);
+  props = { ...props, draftMonth: { year: 2026, month: 11 } };
+  await act(async () => app.update(<CalendarModal {...props} />));
+  expect(button('Next month').props.disabled).toBe(false);
+  await act(async () =>
+    track().props.onMomentumScrollEnd({
+      nativeEvent: { contentOffset: { x: 1400 } },
+    }),
+  );
+  expect(props.onBrowseMonth).toHaveBeenCalledTimes(1);
+  await act(async () => track().props.onScrollBeginDrag());
+  await act(async () =>
+    track().props.onMomentumScrollEnd({
+      nativeEvent: { contentOffset: { x: 0 } },
+    }),
+  );
+  expect(props.onBrowseMonth).toHaveBeenLastCalledWith({
+    year: 2026,
+    month: 10,
+  });
+  expect(props.onApplyDay).not.toHaveBeenCalled();
+});
+
+test('visible month heading follows the grid before draft commit and rolls back with a cancelled swipe', async () => {
+  await mount();
+  await act(async () =>
+    app.root
+      .findAllByProps({ testID: 'calendar-swipe-surface' })[0]
+      .props.onLayout({ nativeEvent: { layout: { width: 700 } } }),
+  );
+  const heading = () =>
+    app.root.findAllByProps({ testID: 'calendar-visible-heading' })[0].props
+      .children;
+  const track = () =>
+    app.root.findAllByProps({ testID: 'calendar-page-track' })[0];
+  const october = calendarMonthLabel({ year: 2026, month: 10 }, mockLocales.en);
+  const november = calendarMonthLabel(
+    { year: 2026, month: 11 },
+    mockLocales.en,
+  );
+  expect(heading()).toBe(october);
+  await act(async () => track().props.onScrollBeginDrag());
+  await act(async () =>
+    track().props.onScroll({ nativeEvent: { contentOffset: { x: 1100 } } }),
+  );
+  expect(heading()).toBe(november);
+  expect(props.onBrowseMonth).not.toHaveBeenCalled();
+  await act(async () =>
+    track().props.onScroll({ nativeEvent: { contentOffset: { x: 700 } } }),
+  );
+  expect(heading()).toBe(october);
+  await act(async () =>
+    track().props.onMomentumScrollEnd({
+      nativeEvent: { contentOffset: { x: 700 } },
+    }),
+  );
+  expect(props.onBrowseMonth).not.toHaveBeenCalled();
+  props = { ...props, draftMonth: { year: 2026, month: 12 } };
+  await act(async () => app.update(<CalendarModal {...props} />));
+  await act(async () => track().props.onScrollBeginDrag());
+  await act(async () =>
+    track().props.onScroll({ nativeEvent: { contentOffset: { x: 1100 } } }),
+  );
+  expect(heading()).toBe(
+    calendarMonthLabel({ year: 2027, month: 1 }, mockLocales.en),
+  );
+  expect(props.onBrowseMonth).not.toHaveBeenCalled();
+  await act(async () =>
+    track().props.onMomentumScrollEnd({
+      nativeEvent: { contentOffset: { x: 1400 } },
+    }),
+  );
+  expect(props.onBrowseMonth).toHaveBeenCalledWith({ year: 2027, month: 1 });
+  props = { ...props, draftMonth: { year: 2027, month: 1 } };
+  await act(async () => app.update(<CalendarModal {...props} />));
+  expect(heading()).toBe(
+    calendarMonthLabel({ year: 2027, month: 1 }, mockLocales.en),
+  );
+});
+
+test('heading swipe pages the same grid, while short and vertical touches keep the month', async () => {
+  mockReduced = false;
+  await mount();
+  await act(async () =>
+    app.root
+      .findAllByProps({ testID: 'calendar-swipe-surface' })[0]
+      .props.onLayout({ nativeEvent: { layout: { width: 700 } } }),
+  );
+  const heading = () =>
+    app.root.findAllByProps({ testID: 'calendar-month-swipe-heading' })[0];
+  const touch = async (x: number, y: number, endX: number, endY: number) => {
+    await act(async () => {
+      heading().props.onTouchStart({
+        nativeEvent: { pageX: x, pageY: y, touches: [{}] },
+      });
+      heading().props.onTouchEnd({
+        nativeEvent: { pageX: endX, pageY: endY },
+      });
+    });
+  };
+  await touch(300, 100, 290, 100);
+  await touch(300, 100, 100, 270);
+  expect(props.onBrowseMonth).not.toHaveBeenCalled();
+  await touch(300, 100, 100, 100);
+  expect(
+    app.root.findAllByProps({ testID: 'calendar-visible-heading' })[0].props
+      .children,
+  ).toBe(calendarMonthLabel({ year: 2026, month: 11 }, mockLocales.en));
+  expect(props.onBrowseMonth).not.toHaveBeenCalled();
+  expect(button('Next month').props.disabled).toBe(true);
+  await act(async () =>
+    app.root
+      .findAllByProps({ testID: 'calendar-page-track' })[0]
+      .props.onMomentumScrollEnd({
+        nativeEvent: { contentOffset: { x: 1400 } },
+      }),
+  );
+  expect(props.onBrowseMonth).toHaveBeenCalledTimes(1);
+  expect(props.onBrowseMonth).toHaveBeenCalledWith({ year: 2026, month: 11 });
+});
+
+test.each([false, true])(
+  'short fast grid gesture completes one page with reduced motion %s even when native paging snaps back',
+  async reduced => {
+    mockReduced = reduced;
+    await mount();
+    const surface = app.root.findAllByProps({
+      testID: 'calendar-swipe-surface',
+    })[0];
+    await act(async () =>
+      surface.props.onLayout({ nativeEvent: { layout: { width: 700 } } }),
+    );
+    await act(async () => {
+      surface.props.onTouchStartCapture({
+        nativeEvent: { pageX: 300, pageY: 100, touches: [{}] },
+      });
+      surface.props.onTouchEndCapture({
+        nativeEvent: { pageX: 250, pageY: 100 },
+      });
+    });
+    const track = app.root.findAllByProps({ testID: 'calendar-page-track' })[0];
+    expect(track.props.scrollEnabled).toBe(!reduced);
+    await act(async () =>
+      track.props.onMomentumScrollEnd({
+        nativeEvent: { contentOffset: { x: 700 } },
+      }),
+    );
+    expect(props.onBrowseMonth).toHaveBeenCalledTimes(1);
+    expect(props.onBrowseMonth).toHaveBeenCalledWith({ year: 2026, month: 11 });
+    await act(async () =>
+      track.props.onMomentumScrollEnd({
+        nativeEvent: { contentOffset: { x: 1400 } },
+      }),
+    );
+    expect(props.onBrowseMonth).toHaveBeenCalledTimes(1);
+  },
+);
+
+test.each(['en', 'es', 'uk'] as Language[])(
+  'compact title keeps a 16dp inset without narrowing the day grid in %s',
+  async language => {
+    const dimensions = jest
+      .spyOn(
+        jest.requireActual<typeof import('react-native')>('react-native'),
+        'useWindowDimensions',
+      )
+      .mockReturnValue({ width: 384, height: 800, scale: 1, fontScale: 1.1 });
+    try {
+      mockLanguage = language;
+      await mount();
+      const title = app.root.findAllByProps({
+        testID: 'calendar-title-row',
+      })[0];
+      const content = app.root
+        .findAllByType(ScrollView)
+        .find(
+          node => !node.props.horizontal && node.props.contentContainerStyle,
+        )!;
+      const contentInset = StyleSheet.flatten(
+        content.props.contentContainerStyle,
+      ).paddingHorizontal;
+      expect(contentInset).toBe(4);
+      expect(
+        StyleSheet.flatten(title.props.style).paddingHorizontal + contentInset,
+      ).toBe(16);
+    } finally {
+      dimensions.mockRestore();
+    }
+  },
+);
+
+test('warms three pages before dragging and promotes the prepared Calendar without remounting', async () => {
+  const formatters = jest.spyOn(Intl, 'DateTimeFormat');
+  try {
+    await mount();
+    await act(async () =>
+      app.root
+        .findAllByProps({ testID: 'calendar-swipe-surface' })[0]
+        .props.onLayout({ nativeEvent: { layout: { width: 700 } } }),
+    );
+    expect(app.root.findAllByType(Calendar)).toHaveLength(3);
+    const prepared = app.root
+      .findAllByProps({ testID: 'calendar-next-preview' })[0]
+      .findByType(Calendar);
+    const original = currentPage().findByType(Calendar);
+    formatters.mockClear();
+    await act(async () => {
+      app.root
+        .findAllByProps({ testID: 'calendar-page-track' })[0]
+        .props.onScrollBeginDrag();
+    });
+    expect(currentPage().findByType(Calendar)).toBe(original);
+    expect(
+      app.root
+        .findAllByProps({ testID: 'calendar-next-preview' })[0]
+        .findByType(Calendar),
+    ).toBe(prepared);
+    expect(
+      formatters.mock.calls.filter(
+        ([, options]) =>
+          options?.dateStyle === 'full' || options?.weekday === 'short',
+      ),
+    ).toHaveLength(0);
+    await act(async () => {
+      app.root
+        .findAllByProps({ testID: 'calendar-page-track' })[0]
+        .props.onMomentumScrollEnd({
+          nativeEvent: { contentOffset: { x: 1400 } },
+        });
+    });
+    props = { ...props, draftMonth: { year: 2026, month: 11 } };
+    await act(async () => app.update(<CalendarModal {...props} />));
+    expect(currentPage().findByType(Calendar)).toBe(prepared);
+    expect(app.root.findAllByType(Calendar)).toHaveLength(3);
+    expect(
+      formatters.mock.calls.filter(
+        ([, options]) => options?.dateStyle === 'full',
+      ),
+    ).toHaveLength(1);
+    expect(
+      formatters.mock.calls.filter(
+        ([, options]) => options?.weekday === 'short',
+      ),
+    ).toHaveLength(1);
+  } finally {
+    formatters.mockRestore();
+  }
+});
+
 test('month arrows retain six equal-height week rows and hide adjacent dates across four, five and six week months', async () => {
   props.draftMonth = { year: 2021, month: 2 };
   await mount();
@@ -136,10 +540,10 @@ test('month arrows retain six equal-height week rows and hide adjacent dates acr
   ]) {
     props = { ...props, draftMonth: { year, month } };
     await act(async () => app.update(<CalendarModal {...props} />));
-    const calendar = app.root.findByType(Calendar);
+    const calendar = currentPage().findByType(Calendar);
     expect(calendar.props.showSixWeeks).toBe(false);
     expect(calendar.props.hideExtraDays).toBe(false);
-    const cells = app.root.findAllByType(CalendarDay);
+    const cells = currentPage().findAllByType(CalendarDay);
     expect(cells).toHaveLength(42);
     const placeholders = cells.filter(
       cell => cell.findAllByProps({ testID: 'calendar-empty-day' }).length > 0,

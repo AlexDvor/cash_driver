@@ -6,11 +6,12 @@ These static TypeScript exports preserve the current defaults. Edit the values h
 | --- | --- |
 | `theme/tokens.ts` | Light/dark semantic palettes, gradients, spacing, typography (including Home/tab labels), radii, touch targets, icon sizes and state/decorative opacity |
 | `theme/layout.ts` | Payment action wrapping, quick-amount/choice widths, text-width estimates and summary label font-scale limits |
-| `theme/motion.ts` | Collapsible duration, skeleton half-cycle/minimum opacity and calendar animation/indicator timing |
+| `theme/motion.ts` | Collapsible duration, skeleton half-cycle/minimum opacity and calendar feedback timing |
 | `theme/calendar.ts` | Calendar progress geometry; existing timing names delegate to `calendarMotion` for compatibility |
 | `timing.ts` | Fare auto-advance, received-cash keyboard dismissal, success/result visibility, Undo window/countdown and local clock refresh |
 | `solarTheme.ts` | Foreground location acquisition/permission timeouts, initial fix age, solar clock checks and approximate location watch options |
 | `platforms.ts` | Existing platform IDs, labels and validation |
+| `calendarGestures.ts` | Calendar swipe claim/fling distances (dp), completion fraction of page width, fling velocity (dp/ms) and horizontal direction dominance |
 
 Keep independently meaningful parameters separate even when their numbers match. For example, changing payment success visibility must not change deletion feedback timing. Pressed opacity remains 0.7 for ordinary controls and 0.8 for choice controls. `DELETION_UNDO_SECONDS` remains available from its feature file and delegates to `deletionTiming.undoWindowSeconds`.
 

@@ -23,6 +23,8 @@ import { styles } from './CalendarModal.styles';
 import { CalendarGrid } from '../CalendarGrid/CalendarGrid';
 import { CalendarChevron, CalendarIcon } from './CalendarIcon';
 import { useCalendarMotion } from '../../hooks/app/useCalendarMotion';
+import { resolveHeadingSwipe } from '../../constants/calendarGestures';
+import { CalendarGridHandle } from '../CalendarGrid/CalendarGrid.interface';
 import {
   CalendarActivityFeedback,
   CalendarMonthActivity,
@@ -62,14 +64,35 @@ function CalendarSession({
 }) {
   const { t, locale } = useTranslation();
   const { colors, appearance } = useAppTheme();
-  const { height, width } = useWindowDimensions();
+  const { height, width, fontScale } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [pickingMonth, setPickingMonth] = useState(monthOnly);
+  const [viewportWidth, setViewportWidth] = useState(0);
+  const [gridPaging, setGridPaging] = useState(false);
+  const [previewMonth, setPreviewMonth] =
+    useState<CalendarModalProps['draftMonth']>(null);
+  const gridRef = useRef<CalendarGridHandle>(null);
+  const headingTouch = useRef<{
+    x: number;
+    y: number;
+    started: number;
+    multi: boolean;
+  } | null>(null);
   useEffect(() => {
     onMonthPickerChange?.(pickingMonth);
     return () => onMonthPickerChange?.(false);
   }, [pickingMonth, onMonthPickerChange]);
   const motion = useCalendarMotion();
+  const previousMonth = useRef(`${draftMonth.year}/${draftMonth.month}`);
+  useEffect(() => {
+    const key = `${draftMonth.year}/${draftMonth.month}`;
+    if (previousMonth.current !== key) {
+      previousMonth.current = key;
+      AccessibilityInfo.announceForAccessibility(
+        calendarMonthLabel(draftMonth, locale),
+      );
+    }
+  }, [draftMonth, locale]);
   const hasDates = activityHasData ?? activityStatus === 'ready';
   const hasMonths = monthActivityHasData ?? monthActivityStatus === 'ready';
   const status = pickingMonth ? monthActivityStatus : activityStatus;
@@ -101,7 +124,7 @@ function CalendarSession({
     ? new Intl.NumberFormat(locale, { useGrouping: false }).format(
         draftMonth.year,
       )
-    : label;
+    : calendarMonthLabel(previewMonth ?? draftMonth, locale);
   const headingSamples = useMemo(
     () =>
       Array.from({ length: 12 }, (_, index) =>
@@ -161,13 +184,20 @@ function CalendarSession({
           ]}
         >
           <ScrollView
+            scrollEnabled={!gridPaging}
             contentContainerStyle={[
               styles.content,
               { paddingHorizontal: horizontalPadding },
             ]}
             keyboardShouldPersistTaps="handled"
           >
-            <View style={styles.row}>
+            <View
+              testID="calendar-title-row"
+              style={[
+                styles.row,
+                compact && !monthOnly && styles.compactTitleInset,
+              ]}
+            >
               <View
                 ref={heading}
                 accessible
@@ -223,8 +253,9 @@ function CalendarSession({
                 </AppText>
               </Pressable>
             </View>
-            <View style={styles.row}>
+            <View testID="calendar-month-navigation" style={styles.row}>
               <Pressable
+                disabled={gridPaging}
                 accessibilityRole="button"
                 accessibilityLabel={t(
                   pickingMonth
@@ -242,7 +273,51 @@ function CalendarSession({
               >
                 <CalendarChevron color={colors.text} previous />
               </Pressable>
-              <View style={[styles.control, styles.heading]}>
+              <View
+                testID="calendar-month-swipe-heading"
+                onTouchStart={event => {
+                  headingTouch.current = {
+                    x: event.nativeEvent.pageX,
+                    y: event.nativeEvent.pageY,
+                    started: Date.now(),
+                    multi: event.nativeEvent.touches.length > 1,
+                  };
+                }}
+                onTouchMove={event => {
+                  if (
+                    event.nativeEvent.touches.length > 1 &&
+                    headingTouch.current
+                  )
+                    headingTouch.current.multi = true;
+                }}
+                onTouchCancel={() => {
+                  headingTouch.current = null;
+                }}
+                onTouchEnd={event => {
+                  const start = headingTouch.current;
+                  headingTouch.current = null;
+                  if (
+                    !start ||
+                    start.multi ||
+                    pickingMonth ||
+                    gridPaging ||
+                    !motion.active
+                  )
+                    return;
+                  const dx = event.nativeEvent.pageX - start.x;
+                  const dy = event.nativeEvent.pageY - start.y;
+                  const duration = Math.max(1, Date.now() - start.started);
+                  const direction = resolveHeadingSwipe(
+                    dx,
+                    dy,
+                    duration,
+                    viewportWidth,
+                    start.multi,
+                  );
+                  if (direction) gridRef.current?.page(direction);
+                }}
+                style={[styles.control, styles.heading]}
+              >
                 <View
                   testID="calendar-heading-measure"
                   style={styles.headingMeasureRow}
@@ -275,6 +350,7 @@ function CalendarSession({
                 </View>
               </View>
               <Pressable
+                disabled={gridPaging}
                 accessibilityRole="button"
                 accessibilityLabel={t(
                   pickingMonth ? 'calendarNextYear' : 'calendarNextMonth',
@@ -292,6 +368,7 @@ function CalendarSession({
               </Pressable>
               {!monthOnly && (
                 <Pressable
+                  disabled={gridPaging}
                   accessibilityRole="button"
                   accessibilityLabel={t(
                     pickingMonth
@@ -403,6 +480,14 @@ function CalendarSession({
               </View>
             ) : (
               <CalendarGrid
+                ref={gridRef}
+                viewportWidth={viewportWidth}
+                onViewportWidth={setViewportWidth}
+                onPagingChange={setGridPaging}
+                onPreviewMonth={setPreviewMonth}
+                active={motion.active}
+                reducedMotion={motion.reduced}
+                resetKey={`${locale}/${width}/${height}/${fontScale}/${appearance}`}
                 draftMonth={draftMonth}
                 selectedDate={selectedDate}
                 todayDateKey={todayDateKey}
@@ -411,6 +496,7 @@ function CalendarSession({
                 activityHasData={hasDates}
                 onApplyDay={onApplyDay}
                 onRetryActivity={onRetryActivity}
+                onBrowseMonth={onBrowseMonth}
               />
             )}
             {pickingMonth && (
@@ -420,7 +506,10 @@ function CalendarSession({
             )}
             <ActionButton
               label={t('calendarShowMonth')}
-              onPress={() => onApplyMonth(draftMonth)}
+              disabled={gridPaging}
+              onPress={() => {
+                if (!gridPaging) onApplyMonth(draftMonth);
+              }}
             />
             <Pressable
               testID="calendar-cancel"

@@ -134,6 +134,7 @@ async function historicalFebruary() {
 }
 async function pressDay(day: number) {
   const node = app.root
+    .findAllByProps({ testID: 'calendar-current-page' })[0]
     .findAllByType(CalendarDay)
     .find(
       candidate =>
@@ -341,6 +342,7 @@ function dayLabel(day: number, month: number, year: number) {
     .findByType(SummaryScreen)
     .findByType(CalendarNavigation);
   const cell = grid
+    .findAllByProps({ testID: 'calendar-current-page' })[0]
     .findAllByType(CalendarDay)
     .find(
       node =>

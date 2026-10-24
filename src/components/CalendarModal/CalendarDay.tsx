@@ -7,8 +7,11 @@ import { useTranslation } from '../../providers/LanguageProvider/LanguageProvide
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../../ui/AppText/AppText';
 import { styles } from './CalendarModal.styles';
+import { CalendarDate } from '../../features/summary/periods';
 
-export const CalendarDayContext = createContext<CalendarGridProps | null>(null);
+export const CalendarDayContext = createContext<
+  (CalendarGridProps & { formatDate?: (date: CalendarDate) => string }) | null
+>(null);
 
 export function CalendarDay({ date }: { date?: DateData }) {
   const context = useContext(CalendarDayContext);
@@ -55,7 +58,8 @@ export function CalendarDay({ date }: { date?: DateData }) {
     ? t('calendarActivityLegend')
     : t('calendarNoActivity');
   const label = [
-    calendarFullDateLabel(coordinate, locale),
+    context.formatDate?.(coordinate) ??
+      calendarFullDateLabel(coordinate, locale),
     activity,
     !unknown && context.activityStatus !== 'ready'
       ? t(
