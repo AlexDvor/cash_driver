@@ -5,7 +5,6 @@ export const calendarGestures = {
   flingVelocity: 0.5,
   flingDistance: 12,
   horizontalDominance: 1.3,
-  programmaticSettleMs: 500,
   slowSnapFallbackMs: 350,
   scrollThrottleMs: 32,
 } as const;

@@ -16,5 +16,5 @@ class AppVersionModule(context: ReactApplicationContext) : ReactContextBaseJavaM
 
 class AppVersionPackage : ReactPackage {
   override fun createNativeModules(context: ReactApplicationContext): List<NativeModule> = listOf(AppVersionModule(context), SystemBarsModule(context), ConfirmationSoundModule(context))
-  override fun createViewManagers(context: ReactApplicationContext): List<ViewManager<*, *>> = emptyList()
+  override fun createViewManagers(context: ReactApplicationContext): List<ViewManager<*, *>> = listOf(CalendarPageHostManager())
 }

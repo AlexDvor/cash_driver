@@ -8,6 +8,7 @@ import React, {
   useRef,
 } from 'react';
 import {
+  Platform,
   ScrollView,
   ScrollViewInstance,
   useWindowDimensions,
@@ -28,8 +29,10 @@ import {
   CalendarPagerProps,
 } from './CalendarGrid.interface';
 import { CalendarMonthPage } from './CalendarMonthPage';
+import { CalendarPageHost } from './CalendarPageHost';
 
 const noDates: readonly string[] = [];
+const visiblePageAnchor = { minIndexForVisible: 0 };
 
 export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
   function CalendarGridContent(
@@ -51,9 +54,7 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
     const pageScroll = useRef<ScrollViewInstance>(null);
     const scrolling = useRef(false);
     const pendingMonth = useRef<string | null>(null);
-    const momentum = useRef(false);
-    const dragStarted = useRef(0);
-    const flingTarget = useRef<number | null>(null);
+    const dragging = useRef(false);
     const previewDirection = useRef<-1 | 0 | 1>(0);
     const touchStart = useRef<{
       x: number;
@@ -86,6 +87,7 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
       const current = latest.current;
       if (
         !scrolling.current &&
+        !pendingMonth.current &&
         date.year === current.draftMonth?.year &&
         date.month === current.draftMonth.month
       )
@@ -111,15 +113,27 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
       [year, month],
     );
     const monthKey = `${year}/${month}`;
+    const previousMonthKey = useRef(monthKey);
+    const externalMonthChange =
+      previousMonthKey.current !== monthKey &&
+      pendingMonth.current !== monthKey;
     useLayoutEffect(() => {
       if (!viewportWidth) return;
       if (settleTimer.current) clearTimeout(settleTimer.current);
-      pageScroll.current?.scrollTo({ x: viewportWidth, animated: false });
+      // Android positions the chosen native page before drawing its descendants.
+      // A same-month lifecycle reset still cancels any unfinished gesture.
+      const nativeMonthChange =
+        Platform.OS === 'android' && previousMonthKey.current !== monthKey;
+      if (
+        !nativeMonthChange &&
+        (pendingMonth.current !== monthKey || reducedMotion)
+      )
+        pageScroll.current?.scrollTo({ x: viewportWidth, animated: false });
+      previousMonthKey.current = monthKey;
       pendingMonth.current = null;
       scrolling.current = false;
       onPagingChange(false);
-      momentum.current = false;
-      flingTarget.current = null;
+      dragging.current = false;
       previewDirection.current = 0;
       onPreviewMonth(null);
       touchStart.current = null;
@@ -129,6 +143,7 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
       viewportWidth,
       resetKey,
       active,
+      reducedMotion,
       onPagingChange,
       onPreviewMonth,
     ]);
@@ -136,7 +151,11 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
       (offset: number) => {
         if (!viewportWidth || !scrolling.current || pendingMonth.current)
           return;
-        const page = Math.round(offset / viewportWidth);
+        const page = Math.max(
+          0,
+          Math.min(2, Math.round(offset / viewportWidth)),
+        );
+        if (settleTimer.current) clearTimeout(settleTimer.current);
         scrolling.current = false;
         if (page === 1) {
           showPreview(0);
@@ -151,22 +170,34 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
       },
       [viewportWidth, onPagingChange, showPreview],
     );
+    // Restart after every native offset: elapsed time alone does not prove a
+    // page reached its destination. Some Android slow snaps omit momentum-end.
+    const settleWhenIdle = useCallback(() => {
+      if (settleTimer.current) clearTimeout(settleTimer.current);
+      settleTimer.current = setTimeout(() => {
+        if (dragging.current || !scrolling.current || pendingMonth.current)
+          return;
+        const offset = lastOffset.current;
+        const target =
+          Math.max(0, Math.min(2, Math.round(offset / viewportWidth))) *
+          viewportWidth;
+        pageScroll.current?.scrollTo({ x: target, animated: false });
+        finishPage(target);
+      }, calendarGestures.slowSnapFallbackMs);
+    }, [viewportWidth, finishPage]);
     const forcePage = useCallback(
       (direction: -1 | 1) => {
         if (!viewportWidth || pendingMonth.current || !active) return;
         scrolling.current = true;
+        dragging.current = false;
         onPagingChange(true);
         const target = viewportWidth * (1 + direction);
-        flingTarget.current = target;
-        showPreview(direction);
-        pageScroll.current?.scrollTo({ x: target, animated: !reducedMotion });
-        if (settleTimer.current) clearTimeout(settleTimer.current);
-        if (reducedMotion) finishPage(target);
-        else
-          settleTimer.current = setTimeout(
-            () => finishPage(target),
-            calendarGestures.programmaticSettleMs,
-          );
+        if (!reducedMotion || Platform.OS !== 'android')
+          pageScroll.current?.scrollTo({ x: target, animated: !reducedMotion });
+        if (reducedMotion) {
+          lastOffset.current = target;
+          finishPage(target);
+        } else settleWhenIdle();
       },
       [
         viewportWidth,
@@ -174,7 +205,7 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
         reducedMotion,
         onPagingChange,
         finishPage,
-        showPreview,
+        settleWhenIdle,
       ],
     );
     useImperativeHandle(
@@ -189,10 +220,11 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
 
     return (
       <>
-        <View
+        <CalendarPageHost
           testID="calendar-swipe-surface"
           onLayout={event => onViewportWidth(event.nativeEvent.layout.width)}
           onTouchStartCapture={event => {
+            if (!reducedMotion) return;
             touchStart.current = {
               x: event.nativeEvent.pageX,
               y: event.nativeEvent.pageY,
@@ -207,10 +239,10 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
           onTouchEndCapture={event => {
             const start = touchStart.current;
             touchStart.current = null;
-            if (!start || start.multi || !active || overflow) return;
+            if (!start || start.multi || !active || overflow || !reducedMotion)
+              return;
             const dx = event.nativeEvent.pageX - start.x;
             const dy = event.nativeEvent.pageY - start.y;
-            const distance = Math.abs(dx);
             const duration = Math.max(1, Date.now() - start.at);
             const direction = resolveHeadingSwipe(
               dx,
@@ -219,14 +251,7 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
               viewportWidth,
               start.multi,
             );
-            if (
-              direction &&
-              (reducedMotion ||
-                (distance < viewportWidth * calendarGestures.pageFraction &&
-                  distance >= calendarGestures.flingDistance &&
-                  distance / duration >= calendarGestures.flingVelocity))
-            )
-              forcePage(direction);
+            if (direction) forcePage(direction);
           }}
           onTouchCancelCapture={() => {
             touchStart.current = null;
@@ -239,8 +264,11 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
             testID="calendar-page-track"
             horizontal
             pagingEnabled
-            snapToInterval={viewportWidth}
-            disableIntervalMomentum
+            maintainVisibleContentPosition={
+              Platform.OS === 'android' || externalMonthChange || reducedMotion
+                ? undefined
+                : visiblePageAnchor
+            }
             decelerationRate="fast"
             bounces={false}
             overScrollMode="never"
@@ -251,10 +279,8 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
             contentOffset={{ x: viewportWidth, y: 0 }}
             onScrollBeginDrag={() => {
               scrolling.current = true;
-              dragStarted.current = Date.now();
-              flingTarget.current = null;
+              dragging.current = true;
               onPagingChange(true);
-              momentum.current = false;
               if (settleTimer.current) clearTimeout(settleTimer.current);
             }}
             scrollEventThrottle={calendarGestures.scrollThrottleMs}
@@ -263,49 +289,40 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
               if (
                 viewportWidth > 0 &&
                 scrolling.current &&
-                !pendingMonth.current &&
-                flingTarget.current === null
+                !pendingMonth.current
               ) {
                 const page = Math.round(lastOffset.current / viewportWidth) - 1;
                 showPreview(page < 0 ? -1 : page > 0 ? 1 : 0);
+                if (!dragging.current) {
+                  // At an outer page the native animation has reached its hard
+                  // boundary. Promote now, without Android's delayed momentum-end.
+                  if (
+                    lastOffset.current <= 0 ||
+                    lastOffset.current >= viewportWidth * 2
+                  )
+                    finishPage(lastOffset.current);
+                  else settleWhenIdle();
+                }
               }
             }}
             onMomentumScrollBegin={() => {
-              momentum.current = true;
-              if (settleTimer.current) clearTimeout(settleTimer.current);
+              if (dragging.current) return;
+              settleWhenIdle();
             }}
             onMomentumScrollEnd={event => {
-              momentum.current = false;
-              finishPage(
-                flingTarget.current ?? event.nativeEvent.contentOffset.x,
-              );
+              if (dragging.current) return;
+              lastOffset.current = event.nativeEvent.contentOffset.x;
+              finishPage(lastOffset.current);
             }}
             onScrollEndDrag={event => {
-              if (flingTarget.current != null) return;
-              const offset = event.nativeEvent.contentOffset.x;
-              const distance = offset - viewportWidth;
-              const elapsed = Math.max(1, Date.now() - dragStarted.current);
+              dragging.current = false;
+              lastOffset.current = event.nativeEvent.contentOffset.x;
               if (
-                Math.abs(distance) >= calendarGestures.flingDistance &&
-                Math.abs(distance) / elapsed >= calendarGestures.flingVelocity
-              ) {
-                flingTarget.current = viewportWidth * (distance > 0 ? 2 : 0);
-                pageScroll.current?.scrollTo({
-                  x: flingTarget.current,
-                  animated: !reducedMotion,
-                });
-                if (reducedMotion) finishPage(flingTarget.current);
-                else
-                  settleTimer.current = setTimeout(
-                    () => finishPage(flingTarget.current ?? offset),
-                    calendarGestures.programmaticSettleMs,
-                  );
-                return;
-              }
-              // Some Android releases omit momentum callbacks for a slow snap.
-              settleTimer.current = setTimeout(() => {
-                if (!momentum.current) finishPage(lastOffset.current);
-              }, calendarGestures.slowSnapFallbackMs);
+                lastOffset.current <= 0 ||
+                lastOffset.current >= viewportWidth * 2
+              )
+                finishPage(lastOffset.current);
+              else settleWhenIdle();
             }}
           >
             {months.map((coordinate, index) => {
@@ -327,6 +344,7 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
               return (
                 <View
                   key={`${coordinate.year}/${coordinate.month}`}
+                  collapsable={false}
                   testID={
                     preview
                       ? offset < 0
@@ -357,7 +375,7 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
               );
             })}
           </ScrollView>
-        </View>
+        </CalendarPageHost>
         <View style={styles.legend}>
           <View
             accessible={false}

@@ -31,15 +31,27 @@ export const CalendarMonthPage = memo(
     const { draftMonth } = props;
     const { locale } = useTranslation();
     const { colors } = useAppTheme();
-    const dateFormatter = useMemo(
-      () =>
-        new Intl.DateTimeFormat(locale, { dateStyle: 'full', timeZone: 'UTC' }),
-      [locale],
-    );
+    const year = draftMonth?.year;
+    const month = draftMonth?.month;
+    // Promoting a prepared page changes activity/selection context. Keep its
+    // localized date labels instead of formatting every day again on each read.
+    const dateLabels = useMemo(() => {
+      if (year == null || month == null) return [];
+      const formatter = new Intl.DateTimeFormat(locale, {
+        dateStyle: 'full',
+        timeZone: 'UTC',
+      });
+      const days = calendarDisplayDate(
+        offsetCalendarMonth({ year, month }, 1),
+        0,
+      ).getUTCDate();
+      return Array.from({ length: days }, (_, index) =>
+        formatter.format(calendarDisplayDate({ year, month }, index + 1)),
+      );
+    }, [locale, year, month]);
     const formatDate = useCallback(
-      (date: CalendarDate) =>
-        dateFormatter.format(calendarDisplayDate(date, date.day)),
-      [dateFormatter],
+      (date: CalendarDate) => dateLabels[date.day - 1],
+      [dateLabels],
     );
     const weekdays = useMemo(() => {
       const formatter = new Intl.DateTimeFormat(locale, {
