@@ -12,7 +12,7 @@ export const styles = StyleSheet.create({
   controls: { gap: spacing.md },
   feedback: { gap: spacing.md },
   groupHeading: { paddingTop: spacing.lg, paddingBottom: spacing.sm },
-  separator: { height: spacing.md },
+  separator: { height: spacing.sm },
   footer: { paddingTop: spacing.xxl },
   heading: { gap: spacing.xs, flexShrink: 1 },
   platformHeading: {
@@ -23,8 +23,8 @@ export const styles = StyleSheet.create({
   },
   row: {
     borderWidth: sizing.borderWidth,
-    borderRadius: radii.card,
-    padding: spacing.lg,
+    borderRadius: radii.chip,
+    padding: spacing.md,
     gap: spacing.sm,
     minHeight: sizing.touchTarget,
   },
@@ -40,5 +40,6 @@ export const styles = StyleSheet.create({
     marginLeft: 'auto',
     alignItems: 'flex-end',
   },
+  money: { textAlign: 'right', fontVariant: ['tabular-nums'] },
   pressed: { opacity: opacity.pressed },
 });

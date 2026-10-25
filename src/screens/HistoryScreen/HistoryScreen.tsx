@@ -16,7 +16,6 @@ import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { useDeletion } from '../../providers/DeletionProvider/DeletionProvider';
 import {
   groupHistory,
-  HistoryPeriod,
   HistoryPlatform,
 } from '../../features/transactions/history';
 import { platforms, platformLabels } from '../../constants/platforms';
@@ -24,10 +23,10 @@ import { usePagedTransactions } from '../../hooks/transactions/usePagedTransacti
 import { useHasTransactions } from '../../hooks/transactions/useHasTransactions';
 import { useCalendarSelection } from '../../hooks/summary/useCalendarSelection';
 import { CalendarNavigation } from '../../components/CalendarNavigation/CalendarNavigation';
-import { calendarFullDateLabel } from '../../components/CalendarModal/calendarPresentation';
 import {
   getCalendarDayBounds,
   getPeriodBounds,
+  SummaryPeriod,
 } from '../../features/summary/periods';
 import { spacing, sizing, iconSizing } from '../../constants/theme/tokens';
 import { TransactionLoadState } from '../../components/TransactionLoadState/TransactionLoadState';
@@ -50,12 +49,9 @@ export function HistoryScreen() {
   cancelCalendar.current = calendar.cancelCalendar;
   useFocusEffect(useCallback(() => () => cancelCalendar.current(), []));
   const deletion = useDeletion();
-  const [period, setPeriod] = useState<HistoryPeriod>('day');
+  const [period, setPeriod] = useState<SummaryPeriod>('day');
   const [platform, setPlatform] = useState<HistoryPlatform>('all');
   const bounds = useMemo(() => {
-    if (period === 'all') {
-      return undefined;
-    }
     if (period === 'month') {
       return calendar.bounds;
     }
@@ -135,13 +131,13 @@ export function HistoryScreen() {
       </View>
       <ChoiceGroup
         label={t('period')}
+        columns="filters"
         value={period}
         onChange={setPeriod}
         options={[
           { value: 'day', label: t('today') },
           { value: 'week', label: t('week') },
           { value: 'month', label: t('month') },
-          { value: 'all', label: t('allTime') },
         ]}
       />
       {period === 'month' && (
@@ -151,13 +147,12 @@ export function HistoryScreen() {
           todayDateKey={clock.dayKey}
         />
       )}
-      {bounds && (
-        <AppText secondary testID="history-range">
-          {period === 'month' && calendar.selection.kind === 'day'
-            ? calendarFullDateLabel(calendar.selection.date, locale)
-            : formatPeriodRange(bounds, locale, clock.timeZone)}
-        </AppText>
-      )}
+      {period !== 'day' &&
+        !(period === 'month' && calendar.selection.kind === 'day') && (
+          <AppText secondary testID="history-range">
+            {formatPeriodRange(bounds, locale, clock.timeZone)}
+          </AppText>
+        )}
       <ChoiceGroup
         label={t('platform')}
         iconLayout="adaptive"
@@ -256,7 +251,13 @@ export function HistoryScreen() {
             <Pressable
               testID={`history-${record.id}`}
               accessibilityRole="button"
-              accessibilityLabel={record.openLabel}
+              accessibilityLabel={[
+                record.openLabel,
+                record.tipLabel,
+                deletion.state.id === record.id ? t('deletionPending') : null,
+              ]
+                .filter(Boolean)
+                .join('. ')}
               onPress={() =>
                 navigation.navigate(routes.Details, { id: record.id })
               }
@@ -277,24 +278,28 @@ export function HistoryScreen() {
                       {platformLabels[record.platform]}
                     </AppText>
                     <AppText secondary variant="supporting">
-                      {record.timeLabel} ·{' '}
+                      {record.timeLabel}
+                    </AppText>
+                    {deletion.state.id === record.id && (
                       <AppText
                         variant="supporting"
                         style={{ color: colors.primary }}
                       >
-                        {t(
-                          deletion.state.id === record.id
-                            ? 'deletionPending'
-                            : 'recorded',
-                        )}
+                        {t('deletionPending')}
                       </AppText>
-                    </AppText>
+                    )}
                   </View>
                 </View>
                 <View style={styles.amounts}>
-                  <AppText variant="heading">{record.fareLabel}</AppText>
+                  <AppText variant="heading" style={styles.money}>
+                    {record.fareLabel}
+                  </AppText>
                   {record.tipCents > 0 && (
-                    <AppText secondary variant="supporting">
+                    <AppText
+                      secondary
+                      variant="supporting"
+                      style={styles.money}
+                    >
                       {record.tipLabel}
                     </AppText>
                   )}

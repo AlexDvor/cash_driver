@@ -1,6 +1,6 @@
 import React from 'react';
 import { HistorySkeleton } from '../../components/HistorySkeleton/HistorySkeleton';
-import { Alert, AppState, TextInput, StyleSheet } from 'react-native';
+import { Alert, AppState, TextInput, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createNavigationContainerRef } from '@react-navigation/native';
 import ReactTestRenderer, { act } from 'react-test-renderer';
@@ -21,6 +21,9 @@ import {
 } from '../../test/sqliteTestDatabase';
 import { CashTransaction } from '../../features/transactions/types';
 import { HistoryPage } from '../../features/transactions/transactionReadContracts';
+import { CalendarModal } from '../../components/CalendarModal/CalendarModal';
+import { AppText } from '../../ui/AppText/AppText';
+import { ChoiceGroup } from '../../ui/ChoiceGroup/ChoiceGroup';
 
 let db: SqlConnection;
 let services: Persistence;
@@ -166,11 +169,18 @@ async function edit(id: string) {
 
 test('real history combines period/platform filters, shows groups and preserved filters across languages/themes', async () => {
   const today = await seed();
-  const old = await seed('bolt', '2026-09-30T08:00:00Z');
+  const old = await seed('bolt', '2026-10-07T08:00:00Z');
   await mount();
   await press('Historial');
   expect(rowIds()).toEqual([`history-${today.id}`]);
-  await press('Todo');
+  expect(() => button('Todo')).toThrow('Missing Todo');
+  expect(['Hoy', 'Semana', 'Mes'].map(label => button(label))).toHaveLength(3);
+  expect(
+    ['Todas', 'Uber', 'Cabify', 'Bolt', 'Otro'].map(label => button(label)),
+  ).toHaveLength(5);
+  expect(content()).not.toContain('Registrado');
+  expect(app.root.findAllByProps({ testID: 'history-range' })).toHaveLength(0);
+  await press('Semana');
   expect(rowIds()).toHaveLength(2);
   await press('Bolt');
   expect(rowIds()).toEqual([`history-${old.id}`]);
@@ -196,6 +206,113 @@ test('genuine empty state navigates Home; load error shows retry without fabrica
   expect(rowIds()).toEqual([]);
   await press('Reintentar');
   expect(content()).toContain('Todavía no hay operaciones');
+});
+
+test.each([
+  [280, 1.1],
+  [344, 1.1],
+  [600, 1.1],
+  [280, 1.8],
+  [344, 1.8],
+  [600, 1.8],
+])(
+  'period controls respect their minimum width at content width %s and font scale %s',
+  async (width, fontScale) => {
+    jest
+      .spyOn(
+        jest.requireActual<typeof import('react-native')>('react-native'),
+        'useWindowDimensions',
+      )
+      .mockReturnValue({ width: width + 40, height: 800, scale: 1, fontScale });
+    await mount();
+    await press('Historial');
+    const group = app.root
+      .findAllByType(ChoiceGroup)
+      .find(node => node.props.label === 'Período')!;
+    const container = group
+      .findAllByType(View)
+      .find(node => typeof node.props.onLayout === 'function')!;
+    await act(async () =>
+      container.props.onLayout({ nativeEvent: { layout: { width } } }),
+    );
+    const controls = group.findAll(
+      node =>
+        node.props.accessibilityRole === 'radio' &&
+        typeof node.props.onPress === 'function',
+    );
+    expect(controls).toHaveLength(3);
+    for (const control of controls) {
+      const style = StyleSheet.flatten(control.props.style({ pressed: false }));
+      expect(style.width).toBeGreaterThanOrEqual(style.minWidth ?? 48);
+      expect(style.width).toBeLessThanOrEqual(width);
+    }
+    await act(async () => controls[2].props.onPress());
+    expect(button('Mes').props.accessibilityState.selected).toBe(true);
+  },
+);
+
+test('month/day selection retains platform filters and older records remain reachable without Todo', async () => {
+  const today = await seed();
+  const older = await seed('bolt', '2026-09-30T08:00:00Z');
+  await mount();
+  await press('Historial');
+  await press('Mes');
+  expect(rowIds()).toEqual([`history-${today.id}`]);
+  await press('Mes anterior');
+  await press('Bolt');
+  expect(rowIds()).toEqual([`history-${older.id}`]);
+  await press('Abrir calendario');
+  await act(async () => {
+    app.root.findByType(CalendarModal).props.onApplyDay({
+      year: 2026,
+      month: 9,
+      day: 30,
+    });
+  });
+  expect(rowIds()).toEqual([`history-${older.id}`]);
+  expect(app.root.findAllByProps({ testID: 'history-range' })).toHaveLength(0);
+  expect(button('Bolt').props.accessibilityState.selected).toBe(true);
+  await press('Volver al mes');
+  await press('Hoy');
+  expect(rowIds()).toEqual([]);
+  await press('Mes');
+  expect(rowIds()).toEqual([`history-${older.id}`]);
+});
+
+test('compact rows retain complete fares and tips, omit zero tips and open details', async () => {
+  const tipped = await seed('cabify');
+  const large = await services.transactions.save(
+    services.transactions.newPendingOperation(),
+    {
+      platform: 'uber',
+      fareAmountCents: 999999,
+      cashReceivedCents: 999999,
+      tipCents: 0,
+    },
+  );
+  await mount();
+  await press('Historial');
+  const row = (id: string) =>
+    app.root.findAll(
+      node =>
+        node.props.testID === `history-${id}` &&
+        typeof node.props.onPress === 'function',
+    )[0];
+  const labels = (id: string) =>
+    row(id)
+      .findAllByType(AppText)
+      .map(node => node.props.children)
+      .join(' ');
+  expect(labels(tipped.id)).toMatch(/18,00.*Propina:.*2,00/);
+  expect(row(tipped.id).props.accessibilityLabel).toMatch(/Propina:.*2,00/);
+  expect(labels(large.id)).toContain('999,99');
+  expect(labels(large.id)).not.toContain('Propina');
+  expect(labels(large.id)).not.toContain('Registrado');
+  await act(async () => row(tipped.id).props.onPress());
+  expect(ref.getCurrentRoute()).toMatchObject({
+    name: 'Details',
+    params: { id: tipped.id },
+  });
 });
 
 test('loading has no fabricated rows and a stale pre-edit response cannot overwrite refreshed history', async () => {

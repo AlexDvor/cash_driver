@@ -370,7 +370,7 @@ test('persisted partial tip displays independently and edit refreshes history, d
   // Save keeps Edit open; return through Details to the focused History screen.
   await act(async () => ref.goBack());
   await act(async () => ref.goBack());
-  await press('Todo');
+  await press('Mes');
   const updatedRow = app.root.findAllByProps({
     testID: `history-${original.id}`,
   })[0];

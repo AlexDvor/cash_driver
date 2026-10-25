@@ -3,12 +3,12 @@ import { radii, sizing, spacing } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   container: { gap: 0 },
-  rows: { gap: spacing.md },
+  rows: { gap: spacing.sm },
   groupHeading: { paddingTop: spacing.lg, paddingBottom: spacing.sm },
   card: {
-    padding: spacing.lg,
+    padding: spacing.md,
     borderWidth: sizing.borderWidth,
-    borderRadius: radii.card,
+    borderRadius: radii.chip,
     minHeight: sizing.touchTarget,
   },
   row: {
