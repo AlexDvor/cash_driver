@@ -10,6 +10,7 @@ import {
 
 export function CalendarActivityFeedback({
   status,
+  paging = false,
   requestKey,
   message,
   motion,
@@ -18,16 +19,27 @@ export function CalendarActivityFeedback({
   const [visibleKey, setVisibleKey] = useState<string | null>(null);
   const [width, setWidth] = useState(0);
   const position = useRef(new Animated.Value(0)).current;
-  const visible = status === 'loading' && visibleKey === requestKey;
+  const pagingFeedback = useRef(false);
+  const visible = paging || (status === 'loading' && visibleKey === requestKey);
   useEffect(() => {
-    setVisibleKey(null);
-    if (status !== 'loading') return;
+    if (paging) pagingFeedback.current = true;
+    if (status !== 'loading') {
+      if (!paging) pagingFeedback.current = false;
+      setVisibleKey(null);
+      return;
+    }
+    // Continue the existing indicator without a second delay after a swipe.
+    if (pagingFeedback.current) {
+      setVisibleKey(requestKey);
+      return;
+    }
+    if (visibleKey === requestKey) return;
     const timer = setTimeout(
       () => setVisibleKey(requestKey),
       calendarFeedback.indicatorDelay,
     );
     return () => clearTimeout(timer);
-  }, [requestKey, status]);
+  }, [requestKey, status, paging, visibleKey]);
   useEffect(() => {
     if ((visible || status === 'error') && motion.active)
       AccessibilityInfo.announceForAccessibility(message);

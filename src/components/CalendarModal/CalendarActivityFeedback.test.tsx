@@ -91,6 +91,52 @@ test('progress delays 200ms, reserves identical geometry, resets on new query an
   expect(cancel).toHaveBeenCalledWith(handle);
 });
 
+test('paging shows progress immediately and continues until month data is ready', async () => {
+  let paging = true;
+  let status: 'loading' | 'ready' = 'ready';
+  const render = () => (
+    <CalendarActivityFeedback
+      paging={paging}
+      status={status}
+      requestKey="month"
+      message="Loading"
+      motion={{ reduced: true, active: true }}
+    />
+  );
+  const opacity = () =>
+    StyleSheet.flatten(
+      app.root.findAllByProps({ testID: 'calendar-progress-segment' })[0].props
+        .style,
+    ).opacity;
+  await act(async () => {
+    app = Renderer.create(render());
+  });
+  expect(opacity()).toBe(1);
+  status = 'loading';
+  await act(async () => {
+    app.update(render());
+  });
+  paging = false;
+  await act(async () => {
+    app.update(render());
+  });
+  expect(opacity()).toBe(1);
+  status = 'ready';
+  await act(async () => {
+    app.update(render());
+  });
+  expect(opacity()).toBe(0);
+  paging = true;
+  await act(async () => {
+    app.update(render());
+  });
+  paging = false;
+  await act(async () => {
+    app.update(render());
+  });
+  expect(opacity()).toBe(0);
+});
+
 test('animations stop in background and Reduce Motion keeps a static indicator', async () => {
   const stop = jest.fn();
   const loop = jest

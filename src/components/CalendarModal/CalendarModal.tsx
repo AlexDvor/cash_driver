@@ -391,6 +391,7 @@ function CalendarSession({
             </View>
             <CalendarActivityFeedback
               status={status}
+              paging={gridPaging}
               message={message}
               motion={motion}
               requestKey={`${draftMonth.year}/${

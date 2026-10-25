@@ -58,6 +58,7 @@ beforeEach(() => {
 });
 afterEach(async () => {
   await act(async () => app?.unmount());
+  jest.useRealTimers();
 });
 async function mount() {
   await act(async () => {
@@ -375,6 +376,7 @@ test('visible month heading follows the grid before draft commit and rolls back 
 });
 
 test('heading swipe pages the same grid, while short and vertical touches keep the month', async () => {
+  jest.useFakeTimers();
   mockReduced = false;
   await mount();
   await act(async () =>

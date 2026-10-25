@@ -1,5 +1,6 @@
 export interface CalendarActivityFeedbackProps {
   status: 'loading' | 'error' | 'ready';
+  paging?: boolean;
   requestKey: string;
   message: string;
   motion: { reduced: boolean; active: boolean };
