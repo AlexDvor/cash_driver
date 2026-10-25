@@ -11,7 +11,7 @@ Platform labels — Uber, Cabify, Bolt, and Otro — are selected manually. The 
 - Collapsible tip section: add a specific amount or use all change as a tip. A positive tip stays visible in the header when collapsed; removing it clears the amount.
 - Local SQLite history with payment details, editing, period/platform filters, and confirmed deletion with an undo opportunity for individual payments.
 - Separate fare, tip, and retained-cash totals; average fare and fare totals by platform.
-- Spanish (default), English, and Ukrainian interface languages.
+- Spanish (default) and English interface languages.
 - Light, dark, and automatic system themes; saved language, theme, and default-platform preferences.
 
 For example, a **20 €** fare, **50 €** received, and **5 €** tip produces **25 €** change and **25 €** retained cash. Received cash is not counted as revenue; retained cash is not a profit calculation.

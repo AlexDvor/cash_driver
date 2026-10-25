@@ -158,11 +158,11 @@ test('saved platforms, tips and retained cash remain distinct, with fare-only av
   expect(text('summary-averageFare')).toMatch(/13,75/);
   expect(text('summary-cabify')).toMatch(/15,01/);
   await press('Mes');
-  for (const language of ['en', 'uk', 'es'] as const) {
+  for (const language of ['en', 'es'] as const) {
     await act(async () => {
       await preferences.updatePreferences({
         language,
-        themeMode: language === 'uk' ? 'dark' : 'light',
+        themeMode: language === 'es' ? 'dark' : 'light',
       });
     });
     expect(text('summary-fareTotal')).toMatch(/55[,.]00/);
@@ -434,7 +434,7 @@ test('focus, resume, local midnight and timezone changes reload persisted rows a
   expect(listeners.size).toBe(0);
 });
 
-test('large saved totals stay complete across ES/EN/UK and all branded platform rows preserve fare-only values', async () => {
+test('large saved totals stay complete across ES/EN and all branded platform rows preserve fare-only values', async () => {
   for (const platform of ['uber', 'cabify', 'bolt', 'other'] as const) {
     await seed('2026-10-08T08:00:00Z', {
       platform,
@@ -444,7 +444,7 @@ test('large saved totals stay complete across ES/EN/UK and all branded platform 
     });
   }
   await mount();
-  for (const language of ['es', 'en', 'uk'] as const) {
+  for (const language of ['es', 'en'] as const) {
     await act(async () => {
       await preferences.updatePreferences({
         language,

@@ -453,18 +453,18 @@ test('actual edit failure preserves draft/platform/tip and retry commits derived
   expect(field('Propina').props.value).toBe('3,00');
   expect(await services.transactions.get(original.id)).toEqual(original);
   await act(async () => {
-    await preferences.updatePreferences({ language: 'uk', themeMode: 'dark' });
+    await preferences.updatePreferences({ language: 'es', themeMode: 'dark' });
   });
-  expect(field('Вартість поїздки').props.value).toBe('17');
+  expect(field('Importe a cobrar').props.value).toBe('17');
   await db.execute('DROP TRIGGER reject_edit');
-  await press('Повторити збереження змін');
+  await press('Reintentar cambios');
   expect(await services.transactions.get(original.id)).toMatchObject({
     fareAmountCents: 1700,
     tipCents: 300,
     netCashCents: 2000,
     changeGivenCents: 0,
   });
-  expect(content()).toContain('Операцію оновлено');
+  expect(content()).toContain('Operación actualizada');
   expect(content()).toContain('17,00');
   expect(content()).toContain('3,00');
 });

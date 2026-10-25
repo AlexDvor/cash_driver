@@ -33,7 +33,7 @@ test('concurrent reads wait for a transaction and never observe a rolled-back pr
     started = resolve;
   });
   const write = db.transaction(async tx => {
-    await tx.execute("UPDATE preferences SET language = 'uk' WHERE id = 1");
+    await tx.execute("UPDATE preferences SET language = 'en' WHERE id = 1");
     started?.();
     await gate;
     throw new Error('Rollback');
@@ -63,6 +63,7 @@ test('invalid preferences and missing singleton row fail without inventing repla
   services.changes.subscribe(notify);
   for (const patch of [
     { language: 'fr' },
+    { language: 'uk' },
     { themeMode: 'scheduled' },
     { defaultPlatform: 'unknown' },
     { hapticsEnabled: 1 },
@@ -75,7 +76,7 @@ test('invalid preferences and missing singleton row fail without inventing repla
   expect(notify).not.toHaveBeenCalled();
   await db.execute('DELETE FROM preferences');
   await expect(services.preferences.read()).rejects.toThrow('missing');
-  await expect(services.preferences.update({ language: 'uk' })).rejects.toThrow(
+  await expect(services.preferences.update({ language: 'es' })).rejects.toThrow(
     'missing',
   );
   expect((await db.execute('SELECT * FROM preferences')).rows).toEqual([]);
@@ -296,7 +297,7 @@ test('initializes once for simultaneous callers, reopens a file without losing o
     const pending = services.transactions.newPendingOperation();
     const saved = await services.transactions.save(pending, validInput);
     await services.preferences.update({
-      language: 'uk',
+      language: 'es',
       themeMode: 'dark',
       defaultPlatform: 'bolt',
       enabledPlatforms: ['bolt'],
@@ -308,7 +309,7 @@ test('initializes once for simultaneous callers, reopens a file without losing o
     const reopened = await testPersistence(connection);
     expect(await reopened.transactions.get(pending.id)).toEqual(saved);
     expect(await reopened.preferences.read()).toEqual({
-      language: 'uk',
+      language: 'es',
       themeMode: 'dark',
       defaultPlatform: 'bolt',
       enabledPlatforms: ['bolt'],
@@ -361,7 +362,7 @@ test('v5 sound migration preserves history/settings and later disabled choice su
     validInput,
   );
   await services.preferences.update({
-    language: 'uk',
+    language: 'es',
     themeMode: 'dark',
     hapticsEnabled: true,
     enabledPlatforms: ['cabify', 'bolt'],
@@ -433,14 +434,14 @@ test.each([null, 0, 1])(
     );
     await db.execute(
       'UPDATE preferences SET language = ?, theme_mode = ?, default_platform = ?, haptics_enabled = ? WHERE id = 1',
-      ['uk', 'dark', 'bolt', haptics],
+      ['es', 'dark', 'bolt', haptics],
     );
     await db.execute('DROP TABLE preference_enabled_platforms');
     await db.execute('ALTER TABLE preferences DROP COLUMN sound_enabled');
     await db.execute('PRAGMA user_version = 2');
     await migrateDatabase(db);
     expect(await services.preferences.read()).toEqual({
-      language: 'uk',
+      language: 'es',
       themeMode: 'dark',
       defaultPlatform: 'bolt',
       enabledPlatforms: ['bolt'],
@@ -725,7 +726,7 @@ test('failed writes roll back, preserve records/preferences and pending ID can r
     enabledPlatforms: ['cabify', 'uber'],
   });
   await Promise.all([
-    services.preferences.update({ language: 'uk' }),
+    services.preferences.update({ language: 'en' }),
     services.preferences.update({ themeMode: 'dark' }),
     services.preferences.update({
       defaultPlatform: 'cabify',
@@ -734,7 +735,7 @@ test('failed writes roll back, preserve records/preferences and pending ID can r
     }),
   ]);
   expect(await services.preferences.read()).toEqual({
-    language: 'uk',
+    language: 'en',
     themeMode: 'dark',
     defaultPlatform: 'cabify',
     enabledPlatforms: ['uber', 'cabify'],
@@ -742,5 +743,78 @@ test('failed writes roll back, preserve records/preferences and pending ID can r
     soundEnabled: true,
   });
   await services.transactions.removeAll();
-  expect((await services.preferences.read()).language).toBe('uk');
+  expect((await services.preferences.read()).language).toBe('en');
+});
+
+test.each(['es', 'en', 'uk'])(
+  'v7 retires saved %s language without changing other data',
+  async language => {
+    const services = await testPersistence(db);
+    const saved = await services.transactions.save(
+      services.transactions.newPendingOperation(),
+      validInput,
+    );
+    await services.preferences.update({
+      language: 'en',
+      themeMode: 'dark',
+      enabledPlatforms: ['cabify', 'bolt'],
+      defaultPlatform: 'bolt',
+      hapticsEnabled: true,
+      soundEnabled: false,
+    });
+    const previous = await services.preferences.read();
+    await db.execute('UPDATE preferences SET language = ? WHERE id = 1', [
+      language,
+    ]);
+    await db.execute('PRAGMA user_version = 6');
+    await migrateDatabase(db);
+    expect(await services.preferences.read()).toEqual({
+      ...previous,
+      language: language === 'uk' ? 'es' : language,
+    });
+    expect(await services.transactions.list()).toEqual([saved]);
+    expect((await db.execute('PRAGMA user_version')).rows[0].user_version).toBe(
+      7,
+    );
+    await migrateDatabase(db);
+    expect(await services.preferences.read()).toEqual({
+      ...previous,
+      language: language === 'uk' ? 'es' : language,
+    });
+  },
+);
+
+test('failed v7 language migration rolls back language/version and can retry without losing history', async () => {
+  const services = await testPersistence(db);
+  const saved = await services.transactions.save(
+    services.transactions.newPendingOperation(),
+    validInput,
+  );
+  await db.execute("UPDATE preferences SET language = 'uk' WHERE id = 1");
+  await db.execute('PRAGMA user_version = 6');
+  const failing: SqlConnection = {
+    ...db,
+    transaction: work =>
+      db.transaction(tx =>
+        work({
+          async execute(sql, params) {
+            const result = await tx.execute(sql, params);
+            if (sql.includes("WHERE language = 'uk'"))
+              throw new Error('Injected v7 failure');
+            return result;
+          },
+        }),
+      ),
+  };
+  await expect(migrateDatabase(failing)).rejects.toThrow('Injected v7 failure');
+  expect(
+    (await db.execute('SELECT language FROM preferences')).rows[0].language,
+  ).toBe('uk');
+  expect((await db.execute('PRAGMA user_version')).rows[0].user_version).toBe(
+    6,
+  );
+  expect(await services.transactions.get(saved.id)).toEqual(saved);
+  await migrateDatabase(db);
+  expect((await services.preferences.read()).language).toBe('es');
+  expect(await services.transactions.get(saved.id)).toEqual(saved);
 });

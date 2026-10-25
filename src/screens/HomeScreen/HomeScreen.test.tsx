@@ -139,7 +139,7 @@ function tipValue() {
   return app.root
     .findAllByType(TextInput)
     .find(node =>
-      ['Propina', 'Tip', 'Чайові'].includes(node.props.accessibilityLabel),
+      ['Propina', 'Tip', 'Propinas'].includes(node.props.accessibilityLabel),
     )?.props.value;
 }
 async function tip(enabled: boolean) {
@@ -415,9 +415,9 @@ test('language/theme changes preserve raw draft, platform and tip while mounted'
   expect(tipValue()).toBe('1,50');
   expect(JSON.stringify(app.toJSON())).toContain('#101714');
   await press('Settings');
-  await press('Українська');
-  await press('Головна');
-  expect(field('Вартість поїздки').props.value).toBe('18.5');
+  await press('Español');
+  await press('Inicio');
+  expect(field('Importe a cobrar').props.value).toBe('18.5');
   expect(tipValue()).toBe('1,50');
 });
 

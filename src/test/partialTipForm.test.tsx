@@ -231,14 +231,14 @@ test('collapsed partial tip retains exact change and a localized visible amount;
   expect(tipSection().props.accessibilityLabel).toMatch(/Tip:.*5\.00/);
   expect(field('Tip').props.value).toBe('5,00');
   await act(async () => {
-    await preferences.updatePreferences({ language: 'uk', themeMode: 'light' });
+    await preferences.updatePreferences({ language: 'es', themeMode: 'light' });
   });
-  expect(tipSection().props.accessibilityLabel).toMatch(/Чайові:.*5,00/);
+  expect(tipSection().props.accessibilityLabel).toMatch(/Propina:.*5,00/);
   await expandTip();
-  await press('Прибрати чайові');
+  await press('Quitar propina');
   expect(tipSection().props.accessibilityState.expanded).toBe(false);
-  expect(tipSection().props.accessibilityLabel).toBe('+ Додати чайові');
-  expect(field('Чайові').props.value).toBe('');
+  expect(tipSection().props.accessibilityLabel).toBe('+ Añadir propina');
+  expect(field('Propina').props.value).toBe('');
   expect(changeResult()).toMatch(/30,00/);
 });
 
@@ -546,9 +546,9 @@ test('language and theme changes preserve the raw partial tip draft', async () =
   });
   expect(field('Tip').props.value).toBe('5,');
   await act(async () => {
-    await preferences.updatePreferences({ language: 'uk', themeMode: 'light' });
+    await preferences.updatePreferences({ language: 'es', themeMode: 'light' });
   });
-  expect(field('Чайові').props.value).toBe('5,');
+  expect(field('Propina').props.value).toBe('5,');
   await act(async () => {
     await preferences.updatePreferences({ language: 'es', themeMode: 'dark' });
   });

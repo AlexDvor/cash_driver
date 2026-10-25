@@ -53,7 +53,7 @@ function probeState() {
 test('withholds main UI until settings read succeeds and restores language/theme before the first main render', async () => {
   const services = await testPersistence(db);
   await services.preferences.update({
-    language: 'uk',
+    language: 'en',
     themeMode: 'dark',
     defaultPlatform: 'bolt',
     enabledPlatforms: ['bolt'],
@@ -81,7 +81,7 @@ test('withholds main UI until settings read succeeds and restores language/theme
   expect(app?.root.findAllByProps({ testID: 'probe' })).toHaveLength(0);
   await act(async () => release?.());
   expect(probeState()).toMatchObject({
-    language: 'uk',
+    language: 'en',
     mode: 'dark',
     appearance: 'dark',
     preferences: { defaultPlatform: 'bolt', hapticsEnabled: true },
@@ -127,7 +127,7 @@ test('failed preference write retains committed language/theme, shows error and 
       }),
   };
   const services = await testPersistence(connection);
-  await services.preferences.update({ language: 'uk', themeMode: 'dark' });
+  await services.preferences.update({ language: 'es', themeMode: 'dark' });
   const initialize = async () => services;
   await act(async () => {
     app = ReactTestRenderer.create(
@@ -145,13 +145,13 @@ test('failed preference write retains committed language/theme, shows error and 
     app?.root.findByProps({ testID: 'probe' }).props.onPress(),
   );
   expect(probeState()).toMatchObject({
-    language: 'uk',
+    language: 'es',
     mode: 'dark',
     status: 'themeWriteFailed',
   });
   fail = false;
   expect(await services.preferences.read()).toMatchObject({
-    language: 'uk',
+    language: 'es',
     themeMode: 'dark',
   });
   await act(async () =>

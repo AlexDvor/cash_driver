@@ -150,21 +150,21 @@ test('language and theme changes preserve navigation and localize the mounted UI
       React.isValidElement(value) ? undefined : value,
     ),
   ).toContain('#101714');
-  await press(app, 'radio', 'Українська');
+  await press(app, 'radio', 'Español');
   expect(ref.getCurrentRoute()?.key).toBe(routeKey);
   expect(
     JSON.stringify(app.toJSON(), (_key, value: unknown) =>
       React.isValidElement(value) ? undefined : value,
     ),
-  ).toContain('Налаштування');
+  ).toContain('Ajustes');
   await act(async () => ref.navigate('Edit', { id: 'missing' }));
-  await press(app, 'button', 'Назад');
+  await press(app, 'button', 'Volver');
   expect(ref.getCurrentRoute()?.key).toBe(routeKey);
-  await press(app, 'tab', 'Головна');
+  await press(app, 'tab', 'Inicio');
   expect(ref.getCurrentRoute()?.name).toBe('Home');
   expect(
     JSON.stringify(app.toJSON(), (_key, value: unknown) =>
       React.isValidElement(value) ? undefined : value,
     ),
-  ).toContain('Вартість поїздки');
+  ).toContain('Importe a cobrar');
 });

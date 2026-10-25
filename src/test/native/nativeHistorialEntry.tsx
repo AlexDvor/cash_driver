@@ -45,11 +45,7 @@ const manager = createDatabaseManager(() =>
 );
 const ready = manager.initialize().then(async db => {
   const url = (await Linking.getInitialURL()) ?? '';
-  const language = url.includes('language=uk')
-    ? 'uk'
-    : url.includes('language=en')
-    ? 'en'
-    : 'es';
+  const language = url.includes('language=en') ? 'en' : 'es';
   if (url.includes('large=1')) simulateFontScale(1.8);
   const changes = createChangeNotifier();
   let timestamp: Date | null = null;

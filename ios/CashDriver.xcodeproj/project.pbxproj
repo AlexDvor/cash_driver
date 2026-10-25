@@ -26,7 +26,6 @@
 		A719C0340200000000000002 /* LocationPermission.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = LocationPermission.mm; path = CashDriver/LocationPermission.mm; sourceTree = "<group>"; };
 		A719C0340200000000000005 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = CashDriver/en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		A719C0340200000000000006 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = CashDriver/es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		A719C0340200000000000007 /* uk */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = uk; path = CashDriver/uk.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		A719C0340100000000000002 /* AppVersion.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = AppVersion.mm; path = CashDriver/AppVersion.mm; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* CashDriver.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CashDriver.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = CashDriver/Images.xcassets; sourceTree = "<group>"; };
@@ -162,7 +161,6 @@
 			knownRegions = (
 				en,
 				es,
-				uk,
 				Base,
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
@@ -284,7 +282,6 @@
 			children = (
 				A719C0340200000000000005 /* en */,
 				A719C0340200000000000006 /* es */,
-				A719C0340200000000000007 /* uk */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";

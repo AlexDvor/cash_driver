@@ -393,11 +393,11 @@ test('working-platform labels and minimum-selection explanation follow the langu
   await press('English');
   expect(content()).toContain('Working platforms');
   expect(content()).toContain('Select at least one platform');
-  await press('Українська');
-  expect(content()).toContain('Робочі платформи');
-  expect(content()).toContain('Оберіть принаймні одну платформу');
+  await press('Español');
+  expect(content()).toContain('Plataformas de trabajo');
+  expect(content()).toContain('Selecciona al menos una plataforma');
   expect(button('Uber').props.accessibilityHint).toBe(
-    'Оберіть принаймні одну платформу.',
+    'Selecciona al menos una plataforma.',
   );
 });
 

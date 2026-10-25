@@ -35,7 +35,7 @@ test.each([1, 1.1, 1.8])(
             layout="single-row"
             showSelectionIndicator
             label="Language"
-            options={['Español', 'English', 'Українська'].map(value => ({
+            options={['Español', 'English'].map(value => ({
               value,
               label: value,
             }))}
@@ -63,21 +63,16 @@ test.each([1, 1.1, 1.8])(
             sum +
             StyleSheet.flatten(node.props.style({ pressed: false })).width,
           0,
-        ) + 16;
-      if (fontScale <= 1.1) {
-        expect(extent).toBeLessThanOrEqual(312);
-      } else {
-        expect(extent).toBeGreaterThan(312);
-      }
+        ) + 8;
+      expect(extent).toBeLessThanOrEqual(312);
       expect(buttons.map(node => node.props.accessibilityLabel)).toEqual([
         'Español',
         'English',
-        'Українська',
       ]);
       expect(buttons[1].props.accessibilityState.selected).toBe(true);
-      await act(async () => buttons[2].props.onPress());
+      await act(async () => buttons[0].props.onPress());
       expect(onChange).toHaveBeenCalledTimes(1);
-      expect(onChange).toHaveBeenCalledWith('Українська');
+      expect(onChange).toHaveBeenCalledWith('Español');
     } finally {
       await act(async () => app!?.unmount());
       dimensions.mockRestore();
@@ -419,18 +414,18 @@ test.each(['chips', 'segmented'] as const)(
       app.update(
         <ChoiceGroup
           appearance={appearance}
-          label="Період"
+          label="Period"
           options={[
-            { value: 'day', label: 'Сьогодні' },
-            { value: 'week', label: 'Тиждень' },
-            { value: 'month', label: 'Місяць' },
+            { value: 'day', label: 'Today' },
+            { value: 'week', label: 'Week' },
+            { value: 'month', label: 'Month' },
           ]}
           value="month"
           onChange={onChange}
         />,
       ),
     );
-    expect(buttons()[2].props.accessibilityLabel).toBe('Місяць');
+    expect(buttons()[2].props.accessibilityLabel).toBe('Month');
     expect(
       buttons().map(button => button.props.accessibilityState.selected),
     ).toEqual([false, false, true]);

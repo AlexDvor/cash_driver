@@ -40,7 +40,7 @@ export function decodePreferences(
   } = row;
   const enabledPlatforms = normalizeEnabledPlatforms(enabledValues);
   if (
-    (language !== 'es' && language !== 'en' && language !== 'uk') ||
+    (language !== 'es' && language !== 'en') ||
     (themeMode !== 'light' && themeMode !== 'dark' && themeMode !== 'system') ||
     !isPlatform(defaultPlatform) ||
     !enabledPlatforms.includes(defaultPlatform) ||

@@ -145,7 +145,7 @@ test.each([1, 2, 3])(
       expect((await db.execute('SELECT * FROM preferences')).rows).toEqual([
         {
           id: 1,
-          language: 'uk',
+          language: 'es',
           theme_mode: 'dark',
           default_platform: 'bolt',
           haptics_enabled: 0,

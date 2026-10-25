@@ -136,7 +136,7 @@ async function verifyNativePersistence(): Promise<string> {
       migration.delete();
     }
     await preferences.update({
-      language: 'uk',
+      language: 'en',
       themeMode: 'dark',
       defaultPlatform: 'bolt',
       enabledPlatforms: ['bolt'],
@@ -145,7 +145,7 @@ async function verifyNativePersistence(): Promise<string> {
     return 'NATIVE FIRST PASS: integer bindings, constraints, migration, retry, rollback; force-stop and relaunch';
   }
   check(
-    settings.language === 'uk' &&
+    settings.language === 'en' &&
       settings.themeMode === 'dark' &&
       settings.defaultPlatform === 'bolt' &&
       settings.hapticsEnabled === true,

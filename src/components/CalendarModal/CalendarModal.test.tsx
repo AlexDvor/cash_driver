@@ -593,7 +593,7 @@ test('missing momentum-end waits for native scroll inactivity and never commits 
   }
 });
 
-test.each(['en', 'es', 'uk'] as Language[])(
+test.each(['en', 'es'] as Language[])(
   'compact title keeps a 16dp inset without narrowing the day grid in %s',
   async language => {
     const dimensions = jest
@@ -936,7 +936,7 @@ test('loading and failed activity keep days selectable and never claim no activi
   expect(props.onRetryActivity).toHaveBeenCalledTimes(1);
 });
 
-test.each(['en', 'es', 'uk'] as Language[])(
+test.each(['en', 'es'] as Language[])(
   'header status reserves space across loading, error and success in %s',
   async language => {
     mockLanguage = language;
@@ -1093,12 +1093,12 @@ test('compact selector exposes direct navigation and return from day', async () 
 test('locale and theme changes preserve the open year/month chooser and draft coordinates', async () => {
   await mount();
   await act(async () => button('Choose month and year').props.onPress());
-  mockLanguage = 'uk';
+  mockLanguage = 'es';
   mockDark = true;
   await act(async () => app.update(<CalendarModal {...props} />));
-  expect(button(mockTranslate('uk', 'calendarShowDays'))).toBeDefined();
+  expect(button(mockTranslate('es', 'calendarShowDays'))).toBeDefined();
   await act(async () =>
-    button(mockTranslate('uk', 'calendarNextYear')).props.onPress(),
+    button(mockTranslate('es', 'calendarNextYear')).props.onPress(),
   );
   expect(props.onBrowseMonth).toHaveBeenCalledWith({ year: 2027, month: 10 });
   expect(props.onApplyMonth).not.toHaveBeenCalled();
