@@ -9,6 +9,7 @@ import { useLocalClock } from '../../hooks/app/useLocalClock';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
 import { ChoiceGroup } from '../../ui/ChoiceGroup/ChoiceGroup';
+import { Card } from '../../ui/Card/Card';
 import { PlatformIcon } from '../../components/PlatformIcon/PlatformIcon';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { formatMoney, formatPeriodRange } from '../../i18n/formatting';
@@ -129,45 +130,49 @@ export function HistoryScreen() {
         </AppText>
         <AppText secondary>{t('historySubtitle')}</AppText>
       </View>
-      <ChoiceGroup
-        label={t('period')}
-        columns="filters"
-        value={period}
-        onChange={setPeriod}
-        options={[
-          { value: 'day', label: t('today') },
-          { value: 'week', label: t('week') },
-          { value: 'month', label: t('month') },
-        ]}
-      />
-      {period === 'month' && (
-        <CalendarNavigation
-          calendar={calendar}
-          timeZone={clock.timeZone}
-          todayDateKey={clock.dayKey}
+      <Card depth style={styles.filterSurface}>
+        <ChoiceGroup
+          label={t('period')}
+          columns="filters"
+          value={period}
+          onChange={setPeriod}
+          options={[
+            { value: 'day', label: t('today') },
+            { value: 'week', label: t('week') },
+            { value: 'month', label: t('month') },
+          ]}
         />
-      )}
-      {period !== 'day' &&
-        !(period === 'month' && calendar.selection.kind === 'day') && (
-          <AppText secondary testID="history-range">
-            {formatPeriodRange(bounds, locale, clock.timeZone)}
-          </AppText>
+        {period === 'month' && (
+          <CalendarNavigation
+            calendar={calendar}
+            timeZone={clock.timeZone}
+            todayDateKey={clock.dayKey}
+          />
         )}
-      <ChoiceGroup
-        label={t('platform')}
-        iconLayout="adaptive"
-        columns="filters"
-        value={platform}
-        onChange={setPlatform}
-        options={[
-          { value: 'all', label: t('allPlatforms') },
-          ...platforms.map(value => ({
-            value,
-            label: platformLabels[value],
-            icon: <PlatformIcon platform={value} size={sizing.icon} />,
-          })),
-        ]}
-      />
+        {period !== 'day' &&
+          !(period === 'month' && calendar.selection.kind === 'day') && (
+            <AppText secondary testID="history-range">
+              {formatPeriodRange(bounds, locale, clock.timeZone)}
+            </AppText>
+          )}
+      </Card>
+      <Card depth style={styles.filterSurface}>
+        <ChoiceGroup
+          label={t('platform')}
+          iconLayout="adaptive"
+          columns="filters"
+          value={platform}
+          onChange={setPlatform}
+          options={[
+            { value: 'all', label: t('allPlatforms') },
+            ...platforms.map(value => ({
+              value,
+              label: platformLabels[value],
+              icon: <PlatformIcon platform={value} size={sizing.icon} />,
+            })),
+          ]}
+        />
+      </Card>
       {state.status === 'error' && (
         <TransactionLoadState status={state.status} retry={refresh} />
       )}
