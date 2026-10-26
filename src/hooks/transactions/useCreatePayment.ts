@@ -11,6 +11,7 @@ export function useCreatePayment(
   services: Persistence,
   hapticsEnabled: boolean,
   soundEnabled = false,
+  draftGeneration = 0,
 ) {
   const latestHapticsEnabled = useRef(hapticsEnabled);
   latestHapticsEnabled.current = hapticsEnabled;
@@ -20,6 +21,11 @@ export function useCreatePayment(
     operation: PendingOperation;
     input: TransactionInput;
   } | null>(null);
+  const generation = useRef(draftGeneration);
+  if (generation.current !== draftGeneration) {
+    pending.current = null;
+    generation.current = draftGeneration;
+  }
 
   return useCallback(
     async (input: TransactionInput) => {

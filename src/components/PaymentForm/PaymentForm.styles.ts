@@ -5,10 +5,31 @@ import {
   spacing,
   opacity,
   iconSizing,
+  typography,
 } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
-  card: { gap: spacing.md },
+  card: { gap: spacing.md, padding: spacing.md },
+  measurement: {
+    position: 'absolute',
+    opacity: 0,
+    width: sizing.contentMaxWidth * 4,
+  },
+  moneyMeasure: {
+    fontSize: typography.paymentMoney,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+  },
+  moneyFields: { gap: spacing.md },
+  pairedFields: { flexDirection: 'row', alignItems: 'flex-start' },
+  moneyColumn: { flex: 1, minWidth: 0 },
+  tipBadge: {
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+    borderRadius: radii.chip,
+    fontWeight: '600',
+    flexShrink: 1,
+  },
   platformRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -23,6 +44,8 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
     minHeight: sizing.touchTarget,
     paddingHorizontal: spacing.sm,
+    borderWidth: sizing.borderWidth,
+    borderRadius: radii.chip,
   },
   stackedActions: { flexDirection: 'column' },
   fullWidthAction: { flexBasis: 'auto', width: '100%' },

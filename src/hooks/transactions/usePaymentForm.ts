@@ -22,6 +22,7 @@ interface PaymentFormOptions {
   clearAfterSave?: boolean;
   onSubmit: (input: TransactionInput) => Promise<CashTransaction>;
   onPlatformChange?: (platform: Platform) => Promise<boolean>;
+  onCancel?: () => void;
 }
 
 export function usePaymentForm({
@@ -31,6 +32,7 @@ export function usePaymentForm({
   clearAfterSave = true,
   onSubmit,
   onPlatformChange,
+  onCancel,
 }: PaymentFormOptions) {
   const [platform, setPlatform] = useState(
     initialValues?.platform ?? initialPlatform,
@@ -57,8 +59,8 @@ export function usePaymentForm({
   const [saved, setSaved] = useState<CashTransaction | null>(null);
   const busy = useRef(false);
   const committedDraft = useRef(false);
-  const completedSaves = useRef(0);
-  const renderedSaveCount = completedSaves.current;
+  const draftRevision = useRef(0);
+  const renderedRevision = draftRevision.current;
   const choosing = useRef(false);
   const dirty = useRef(initialValues !== undefined);
   const mounted = useRef(false);
@@ -152,7 +154,7 @@ export function usePaymentForm({
   }
   function blur(field: 'fare' | 'received' | 'tip') {
     // Native blur may arrive after commit with the previous render's raw value.
-    if (renderedSaveCount !== completedSaves.current) {
+    if (renderedRevision !== draftRevision.current) {
       return;
     }
     setFocused(current => (current === field ? null : current));
@@ -166,7 +168,7 @@ export function usePaymentForm({
     return (
       mounted.current &&
       !busy.current &&
-      renderedSaveCount === completedSaves.current
+      renderedRevision === draftRevision.current
     );
   }
   function expandTip() {
@@ -253,6 +255,7 @@ export function usePaymentForm({
   }
   async function submit(): Promise<boolean> {
     if (
+      renderedRevision !== draftRevision.current ||
       busy.current ||
       (!clearAfterSave && committedDraft.current) ||
       choosing.current ||
@@ -278,7 +281,7 @@ export function usePaymentForm({
     try {
       const committed = await onSubmit(input);
       committedDraft.current = !clearAfterSave;
-      completedSaves.current++;
+      draftRevision.current++;
       if (mounted.current) {
         latestTip.current =
           clearAfterSave || committed.tipCents === 0
@@ -316,6 +319,31 @@ export function usePaymentForm({
       }
     }
   }
+  function cancelPayment(): boolean {
+    if (
+      !clearAfterSave ||
+      !mounted.current ||
+      busy.current ||
+      choosing.current ||
+      renderedRevision !== draftRevision.current
+    )
+      return false;
+    // Advance the draft boundary so delayed native blur/submit cannot restore it.
+    draftRevision.current++;
+    latestTip.current = '';
+    dirty.current = false;
+    committedDraft.current = false;
+    setFare('');
+    setReceived('');
+    setTip('');
+    setTipExpanded(false);
+    setFocused(null);
+    setPlatform(latestDefault.current);
+    setFailed(false);
+    setSaved(null);
+    onCancel?.();
+    return true;
+  }
   return {
     platform,
     platformAllowed,
@@ -323,8 +351,8 @@ export function usePaymentForm({
     received,
     tip,
     tipExpanded,
-    // UI can distinguish instant successful-create reset from user collapse.
-    tipResetCount: clearAfterSave ? completedSaves.current : 0,
+    // UI can distinguish create/cancel reset from user collapse.
+    tipResetCount: clearAfterSave ? draftRevision.current : 0,
     fareParsed,
     receivedParsed,
     tipParsed,
@@ -349,6 +377,7 @@ export function usePaymentForm({
     quick,
     choosePlatform,
     submit,
+    cancelPayment,
     expandTip,
     collapseTip,
     removeTip,

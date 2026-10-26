@@ -6,6 +6,7 @@ import {
   AppStateStatus,
   Keyboard,
   Switch,
+  StyleSheet,
   TextInput,
 } from 'react-native';
 import ReactTestRenderer, { act } from 'react-test-renderer';
@@ -18,7 +19,6 @@ import {
   testPersistence,
 } from '../../test/sqliteTestDatabase';
 import { PlatformIcon } from '../../components/PlatformIcon/PlatformIcon';
-import { AppText } from '../../ui/AppText/AppText';
 import { PaymentForm } from '../../components/PaymentForm/PaymentForm';
 import { PaymentOutcome } from '../../components/PaymentOutcome/PaymentOutcome';
 import { ScrollView } from 'react-native';
@@ -91,6 +91,154 @@ async function enter(fare: string, received: string) {
   await input('Importe a cobrar', fare);
   await input('El cliente entrega', received);
 }
+
+test('cancel reveals for sufficient valid amounts, clears tips and never saves a cancelled draft', async () => {
+  await mount();
+  const cancelSection = () =>
+    app.root
+      .findAllByProps({ testID: 'cancel-payment-section' })
+      .find(node => node.props.pointerEvents !== undefined)!;
+  expect(cancelSection().props.pointerEvents).toBe('none');
+  expect(cancelSection().props.accessibilityElementsHidden).toBe(true);
+  await input('Importe a cobrar', '20');
+  expect(cancelSection().props.pointerEvents).toBe('none');
+  await input('El cliente entrega', '10');
+  expect(cancelSection().props.pointerEvents).toBe('none');
+  await input('El cliente entrega', '50');
+  expect(cancelSection().props.pointerEvents).toBe('auto');
+  await press('+ Añadir propina');
+  await input('Propina', 'bad');
+  // Cancellation depends on fare/received, so an invalid tip can still be discarded.
+  expect(cancelSection().props.pointerEvents).toBe('auto');
+  const staleForm = app.root.findByType(PaymentForm).props.form;
+  await press('Cancelar cobro');
+  await act(async () => staleForm.blur('received'));
+  let staleSubmitted = true;
+  await act(async () => {
+    staleSubmitted = await staleForm.submit();
+  });
+  expect(staleSubmitted).toBe(false);
+  expect(field('Importe a cobrar').props.value).toBe('');
+  expect(field('El cliente entrega').props.value).toBe('');
+  expect(field('Propina').props.value).toBe('');
+  expect(
+    app.root.findByProps({ testID: 'tip-section-toggle' }).props
+      .accessibilityState.expanded,
+  ).toBe(false);
+  expect(cancelSection().props.pointerEvents).toBe('none');
+  expect(text('change-result')).toMatch(/0,00/);
+  expect(await services.transactions.list()).toHaveLength(0);
+});
+
+test('cancelling a failed payment discards its retry identity before entering the same amounts again', async () => {
+  const pending = jest.spyOn(services.transactions, 'newPendingOperation');
+  jest
+    .spyOn(services.transactions, 'save')
+    .mockRejectedValueOnce(new Error('Disk full'));
+  await mount();
+  await enter('20', '50');
+  await press('Confirmar cobro');
+  expect(pending).toHaveBeenCalledTimes(1);
+  await press('Cancelar cobro');
+  await enter('20', '50');
+  await press('Confirmar cobro');
+  expect(pending).toHaveBeenCalledTimes(2);
+  expect(await services.transactions.list()).toHaveLength(1);
+});
+
+test('measured money fields stack when width is insufficient without losing the draft', async () => {
+  await mount();
+  await enter('20', '50');
+  const fields = () => app.root.findByProps({ testID: 'payment-money-fields' });
+  await act(async () => {
+    app.root
+      .findByProps({ testID: 'payment-money-measure' })
+      .props.onTextLayout({ nativeEvent: { lines: [{ width: 120 }] } });
+    fields().props.onLayout({ nativeEvent: { layout: { width: 400 } } });
+  });
+  expect(StyleSheet.flatten(fields().props.style).flexDirection).toBe('row');
+  await act(async () =>
+    fields().props.onLayout({ nativeEvent: { layout: { width: 250 } } }),
+  );
+  expect(StyleSheet.flatten(fields().props.style).flexDirection).not.toBe(
+    'row',
+  );
+  expect(field('Importe a cobrar').props.value).toBe('20');
+  expect(field('El cliente entrega').props.value).toBe('50');
+  expect(text('change-result')).toMatch(/30,00/);
+});
+
+test('receipt follows valid amounts, selected banknotes and collapsed tips without saving', async () => {
+  await mount();
+  expect(text('change-result')).toMatch(/0,00/);
+  expect(button('Confirmar cobro').props.accessibilityState.disabled).toBe(
+    true,
+  );
+  expect(
+    app.root.findAllByProps({ testID: 'payment-receipt-details' }),
+  ).toHaveLength(0);
+  await enter('20', '50');
+  expect(text('receipt-fare')).toMatch(/20,00/);
+  expect(text('receipt-received')).toMatch(/50,00/);
+  expect(text('change-result')).toMatch(/30,00/);
+  expect(button('50,00 €').props.accessibilityState.selected).toBe(true);
+  expect(app.root.findAllByProps({ testID: 'receipt-tip' })).toHaveLength(0);
+  await press('+ Añadir propina');
+  await input('Propina', '5');
+  expect(text('receipt-tip')).toMatch(/5,00/);
+  expect(text('change-result')).toMatch(/25,00/);
+  await act(async () =>
+    app.root.findByProps({ testID: 'tip-section-toggle' }).props.onPress(),
+  );
+  expect(text('tip-amount-badge')).toMatch(/5,00/);
+  expect(text('receipt-tip')).toMatch(/5,00/);
+  await press('50,00 €');
+  expect(app.root.findAllByProps({ testID: 'receipt-tip' })).toHaveLength(0);
+  expect(text('change-result')).toMatch(/30,00/);
+  await input('El cliente entrega', '10');
+  expect(button('50,00 €').props.accessibilityState.selected).toBe(false);
+  expect(
+    app.root.findAllByProps({ testID: 'payment-receipt-details' }),
+  ).toHaveLength(0);
+  expect(text('change-result')).toMatch(/10,00/);
+  expect(await services.transactions.list()).toHaveLength(0);
+});
+
+test('receipt hides unfinished and excessive tips and header count follows committed payments', async () => {
+  await mount();
+  expect(
+    String(
+      app.root.findByProps({ testID: 'daily-header-count' }).props.children,
+    ),
+  ).toContain('0');
+  await enter('20', '50');
+  await press('+ Añadir propina');
+  await input('Propina', '5,');
+  expect(text('change-result')).toBe('—');
+  expect(
+    app.root.findAllByProps({ testID: 'payment-receipt-details' }),
+  ).toHaveLength(0);
+  await input('Propina', '31');
+  expect(app.root.findAllByProps({ testID: 'tip-amount-badge' })).toHaveLength(
+    0,
+  );
+  expect(
+    app.root.findAllByProps({ testID: 'payment-receipt-details' }),
+  ).toHaveLength(0);
+  await input('Propina', '5');
+  await press('Confirmar cobro');
+  expect(
+    String(
+      app.root.findByProps({ testID: 'daily-header-count' }).props.children,
+    ),
+  ).toContain('1');
+  expect(
+    app.root.findAllByProps({ testID: 'payment-receipt-details' }),
+  ).toHaveLength(0);
+  expect(app.root.findAllByProps({ testID: 'payment-success' })).toHaveLength(
+    0,
+  );
+});
 
 test.each(['50,00 €', 'Exacto'])(
   'quick shortcut %s uses the received idle dismissal without saving',
@@ -301,6 +449,10 @@ test('synchronous repeated taps and loading controls produce one committed opera
   });
   expect(spy).toHaveBeenCalledTimes(1);
   expect(button('Guardando cobro…').props.disabled).toBe(true);
+  expect(button('Cancelar cobro').props.disabled).toBe(true);
+  await act(async () => button('Cancelar cobro').props.onPress());
+  expect(field('Importe a cobrar').props.value).toBe('20');
+  expect(field('El cliente entrega').props.value).toBe('50');
   expect(field('Importe a cobrar').props.editable).toBe(false);
   expect(field('Propina').props.editable).toBe(false);
   expect(button('Quitar propina').props.disabled).toBe(true);
@@ -568,9 +720,10 @@ test('daily totals update at local midnight and on resume, with subscription cle
 
 test('summary starts hidden, toggles access and preserves fare and tip draft through rapid taps', async () => {
   await mount();
-  expect(summaryToggle().findByType(AppText).props.children).toBe(
-    'Resumen de hoy',
-  );
+  expect(
+    summaryToggle().findByProps({ testID: 'daily-summary-title' }).props
+      .children,
+  ).toBe('Resumen de hoy');
   expect(summaryToggle().props.accessibilityState.expanded).toBe(false);
   expect(summaryToggle().props.accessibilityLabel).toBe(
     'Hoy · Mostrar totales',
@@ -584,9 +737,10 @@ test('summary starts hidden, toggles access and preserves fare and tip draft thr
   await press('+ Añadir propina');
   await input('Propina', '5');
   await toggleSummary();
-  expect(summaryToggle().findByType(AppText).props.children).toBe(
-    'Resumen de hoy',
-  );
+  expect(
+    summaryToggle().findByProps({ testID: 'daily-summary-title' }).props
+      .children,
+  ).toBe('Resumen de hoy');
   expect(summaryContent().props.pointerEvents).toBe('auto');
   expect(summaryContent().props.accessibilityElementsHidden).toBe(false);
   expect(summaryToggle().props.accessibilityLabel).toBe(

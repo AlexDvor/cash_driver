@@ -88,6 +88,8 @@ test('the shared form retains exact partial tips across edit commit', async () =
       changeGivenCents: 2500,
     });
     expect(form().tip).toBe('5,00');
+    expect(form().cancelPayment()).toBe(false);
+    expect(form().tip).toBe('5,00');
     await act(async () => {
       expect(await form().submit()).toBe(true);
     });

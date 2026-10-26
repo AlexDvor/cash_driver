@@ -346,6 +346,9 @@ test('persisted partial tip displays independently and edit refreshes history, d
   await press('Editar');
   jest.setSystemTime(new Date('2026-10-09T10:00:00Z'));
   await input('Propina', '7');
+  expect(displayedText('receipt-fare')).toMatch(/20,00/);
+  expect(displayedText('receipt-received')).toMatch(/50,00/);
+  expect(displayedText('receipt-tip')).toMatch(/7,00/);
   await toggleTip();
   expect(tipSection().props.accessibilityState.expanded).toBe(false);
   expect(tipSection().props.accessibilityLabel).toMatch(/Propina:.*7,00/);

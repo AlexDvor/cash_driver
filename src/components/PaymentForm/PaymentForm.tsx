@@ -4,6 +4,7 @@ import {
   Keyboard,
   Pressable,
   TextInput,
+  Text,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -15,7 +16,7 @@ import { Card } from '../../ui/Card/Card';
 import { ChoiceGroup } from '../../ui/ChoiceGroup/ChoiceGroup';
 import { MoneyInput } from '../../ui/MoneyInput/MoneyInput';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
-import { formatMoney } from '../../i18n/formatting';
+import { centsToInput, formatMoney } from '../../i18n/formatting';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { MAX_INPUT_CENTS } from '../../features/transactions/money';
 import type { MoneyParseResult } from '../../features/transactions/money';
@@ -35,10 +36,18 @@ export function PaymentForm({
 }: PaymentFormProps) {
   const { t, locale } = useTranslation();
   const { colors } = useAppTheme();
-  const { width, fontScale } = useWindowDimensions();
-  const stackedTipActions =
-    width / fontScale < paymentLayout.tipActionsStackWidth;
+  const { fontScale } = useWindowDimensions();
   const [quickWidth, setQuickWidth] = useState(0);
+  const [fieldsWidth, setFieldsWidth] = useState(0);
+  const stackedTipActions =
+    fieldsWidth / fontScale < paymentLayout.tipActionsStackWidth;
+  const [moneyMeasure, setMoneyMeasure] = useState({ key: '', width: 0 });
+  const measureKey = `${fontScale}:${locale}`;
+  const pairedFields =
+    moneyMeasure.key === measureKey &&
+    fieldsWidth >=
+      2 * (moneyMeasure.width + spacing.sm * 3 + sizing.borderWidth * 2) +
+        spacing.md;
   const quickCount = form.quickAmounts.length + (form.validFare ? 1 : 0);
   const quickColumns =
     quickCount > 0 &&
@@ -100,9 +109,32 @@ export function PaymentForm({
       : form.tipExpanded
       ? t('tipInput')
       : t('addTip');
+  const positiveTip =
+    form.tipParsed.status === 'valid' && form.tipParsed.cents > 0 && !tipError;
   return (
     <>
-      <Card style={styles.card}>
+      <Card depth style={styles.card}>
+        <View
+          pointerEvents="none"
+          accessible={false}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+          style={styles.measurement}
+        >
+          <Text
+            testID="payment-money-measure"
+            key={measureKey}
+            style={styles.moneyMeasure}
+            onTextLayout={event => {
+              const measured = event.nativeEvent.lines[0]?.width;
+              if (measured)
+                setMoneyMeasure({
+                  key: measureKey,
+                  width: Math.ceil(measured),
+                });
+            }}
+          >{`${centsToInput(MAX_INPUT_CENTS)} €`}</Text>
+        </View>
         {title && (
           <AppText variant="heading" accessibilityRole="header">
             {title}
@@ -125,6 +157,10 @@ export function PaymentForm({
               }}
               style={({ pressed }) => [
                 styles.singlePlatform,
+                {
+                  backgroundColor: colors.background,
+                  borderColor: colors.border,
+                },
                 pressed && styles.pressed,
               ]}
             >
@@ -169,47 +205,59 @@ export function PaymentForm({
             {t('platformReselectionRequired')}
           </AppText>
         )}
-        <MoneyInput
-          showCurrency
-          groupRef={entryNavigation?.fareRef}
-          label={t('fareInput')}
-          value={form.fare}
-          error={fieldError(form.fareParsed, true)}
-          disabled={disabled}
-          onChange={raw => {
-            entryNavigation?.changedFare();
-            form.changeField('fare', raw);
-          }}
-          onFocus={() => {
-            form.focus('fare');
-            entryNavigation?.focus('fare');
-          }}
-          onBlur={() => {
-            entryNavigation?.blur('fare');
-            form.blur('fare');
-          }}
-        />
-        <MoneyInput
-          showCurrency
-          groupRef={entryNavigation?.receivedRef}
-          inputRef={entryNavigation?.receivedInputRef}
-          label={t('receivedInput')}
-          value={form.received}
-          error={fieldError(form.receivedParsed, false)}
-          disabled={disabled}
-          onChange={raw => {
-            entryNavigation?.changedReceived();
-            form.changeField('received', raw);
-          }}
-          onFocus={() => {
-            form.focus('received');
-            entryNavigation?.focus('received');
-          }}
-          onBlur={() => {
-            entryNavigation?.blur('received');
-            form.blur('received');
-          }}
-        />
+        <View
+          testID="payment-money-fields"
+          onLayout={event => setFieldsWidth(event.nativeEvent.layout.width)}
+          style={[styles.moneyFields, pairedFields && styles.pairedFields]}
+        >
+          <View style={styles.moneyColumn}>
+            <MoneyInput
+              compact
+              showCurrency
+              groupRef={entryNavigation?.fareRef}
+              label={t('fareInput')}
+              value={form.fare}
+              error={fieldError(form.fareParsed, true)}
+              disabled={disabled}
+              onChange={raw => {
+                entryNavigation?.changedFare();
+                form.changeField('fare', raw);
+              }}
+              onFocus={() => {
+                form.focus('fare');
+                entryNavigation?.focus('fare');
+              }}
+              onBlur={() => {
+                entryNavigation?.blur('fare');
+                form.blur('fare');
+              }}
+            />
+          </View>
+          <View style={styles.moneyColumn}>
+            <MoneyInput
+              compact
+              showCurrency
+              groupRef={entryNavigation?.receivedRef}
+              inputRef={entryNavigation?.receivedInputRef}
+              label={t('receivedInput')}
+              value={form.received}
+              error={fieldError(form.receivedParsed, false)}
+              disabled={disabled}
+              onChange={raw => {
+                entryNavigation?.changedReceived();
+                form.changeField('received', raw);
+              }}
+              onFocus={() => {
+                form.focus('received');
+                entryNavigation?.focus('received');
+              }}
+              onBlur={() => {
+                entryNavigation?.blur('received');
+                form.blur('received');
+              }}
+            />
+          </View>
+        </View>
         {quickCount > 0 && (
           <View
             collapsable={false}
@@ -223,6 +271,12 @@ export function PaymentForm({
                 key={cents}
                 accessibilityRole="button"
                 accessibilityLabel={formatMoney(cents, locale)}
+                accessibilityState={{
+                  selected:
+                    form.receivedParsed.status === 'valid' &&
+                    form.receivedParsed.cents === cents,
+                  disabled,
+                }}
                 disabled={disabled}
                 onPress={() => {
                   entryNavigation?.cancel();
@@ -232,14 +286,27 @@ export function PaymentForm({
                   styles.quick,
                   quickStyle,
                   {
-                    backgroundColor: colors.softGreen,
+                    backgroundColor:
+                      form.receivedParsed.status === 'valid' &&
+                      form.receivedParsed.cents === cents
+                        ? colors.primary
+                        : colors.softGreen,
                   },
                   pressed && styles.pressed,
                 ]}
               >
                 <AppText
                   variant="supporting"
-                  style={[styles.quickLabel, { color: colors.primary }]}
+                  style={[
+                    styles.quickLabel,
+                    {
+                      color:
+                        form.receivedParsed.status === 'valid' &&
+                        form.receivedParsed.cents === cents
+                          ? colors.onPrimary
+                          : colors.primary,
+                    },
+                  ]}
                 >
                   {formatMoney(cents, locale, true)}
                 </AppText>
@@ -305,11 +372,30 @@ export function PaymentForm({
               (pressed || disabled) && styles.pressed,
             ]}
           >
-            <AppText style={styles.tipLabel}>
-              {form.tipExpanded
-                ? `${tipHeader} (${t('optionalTip')})`
-                : tipHeader}
+            <AppText
+              accessible={false}
+              importantForAccessibility="no"
+              style={{ color: colors.primary }}
+            >
+              +
             </AppText>
+            <AppText style={styles.tipLabel}>
+              {positiveTip || form.tipExpanded
+                ? t('tipInput')
+                : t('addTip').replace(/^\+\s*/, '')}
+            </AppText>
+            {positiveTip && form.tipParsed.status === 'valid' && (
+              <AppText
+                testID="tip-amount-badge"
+                variant="supporting"
+                style={[
+                  styles.tipBadge,
+                  { color: colors.primary, backgroundColor: colors.softGreen },
+                ]}
+              >
+                {formatMoney(form.tipParsed.cents, locale)}
+              </AppText>
+            )}
             <View
               accessible={false}
               importantForAccessibility="no-hide-descendants"
@@ -329,6 +415,7 @@ export function PaymentForm({
             resetCount={form.tipResetCount}
           >
             <MoneyInput
+              compact
               showCurrency
               inputRef={tipInput}
               label={t('tipInput')}

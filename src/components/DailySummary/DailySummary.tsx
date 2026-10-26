@@ -11,6 +11,8 @@ import { styles } from './DailySummary.styles';
 import { TabIcon } from '../../ui/TabIcon/TabIcon';
 import { routes } from '../../navigation/routes';
 import { DailySummarySkeleton } from './DailySummarySkeleton';
+import { SurfaceDepth } from '../../ui/SurfaceDepth/SurfaceDepth';
+import { radii } from '../../constants/theme/tokens';
 
 export function DailySummary({
   daily,
@@ -31,23 +33,53 @@ export function DailySummary({
   const currentSummary = useRef(summary);
   currentSummary.current = summary;
   const hasRefreshFeedback = daily.refreshing || daily.refreshError;
+  const refreshLabel = hasRefreshFeedback
+    ? t(daily.refreshError ? 'dataRefreshFailed' : 'dataRefreshing')
+    : '';
+  const headerStatus = summary
+    ? `${t('operationCount')}: ${summary.operationCount}${
+        refreshLabel ? ` · ${refreshLabel}` : ''
+      }`
+    : state.status === 'error'
+    ? t('totalsFailed')
+    : t('dataRefreshing');
   const toggleLabel = `${t('today')} · ${t(
     expanded ? 'hideTotals' : 'showTotals',
   )}`;
   return (
     <View style={[styles.container, { backgroundColor: colors.softGreen }]}>
+      <SurfaceDepth radius={radii.input} />
       <Pressable
         testID="daily-summary-toggle"
         accessibilityRole="button"
         accessibilityLabel={toggleLabel}
+        accessibilityValue={{ text: headerStatus }}
         accessibilityState={{ expanded }}
         onPress={onToggle}
         style={({ pressed }) => [styles.header, pressed && styles.pressed]}
       >
         <TabIcon name={routes.Summary} color={colors.primary} />
-        <AppText variant="heading" style={styles.headerText}>
-          {t('dailySummaryTitle')}
-        </AppText>
+        <View style={styles.headerText}>
+          <AppText testID="daily-summary-title" style={styles.headerTitle}>
+            {t('dailySummaryTitle')}
+          </AppText>
+          {summary && (
+            <AppText testID="daily-header-count" variant="supporting" secondary>
+              {headerStatus}
+            </AppText>
+          )}
+          {!summary && state.status === 'loading' && (
+            <ActivityIndicator
+              accessibilityLabel={t('dataRefreshing')}
+              color={colors.primary}
+            />
+          )}
+          {!summary && state.status === 'error' && (
+            <AppText variant="supporting" style={{ color: colors.errorText }}>
+              {t('totalsFailed')}
+            </AppText>
+          )}
+        </View>
         <View
           style={styles.toggleCircle}
           accessible={false}

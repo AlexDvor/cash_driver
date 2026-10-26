@@ -22,6 +22,7 @@ export function HomeScreen() {
   const { services, preferences, updatePreferences, saving, errorKey } =
     usePersistence();
   const [summaryExpanded, setSummaryExpanded] = useState(false);
+  const [draftGeneration, setDraftGeneration] = useState(0);
   const [summaryResetCount, setSummaryResetCount] = useState(0);
   const hideSummary = useCallback(() => {
     setSummaryExpanded(false);
@@ -40,11 +41,13 @@ export function HomeScreen() {
     services,
     preferences.hapticsEnabled,
     preferences.soundEnabled,
+    draftGeneration,
   );
   const form = usePaymentForm({
     initialPlatform: preferences.defaultPlatform,
     allowedPlatforms: preferences.enabledPlatforms,
     onSubmit,
+    onCancel: () => setDraftGeneration(value => value + 1),
     onPlatformChange: platform =>
       updatePreferences({ defaultPlatform: platform }),
   });
@@ -66,7 +69,10 @@ export function HomeScreen() {
     >
       <View style={styles.header}>
         <AppText style={styles.title} accessibilityRole="header">
-          {t('appName')}
+          Cash{' '}
+          <AppText style={[styles.title, { color: colors.primary }]}>
+            Driver
+          </AppText>
         </AppText>
         <AppText variant="supporting" secondary>
           {formatLocalDate(clock.now, locale, clock.timeZone)}
@@ -89,6 +95,7 @@ export function HomeScreen() {
         platformOptions={preferences.enabledPlatforms}
         preferenceSaving={saving}
         confirmLabel={t('confirmPayment')}
+        title={t('newPayment')}
       />
     </ScreenContainer>
   );
