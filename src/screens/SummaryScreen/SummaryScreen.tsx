@@ -47,6 +47,7 @@ export function SummaryScreen() {
         {t('summary')}
       </AppText>
       <ChoiceGroup
+        hideLabel
         appearance="segmented"
         label={t('period')}
         value={period}
@@ -82,7 +83,6 @@ export function SummaryScreen() {
         </Card>
       ) : (
         <SummaryContent
-          periodLabel={periodLabel}
           summary={summary}
           showEmpty={state.status === 'ready' && summary?.operationCount === 0}
         />

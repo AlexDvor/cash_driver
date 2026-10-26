@@ -18,6 +18,7 @@ export function ChoiceGroup<Value extends string>({
   headingVariant = 'heading',
   disabled = false,
   label,
+  hideLabel = false,
   options,
   value,
   onChange,
@@ -77,11 +78,23 @@ export function ChoiceGroup<Value extends string>({
     (iconLayout === 'adaptive' && columnCount !== options.length);
   return (
     <View style={styles.group}>
-      <AppText variant={headingVariant} accessibilityRole="header">
-        {label}
-      </AppText>
+      {!hideLabel && (
+        <AppText variant={headingVariant} accessibilityRole="header">
+          {label}
+        </AppText>
+      )}
       <Container
-        style={singleRow ? styles.singleRowViewport : styles.choices}
+        style={
+          singleRow
+            ? styles.singleRowViewport
+            : [
+                styles.choices,
+                appearance === 'segmented' && [
+                  styles.segmentTray,
+                  { backgroundColor: colors.card, borderColor: colors.border },
+                ],
+              ]
+        }
         {...(singleRow
           ? {
               horizontal: true,
@@ -102,6 +115,7 @@ export function ChoiceGroup<Value extends string>({
               key={option.value}
               accessibilityRole="radio"
               accessibilityLabel={option.label}
+              accessibilityHint={hideLabel ? label : undefined}
               accessibilityState={{ selected, disabled }}
               disabled={disabled}
               onPress={() => onChange(option.value)}
@@ -143,9 +157,20 @@ export function ChoiceGroup<Value extends string>({
                   flexShrink: 0,
                 },
                 {
-                  backgroundColor: selected ? colors.softGreen : colors.card,
+                  backgroundColor:
+                    appearance === 'segmented'
+                      ? selected
+                        ? colors.primary
+                        : colors.transparent
+                      : selected
+                      ? colors.softGreen
+                      : colors.card,
                   borderColor:
-                    selected || pressed ? colors.primary : colors.border,
+                    appearance === 'segmented'
+                      ? colors.transparent
+                      : selected || pressed
+                      ? colors.primary
+                      : colors.border,
                 },
                 pressed && appearance === 'segmented' && styles.pressed,
               ]}
@@ -183,7 +208,11 @@ export function ChoiceGroup<Value extends string>({
                     styles.inlineLabel,
                   selected && styles.selected,
                   {
-                    color: selected ? colors.primary : colors.text,
+                    color: selected
+                      ? appearance === 'segmented'
+                        ? colors.onPrimary
+                        : colors.primary
+                      : colors.text,
                   },
                 ]}
               >

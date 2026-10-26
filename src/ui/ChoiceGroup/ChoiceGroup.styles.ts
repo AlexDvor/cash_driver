@@ -39,6 +39,12 @@ export const styles = StyleSheet.create({
     flexGrow: 1,
     borderRadius: radii.button,
   },
+  segmentTray: {
+    borderWidth: sizing.borderWidth,
+    borderRadius: radii.input,
+    padding: spacing.xs,
+    gap: spacing.xs,
+  },
   pressed: { opacity: opacity.choicePressed },
   selected: { fontWeight: '700' },
 });

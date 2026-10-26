@@ -9,6 +9,7 @@ export interface ChoiceGroupProps<Value extends string> {
   headingVariant?: 'heading' | 'body';
   disabled?: boolean;
   label: string;
+  hideLabel?: boolean;
   options: { value: Value; label: string; icon?: ReactNode }[];
   value: Value;
   onChange: (value: Value) => void;

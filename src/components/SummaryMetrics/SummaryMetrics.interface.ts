@@ -5,7 +5,6 @@ export interface RetainedCashCardProps {
   label: string;
   amount: string;
   countLabel: string;
-  periodLabel?: string;
 }
 
 export interface SummaryMetricProps {

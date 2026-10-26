@@ -17,6 +17,46 @@ const options = [
   { value: 'month', label: 'Mes' },
 ];
 
+test('compact period control retains accessible labels and selection without a visible heading', async () => {
+  const onChange = jest.fn();
+  let app!: Renderer.ReactTestRenderer;
+  try {
+    await act(async () => {
+      app = Renderer.create(
+        <ChoiceGroup
+          hideLabel
+          appearance="segmented"
+          label="Period"
+          options={options}
+          value="day"
+          onChange={onChange}
+        />,
+      );
+    });
+    expect(
+      app.root.findAll(node => node.props.accessibilityRole === 'header'),
+    ).toHaveLength(0);
+    const buttons = app.root.findAll(
+      node =>
+        node.props.accessibilityRole === 'radio' &&
+        typeof node.props.onPress === 'function',
+    );
+    expect(buttons.map(node => node.props.accessibilityLabel)).toEqual([
+      'Hoy',
+      'Semana',
+      'Mes',
+    ]);
+    expect(
+      buttons.every(node => node.props.accessibilityHint === 'Period'),
+    ).toBe(true);
+    expect(buttons[0].props.accessibilityState.selected).toBe(true);
+    await act(async () => buttons[1].props.onPress());
+    expect(onChange).toHaveBeenCalledWith('week');
+  } finally {
+    await act(async () => app?.unmount());
+  }
+});
+
 test.each([1, 1.1, 1.8])(
   'single-row choices retain full-size labels and selection at font scale %s',
   async fontScale => {

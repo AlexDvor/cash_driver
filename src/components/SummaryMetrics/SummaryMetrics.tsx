@@ -14,15 +14,15 @@ import {
 } from './SummaryMetrics.interface';
 import { styles } from './SummaryMetrics.styles';
 import { SkeletonText } from '../../ui/Skeleton/SkeletonText';
+import { SummaryHeroBackground } from './SummaryHeroBackground';
 
 export function RetainedCashCard({
   label,
   amount,
   countLabel,
-  periodLabel,
   loading = false,
 }: RetainedCashCardProps) {
-  const { colors } = useAppTheme();
+  const { colors, appearance } = useAppTheme();
   const { width, fontScale } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [contentWidth, setContentWidth] = useState(0);
@@ -47,12 +47,17 @@ export function RetainedCashCard({
       amount.length * summaryLayout.moneyCharacterWidth,
     ) *
       fontScale;
-  const textColor = { color: colors.onPrimary };
+  const textColor = {
+    color: appearance === 'dark' ? colors.text : colors.onPrimary,
+  };
   const money = (
     <SkeletonText
       loading={loading}
       testID="summary-retained"
-      style={[styles.money, textColor]}
+      style={[
+        styles.money,
+        { color: appearance === 'dark' ? colors.primary : colors.onPrimary },
+      ]}
       sizingText={amount}
     />
   );
@@ -71,29 +76,19 @@ export function RetainedCashCard({
     <Card
       style={[
         styles.heroCard,
-        { backgroundColor: colors.primary, borderColor: colors.primary },
+        {
+          backgroundColor: colors.summaryHeroStart,
+          borderColor: colors.summaryHeroStart,
+        },
       ]}
     >
-      <View
-        pointerEvents="none"
-        accessible={false}
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
-        style={styles.heroBackdrop}
-      />
+      <SummaryHeroBackground />
       <View
         style={[styles.heroRow, !sideBySide && styles.heroStack]}
         onLayout={event => setContentWidth(event.nativeEvent.layout.width)}
       >
         <View style={styles.heroText}>
-          <AppText variant="heading" style={textColor}>
-            {label}
-          </AppText>
-          {periodLabel && (
-            <AppText variant="supporting" style={textColor}>
-              {periodLabel}
-            </AppText>
-          )}
+          <AppText style={[styles.heroLabel, textColor]}>{label}</AppText>
           <ScrollView horizontal>{money}</ScrollView>
         </View>
         {sideBySide && (
@@ -121,7 +116,6 @@ export function SummaryStatCards({
   tipAmount,
   loading = false,
 }: SummaryStatCardsProps) {
-  const { colors } = useAppTheme();
   const { width, fontScale } = useWindowDimensions();
   const [measuredWidth, setMeasuredWidth] = useState(0);
   const availableWidth = measuredWidth || Math.max(0, width - spacing.xl * 2);
@@ -150,33 +144,54 @@ export function SummaryStatCards({
       style={styles.statCards}
       onLayout={event => setMeasuredWidth(event.nativeEvent.layout.width)}
     >
-      {metrics.map(metric => (
-        <Card
-          key={metric.testID}
-          style={[styles.statCard, { width: cardWidth }]}
-        >
-          <View style={styles.statContent}>
-            <View
-              style={[styles.iconBadge, { backgroundColor: colors.softGreen }]}
-            >
-              <SummaryIcon name={metric.icon} size={iconSizing.summaryMetric} />
-            </View>
-            <View style={styles.statText}>
-              <AppText variant="supporting" secondary>
+      {metrics.map(metric => {
+        const iconBesideAmount =
+          cardWidth -
+            spacing.md * 2 -
+            sizing.borderWidth * 2 -
+            iconSizing.summaryMetric -
+            spacing.sm >=
+          metric.amount.length *
+            summaryLayout.statMoneyCharacterWidth *
+            fontScale;
+        return (
+          <Card
+            depth
+            key={metric.testID}
+            style={[styles.statCard, { width: cardWidth }]}
+          >
+            <View style={styles.statContent}>
+              <AppText variant="supporting" style={styles.statText}>
                 {metric.label}
               </AppText>
+              {!iconBesideAmount && (
+                <SummaryIcon
+                  name={metric.icon}
+                  size={iconSizing.summaryMetric}
+                />
+              )}
             </View>
-          </View>
-          <ScrollView horizontal>
-            <SkeletonText
-              loading={loading}
-              testID={metric.testID}
-              style={styles.statAmount}
-              sizingText={metric.amount}
-            />
-          </ScrollView>
-        </Card>
-      ))}
+            <View style={styles.statContent}>
+              <View style={styles.statText}>
+                <ScrollView horizontal>
+                  <SkeletonText
+                    loading={loading}
+                    testID={metric.testID}
+                    style={styles.statAmount}
+                    sizingText={metric.amount}
+                  />
+                </ScrollView>
+              </View>
+              {iconBesideAmount && (
+                <SummaryIcon
+                  name={metric.icon}
+                  size={iconSizing.summaryMetric}
+                />
+              )}
+            </View>
+          </Card>
+        );
+      })}
     </View>
   );
 }
@@ -188,30 +203,20 @@ export function SummaryMetric({
   icon,
   loading = false,
 }: SummaryMetricProps) {
-  const { colors } = useAppTheme();
   return (
     <View style={styles.row}>
-      <View style={styles.labelRow}>
-        {icon && (
-          <View
-            style={[styles.iconBadge, { backgroundColor: colors.softGreen }]}
-          >
-            <SummaryIcon name={icon} />
-          </View>
-        )}
-        <AppText secondary style={styles.label}>
-          {label}
-        </AppText>
+      <View style={styles.statText}>
+        <AppText variant="supporting">{label}</AppText>
+        <ScrollView horizontal>
+          <SkeletonText
+            loading={loading}
+            testID={testID}
+            style={styles.statAmount}
+            sizingText={amount}
+          />
+        </ScrollView>
       </View>
-      <SkeletonText
-        loading={loading}
-        testID={testID}
-        style={styles.value}
-        sizingText={amount}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={summaryLayout.labelMinimumFontScale}
-      />
+      {icon && <SummaryIcon name={icon} size={iconSizing.summaryMetric} />}
     </View>
   );
 }

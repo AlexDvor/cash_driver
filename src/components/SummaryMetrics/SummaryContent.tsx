@@ -19,11 +19,9 @@ import {
 export function SummaryContent({
   summary,
   showEmpty = false,
-  periodLabel,
 }: {
   summary: CashSummary | null;
   showEmpty?: boolean;
-  periodLabel?: string;
 }) {
   const { t, locale } = useTranslation();
   const loading = summary === null;
@@ -45,7 +43,6 @@ export function SummaryContent({
       style={{ gap: spacing.lg }}
     >
       <RetainedCashCard
-        periodLabel={periodLabel}
         loading={loading}
         label={t('retainedCash')}
         amount={geometry ? formatMoney(geometry.netCashTotalCents, locale) : ''}
@@ -60,8 +57,9 @@ export function SummaryContent({
         tipLabel={t('tipsTotal')}
         tipAmount={geometry ? formatMoney(geometry.tipTotalCents, locale) : ''}
       />
-      <Card>
+      <Card depth>
         <SummaryMetric
+          icon="average"
           loading={loading}
           label={t('averageFare')}
           amount={
@@ -70,7 +68,7 @@ export function SummaryContent({
           testID="summary-averageFare"
         />
       </Card>
-      <Card>
+      <Card depth>
         <AppText variant="heading" accessibilityRole="header">
           {t('byPlatform')}
         </AppText>
