@@ -5,9 +5,12 @@ import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../AppText/AppText';
 import { styles } from './ActionButton.styles';
 import { ActionButtonProps } from './ActionButton.interface';
+import { SurfaceDepth } from '../SurfaceDepth/SurfaceDepth';
+import { radii } from '../../constants/theme/tokens';
 
 export function ActionButton({
   renderIcon,
+  depth = false,
   label,
   onPress,
   disabled = false,
@@ -16,19 +19,24 @@ export function ActionButton({
 }: ActionButtonProps) {
   const { colors } = useAppTheme();
   const blocked = disabled || loading;
-  const backgroundColor = blocked
-    ? colors.disabledSurface
-    : variant === 'destructive'
-    ? colors.transparent
-    : variant === 'secondary'
-    ? colors.softGreen
-    : colors.primary;
+  const backgroundColor =
+    variant === 'outline'
+      ? colors.transparent
+      : blocked
+      ? colors.disabledSurface
+      : variant === 'destructive'
+      ? colors.transparent
+      : variant === 'secondary'
+      ? colors.softGreen
+      : colors.primary;
   const textColor = blocked
     ? colors.disabledText
     : variant === 'destructive'
     ? colors.errorText
     : variant === 'secondary'
     ? colors.primary
+    : variant === 'outline'
+    ? colors.secondaryText
     : colors.onPrimary;
   return (
     <Pressable
@@ -41,10 +49,17 @@ export function ActionButton({
         styles.button,
         {
           backgroundColor,
-          borderColor: pressed ? textColor : colors.transparent,
+          borderColor: pressed
+            ? textColor
+            : variant === 'outline'
+            ? colors.border
+            : colors.transparent,
         },
       ]}
     >
+      {depth && !blocked && variant === 'primary' && (
+        <SurfaceDepth radius={radii.button} action />
+      )}
       {loading && <ActivityIndicator color={textColor} />}
       {!loading && renderIcon?.(textColor)}
       <AppText style={[styles.label, { color: textColor }]}>{label}</AppText>

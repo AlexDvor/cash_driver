@@ -2,11 +2,14 @@ import React from 'react';
 import { StyleProp, View, ViewStyle } from 'react-native';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { styles } from './Card.styles';
+import { SurfaceDepth } from '../SurfaceDepth/SurfaceDepth';
+import { radii } from '../../constants/theme/tokens';
 
 export function Card({
   children,
   style,
-}: React.PropsWithChildren<{ style?: StyleProp<ViewStyle> }>) {
+  depth = false,
+}: React.PropsWithChildren<{ style?: StyleProp<ViewStyle>; depth?: boolean }>) {
   const { colors } = useAppTheme();
   return (
     <View
@@ -16,6 +19,7 @@ export function Card({
         style,
       ]}
     >
+      {depth && <SurfaceDepth radius={radii.card} />}
       {children}
     </View>
   );

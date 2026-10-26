@@ -8,6 +8,8 @@ import {
 
 export const styles = StyleSheet.create({
   group: { gap: spacing.sm },
+  compactField: { paddingHorizontal: spacing.sm },
+  compactInput: { fontSize: typography.paymentMoney, fontWeight: '600' },
   field: {
     flexDirection: 'row',
     alignItems: 'center',

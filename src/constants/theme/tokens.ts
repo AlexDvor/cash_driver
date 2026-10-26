@@ -16,6 +16,9 @@ export const typography = {
   body: 16, // Розмір основного тексту.
   supporting: 14, // Розмір пояснень і допоміжного тексту.
   money: 32, // Розмір цифр у грошових полях.
+  paymentMoney: 24, // Максимальна сума в парному полі без зменшення системного масштабу.
+  summaryMoney: 40,
+  summaryStatMoney: 24,
   change: 56, // Розмір суми решти.
 };
 // Наскільки заокруглені кути елементів, dp.
@@ -74,6 +77,10 @@ export const iconSizing = {
   },
 } as const;
 export interface Palette {
+  summaryHeroStart: string;
+  summaryHeroEnd: string;
+  summaryHeroGlow: string;
+  summaryIcon: string;
   transparent: string; // Прозорий колір без заливки.
   disabledSurface: string; // Фон недоступних кнопок.
   disabledText: string; // Текст недоступних кнопок.
@@ -93,6 +100,10 @@ export interface Palette {
 export const palettes: Record<'light' | 'dark', Palette> = {
   // Кольори світлої теми.
   light: {
+    summaryHeroStart: '#136C46',
+    summaryHeroEnd: '#095231',
+    summaryHeroGlow: '#65E5A9',
+    summaryIcon: '#43B982',
     transparent: 'transparent', // Прозорий колір без заливки.
     disabledSurface: '#E5E7EB', // Фон недоступних кнопок.
     disabledText: '#626975', // Текст недоступних кнопок.
@@ -111,6 +122,10 @@ export const palettes: Record<'light' | 'dark', Palette> = {
   },
   // Кольори темної теми.
   dark: {
+    summaryHeroStart: '#204735',
+    summaryHeroEnd: '#10261B',
+    summaryHeroGlow: '#4D8068',
+    summaryIcon: '#62C698',
     transparent: 'transparent', // Прозорий колір без заливки.
     disabledSurface: '#303C35', // Фон недоступних кнопок.
     disabledText: '#B0BEB6', // Текст недоступних кнопок.
@@ -133,3 +148,11 @@ export const gradients = {
   summaryHeroOverlay:
     'radial-gradient(ellipse at 82% 38%, rgba(255, 255, 255, 0.19) 0%, transparent 68%), linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 35%, rgba(0, 0, 0, 0.23) 100%)',
 };
+export const surfaceDepth = {
+  leadingOpacity: 0.1,
+  trailingOpacity: 0.035,
+} as const;
+export const summaryHeroLighting = {
+  lightOpacity: 0.44,
+  darkOpacity: 0.27,
+} as const;

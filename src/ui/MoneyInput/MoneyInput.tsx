@@ -8,6 +8,7 @@ import { MoneyInputProps } from './MoneyInput.interface';
 
 export function MoneyInput({
   showCurrency = false,
+  compact = false,
   onLayout,
   inputRef,
   groupRef,
@@ -33,6 +34,7 @@ export function MoneyInput({
       <View
         style={[
           styles.field,
+          compact && styles.compactField,
           {
             backgroundColor: colors.background,
             borderColor: error
@@ -65,6 +67,7 @@ export function MoneyInput({
           autoCorrect={false}
           style={[
             styles.input,
+            compact && styles.compactInput,
             {
               color: colors.text,
             },
