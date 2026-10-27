@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Alert,
   AppState,
+  Platform,
   TextInput,
   Switch,
   NativeModules,
@@ -144,11 +145,11 @@ async function edit(id: string) {
 
 jest.mock('react-native-haptic-feedback', () => ({
   isSupported: jest.fn(() => true),
-  trigger: jest.fn(),
+  triggerPattern: jest.fn(),
 }));
 const feedback = jest.requireMock('react-native-haptic-feedback') as {
   isSupported: jest.Mock;
-  trigger: jest.Mock;
+  triggerPattern: jest.Mock;
 };
 function switchValue() {
   return app.root
@@ -705,7 +706,8 @@ test('working-platform write blocks rapid taps and keeps the committed list unti
 });
 
 test('feedback occurs once after successful payment, disabled/failure does not alter committed save', async () => {
-  feedback.trigger.mockClear();
+  jest.replaceProperty(Platform, 'OS', 'android');
+  feedback.triggerPattern.mockClear();
   feedback.isSupported.mockReturnValue(true);
   await mount();
   await press('Ajustes');
@@ -729,15 +731,15 @@ test('feedback occurs once after successful payment, disabled/failure does not a
     writing = button('Confirmar cobro').props.onPress();
     button('Confirmar cobro').props.onPress();
   });
-  expect(feedback.trigger).not.toHaveBeenCalled();
-  feedback.trigger.mockImplementation(() => {
+  expect(feedback.triggerPattern).not.toHaveBeenCalled();
+  feedback.triggerPattern.mockImplementation(() => {
     throw Error('native failure');
   });
   await act(async () => {
     release();
     await writing;
   });
-  expect(feedback.trigger).toHaveBeenCalledTimes(1);
+  expect(feedback.triggerPattern).toHaveBeenCalledTimes(1);
   expect(await services.transactions.list()).toHaveLength(1);
   expect(field('Importe a cobrar').props.value).toBe('');
   expect(content()).not.toContain('Cobro registrado');
@@ -747,11 +749,12 @@ test('feedback occurs once after successful payment, disabled/failure does not a
   await input('Importe a cobrar', '10');
   await input('El cliente entrega', '10');
   await press('Confirmar cobro');
-  expect(feedback.trigger).toHaveBeenCalledTimes(1);
+  expect(feedback.triggerPattern).toHaveBeenCalledTimes(1);
 });
 
 test('a rejected payment never triggers enabled feedback and keeps its draft', async () => {
-  feedback.trigger.mockClear();
+  jest.replaceProperty(Platform, 'OS', 'android');
+  feedback.triggerPattern.mockClear();
   await mount();
   await press('Ajustes');
   await toggle(true);
@@ -762,7 +765,7 @@ test('a rejected payment never triggers enabled feedback and keeps its draft', a
     "CREATE TRIGGER reject_payment BEFORE INSERT ON transactions BEGIN SELECT RAISE(ABORT, 'test failure'); END",
   );
   await press('Confirmar cobro');
-  expect(feedback.trigger).not.toHaveBeenCalled();
+  expect(feedback.triggerPattern).not.toHaveBeenCalled();
   expect(await services.transactions.list()).toEqual([]);
   expect(field('Importe a cobrar').props.value).toBe('18');
 });

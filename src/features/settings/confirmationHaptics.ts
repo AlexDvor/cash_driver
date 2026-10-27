@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { paymentTiming } from '../../constants/timing';
 
 export function confirmationHaptics(enabled: boolean): void {
   if (!enabled || (Platform.OS !== 'android' && Platform.OS !== 'ios')) {
@@ -10,15 +11,26 @@ export function confirmationHaptics(enabled: boolean): void {
     if (!feedback.isSupported()) {
       return;
     }
-    let type: 'notificationSuccess' | 'confirm' | 'virtualKey' =
-      'notificationSuccess';
-    if (Platform.OS === 'android') {
-      type = Number(Platform.Version) >= 30 ? 'confirm' : 'virtualKey';
-    }
-    feedback.trigger(type, {
+    const options = {
       enableVibrateFallback: false,
       ignoreAndroidSystemSettings: false,
-    });
+    };
+    if (Platform.OS === 'android') {
+      // Short OEM view effects were imperceptible on the owner's Samsung.
+      feedback.triggerPattern(
+        [
+          {
+            time: 0,
+            type: 'continuous',
+            duration: paymentTiming.confirmationVibrationDurationMs,
+            intensity: 1,
+          },
+        ],
+        options,
+      );
+    } else {
+      feedback.trigger('notificationSuccess', options);
+    }
   } catch {
     // Optional feedback must never turn an already committed payment into failure.
   }
