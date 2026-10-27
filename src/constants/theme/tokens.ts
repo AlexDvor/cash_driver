@@ -143,11 +143,6 @@ export const palettes: Record<'light' | 'dark', Palette> = {
     errorSurface: '#921252', // Фон помилок і небезпечних дій.
   },
 };
-export const gradients = {
-  // Декоративний градієнт великої картки підсумків.
-  summaryHeroOverlay:
-    'radial-gradient(ellipse at 82% 38%, rgba(255, 255, 255, 0.19) 0%, transparent 68%), linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 35%, rgba(0, 0, 0, 0.23) 100%)',
-};
 export const surfaceDepth = {
   leadingOpacity: 0.1,
   trailingOpacity: 0.035,
