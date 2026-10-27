@@ -20,7 +20,7 @@ export function ActionButton({
   const { colors } = useAppTheme();
   const blocked = disabled || loading;
   const backgroundColor =
-    variant === 'outline'
+    variant === 'outline' || variant === 'destructive-outline'
       ? colors.transparent
       : blocked
       ? colors.disabledSurface
@@ -31,7 +31,7 @@ export function ActionButton({
       : colors.primary;
   const textColor = blocked
     ? colors.disabledText
-    : variant === 'destructive'
+    : variant === 'destructive' || variant === 'destructive-outline'
     ? colors.errorText
     : variant === 'secondary'
     ? colors.primary
@@ -50,6 +50,8 @@ export function ActionButton({
         {
           backgroundColor,
           borderColor: pressed
+            ? textColor
+            : variant === 'destructive-outline'
             ? textColor
             : variant === 'outline'
             ? colors.border

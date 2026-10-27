@@ -1,12 +1,9 @@
-import { opacity, iconSizing } from '../../constants/theme/tokens';
+import { opacity } from '../../constants/theme/tokens';
 import React, { useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  Pressable,
-  Switch,
-  View,
-} from 'react-native';
+import { Alert, Pressable, Switch, View } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
+import { CalendarActivityFeedback } from '../../components/CalendarModal/CalendarActivityFeedback';
+import { useCalendarMotion } from '../../hooks/app/useCalendarMotion';
 import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
@@ -25,6 +22,8 @@ import { readAppVersion } from '../../features/settings/appVersion';
 import { styles } from './SettingsScreen.styles';
 
 export function SettingsScreen() {
+  const motion = useCalendarMotion();
+  const focused = useIsFocused();
   const { t, language } = useTranslation();
   const { colors, setMode, automaticThemeStatus } = useAppTheme();
   const { preferences, saving, errorKey, updatePreferences, retryPreferences } =
@@ -50,17 +49,21 @@ export function SettingsScreen() {
   }
   return (
     <ScreenContainer>
-      <AppText variant="title" accessibilityRole="header">
-        {t('settings')}
-      </AppText>
-      {saving && (
-        <ActivityIndicator
-          accessibilityLabel={t('preferencesSaving')}
-          color={colors.primary}
-        />
-      )}
+      <View>
+        <AppText variant="title" accessibilityRole="header">
+          {t('settings')}
+        </AppText>
+        <View style={styles.saveProgress} pointerEvents="none">
+          <CalendarActivityFeedback
+            status={saving ? 'loading' : 'ready'}
+            requestKey="preferences"
+            message={t('preferencesSaving')}
+            motion={{ ...motion, active: motion.active && focused }}
+          />
+        </View>
+      </View>
       {errorKey && (
-        <Card style={styles.section}>
+        <Card depth style={styles.section}>
           <AppText
             accessibilityRole="alert"
             style={{ color: colors.errorText }}
@@ -74,12 +77,19 @@ export function SettingsScreen() {
           />
         </Card>
       )}
-      <Card style={styles.section}>
-        <AppText variant="heading" accessibilityRole="header">
-          {t('appearanceSection')}
-        </AppText>
+      <Card depth style={styles.section}>
+        <View style={styles.sectionHeading}>
+          <SettingsIcon name="palette" color={colors.primary} />
+          <AppText
+            variant="heading"
+            accessibilityRole="header"
+            style={styles.toggleLabel}
+          >
+            {t('appearanceSection')}
+          </AppText>
+        </View>
         <ChoiceGroup
-          layout="single-row"
+          appearance="segmented"
           label={t('language')}
           headingVariant="body"
           options={languageOptions}
@@ -157,10 +167,17 @@ export function SettingsScreen() {
           )}
         </AppText>
       </Card>
-      <Card style={styles.section}>
-        <AppText variant="heading" accessibilityRole="header">
-          {t('workSection')}
-        </AppText>
+      <Card depth style={styles.section}>
+        <View style={styles.sectionHeading}>
+          <SettingsIcon name="briefcase" color={colors.primary} />
+          <AppText
+            variant="heading"
+            accessibilityRole="header"
+            style={styles.toggleLabel}
+          >
+            {t('workSection')}
+          </AppText>
+        </View>
         <MultiChoiceGroup
           label={t('workingPlatforms')}
           description={t('workingPlatformsHelp')}
@@ -259,10 +276,17 @@ export function SettingsScreen() {
           </View>
         </Pressable>
       </Card>
-      <Card style={styles.section}>
-        <AppText variant="heading" accessibilityRole="header">
-          {t('appSection')}
-        </AppText>
+      <Card depth style={styles.section}>
+        <View style={styles.sectionHeading}>
+          <SettingsIcon name="info" color={colors.primary} />
+          <AppText
+            variant="heading"
+            accessibilityRole="header"
+            style={styles.toggleLabel}
+          >
+            {t('appSection')}
+          </AppText>
+        </View>
         <View>
           <View style={styles.row}>
             <AppText style={styles.toggleLabel}>{t('currency')}</AppText>
@@ -289,16 +313,18 @@ export function SettingsScreen() {
           )}
         </View>
       </Card>
-      <Card style={styles.section}>
-        <AppText variant="heading" accessibilityRole="header">
-          {t('deviceDataSection')}
-        </AppText>
+      <Card depth style={styles.section}>
+        <View style={styles.sectionHeading}>
+          <SettingsIcon name="database" color={colors.primary} />
+          <AppText
+            variant="heading"
+            accessibilityRole="header"
+            style={styles.toggleLabel}
+          >
+            {t('deviceDataSection')}
+          </AppText>
+        </View>
         <View style={styles.storageRow}>
-          <SettingsIcon
-            name="database"
-            color={colors.secondaryText}
-            size={iconSizing.storage}
-          />
           <View style={styles.storageText}>
             <AppText style={styles.storageTitle}>
               {t('localStorageTitle')}
@@ -322,26 +348,17 @@ export function SettingsScreen() {
             {t('deleteAllSuccess')}
           </AppText>
         )}
-        <View style={styles.destructiveAction}>
-          <View
-            pointerEvents="none"
-            style={[
-              styles.destructiveBackground,
-              { backgroundColor: colors.errorText },
-            ]}
-          />
-          <ActionButton
-            variant="destructive"
-            renderIcon={color => <SettingsIcon name="trash" color={color} />}
-            label={deleting ? t('deletingAll') : t('deleteAll')}
-            loading={deleting}
-            disabled={disabled || deletion.state.status !== 'idle'}
-            onPress={confirmClear}
-          />
-        </View>
+        <ActionButton
+          variant="destructive-outline"
+          renderIcon={color => <SettingsIcon name="trash" color={color} />}
+          label={deleting ? t('deletingAll') : t('deleteAll')}
+          loading={deleting}
+          disabled={disabled || deletion.state.status !== 'idle'}
+          onPress={confirmClear}
+        />
         {deletion.allStatus === 'error' && (
           <ActionButton
-            variant="destructive"
+            variant="destructive-outline"
             renderIcon={color => <SettingsIcon name="trash" color={color} />}
             label={t('retryDeleteAll')}
             disabled={disabled || deletion.state.status !== 'idle'}

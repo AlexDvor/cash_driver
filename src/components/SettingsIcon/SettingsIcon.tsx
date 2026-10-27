@@ -5,6 +5,9 @@ import Moon from '../../assets/settings/moon.svg';
 import Phone from '../../assets/settings/phone.svg';
 import Database from '../../assets/settings/database.svg';
 import Trash from '../../assets/settings/trash.svg';
+import Palette from '../../assets/settings/palette.svg';
+import Briefcase from '../../assets/settings/briefcase.svg';
+import Info from '../../assets/settings/info.svg';
 import { sizing } from '../../constants/theme/tokens';
 import { styles } from './SettingsIcon.styles';
 
@@ -14,6 +17,9 @@ const icons = {
   phone: Phone,
   database: Database,
   trash: Trash,
+  palette: Palette,
+  briefcase: Briefcase,
+  info: Info,
 };
 
 export function SettingsIcon({

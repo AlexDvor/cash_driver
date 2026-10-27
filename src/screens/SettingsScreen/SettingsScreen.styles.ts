@@ -1,8 +1,19 @@
 import { StyleSheet } from 'react-native';
-import { radii, sizing, spacing, opacity } from '../../constants/theme/tokens';
+import { sizing, spacing } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
-  section: { gap: spacing.sm },
+  saveProgress: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: -spacing.sm,
+  },
+  section: { gap: spacing.md },
+  sectionHeading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+  },
   hapticsRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -17,15 +28,6 @@ export const styles = StyleSheet.create({
     gap: spacing.md,
   },
   storageText: { flex: 1, gap: spacing.sm },
-  destructiveAction: { borderRadius: radii.button, overflow: 'hidden' },
-  destructiveBackground: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    opacity: opacity.destructiveBackground,
-  },
   row: {
     flexDirection: 'row',
     flexWrap: 'wrap',

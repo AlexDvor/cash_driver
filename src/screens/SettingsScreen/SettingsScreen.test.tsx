@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { SettingsIcon } from '../../components/SettingsIcon/SettingsIcon';
+import { CalendarActivityFeedback } from '../../components/CalendarModal/CalendarActivityFeedback';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createNavigationContainerRef } from '@react-navigation/native';
 import ReactTestRenderer, { act } from 'react-test-renderer';
@@ -196,14 +197,17 @@ test('initial EUR/Spanish/system/Uber/disabled haptics and installed metadata; a
   expect(await services.preferences.read()).toEqual(saved);
 });
 
-test('the five settings icons are decorative and theme icons follow the selected option', async () => {
+test('section and control icons are decorative and theme icons follow the selected option', async () => {
   await mount();
   await press('Ajustes');
   const icons = () => app.root.findAllByType(SettingsIcon);
   expect(icons().map(icon => icon.props.name)).toEqual([
+    'palette',
     'sun',
     'moon',
     'phone',
+    'briefcase',
+    'info',
     'database',
     'trash',
   ]);
@@ -638,6 +642,8 @@ test.each(['language', 'theme', 'platform', 'haptics', 'sound'])(
 test('saving preference disables controls and retains committed state until write finishes', async () => {
   await mount();
   await press('Ajustes');
+  const progress = app.root.findByType(CalendarActivityFeedback);
+  expect(progress.props.status).toBe('ready');
   let release = () => {};
   const gate = new Promise<void>(resolve => {
     release = resolve;
@@ -651,13 +657,17 @@ test('saving preference disables controls and retains committed state until writ
     button('English').props.onPress();
   });
   expect(button('English').props.disabled).toBe(true);
-  expect(content()).toContain('Guardando preferencia');
+  expect(app.root.findByType(CalendarActivityFeedback)).toBe(progress);
+  expect(progress.props.status).toBe('loading');
+  expect(progress.props.message).toContain('Guardando preferencia');
   expect(await services.preferences.read()).toMatchObject({ language: 'es' });
   await act(async () => {
     release();
     await gate;
   });
   expect(content()).toContain('Currency');
+  expect(app.root.findByType(CalendarActivityFeedback)).toBe(progress);
+  expect(progress.props.status).toBe('ready');
 });
 
 test('working-platform write blocks rapid taps and keeps the committed list until completion', async () => {
