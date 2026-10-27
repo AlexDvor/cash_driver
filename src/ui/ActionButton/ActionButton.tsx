@@ -9,6 +9,7 @@ import { SurfaceDepth } from '../SurfaceDepth/SurfaceDepth';
 import { radii } from '../../constants/theme/tokens';
 
 export function ActionButton({
+  compact = false,
   renderIcon,
   depth = false,
   label,
@@ -47,6 +48,7 @@ export function ActionButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
+        compact && styles.compact,
         {
           backgroundColor,
           borderColor: pressed

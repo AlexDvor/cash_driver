@@ -71,6 +71,7 @@ export function SettingsScreen() {
             {t(errorKey)}
           </AppText>
           <ActionButton
+            compact
             label={t('retryPreference')}
             disabled={disabled}
             onPress={retryPreferences}
@@ -89,6 +90,7 @@ export function SettingsScreen() {
           </AppText>
         </View>
         <ChoiceGroup
+          compact
           appearance="segmented"
           label={t('language')}
           headingVariant="body"
@@ -101,7 +103,9 @@ export function SettingsScreen() {
         />
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
         <ChoiceGroup
+          compact
           columns="filters"
+          iconLayout="inline"
           label={t('theme')}
           headingVariant="body"
           value={preferences.themeMode}
@@ -178,6 +182,7 @@ export function SettingsScreen() {
           </AppText>
         </View>
         <MultiChoiceGroup
+          compact
           label={t('workingPlatforms')}
           description={t('workingPlatformsHelp')}
           options={platforms.map(value => ({
@@ -305,6 +310,7 @@ export function SettingsScreen() {
                 {t('versionUnavailable')}
               </AppText>
               <ActionButton
+                compact
                 label={t('retryVersion')}
                 onPress={() => setVersion(readAppVersion())}
               />
@@ -348,6 +354,7 @@ export function SettingsScreen() {
           </AppText>
         )}
         <ActionButton
+          compact
           variant="destructive-outline"
           renderIcon={color => <SettingsIcon name="trash" color={color} />}
           label={deleting ? t('deletingAll') : t('deleteAll')}
@@ -357,6 +364,7 @@ export function SettingsScreen() {
         />
         {deletion.allStatus === 'error' && (
           <ActionButton
+            compact
             variant="destructive-outline"
             renderIcon={color => <SettingsIcon name="trash" color={color} />}
             label={t('retryDeleteAll')}

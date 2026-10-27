@@ -16,6 +16,7 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
     flexShrink: 1,
   },
+  compact: { minHeight: sizing.touchTarget, paddingVertical: spacing.xs },
   choiceLabel: { flex: 1, flexShrink: 1 },
   checked: { fontWeight: '700' },
   pressed: { opacity: opacity.choicePressed },

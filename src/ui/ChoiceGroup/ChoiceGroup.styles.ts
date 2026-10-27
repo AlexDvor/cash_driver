@@ -30,6 +30,7 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
     flexShrink: 1,
   },
+  compact: { minHeight: sizing.touchTarget, paddingVertical: spacing.xs },
   label: { textAlign: 'center' },
   equalChoice: { paddingHorizontal: spacing.xs },
   inline: { flexDirection: 'row', gap: spacing.sm },

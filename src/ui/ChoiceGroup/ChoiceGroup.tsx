@@ -10,6 +10,7 @@ import { ChoiceGroupProps } from './ChoiceGroup.interface';
 import { SelectionIndicator } from '../SelectionIndicator/SelectionIndicator';
 
 export function ChoiceGroup<Value extends string>({
+  compact = false,
   layout = 'wrap',
   showSelectionIndicator = false,
   appearance = 'chips',
@@ -122,6 +123,7 @@ export function ChoiceGroup<Value extends string>({
               onPress={() => onChange(option.value)}
               style={({ pressed }) => [
                 styles.choice,
+                compact && styles.compact,
                 (columns === 'equal' || columns === 'filters') &&
                   styles.equalChoice,
                 !singleRow &&

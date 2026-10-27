@@ -10,7 +10,6 @@ export const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   controls: { gap: spacing.md },
-  filterSurface: { padding: spacing.md },
   feedback: { gap: spacing.md },
   groupHeading: { paddingTop: spacing.lg, paddingBottom: spacing.sm },
   separator: { height: spacing.sm },

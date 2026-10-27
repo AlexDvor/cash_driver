@@ -13,6 +13,7 @@ import { styles } from './MultiChoiceGroup.styles';
 import { SelectionIndicator } from '../SelectionIndicator/SelectionIndicator';
 
 interface MultiChoiceGroupProps<Value extends string> {
+  compact?: boolean;
   label: string;
   description?: string;
   options: { value: Value; label: string; icon?: ReactNode }[];
@@ -23,6 +24,7 @@ interface MultiChoiceGroupProps<Value extends string> {
 }
 
 export function MultiChoiceGroup<Value extends string>({
+  compact = false,
   label,
   description,
   options,
@@ -72,6 +74,7 @@ export function MultiChoiceGroup<Value extends string>({
               onPress={() => onToggle(option.value)}
               style={({ pressed }) => [
                 styles.choice,
+                compact && styles.compact,
                 {
                   width:
                     width > 0

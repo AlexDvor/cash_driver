@@ -13,5 +13,6 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  compact: { minHeight: sizing.touchTarget, paddingVertical: spacing.sm },
   label: { fontWeight: '600', textAlign: 'center', flexShrink: 1 },
 });

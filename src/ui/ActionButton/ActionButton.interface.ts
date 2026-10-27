@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 export interface ActionButtonProps {
+  compact?: boolean;
   renderIcon?: (color: string) => ReactNode;
   depth?: boolean;
   label: string;

@@ -128,6 +128,49 @@ function content() {
   );
 }
 
+test('history filters start collapsed and toggling preserves applied filters and loaded rows', async () => {
+  await seed('uber');
+  const cabify = await seed('cabify');
+  const reads = jest.spyOn(services.transactions, 'listPage');
+  await mount();
+  await press('Historial');
+
+  const hidden = (testID: string) =>
+    app.root
+      .findAllByProps({ testID })
+      .find(node => Object.hasOwn(node.props, 'accessibilityElementsHidden'))!
+      .props.accessibilityElementsHidden;
+  expect(button('Período').props.accessibilityState.expanded).toBe(false);
+  expect(button('Período').props.accessibilityValue.text).toBe('Hoy');
+  expect(button('Plataforma').props.accessibilityValue.text).toBe('Todas');
+  expect(hidden('filter-period-content')).toBe(true);
+  expect(hidden('filter-platform-content')).toBe(true);
+
+  const initialRows = rowIds();
+  const initialReads = reads.mock.calls.length;
+  await press('Período');
+  expect(button('Período').props.accessibilityState.expanded).toBe(true);
+  expect(hidden('filter-period-content')).toBe(false);
+  expect(button('Plataforma').props.accessibilityState.expanded).toBe(false);
+  await press('Período');
+  expect(rowIds()).toEqual(initialRows);
+  expect(reads).toHaveBeenCalledTimes(initialReads);
+
+  await press('Plataforma');
+  await press('Cabify');
+  expect(rowIds()).toEqual([`history-${cabify.id}`]);
+  await press('Plataforma');
+  expect(button('Plataforma').props.accessibilityValue.text).toBe('Cabify');
+  expect(hidden('filter-platform-content')).toBe(true);
+  expect(rowIds()).toEqual([`history-${cabify.id}`]);
+
+  await press('Período');
+  await press('Semana');
+  await press('Período');
+  expect(button('Período').props.accessibilityValue.text).toBe('Semana');
+  expect(rowIds()).toEqual([`history-${cabify.id}`]);
+});
+
 test('period loading preserves the measured list extent without exposing old rows', async () => {
   const row = await seed();
   await mount();

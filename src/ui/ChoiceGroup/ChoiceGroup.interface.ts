@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 
 export interface ChoiceGroupProps<Value extends string> {
+  compact?: boolean;
   layout?: 'wrap' | 'single-row';
   showSelectionIndicator?: boolean;
   appearance?: 'chips' | 'segmented';

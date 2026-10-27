@@ -9,7 +9,7 @@ import { useLocalClock } from '../../hooks/app/useLocalClock';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
 import { ChoiceGroup } from '../../ui/ChoiceGroup/ChoiceGroup';
-import { Card } from '../../ui/Card/Card';
+import { CollapsibleFilter } from '../../components/CollapsibleFilter/CollapsibleFilter';
 import { PlatformIcon } from '../../components/PlatformIcon/PlatformIcon';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { formatMoney, formatPeriodRange } from '../../i18n/formatting';
@@ -52,6 +52,8 @@ export function HistoryScreen() {
   const deletion = useDeletion();
   const [period, setPeriod] = useState<SummaryPeriod>('day');
   const [platform, setPlatform] = useState<HistoryPlatform>('all');
+  const [periodExpanded, setPeriodExpanded] = useState(false);
+  const [platformExpanded, setPlatformExpanded] = useState(false);
   const bounds = useMemo(() => {
     if (period === 'month') {
       return calendar.bounds;
@@ -130,8 +132,23 @@ export function HistoryScreen() {
         </AppText>
         <AppText secondary>{t('historySubtitle')}</AppText>
       </View>
-      <Card depth style={styles.filterSurface}>
+      <CollapsibleFilter
+        label={t('period')}
+        value={
+          period === 'month'
+            ? `${t('month')} · ${formatPeriodRange(
+                bounds,
+                locale,
+                clock.timeZone,
+              )}`
+            : t(period === 'day' ? 'today' : 'week')
+        }
+        expanded={periodExpanded}
+        onToggle={() => setPeriodExpanded(expanded => !expanded)}
+        testID="filter-period"
+      >
         <ChoiceGroup
+          hideLabel
           label={t('period')}
           columns="filters"
           value={period}
@@ -155,9 +172,18 @@ export function HistoryScreen() {
               {formatPeriodRange(bounds, locale, clock.timeZone)}
             </AppText>
           )}
-      </Card>
-      <Card depth style={styles.filterSurface}>
+      </CollapsibleFilter>
+      <CollapsibleFilter
+        label={t('platform')}
+        value={
+          platform === 'all' ? t('allPlatforms') : platformLabels[platform]
+        }
+        expanded={platformExpanded}
+        onToggle={() => setPlatformExpanded(expanded => !expanded)}
+        testID="filter-platform"
+      >
         <ChoiceGroup
+          hideLabel
           label={t('platform')}
           iconLayout="adaptive"
           columns="filters"
@@ -172,7 +198,7 @@ export function HistoryScreen() {
             })),
           ]}
         />
-      </Card>
+      </CollapsibleFilter>
       {state.status === 'error' && (
         <TransactionLoadState status={state.status} retry={refresh} />
       )}
