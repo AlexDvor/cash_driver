@@ -11,8 +11,6 @@ export const choiceLayout = {
 } as const;
 
 export const summaryLayout = {
-  moneyCharacterWidth: 24, // Оцінка ширини символу 40-unit суми для розміщення ілюстрації поруч, dp.
-  statMoneyCharacterWidth: 12.5, // Оцінка цифри 24-unit суми перед розміщенням іконки збоку.
   countMinimumFontScale: 0.5, // До якої частки початкового розміру можна зменшувати текст кількості операцій.
   labelMinimumFontScale: 0.25, // До якої частки початкового розміру можна зменшувати підписи підсумків.
 } as const;

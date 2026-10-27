@@ -1,7 +1,6 @@
 import { summaryLayout } from '../../constants/theme/layout';
 import React, { useState } from 'react';
 import { ScrollView, useWindowDimensions, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { sizing, spacing, iconSizing } from '../../constants/theme/tokens';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../../ui/AppText/AppText';
@@ -23,30 +22,7 @@ export function RetainedCashCard({
   loading = false,
 }: RetainedCashCardProps) {
   const { colors, appearance } = useAppTheme();
-  const { width, fontScale } = useWindowDimensions();
-  const insets = useSafeAreaInsets();
-  const [contentWidth, setContentWidth] = useState(0);
-  const availableWidth =
-    contentWidth ||
-    Math.max(
-      0,
-      Math.min(
-        sizing.contentMaxWidth,
-        width - spacing.xl * 2 - insets.left - insets.right,
-      ) -
-        spacing.lg * 2 -
-        sizing.borderWidth * 2,
-    );
   const coinSize = iconSizing.summaryHero;
-  const textWidth = availableWidth - coinSize - spacing.lg;
-  // Reserve full-size money text before placing the artwork beside it.
-  const sideBySide =
-    textWidth >=
-    Math.max(
-      sizing.touchTarget * 3,
-      amount.length * summaryLayout.moneyCharacterWidth,
-    ) *
-      fontScale;
   const textColor = {
     color: appearance === 'dark' ? colors.text : colors.onPrimary,
   };
@@ -83,28 +59,16 @@ export function RetainedCashCard({
       ]}
     >
       <SummaryHeroBackground />
-      <View
-        style={[styles.heroRow, !sideBySide && styles.heroStack]}
-        onLayout={event => setContentWidth(event.nativeEvent.layout.width)}
-      >
+      <View style={styles.heroRow}>
         <View style={styles.heroText}>
           <AppText style={[styles.heroLabel, textColor]}>{label}</AppText>
           <ScrollView horizontal>{money}</ScrollView>
+          {count}
         </View>
-        {sideBySide && (
-          <View style={[styles.heroIllustration, { width: coinSize }]}>
-            <SummaryIcon name="coins" size={coinSize} />
-          </View>
-        )}
-      </View>
-      {sideBySide ? (
-        count
-      ) : (
-        <View style={styles.heroFooter}>
-          <View style={styles.heroCount}>{count}</View>
+        <View style={[styles.heroIllustration, { width: coinSize }]}>
           <SummaryIcon name="coins" size={coinSize} />
         </View>
-      )}
+      </View>
     </Card>
   );
 }
@@ -145,15 +109,6 @@ export function SummaryStatCards({
       onLayout={event => setMeasuredWidth(event.nativeEvent.layout.width)}
     >
       {metrics.map(metric => {
-        const iconBesideAmount =
-          cardWidth -
-            spacing.md * 2 -
-            sizing.borderWidth * 2 -
-            iconSizing.summaryMetric -
-            spacing.sm >=
-          metric.amount.length *
-            summaryLayout.statMoneyCharacterWidth *
-            fontScale;
         return (
           <Card
             depth
@@ -164,12 +119,6 @@ export function SummaryStatCards({
               <AppText variant="supporting" style={styles.statText}>
                 {metric.label}
               </AppText>
-              {!iconBesideAmount && (
-                <SummaryIcon
-                  name={metric.icon}
-                  size={iconSizing.summaryMetric}
-                />
-              )}
             </View>
             <View style={styles.statContent}>
               <View style={styles.statText}>
@@ -182,12 +131,12 @@ export function SummaryStatCards({
                   />
                 </ScrollView>
               </View>
-              {iconBesideAmount && (
+              <View style={styles.statIllustration}>
                 <SummaryIcon
                   name={metric.icon}
                   size={iconSizing.summaryMetric}
                 />
-              )}
+              </View>
             </View>
           </Card>
         );

@@ -5,9 +5,6 @@ export const styles = StyleSheet.create({
   hidden: { opacity: 0 },
   heroCard: { overflow: 'hidden', gap: spacing.md },
   heroLabel: { fontWeight: '600' },
-  heroStack: { flexDirection: 'column', alignItems: 'stretch' },
-  heroFooter: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  heroCount: { flex: 1 },
   heroBackdrop: {
     position: 'absolute',
     top: 0,
@@ -21,7 +18,12 @@ export const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: spacing.md,
   },
-  statCard: { padding: spacing.md, justifyContent: 'space-between' },
+  statCard: {
+    padding: spacing.md,
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  statIllustration: { flexShrink: 0 },
   statContent: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   statText: { flex: 1, minWidth: 0, gap: spacing.sm },
   statAmount: {
@@ -37,7 +39,7 @@ export const styles = StyleSheet.create({
   },
   heroText: { flex: 1, minWidth: 0, gap: spacing.sm },
   heroIllustration: {
-    alignSelf: 'flex-end',
+    flexShrink: 0,
     alignItems: 'center',
     justifyContent: 'center',
   },
