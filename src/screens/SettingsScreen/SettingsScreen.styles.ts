@@ -9,6 +9,11 @@ export const styles = StyleSheet.create({
     bottom: -spacing.sm,
   },
   section: { gap: spacing.md },
+  footer: {
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.md,
+  },
   sectionHeading: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -28,16 +33,6 @@ export const styles = StyleSheet.create({
     gap: spacing.md,
   },
   storageText: { flex: 1, gap: spacing.sm },
-  row: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-    minHeight: sizing.touchTarget,
-    paddingVertical: spacing.md,
-  },
   toggleLabel: { flexShrink: 1 },
-  versionError: { paddingVertical: spacing.md },
   divider: { height: sizing.borderWidth },
 });

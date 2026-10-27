@@ -14,6 +14,7 @@ import { SelectionIndicator } from '../SelectionIndicator/SelectionIndicator';
 
 interface MultiChoiceGroupProps<Value extends string> {
   compact?: boolean;
+  hideLabel?: boolean;
   label: string;
   description?: string;
   options: { value: Value; label: string; icon?: ReactNode }[];
@@ -25,6 +26,7 @@ interface MultiChoiceGroupProps<Value extends string> {
 
 export function MultiChoiceGroup<Value extends string>({
   compact = false,
+  hideLabel = false,
   label,
   description,
   options,
@@ -49,7 +51,7 @@ export function MultiChoiceGroup<Value extends string>({
   const columns = width >= minimumChoiceWidth * 2 + spacing.sm ? 2 : 1;
   return (
     <View style={styles.group}>
-      <AppText accessibilityRole="header">{label}</AppText>
+      {!hideLabel && <AppText accessibilityRole="header">{label}</AppText>}
       {description && (
         <AppText variant="supporting" secondary>
           {description}

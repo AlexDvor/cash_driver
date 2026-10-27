@@ -1,6 +1,6 @@
 import { opacity } from '../../constants/theme/tokens';
 import React, { useState } from 'react';
-import { Alert, Pressable, Switch, View } from 'react-native';
+import { Alert, AppState, Pressable, Switch, View } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { CalendarActivityFeedback } from '../../components/CalendarModal/CalendarActivityFeedback';
 import { useCalendarMotion } from '../../hooks/app/useCalendarMotion';
@@ -18,6 +18,8 @@ import { languageOptions } from '../../i18n/translations';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { useDeletion } from '../../providers/DeletionProvider/DeletionProvider';
 import { platforms, platformLabels } from '../../constants/platforms';
+import { confirmationHaptics } from '../../features/settings/confirmationHaptics';
+import { confirmationSound } from '../../features/settings/confirmationSound';
 import { readAppVersion } from '../../features/settings/appVersion';
 import { styles } from './SettingsScreen.styles';
 
@@ -78,6 +80,138 @@ export function SettingsScreen() {
           />
         </Card>
       )}
+      <Card depth style={styles.section}>
+        <View style={styles.sectionHeading}>
+          <SettingsIcon name="briefcase" color={colors.primary} />
+          <AppText
+            variant="heading"
+            accessibilityRole="header"
+            style={styles.toggleLabel}
+          >
+            {t('workSection')}
+          </AppText>
+        </View>
+        <MultiChoiceGroup
+          compact
+          hideLabel
+          label={t('workingPlatforms')}
+          description={t('workingPlatformsShort')}
+          options={platforms.map(value => ({
+            value,
+            label: platformLabels[value],
+            icon: <PlatformIcon platform={value} />,
+          }))}
+          values={preferences.enabledPlatforms}
+          lastChoiceHint={t('workingPlatformsMinimum')}
+          onToggle={value => {
+            const enabledPlatforms = preferences.enabledPlatforms.includes(
+              value,
+            )
+              ? preferences.enabledPlatforms.filter(
+                  platform => platform !== value,
+                )
+              : [...preferences.enabledPlatforms, value];
+            if (enabledPlatforms.length > 0) {
+              updatePreferences({ enabledPlatforms });
+            }
+          }}
+          disabled={disabled}
+        />
+      </Card>
+      <Card depth style={styles.section}>
+        <View style={styles.sectionHeading}>
+          <SettingsIcon name="check" color={colors.primary} />
+          <AppText
+            variant="heading"
+            accessibilityRole="header"
+            style={styles.toggleLabel}
+          >
+            {t('paymentFeedbackSection')}
+          </AppText>
+        </View>
+        <AppText variant="supporting" secondary>
+          {t('paymentFeedbackHelp')}
+        </AppText>
+        <Pressable
+          accessibilityRole="switch"
+          accessibilityLabel={t('confirmationSound')}
+          accessibilityState={{ checked: preferences.soundEnabled, disabled }}
+          disabled={disabled}
+          onPress={() => {
+            updatePreferences({ soundEnabled: !preferences.soundEnabled });
+          }}
+          style={({ pressed }) => [
+            styles.hapticsRow,
+            pressed && { opacity: opacity.pressed },
+          ]}
+        >
+          <View style={styles.hapticsText}>
+            <AppText>{t('soundSettingLabel')}</AppText>
+          </View>
+          <View
+            pointerEvents="none"
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+          >
+            <Switch
+              accessible={false}
+              importantForAccessibility="no"
+              testID="settings-sound-switch"
+              value={preferences.soundEnabled}
+              disabled={disabled}
+              trackColor={{ false: colors.border, true: colors.primary }}
+            />
+          </View>
+        </Pressable>
+        <View style={[styles.divider, { backgroundColor: colors.border }]} />
+        <Pressable
+          accessibilityRole="switch"
+          accessibilityLabel={t('confirmationHaptics')}
+          accessibilityState={{ checked: preferences.hapticsEnabled, disabled }}
+          disabled={disabled}
+          onPress={() => {
+            updatePreferences({ hapticsEnabled: !preferences.hapticsEnabled });
+          }}
+          style={({ pressed }) => [
+            styles.hapticsRow,
+            pressed && { opacity: opacity.pressed },
+          ]}
+        >
+          <View style={styles.hapticsText}>
+            <AppText>{t('vibrationSettingLabel')}</AppText>
+          </View>
+          <View
+            pointerEvents="none"
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+          >
+            <Switch
+              accessible={false}
+              importantForAccessibility="no"
+              testID="settings-haptics-switch"
+              value={preferences.hapticsEnabled}
+              disabled={disabled}
+              trackColor={{ false: colors.border, true: colors.primary }}
+            />
+          </View>
+        </Pressable>
+        <ActionButton
+          compact
+          variant="secondary"
+          label={t('previewPaymentFeedback')}
+          renderIcon={color => <SettingsIcon name="play" color={color} />}
+          disabled={
+            disabled ||
+            (!preferences.soundEnabled && !preferences.hapticsEnabled)
+          }
+          onPress={() => {
+            if (disabled || !focused || AppState.currentState !== 'active')
+              return;
+            confirmationSound(preferences.soundEnabled);
+            confirmationHaptics(preferences.hapticsEnabled);
+          }}
+        />
+      </Card>
       <Card depth style={styles.section}>
         <View style={styles.sectionHeading}>
           <SettingsIcon name="palette" color={colors.primary} />
@@ -160,163 +294,28 @@ export function SettingsScreen() {
           {t(
             preferences.themeMode === 'system'
               ? automaticThemeStatus === 'solar'
-                ? 'solarThemeHelp'
+                ? 'solarThemeShort'
                 : automaticThemeStatus === 'locating'
-                ? 'solarThemeLocating'
-                : 'solarThemeFallback'
+                ? 'solarThemeLocatingShort'
+                : 'solarThemeFallbackShort'
               : preferences.themeMode === 'dark'
               ? 'darkThemeHelp'
               : 'lightThemeHelp',
           )}
         </AppText>
-      </Card>
-      <Card depth style={styles.section}>
-        <View style={styles.sectionHeading}>
-          <SettingsIcon name="briefcase" color={colors.primary} />
-          <AppText
-            variant="heading"
-            accessibilityRole="header"
-            style={styles.toggleLabel}
-          >
-            {t('workSection')}
-          </AppText>
-        </View>
-        <MultiChoiceGroup
-          compact
-          label={t('workingPlatforms')}
-          description={t('workingPlatformsHelp')}
-          options={platforms.map(value => ({
-            value,
-            label: platformLabels[value],
-            icon: <PlatformIcon platform={value} />,
-          }))}
-          values={preferences.enabledPlatforms}
-          lastChoiceHint={t('workingPlatformsMinimum')}
-          onToggle={value => {
-            const enabledPlatforms = preferences.enabledPlatforms.includes(
-              value,
-            )
-              ? preferences.enabledPlatforms.filter(
-                  platform => platform !== value,
-                )
-              : [...preferences.enabledPlatforms, value];
-            if (enabledPlatforms.length > 0) {
-              updatePreferences({ enabledPlatforms });
+        {preferences.themeMode === 'system' && (
+          <ActionButton
+            compact
+            variant="outline"
+            label={t('moreInformation')}
+            onPress={() =>
+              Alert.alert(
+                t('system'),
+                t('solarThemeHelp') + '\n\n' + t('solarThemeFallback'),
+              )
             }
-          }}
-          disabled={disabled}
-        />
-        <AppText variant="supporting" secondary>
-          {t('workingPlatformsMinimum')}
-        </AppText>
-        <View style={[styles.divider, { backgroundColor: colors.border }]} />
-        <Pressable
-          accessibilityRole="switch"
-          accessibilityLabel={t('confirmationHaptics')}
-          accessibilityState={{ checked: preferences.hapticsEnabled, disabled }}
-          disabled={disabled}
-          onPress={() => {
-            updatePreferences({ hapticsEnabled: !preferences.hapticsEnabled });
-          }}
-          style={({ pressed }) => [
-            styles.hapticsRow,
-            pressed && { opacity: opacity.pressed },
-          ]}
-        >
-          <View style={styles.hapticsText}>
-            <AppText>{t('confirmationHaptics')}</AppText>
-            <AppText variant="supporting" secondary>
-              {t('hapticsHelp')}
-            </AppText>
-          </View>
-          <View
-            pointerEvents="none"
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
-          >
-            <Switch
-              accessible={false}
-              importantForAccessibility="no"
-              testID="settings-haptics-switch"
-              value={preferences.hapticsEnabled}
-              disabled={disabled}
-              trackColor={{ false: colors.border, true: colors.primary }}
-            />
-          </View>
-        </Pressable>
-        <View style={[styles.divider, { backgroundColor: colors.border }]} />
-        <Pressable
-          accessibilityRole="switch"
-          accessibilityLabel={t('confirmationSound')}
-          accessibilityState={{ checked: preferences.soundEnabled, disabled }}
-          disabled={disabled}
-          onPress={() => {
-            updatePreferences({ soundEnabled: !preferences.soundEnabled });
-          }}
-          style={({ pressed }) => [
-            styles.hapticsRow,
-            pressed && { opacity: opacity.pressed },
-          ]}
-        >
-          <View style={styles.hapticsText}>
-            <AppText>{t('confirmationSound')}</AppText>
-            <AppText variant="supporting" secondary>
-              {t('soundHelp')}
-            </AppText>
-          </View>
-          <View
-            pointerEvents="none"
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
-          >
-            <Switch
-              accessible={false}
-              importantForAccessibility="no"
-              testID="settings-sound-switch"
-              value={preferences.soundEnabled}
-              disabled={disabled}
-              trackColor={{ false: colors.border, true: colors.primary }}
-            />
-          </View>
-        </Pressable>
-      </Card>
-      <Card depth style={styles.section}>
-        <View style={styles.sectionHeading}>
-          <SettingsIcon name="info" color={colors.primary} />
-          <AppText
-            variant="heading"
-            accessibilityRole="header"
-            style={styles.toggleLabel}
-          >
-            {t('appSection')}
-          </AppText>
-        </View>
-        <View>
-          <View style={styles.row}>
-            <AppText style={styles.toggleLabel}>{t('currency')}</AppText>
-            <AppText>EUR (€)</AppText>
-          </View>
-          <View style={[styles.divider, { backgroundColor: colors.border }]} />
-          {version ? (
-            <View style={styles.row}>
-              <AppText style={styles.toggleLabel}>{t('appVersion')}</AppText>
-              <AppText testID="app-version">
-                {version.version} ({version.build})
-              </AppText>
-            </View>
-          ) : (
-            <View style={[styles.section, styles.versionError]}>
-              <AppText accessibilityRole="alert">
-                {t('versionUnavailable')}
-              </AppText>
-              <ActionButton
-                compact
-                label={t('retryVersion')}
-                onPress={() => setVersion(readAppVersion())}
-              />
-            </View>
-          )}
-        </View>
+          />
+        )}
       </Card>
       <Card depth style={styles.section}>
         <View style={styles.sectionHeading}>
@@ -335,7 +334,7 @@ export function SettingsScreen() {
               {t('localStorageTitle')}
             </AppText>
             <AppText variant="supporting" secondary>
-              {t('localStorageHelp')}
+              {t('localStorageShort')}
             </AppText>
           </View>
         </View>
@@ -373,6 +372,27 @@ export function SettingsScreen() {
           />
         )}
       </Card>
+      <View style={styles.footer}>
+        <AppText variant="supporting" secondary>
+          {t('currency')}: EUR (€)
+        </AppText>
+        {version ? (
+          <AppText variant="supporting" secondary testID="app-version">
+            CashDriver · {t('appVersion')} {version.version} ({version.build})
+          </AppText>
+        ) : (
+          <View style={styles.section}>
+            <AppText accessibilityRole="alert">
+              {t('versionUnavailable')}
+            </AppText>
+            <ActionButton
+              compact
+              label={t('retryVersion')}
+              onPress={() => setVersion(readAppVersion())}
+            />
+          </View>
+        )}
+      </View>
     </ScreenContainer>
   );
 }

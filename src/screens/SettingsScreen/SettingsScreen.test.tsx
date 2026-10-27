@@ -203,12 +203,13 @@ test('section and control icons are decorative and theme icons follow the select
   await press('Ajustes');
   const icons = () => app.root.findAllByType(SettingsIcon);
   expect(icons().map(icon => icon.props.name)).toEqual([
+    'briefcase',
+    'check',
+    'play',
     'palette',
     'sun',
     'moon',
     'phone',
-    'briefcase',
-    'info',
     'database',
     'trash',
   ]);
@@ -231,13 +232,11 @@ test('section and control icons are decorative and theme icons follow the select
 test('theme explanation follows the committed mode and a failed write keeps the prior explanation', async () => {
   await mount();
   await press('Ajustes');
-  expect(content()).toContain(
-    'Sin ubicación disponible: se usa el tema del dispositivo.',
-  );
+  expect(content()).toContain('Sin ubicación. Se usa el tema del dispositivo.');
   await press('Oscuro');
   expect(content()).toContain('Tema oscuro activado.');
   expect(content()).not.toContain(
-    'Sin ubicación disponible: se usa el tema del dispositivo.',
+    'Sin ubicación. Se usa el tema del dispositivo.',
   );
   await press('Claro');
   expect(content()).toContain('Tema claro activado.');
@@ -249,9 +248,7 @@ test('theme explanation follows the committed mode and a failed write keeps the 
   expect(content()).not.toContain('Tema oscuro activado.');
   expect((await services.preferences.read()).themeMode).toBe('light');
   await press('Automático');
-  expect(content()).toContain(
-    'Sin ubicación disponible: se usa el tema del dispositivo.',
-  );
+  expect(content()).toContain('Sin ubicación. Se usa el tema del dispositivo.');
 });
 
 test('haptics has one accessible switch and one press persists one toggle', async () => {
@@ -324,10 +321,69 @@ test('sound failure cannot fail a committed payment; disabled sound and duplicat
   expect(await services.transactions.list()).toHaveLength(2);
 });
 
+test('feedback preview respects enabled choices, foreground and saving without writing payments', async () => {
+  jest.replaceProperty(Platform, 'OS', 'android');
+  feedback.triggerPattern.mockReset();
+  feedback.isSupported.mockReturnValue(true);
+  const play = jest.fn();
+  NativeModules.CashDriverConfirmationSound = { play };
+  await mount();
+  await press('Ajustes');
+  const persist = services.preferences.update.bind(services.preferences);
+  const update = jest.spyOn(services.preferences, 'update');
+  const save = jest.spyOn(services.transactions, 'save');
+  await press('Probar sonido y vibración');
+  expect(play).toHaveBeenCalledTimes(1);
+  expect(feedback.triggerPattern).not.toHaveBeenCalled();
+  expect(update).not.toHaveBeenCalled();
+  await toggle(true);
+  await press('Sonido al guardar');
+  await press('Probar sonido y vibración');
+  expect(play).toHaveBeenCalledTimes(1);
+  expect(feedback.triggerPattern).toHaveBeenCalledTimes(1);
+  AppState.currentState = 'background';
+  await press('Probar sonido y vibración');
+  expect(feedback.triggerPattern).toHaveBeenCalledTimes(1);
+  AppState.currentState = 'active';
+  let release = () => {};
+  const gate = new Promise<void>(resolve => {
+    release = resolve;
+  });
+  update.mockImplementation(async value => {
+    await gate;
+    return persist(value);
+  });
+  await act(async () => {
+    button('Vibración al guardar').props.onPress();
+  });
+  expect(button('Probar sonido y vibración').props.disabled).toBe(true);
+  await press('Probar sonido y vibración');
+  expect(feedback.triggerPattern).toHaveBeenCalledTimes(1);
+  await act(async () => {
+    release();
+  });
+  expect(button('Probar sonido y vibración').props.disabled).toBe(true);
+  expect(save).not.toHaveBeenCalled();
+  expect(await services.transactions.list()).toEqual([]);
+});
+
+test('automatic theme detail opens without requesting location or changing preferences', async () => {
+  jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  await mount();
+  await press('Ajustes');
+  const update = jest.spyOn(services.preferences, 'update');
+  await press('Más información');
+  expect(Alert.alert).toHaveBeenLastCalledWith(
+    'Automático',
+    expect.stringContaining('La ubicación no se guarda ni se comparte.'),
+  );
+  expect(update).not.toHaveBeenCalled();
+});
+
 test('working platforms support one through four choices and protect the last choice', async () => {
   await mount();
   await press('Ajustes');
-  expect(content()).toContain('Plataformas de trabajo');
+  expect(content()).toContain('Elige las plataformas que utilizas.');
   expect(content()).toContain('Selecciona al menos una plataforma');
   expect(button('Uber').props.accessibilityRole).toBe('checkbox');
   expect(button('Uber').props.accessibilityState).toMatchObject({
@@ -396,10 +452,10 @@ test('working-platform labels and minimum-selection explanation follow the langu
   await mount();
   await press('Ajustes');
   await press('English');
-  expect(content()).toContain('Working platforms');
+  expect(content()).toContain('Choose the platforms you use.');
   expect(content()).toContain('Select at least one platform');
   await press('Español');
-  expect(content()).toContain('Plataformas de trabajo');
+  expect(content()).toContain('Elige las plataformas que utilizas.');
   expect(content()).toContain('Selecciona al menos una plataforma');
   expect(button('Uber').props.accessibilityHint).toBe(
     'Selecciona al menos una plataforma.',

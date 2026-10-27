@@ -1,5 +1,19 @@
 export type Language = 'es' | 'en';
 export const es = {
+  workingPlatformsShort: 'Elige las plataformas que utilizas.',
+  paymentFeedbackSection: 'Confirmación de cobro',
+  paymentFeedbackHelp:
+    'Al guardar un cobro correctamente. Respeta los ajustes del dispositivo.',
+  previewPaymentFeedback: 'Probar sonido y vibración',
+  moreInformation: 'Más información',
+  solarThemeShort: 'Claro de día y oscuro de noche, según tu ubicación.',
+  solarThemeLocatingShort:
+    'Obteniendo ubicación. Mientras tanto se usa el tema del dispositivo.',
+  solarThemeFallbackShort: 'Sin ubicación. Se usa el tema del dispositivo.',
+  localStorageShort:
+    'Los datos se guardan solo en este dispositivo. Desinstalar la app o borrar sus datos puede eliminar el historial. Sin copia de seguridad ni restauración.',
+  soundSettingLabel: 'Sonido',
+  vibrationSettingLabel: 'Vibración',
   appearanceSection: 'Apariencia',
   workSection: 'Trabajo',
   appDataSection: 'App y datos',
@@ -180,6 +194,20 @@ export const es = {
 export type TranslationKey = keyof typeof es;
 type Dictionary = Record<TranslationKey, string>;
 export const en: Dictionary = {
+  workingPlatformsShort: 'Choose the platforms you use.',
+  paymentFeedbackSection: 'Payment confirmation',
+  paymentFeedbackHelp:
+    'After a payment is saved successfully. Respects device settings.',
+  previewPaymentFeedback: 'Test sound and vibration',
+  moreInformation: 'More information',
+  solarThemeShort: 'Light by day and dark by night, based on your location.',
+  solarThemeLocatingShort:
+    'Getting location. Using the device theme in the meantime.',
+  solarThemeFallbackShort: 'Location unavailable. Using the device theme.',
+  localStorageShort:
+    'Data stays only on this device. Uninstalling the app or clearing its data may erase history. No backup or restore.',
+  soundSettingLabel: 'Sound',
+  vibrationSettingLabel: 'Vibration',
   appearanceSection: 'Appearance',
   workSection: 'Work',
   appDataSection: 'App and data',
