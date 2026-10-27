@@ -2,7 +2,7 @@
 
 ## Official app icons — 2026-10-13 assignment
 
-The owner selected official app icons closest to docs/screen.png and explicitly authorized src/test edits. The separate 512x512 JPEG exports below were downloaded unchanged from the verified publishers' Apple App Store artworkUrl512 through the Apple lookup API (country=es). PlatformIcon bundles them locally; no runtime network access, tint or recoloring. Current Cabify uses a white wordmark on purple, not the illustrative symbol in screen.png. Existing original wordmark PNGs are preserved. App-store availability is not an unrestricted trademark license; existing publication/attribution gates below remain open.
+The owner selected official app icons closest to docs/screen.png and explicitly authorized src/test edits. The separate 512x512 JPEG exports below were downloaded unchanged from the verified publishers' Apple App Store artworkUrl512 through the Apple lookup API (country=es). PlatformIcon bundles them locally; no runtime network access, tint or recoloring. Current Cabify uses a white wordmark on purple, not the illustrative symbol in screen.png. The superseded original wordmark PNGs were removed during the owner-requested unused-file cleanup on 2026-10-27; current app icons remain unchanged. App-store availability is not an unrestricted trademark license; existing publication/attribution gates below remain open.
 
 | Asset | Publisher listing | SHA256 |
 | --- | --- | --- |
@@ -12,7 +12,7 @@ The owner selected official app icons closest to docs/screen.png and explicitly 
 
 PlatformIcon uses 24 logical units in Summary/History filters, 28 in selectors, 44 in history rows and 60 in Details, with rounded corners and hidden decorative accessibility. Readable labels remain; Otro has no invented brand asset. These dimensions follow reference proportions, not a pixel-identical native acceptance claim. This assignment supersedes Summary's earlier large wordmark badge presentation.
 
-Prepared in Resumen redesign Phase1 on2026-10-12; rendered locally in Por plataforma in assigned Phase3. These are original PNG wordmarks, not fabricated square app icons. No runtime download, tinting, cropping or recoloring. Keep aspect ratios and clear space; pair with the existing readable platform labels. No platform integration or endorsement is implied.
+Historical provenance of the original PNG wordmarks prepared in Resumen redesign Phase1 on2026-10-12 and formerly rendered in Por plataforma: uber.png, cabify.png and bolt.png were removed on 2026-10-27 after confirming there were no runtime/test/native references. The table below records their historical sources and hashes, not files still present in this folder. No runtime download, tinting, cropping or recoloring. Keep aspect ratios and clear space; pair with the existing readable platform labels. No platform integration or endorsement is implied.
 
 | File | Official source and original export | SHA256 |
 | --- | --- | --- |

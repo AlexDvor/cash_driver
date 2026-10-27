@@ -1,20 +1,10 @@
-# Resumen artwork — approved concept, 2026-10-26
+# Current Resumen artwork
 
-The earlier SummaryIcon implementation used these transparent SVG assets, recreated locally from the owner-selected Resumen concept. Current coins use the PNG follow-up documented below; car/gift/average remain SVG:
+SummaryIcon bundles coins-reference-light.png / coins-reference-dark.png for the theme-specific coins illustration, car-flat.svg and gift-flat.svg for the two metrics, and average-bars.svg for the average. SVGs use the active semantic summaryIcon color. All artwork is decorative and hidden from accessibility; no runtime image download or new dependency is required.
 
-- coins-stacks.svg: light-theme two-stack cylindrical coin illustration with elliptical highlights and gradient sides.
-- coins-stacks-dark.svg: same geometry with muted dark-theme green artwork.
-- car-flat.svg: compact filled car silhouette with transparent windows/lights.
-- gift-flat.svg: filled gift box with ribbon cutouts and outlined bow.
-- average-bars.svg: three ascending rounded bars with graduated opacity.
+The reference coin PNGs were generated from the owner-supplied light/dark crop on 2026-10-26 and copied unchanged: 1254x1254 RGBA with alpha extrema 0..255 and fully transparent corner pixels. They have no baked background or currency text.
 
-No SVG has an opaque background. Car/gift/bars consume currentColor from the active semantic summaryIcon token. Coin gradient stops use explicit artwork colors in separate theme assets: Android rendering of currentColor inside gradient definitions was inspected and produced black fills, so those stops are intentionally fixed per asset. These illustration colors are artwork, not a second application palette.
-
-Original coins-3d.png/car-3d.png/gift-3d.png remain preserved as historical assets; current SummaryIcon no longer references them. Official platform and navigation artwork remains unchanged. The average bars are decorative, not a chart or extra metric. No externally fetched runtime assets, new dependency or personal data is embedded.
-
-## Current coin PNG reference follow-up — 2026-10-26
-
-The owner supplied a cropped light/dark reference and explicitly requested PNG coins. SummaryIcon now uses coins-reference-light.png / coins-reference-dark.png for coins. Both are original imagegen outputs copied unchanged into this folder:1254x1254 RGBA with alpha extrema0..255 and fully transparent corner pixels. No solid background is embedded. Other decorative icons remain the existing transparent SVGs. Earlier coin SVGs and historical PNGs are preserved but not used by current SummaryIcon.
+Owner-requested unused-file cleanup on 2026-10-27 removed the superseded coins-stacks.svg / coins-stacks-dark.svg and original coins-3d.png / car-3d.png / gift-3d.png. They had no application, test or native references. Current PNG/SVG assets and their visual behavior are unchanged.
 
 Generation used the built-in image_gen tool with transparent_background=true, not CLI/API-key fallback. Reference: the owner-supplied screenshot crop dated2026-10-26 20:17:26. No post-generation image edits/resizing were performed. The icon has no currency markings or text.
 
