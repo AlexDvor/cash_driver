@@ -63,7 +63,7 @@ export function PaymentForm({
             (quickWidth - spacing.sm * (quickColumns - 1)) / quickColumns,
           )
         : ('100%' as const),
-    flexGrow: 1,
+    flexGrow: 0,
   };
   const disabled = form.saving;
   const tipInput = useRef<ComponentRef<typeof TextInput>>(null);
@@ -286,6 +286,7 @@ export function PaymentForm({
                   styles.quick,
                   quickStyle,
                   {
+                    borderColor: colors.transparent,
                     backgroundColor:
                       form.receivedParsed.status === 'valid' &&
                       form.receivedParsed.cents === cents

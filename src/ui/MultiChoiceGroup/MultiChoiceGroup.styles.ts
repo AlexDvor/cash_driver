@@ -5,7 +5,7 @@ export const styles = StyleSheet.create({
   group: { gap: spacing.sm },
   choices: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   choice: {
-    minHeight: sizing.touchTarget,
+    minHeight: sizing.primaryButton,
     borderRadius: radii.chip,
     borderWidth: sizing.borderWidth,
     paddingHorizontal: spacing.md,

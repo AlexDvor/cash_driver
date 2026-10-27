@@ -101,9 +101,8 @@ export function SettingsScreen() {
         />
         <View style={[styles.divider, { backgroundColor: colors.border }]} />
         <ChoiceGroup
-          layout="single-row"
+          columns="filters"
           label={t('theme')}
-          iconLayout="inline"
           headingVariant="body"
           value={preferences.themeMode}
           onChange={setMode}

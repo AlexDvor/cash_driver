@@ -38,7 +38,7 @@ export const styles = StyleSheet.create({
   },
   monthButton: {
     flex: 1,
-    minHeight: sizing.touchTarget,
+    minHeight: sizing.primaryButton,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -57,8 +57,8 @@ export const styles = StyleSheet.create({
   },
   pressed: { opacity: opacity.pressed },
   button: {
-    minHeight: sizing.touchTarget,
-    minWidth: sizing.touchTarget,
+    minHeight: sizing.primaryButton,
+    minWidth: sizing.primaryButton,
     flexShrink: 0,
     padding: spacing.sm,
     alignItems: 'center',

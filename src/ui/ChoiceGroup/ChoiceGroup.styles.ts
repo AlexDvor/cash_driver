@@ -20,7 +20,7 @@ export const styles = StyleSheet.create({
     alignItems: 'center',
   },
   choice: {
-    minHeight: sizing.touchTarget,
+    minHeight: sizing.primaryButton,
     borderRadius: radii.chip,
     borderWidth: sizing.borderWidth,
     paddingHorizontal: spacing.md,

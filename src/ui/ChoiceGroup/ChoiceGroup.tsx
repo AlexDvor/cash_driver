@@ -40,11 +40,12 @@ export function ChoiceGroup<Value extends string>({
       option.icon && showSelectionIndicator ? sizing.icon * 3 + spacing.sm : 0,
     ),
   );
+  const minimumChoiceWidth = Math.max(0, ...minimumWidths);
   const spareWidth = Math.max(
     0,
     availableWidth -
       spacing.sm * (options.length - 1) -
-      minimumWidths.reduce((sum, width) => sum + width, 0),
+      minimumChoiceWidth * options.length,
   );
   // Keep the longest word readable instead of breaking platform names into letters.
   const longestWord = Math.max(
@@ -108,7 +109,7 @@ export function ChoiceGroup<Value extends string>({
             : undefined
         }
       >
-        {options.map((option, index) => {
+        {options.map(option => {
           const selected = option.value === value;
           return (
             <Pressable
@@ -129,7 +130,7 @@ export function ChoiceGroup<Value extends string>({
                 singleRow && styles.compactChoice,
                 singleRow && {
                   width: Math.floor(
-                    minimumWidths[index] + spareWidth / options.length,
+                    minimumChoiceWidth + spareWidth / options.length,
                   ),
                   flexShrink: 0,
                 },
@@ -153,7 +154,7 @@ export function ChoiceGroup<Value extends string>({
                             columnCount,
                         )
                       : '100%',
-                  flexGrow: 1,
+                  flexGrow: 0,
                   flexShrink: 0,
                 },
                 {
