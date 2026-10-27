@@ -87,6 +87,23 @@ npm run ios
 
 The repository includes an iOS target, but native iOS build and acceptance have not been verified in the current Windows environment.
 
+## Android release APK
+
+The Android application ID is `com.alexm.cashdriver`. It installs separately from the historical `com.tempapp` development app. The internal native namespace remains `com.tempapp`; it does not identify the installed app.
+
+Release signing reads an external Java properties file from `~/.cashdriver/signing/release.properties`, or the path in `CASHDRIVER_SIGNING_PROPERTIES`. Required properties are `storeFile`, `storePassword`, `keyAlias`, and `keyPassword`; the keystore format is PKCS12. Keep this file and the keystore outside the repository. Release builds fail when signing credentials are missing and never fall back to debug signing. Back up the keystore and keep its password separately.
+
+From the project root on Windows:
+
+```powershell
+cd android
+.\gradlew.bat assembleRelease
+```
+
+The APK is written to `android/app/build/outputs/apk/release/CashDriver.apk`. For Google Play, use `bundleRelease` to produce an AAB after configuring the store release separately.
+
+Before each distributed Android release, increase `versionCode` in `android/app/build.gradle` (first release: `1`, next release: `2`) and set the user-visible `versionName` as appropriate (initial release: `1.0.0`). Do not increase the code on every local test build. Preserve the application ID and signing key for updates. The JavaScript package version is separate from the native Android version displayed by the app.
+
 ## Checks
 
 ```sh

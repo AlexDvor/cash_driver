@@ -1,3 +1,5 @@
+
+
 # OSX
 #
 .DS_Store
@@ -33,6 +35,10 @@ local.properties
 *.hprof
 .cxx/
 *.keystore
+*.jks
+*.p12
+*.pfx
+/android/release-signing.properties
 !debug.keystore
 .kotlin/
 

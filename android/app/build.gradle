@@ -72,6 +72,17 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
+// Keep signing credentials outside the repository; CI may supply another file.
+def releaseSigningFile = file(System.getenv('CASHDRIVER_SIGNING_PROPERTIES') ?:
+    "${System.getProperty('user.home')}/.cashdriver/signing/release.properties")
+def releaseSigning = new Properties()
+if (releaseSigningFile.isFile()) {
+    releaseSigningFile.withInputStream { releaseSigning.load(it) }
+}
+def releaseSigningConfigured = ['storeFile', 'storePassword', 'keyAlias', 'keyPassword'].every {
+    releaseSigning.getProperty(it)?.trim()
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -79,11 +90,11 @@ android {
 
     namespace "com.tempapp"
     defaultConfig {
-        applicationId "com.tempapp"
+        applicationId "com.alexm.cashdriver"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
     }
     signingConfigs {
         debug {
@@ -92,19 +103,49 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            if (releaseSigningConfigured) {
+                storeFile file(releaseSigning.getProperty('storeFile'))
+                storeType 'PKCS12'
+                storePassword releaseSigning.getProperty('storePassword')
+                keyAlias releaseSigning.getProperty('keyAlias')
+                keyPassword releaseSigning.getProperty('keyPassword')
+            }
+        }
     }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
     }
+}
+
+// The project uses AGP's enabled legacy variant API for APK output names.
+android.applicationVariants.all { variant ->
+    if (variant.buildType.name == 'release') {
+        variant.outputs.all {
+            outputFileName = 'CashDriver.apk'
+        }
+    }
+}
+
+def validateReleaseCredentials = tasks.register('validateReleaseCredentials') {
+    doLast {
+        if (!releaseSigningConfigured) {
+            throw new GradleException('Release signing credentials are missing. Configure ~/.cashdriver/signing/release.properties or CASHDRIVER_SIGNING_PROPERTIES; debug signing is never used for release.')
+        }
+        if (!file(releaseSigning.getProperty('storeFile')).isFile()) {
+            throw new GradleException('The configured release keystore does not exist.')
+        }
+    }
+}
+tasks.matching { it.name == 'preReleaseBuild' }.configureEach {
+    dependsOn validateReleaseCredentials
 }
 
 dependencies {
