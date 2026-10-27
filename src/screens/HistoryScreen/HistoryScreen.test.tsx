@@ -176,7 +176,7 @@ test('real history combines period/platform filters, shows groups and preserved 
   expect(() => button('Todo')).toThrow('Missing Todo');
   expect(['Hoy', 'Semana', 'Mes'].map(label => button(label))).toHaveLength(3);
   expect(
-    ['Todas', 'Uber', 'Cabify', 'Bolt', 'Otro'].map(label => button(label)),
+    ['Todas', 'Uber', 'Cabify', 'Bolt', 'Taxi'].map(label => button(label)),
   ).toHaveLength(5);
   expect(content()).not.toContain('Registrado');
   expect(app.root.findAllByProps({ testID: 'history-range' })).toHaveLength(0);

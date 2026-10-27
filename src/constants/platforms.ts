@@ -8,7 +8,7 @@ export const platformLabels: Record<Platform, string> = {
   uber: 'Uber',
   cabify: 'Cabify',
   bolt: 'Bolt',
-  other: 'Otro',
+  other: 'Taxi',
 };
 
 // Перевіряє, чи значення є однією з підтримуваних платформ.

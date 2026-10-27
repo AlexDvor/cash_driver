@@ -27,3 +27,10 @@ Usage requirements, not a declaration of unrestricted license:
 - [Bolt brand guidance](https://bolt.eu/en/company/brand/): written permission before publishing the assets and trademark attribution are required. Local asset preparation is not publication approval. Release gate remains open.
 
 Before public distribution, resolve required permissions and visible attribution placement. Use a suitable backing in dark mode instead of tinting original marks. Otro stays a text label. The PNG files have been visually inspected; asset presence does not verify their future rendering or rights to publish.
+
+## Taxi display replacement — 2026-10-27
+Owner renamed the former Otro option to Taxi in ES/EN. Its persisted platform ID remains other. taxi.svg is original project-authored vector artwork: dark front-view taxi on a yellow rounded tile, bundled offline and used by shared PlatformIcon. It represents generic taxi service, not a third-party trademark. This supersedes earlier statements that Otro has no icon or remains text-only.
+
+
+## Selected Taxi option 1 — 2026-10-27
+Current shared PlatformIcon uses taxi-option-1.png for persisted ID other, superseding initial taxi.svg (preserved). Generated with built-in image_gen, transparent_background=true, no CLI/API-key workflow. Prompt1: recreate top-left option1 from owner-selected four-option board: golden rounded tile, bold charcoal modern front-view taxi with checker roof sign, no label/number, transparent corners. Prompt2: preserve that design, remove stray pixels/marks and exterior padding, smooth edges and subtle yellow depth. Final generation copied unchanged into this folder. Preview board exec-87b05440; final exec-086f8a97. Generic taxi artwork; no third-party taxi trademark claimed. Image uses the same shared Image contain rendering and decorative accessibility as other platform assets.

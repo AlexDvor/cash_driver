@@ -343,7 +343,7 @@ test('working platforms support one through four choices and protect the last ch
   });
   expect(button('Uber').props.accessibilityState.disabled).toBe(false);
   await press('Cabify');
-  await press('Otro');
+  await press('Taxi');
   expect((await services.preferences.read()).enabledPlatforms).toEqual([
     'uber',
     'cabify',
@@ -357,7 +357,7 @@ test('working platforms support one through four choices and protect the last ch
     'other',
   ]);
   await press('Bolt');
-  await press('Otro');
+  await press('Taxi');
   expect(await services.preferences.read()).toMatchObject({
     defaultPlatform: 'cabify',
     enabledPlatforms: ['cabify'],
@@ -442,7 +442,7 @@ test('Home shows only working platforms and requires reselection for a disabled 
         .findAll(
           node =>
             node.props.accessibilityRole === 'radio' &&
-            ['Uber', 'Cabify', 'Bolt', 'Otro'].includes(
+            ['Uber', 'Cabify', 'Bolt', 'Taxi'].includes(
               node.props.accessibilityLabel,
             ),
         )
@@ -499,7 +499,7 @@ test.each([
   ],
   [
     ['uber', 'cabify', 'bolt', 'other'],
-    ['Uber', 'Cabify', 'Bolt', 'Otro'],
+    ['Uber', 'Cabify', 'Bolt', 'Taxi'],
   ],
 ] as const)(
   'Home renders the committed %j platform set',
@@ -512,7 +512,7 @@ test.each([
           .findAll(
             node =>
               node.props.accessibilityRole === 'radio' &&
-              ['Uber', 'Cabify', 'Bolt', 'Otro'].includes(
+              ['Uber', 'Cabify', 'Bolt', 'Taxi'].includes(
                 node.props.accessibilityLabel,
               ),
           )

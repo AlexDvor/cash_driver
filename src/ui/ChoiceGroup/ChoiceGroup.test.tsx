@@ -175,7 +175,7 @@ test('platform checkboxes reflow with marker space while preserving the applied 
     app = Renderer.create(
       <MultiChoiceGroup
         label="Platforms"
-        options={['Uber', 'Cabify', 'Bolt', 'Otro'].map(value => ({
+        options={['Uber', 'Cabify', 'Bolt', 'Taxi'].map(value => ({
           value,
           label: value,
         }))}
@@ -364,7 +364,7 @@ test('platform decorations preserve choice labels, callbacks and last-checkbox p
       label: 'Cabify',
       icon: <PlatformIcon platform="cabify" />,
     },
-    { value: 'other', label: 'Otro', icon: <PlatformIcon platform="other" /> },
+    { value: 'other', label: 'Taxi', icon: <PlatformIcon platform="other" /> },
   ];
   const onChange = jest.fn();
   const onToggle = jest.fn();
@@ -388,9 +388,9 @@ test('platform decorations preserve choice labels, callbacks and last-checkbox p
   expect(choices('radio').map(node => node.props.accessibilityLabel)).toEqual([
     'Uber',
     'Cabify',
-    'Otro',
+    'Taxi',
   ]);
-  expect(app!.root.findAllByType(Image)).toHaveLength(2);
+  expect(app!.root.findAllByType(Image)).toHaveLength(3);
   for (const image of app!.root.findAllByType(Image)) {
     expect(image.props.accessible).toBe(false);
     expect(image.props.importantForAccessibility).toBe('no-hide-descendants');

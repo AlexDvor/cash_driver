@@ -350,9 +350,9 @@ test('opening the tip section requests upward scroll without focusing an input',
 
 test('ordinary change, exact and insufficient cash are immediate; malformed/zero/over-limit amounts cannot confirm', async () => {
   await mount();
-  for (const platform of ['Uber', 'Cabify', 'Bolt', 'Otro']) {
+  for (const platform of ['Uber', 'Cabify', 'Bolt', 'Taxi']) {
     expect(button(platform).findByType(PlatformIcon).props.platform).toBe(
-      platform === 'Otro' ? 'other' : platform.toLowerCase(),
+      platform === 'Taxi' ? 'other' : platform.toLowerCase(),
     );
   }
   await enter('20', '50');

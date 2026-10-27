@@ -462,7 +462,7 @@ test('large saved totals stay complete across ES/EN and all branded platform row
     expect(content()).toContain('Uber');
     expect(content()).toContain('Cabify');
     expect(content()).toContain('Bolt');
-    expect(content()).toContain('Otro');
+    expect(content()).toContain('Taxi');
   }
 });
 

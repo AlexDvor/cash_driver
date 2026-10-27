@@ -120,7 +120,7 @@ export const es = {
   platform: 'Plataforma',
   platformReselectionRequired:
     'La plataforma de este borrador ya no está activa. Elige una plataforma disponible para guardar el cobro.',
-  otherPlatform: 'Otro',
+  otherPlatform: 'Taxi',
   fareInput: 'Importe a cobrar',
   receiptFare: 'Importe',
   receiptReceived: 'Recibido',
@@ -297,7 +297,7 @@ export const en: Dictionary = {
   platform: 'Platform',
   platformReselectionRequired:
     'This draft’s platform is no longer active. Choose an available platform to save the payment.',
-  otherPlatform: 'Other',
+  otherPlatform: 'Taxi',
   fareInput: 'Trip fare',
   receiptFare: 'Fare',
   receiptReceived: 'Received',
