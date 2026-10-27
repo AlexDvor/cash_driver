@@ -24,6 +24,7 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   statIllustration: { flexShrink: 0 },
+  statAmountScroll: { flexGrow: 0 },
   statContent: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   statText: { flex: 1, minWidth: 0, gap: spacing.sm },
   statAmount: {

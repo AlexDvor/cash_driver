@@ -119,18 +119,6 @@ export function SummaryStatCards({
               <AppText variant="supporting" style={styles.statText}>
                 {metric.label}
               </AppText>
-            </View>
-            <View style={styles.statContent}>
-              <View style={styles.statText}>
-                <ScrollView horizontal>
-                  <SkeletonText
-                    loading={loading}
-                    testID={metric.testID}
-                    style={styles.statAmount}
-                    sizingText={metric.amount}
-                  />
-                </ScrollView>
-              </View>
               <View style={styles.statIllustration}>
                 <SummaryIcon
                   name={metric.icon}
@@ -138,6 +126,14 @@ export function SummaryStatCards({
                 />
               </View>
             </View>
+            <ScrollView horizontal style={styles.statAmountScroll}>
+              <SkeletonText
+                loading={loading}
+                testID={metric.testID}
+                style={styles.statAmount}
+                sizingText={metric.amount}
+              />
+            </ScrollView>
           </Card>
         );
       })}
