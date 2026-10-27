@@ -1,31 +1,15 @@
 import { useEffect, useState } from 'react';
-import { AccessibilityInfo, AppState } from 'react-native';
+import { AppState } from 'react-native';
+import { useReducedMotion } from './useReducedMotion';
 
 export function useCalendarMotion() {
-  const [reduced, setReduced] = useState(true);
+  const reduced = useReducedMotion();
   const [active, setActive] = useState(AppState.currentState === 'active');
   useEffect(() => {
-    let mounted = true;
-    let changed = false;
-    const preference = AccessibilityInfo.addEventListener(
-      'reduceMotionChanged',
-      value => {
-        changed = true;
-        setReduced(value);
-      },
-    );
     const state = AppState.addEventListener('change', value =>
       setActive(value === 'active'),
     );
-    AccessibilityInfo.isReduceMotionEnabled().then(
-      value => {
-        if (mounted && !changed) setReduced(value);
-      },
-      () => {},
-    );
     return () => {
-      mounted = false;
-      preference.remove();
       state.remove();
     };
   }, []);

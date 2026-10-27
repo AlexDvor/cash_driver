@@ -1,8 +1,9 @@
 import React from 'react';
-import { Pressable, View } from 'react-native';
+import { Easing, Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   BottomTabBarProps,
+  BottomTabNavigationOptions,
   createBottomTabNavigator,
 } from '@react-navigation/bottom-tabs';
 import {
@@ -34,9 +35,34 @@ import { spacing } from '../constants/theme/tokens';
 import { AppNavigatorProps } from './AppNavigator.interface';
 import { styles } from './AppNavigator.styles';
 import { routes } from './routes';
+import { useReducedMotion } from '../hooks/app/useReducedMotion';
+import { motion } from '../constants/theme/motion';
 
 const Tabs = createBottomTabNavigator<TabParamList>();
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+const fadeUp: NonNullable<
+  BottomTabNavigationOptions['sceneStyleInterpolator']
+> = ({ current }) => ({
+  sceneStyle: {
+    opacity: current.progress.interpolate({
+      inputRange: [-1, 0, 1],
+      outputRange: [0, 1, 0],
+    }),
+    transform: [
+      {
+        translateY: current.progress.interpolate({
+          inputRange: [-1, 0, 1],
+          outputRange: [
+            motion.tabTransitionOffset,
+            0,
+            motion.tabTransitionOffset,
+          ],
+        }),
+      },
+    ],
+  },
+});
 
 function HeaderBackButton() {
   const { t } = useTranslation();
@@ -72,10 +98,25 @@ function renderTabBar(props: BottomTabBarProps) {
 
 function TabNavigator() {
   const { t } = useTranslation();
+  const reduced = useReducedMotion();
+  const animate = !reduced;
   return (
     <Tabs.Navigator
       tabBar={renderTabBar}
-      screenOptions={{ headerShown: false, animation: 'none' }}
+      screenOptions={{
+        headerShown: false,
+        // Keep the scene wrapper stable when the async motion preference resolves.
+        // A zero duration disables motion without remounting screen contents.
+        animation: 'fade',
+        sceneStyleInterpolator: fadeUp,
+        transitionSpec: {
+          animation: 'timing',
+          config: {
+            duration: animate ? motion.tabTransitionDurationMs : 0,
+            easing: Easing.out(Easing.cubic),
+          },
+        },
+      }}
     >
       <Tabs.Screen
         name={routes.Home}
@@ -126,6 +167,7 @@ function DeletionFooter() {
 }
 
 export function AppNavigator({ navigationRef }: AppNavigatorProps) {
+  const reduced = useReducedMotion();
   const { appearance, colors } = useAppTheme();
   const { t } = useTranslation();
   const baseTheme = appearance === 'dark' ? DarkTheme : DefaultTheme;
@@ -147,8 +189,8 @@ export function AppNavigator({ navigationRef }: AppNavigatorProps) {
         <View style={styles.fill}>
           <Stack.Navigator
             screenOptions={{
-              // Static foundation transitions also respect Reduce Motion.
-              animation: 'none',
+              orientation: 'portrait',
+              animation: reduced ? 'none' : 'default',
               statusBarStyle: appearance === 'dark' ? 'light' : 'dark',
               headerTintColor: colors.primary,
               headerBackTitle: t('back'),
