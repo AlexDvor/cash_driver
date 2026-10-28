@@ -12,10 +12,6 @@ export function DailySummarySkeleton() {
   const { colors } = useAppTheme();
   return (
     <LoadingSkeleton label={t('totalsLoading')}>
-      <SkeletonText
-        variant="supporting"
-        sizingText={`${t('operationCount')}: —`}
-      />
       <View style={styles.totals}>
         {(['fareTotal', 'tipsTotal', 'retainedCash'] as const).map(row => (
           <View

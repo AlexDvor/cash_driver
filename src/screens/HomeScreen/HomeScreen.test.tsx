@@ -596,7 +596,7 @@ test('daily loading/error never render fake zero totals and retry loads genuine 
   await press('Reintentar');
   expect(app.root.findAllByType(DailySummarySkeleton)).toHaveLength(0);
   expect(text('fareTotal')).toMatch(/0,00/);
-  expect(text('daily-count')).toContain('0');
+  expect(text('daily-header-count')).toContain('0');
   let finishRefresh: (rows: CashTransaction[]) => void = () => {};
   const refreshRead = new Promise<CashTransaction[]>(resolve => {
     finishRefresh = resolve;
@@ -607,9 +607,9 @@ test('daily loading/error never render fake zero totals and retry loads genuine 
   await act(async () => services.changes.notify('transactions'));
   expect(app.root.findAllByType(DailySummarySkeleton)).toHaveLength(0);
   expect(JSON.stringify(app.toJSON())).toContain('Actualizando');
-  expect(text('daily-count')).toContain('0');
+  expect(text('daily-header-count')).toContain('0');
   await act(async () => finishRefresh([]));
-  expect(text('daily-count')).toContain('0');
+  expect(text('daily-header-count')).toContain('0');
 });
 
 test('daily refresh failure retains labeled totals and payment draft through Retry', async () => {

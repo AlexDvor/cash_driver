@@ -23,9 +23,12 @@ export const styles = StyleSheet.create({
   headerText: { flex: 1 },
   headerTitle: { fontWeight: '600' },
   pressed: { opacity: opacity.pressed },
-  content: { paddingTop: spacing.md, gap: spacing.md },
+  content: {
+    paddingTop: spacing.md,
+    paddingBottom: spacing.sm,
+    gap: spacing.md,
+  },
   refreshFeedback: { gap: spacing.sm },
-  hiddenFeedback: { opacity: 0 },
   refreshStatus: {
     flexDirection: 'row',
     alignItems: 'center',

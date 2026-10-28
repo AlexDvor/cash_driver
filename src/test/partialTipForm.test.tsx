@@ -386,11 +386,11 @@ test('persisted partial tip displays independently and edit refreshes history, d
   await press('Inicio');
   await act(async () => jest.advanceTimersByTime(1000));
   await press('Hoy · Mostrar totales');
-  expect(displayedText('daily-count')).toBe('Operaciones: 0');
+  expect(displayedText('daily-header-count')).toBe('Operaciones: 0');
   expect(displayedText('retainedCash')).toMatch(/0,00/);
   jest.setSystemTime(new Date('2026-10-08T12:00:00Z'));
   await act(async () => jest.advanceTimersByTime(1000));
-  expect(displayedText('daily-count')).toBe('Operaciones: 1');
+  expect(displayedText('daily-header-count')).toBe('Operaciones: 1');
   expect(displayedText('fareTotal')).toMatch(/20,00/);
   expect(displayedText('tipsTotal')).toMatch(/7,00/);
   expect(displayedText('retainedCash')).toMatch(/27,00/);

@@ -130,9 +130,6 @@ export function DailySummary({
             </>
           ) : summary ? (
             <>
-              <AppText testID="daily-count" secondary variant="supporting">
-                {t('operationCount')}: {summary.operationCount}
-              </AppText>
               <View style={styles.totals}>
                 {(
                   [
@@ -181,37 +178,30 @@ export function DailySummary({
               </View>
             </>
           ) : null}
-          {/* Reserve normal feedback below totals, so updates do not move their rows. */}
-          <View
-            pointerEvents={hasRefreshFeedback ? 'auto' : 'none'}
-            accessibilityElementsHidden={!hasRefreshFeedback}
-            importantForAccessibility={
-              hasRefreshFeedback ? 'auto' : 'no-hide-descendants'
-            }
-            style={[
-              styles.refreshFeedback,
-              !hasRefreshFeedback && styles.hiddenFeedback,
-            ]}
-          >
-            <View style={styles.refreshStatus}>
-              <View style={styles.progressSlot}>
-                {daily.refreshing && (
-                  <ActivityIndicator color={colors.primary} />
-                )}
+          {hasRefreshFeedback && (
+            <View style={styles.refreshFeedback}>
+              <View style={styles.refreshStatus}>
+                <View style={styles.progressSlot}>
+                  {daily.refreshing && (
+                    <ActivityIndicator color={colors.primary} />
+                  )}
+                </View>
+                <AppText
+                  style={styles.refreshText}
+                  variant="supporting"
+                  accessibilityLiveRegion="polite"
+                  secondary
+                >
+                  {t(
+                    daily.refreshError ? 'dataRefreshFailed' : 'dataRefreshing',
+                  )}
+                </AppText>
               </View>
-              <AppText
-                style={styles.refreshText}
-                variant="supporting"
-                accessibilityLiveRegion="polite"
-                secondary
-              >
-                {t(daily.refreshError ? 'dataRefreshFailed' : 'dataRefreshing')}
-              </AppText>
+              {daily.refreshError && (
+                <ActionButton label={t('retry')} onPress={daily.refresh} />
+              )}
             </View>
-            {daily.refreshError && (
-              <ActionButton label={t('retry')} onPress={daily.refresh} />
-            )}
-          </View>
+          )}
         </View>
       </CollapsibleContent>
     </View>
