@@ -1,4 +1,10 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { ActivityIndicator, Pressable, SectionList, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
@@ -119,11 +125,20 @@ export function HistoryScreen() {
       }),
     }));
   }, [groups, locale, clock.timeZone, t]);
+  const listRef =
+    useRef<SectionList<(typeof sections)[number]['data'][number]>>(null);
   const empty =
     state.status === 'ready' &&
     state.empty &&
     !state.refreshing &&
     !state.refreshError;
+  const revealEmptyState = useCallback(() => {
+    if (empty)
+      listRef.current
+        ?.getScrollResponder()
+        ?.scrollTo({ x: 0, y: 0, animated: false });
+  }, [empty]);
+  useEffect(revealEmptyState, [revealEmptyState]);
   const header = (
     <View style={styles.controls}>
       <View style={styles.heading}>
@@ -245,6 +260,7 @@ export function HistoryScreen() {
       ]}
     >
       <SectionList
+        ref={listRef}
         testID="history-list"
         sections={sections}
         keyExtractor={record => record.id}
@@ -252,6 +268,7 @@ export function HistoryScreen() {
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         onContentSizeChange={(_width, height) => {
+          revealEmptyState();
           if (currentStatus.current === 'ready')
             readyContentHeight.current = height;
         }}

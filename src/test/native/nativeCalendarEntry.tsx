@@ -2,7 +2,13 @@
 // from production index.js; all fixtures live in this test package's own storage.
 import 'react-native-get-random-values';
 import React, { useEffect, useState } from 'react';
-import { AppRegistry, Button, ScrollView, Text } from 'react-native';
+import {
+  AppRegistry,
+  Button,
+  ScrollView,
+  StyleSheet,
+  Text,
+} from 'react-native';
 import { open } from '@op-engineering/op-sqlite';
 import { v4 as uuid } from 'uuid';
 import App from '../../../App';
@@ -65,6 +71,7 @@ const ready = (async () => {
   return { observations, services, faultServices };
 })();
 
+const styles = StyleSheet.create({ report: { padding: 24 } });
 function NativeCalendarAcceptance() {
   const [report, setReport] = useState('Calendar native acceptance running');
   const [services, setServices] = useState<Persistence | null>(null);
@@ -93,7 +100,7 @@ function NativeCalendarAcceptance() {
     return <App initialize={() => Promise.resolve(services)} />;
   }
   return (
-    <ScrollView contentContainerStyle={{ padding: 24 }}>
+    <ScrollView contentContainerStyle={styles.report}>
       <Text selectable>{report}</Text>
       <Button
         title="Open isolated calendar app"

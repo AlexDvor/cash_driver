@@ -7,6 +7,18 @@ apply plugin: "com.facebook.react"
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
 react {
+    // Embedded fixture entry is reachable only from the isolated acceptance build.
+    if (gradle.startParameter.taskNames.any { it.toLowerCase().contains('acceptance') }) {
+        if (gradle.startParameter.taskNames.any { it.toLowerCase().contains('release') || it.toLowerCase().contains('debug') }) {
+            throw new GradleException('Build acceptance separately: fixture entry must never be used by a production variant.')
+        }
+        entryFile = file('../../src/test/native/nativeFinalAcceptanceEntry.tsx')
+        tasks.configureEach { task ->
+            if (task.name.startsWith('createBundle') && !task.name.contains('Acceptance')) {
+                task.doFirst { throw new GradleException('Acceptance fixtures cannot be bundled for production.') }
+            }
+        }
+    }
     /* Folders */
     //   The root of your project, i.e. where "package.json" lives. Default is '../..'
     // root = file("../../")
@@ -121,6 +133,13 @@ android {
             signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+        }
+        acceptance {
+            initWith release
+            applicationIdSuffix ".acceptance"
+            manifestPlaceholders = [usesCleartextTraffic: "false"]
+            signingConfig signingConfigs.debug
+            matchingFallbacks = ['release']
         }
     }
 }

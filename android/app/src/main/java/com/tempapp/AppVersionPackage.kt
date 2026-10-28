@@ -11,10 +11,12 @@ class AppVersionModule(context: ReactApplicationContext) : ReactContextBaseJavaM
   override fun getConstants(): Map<String, Any> = mapOf(
     "version" to BuildConfig.VERSION_NAME,
     "build" to BuildConfig.VERSION_CODE.toString(),
+    "applicationId" to BuildConfig.APPLICATION_ID,
   )
 }
 
 class AppVersionPackage : ReactPackage {
-  override fun createNativeModules(context: ReactApplicationContext): List<NativeModule> = listOf(AppVersionModule(context), SystemBarsModule(context), ConfirmationSoundModule(context))
-  override fun createViewManagers(context: ReactApplicationContext): List<ViewManager<*, *>> = listOf(CalendarPageHostManager())
+  @Deprecated("Legacy ReactPackage registration required by React Native")
+  override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> = listOf(AppVersionModule(reactContext), SystemBarsModule(reactContext), ConfirmationSoundModule(reactContext))
+  override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> = listOf(CalendarPageHostManager())
 }

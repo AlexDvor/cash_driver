@@ -20,7 +20,7 @@ export const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingHorizontal: 2,
   },
-  // Centered children need an explicit width so scaled labels wrap inside a tab.
+  // Explicit width lets native text fit inside each equal-width touch target.
   label: { width: '100%', textAlign: 'center', fontSize: typography.tabLabel },
   selected: { fontWeight: '700' },
   pressed: { opacity: opacity.pressed },

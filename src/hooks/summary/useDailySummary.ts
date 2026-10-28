@@ -4,14 +4,8 @@ import { usePersistence } from '../../providers/PersistenceProvider/PersistenceP
 import { useDataChanges } from '../app/useDataChanges';
 import { useLocalClock } from '../app/useLocalClock';
 import { useCoalescedRefresh } from '../app/useCoalescedRefresh';
-import {
-  getPeriodBounds,
-  isWithinPeriod,
-} from '../../features/summary/periods';
-import {
-  CashSummary,
-  summarizeTransactions,
-} from '../../features/summary/summary';
+import { getPeriodBounds } from '../../features/summary/periods';
+import { CashSummary } from '../../features/summary/summary';
 
 type DailyState =
   | { status: 'loading'; summary: null }
@@ -71,9 +65,8 @@ export function useDailySummary(clock: ReturnType<typeof useLocalClock>) {
       services === currentServices.current;
     try {
       const readBounds = { start: new Date(start), end: new Date(end) };
-      const rows = await services.transactions.list();
-      const summary = summarizeTransactions(
-        rows.filter(row => isWithinPeriod(new Date(row.createdAt), readBounds)),
+      const summary = await services.transactions.summarizeCompatible(
+        readBounds,
       );
       if (isCurrent()) {
         setResult({

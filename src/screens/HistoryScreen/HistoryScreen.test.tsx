@@ -1,6 +1,13 @@
 import React from 'react';
 import { HistorySkeleton } from '../../components/HistorySkeleton/HistorySkeleton';
-import { Alert, AppState, TextInput, StyleSheet, View } from 'react-native';
+import {
+  Alert,
+  AppState,
+  TextInput,
+  StyleSheet,
+  View,
+  SectionList,
+} from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { createNavigationContainerRef } from '@react-navigation/native';
 import ReactTestRenderer, { act } from 'react-test-renderer';
@@ -249,6 +256,31 @@ test('genuine empty state navigates Home; load error shows retry without fabrica
   expect(rowIds()).toEqual([]);
   await press('Reintentar');
   expect(content()).toContain('Todavía no hay operaciones');
+});
+
+test('clearing populated history reveals the empty header and resets native scroll after content shrink', async () => {
+  await services.transactions.save(
+    services.transactions.newPendingOperation(),
+    validInput,
+  );
+  const responder = jest.spyOn(SectionList.prototype, 'getScrollResponder');
+  await mount();
+  await press('Historial');
+  expect(rowIds()).toHaveLength(1);
+  responder.mockClear();
+  await act(async () => {
+    await services.transactions.removeAll();
+  });
+  expect(content()).toContain('Todavía no hay operaciones');
+  expect(rowIds()).toEqual([]);
+  expect(responder).toHaveBeenCalled();
+  responder.mockClear();
+  act(() =>
+    app.root
+      .findByProps({ testID: 'history-list' })
+      .props.onContentSizeChange(390, 800),
+  );
+  expect(responder).toHaveBeenCalled();
 });
 
 test.each([

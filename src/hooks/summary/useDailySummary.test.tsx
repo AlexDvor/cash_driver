@@ -4,14 +4,19 @@ import { AppState, AppStateStatus } from 'react-native';
 import { useDailySummary } from './useDailySummary';
 import { createChangeNotifier } from '../../app/changeNotifier';
 import type { CashTransaction } from '../../features/transactions/types';
+import { summarizeTransactions } from '../../features/summary/summary';
 
 jest.mock('../../providers/PersistenceProvider/PersistenceProvider', () => ({
   usePersistence: () => ({ services: mockServices }),
 }));
 
 function services() {
+  const list = jest.fn<Promise<CashTransaction[]>, []>();
   return {
-    transactions: { list: jest.fn<Promise<CashTransaction[]>, []>() },
+    transactions: {
+      list,
+      summarizeCompatible: async () => summarizeTransactions(await list()),
+    },
     changes: createChangeNotifier(),
   };
 }

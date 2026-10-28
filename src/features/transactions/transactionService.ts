@@ -56,6 +56,7 @@ export function createTransactionService(
     get: repository.get,
     listPage: repository.listPage,
     summarize: repository.summarize,
+    summarizeCompatible: repository.summarizeCompatible,
     occupiedDates: repository.occupiedDates,
     occupiedMonths: repository.occupiedMonths,
     hasAny: repository.hasAny,

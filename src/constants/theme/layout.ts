@@ -14,3 +14,7 @@ export const summaryLayout = {
   countMinimumFontScale: 0.5, // До якої частки початкового розміру можна зменшувати текст кількості операцій.
   labelMinimumFontScale: 0.25, // До якої частки початкового розміру можна зменшувати підписи підсумків.
 } as const;
+
+export const navigationLayout = {
+  labelMinimumFontScale: 0.75, // Зберігає підписи вкладок одним рядком; системне масштабування залишається активним.
+} as const;

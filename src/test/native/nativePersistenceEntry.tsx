@@ -1,7 +1,7 @@
 // Device-only test entry. Never imported by index.js; fixtures use a separate DB.
 import 'react-native-get-random-values';
 import React, { useEffect, useState } from 'react';
-import { AppRegistry, Text, View } from 'react-native';
+import { AppRegistry, StyleSheet, Text, View } from 'react-native';
 import { open } from '@op-engineering/op-sqlite';
 import { v4 as uuid } from 'uuid';
 import { createDatabaseManager } from '../../database/connection';
@@ -179,6 +179,9 @@ async function verifyNativePersistence(): Promise<string> {
   return 'NATIVE RESTART PASS: operations/preferences restored, edit/date preserved, delete';
 }
 
+const styles = StyleSheet.create({
+  report: { flex: 1, justifyContent: 'center', padding: 24 },
+});
 function NativePersistenceCheck() {
   const [status, setStatus] = useState('Native persistence check running');
   useEffect(() => {
@@ -202,7 +205,7 @@ function NativePersistenceCheck() {
     };
   }, []);
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: 24 }}>
+    <View style={styles.report}>
       <Text>{status}</Text>
     </View>
   );

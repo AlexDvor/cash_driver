@@ -10,6 +10,7 @@ import { spacing } from '../../constants/theme/tokens';
 import { TabParamList } from '../navigationTypes';
 import { styles } from './AppTabBar.styles';
 import { routes } from '../routes';
+import { navigationLayout } from '../../constants/theme/layout';
 
 const labels: Record<keyof TabParamList, TranslationKey> = {
   [routes.Home]: 'home',
@@ -69,6 +70,9 @@ export function AppTabBar({ state, navigation, insets }: BottomTabBarProps) {
             <TabIcon name={route.name} color={color} />
             <AppText
               variant="supporting"
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={navigationLayout.labelMinimumFontScale}
               style={[styles.label, { color }, selected && styles.selected]}
             >
               {label}

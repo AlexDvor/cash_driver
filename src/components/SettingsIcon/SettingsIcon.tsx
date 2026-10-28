@@ -7,7 +7,6 @@ import Database from '../../assets/settings/database.svg';
 import Trash from '../../assets/settings/trash.svg';
 import Palette from '../../assets/settings/palette.svg';
 import Briefcase from '../../assets/settings/briefcase.svg';
-import Info from '../../assets/settings/info.svg';
 import Check from '../../assets/settings/check.svg';
 import Play from '../../assets/settings/play.svg';
 import { sizing } from '../../constants/theme/tokens';
@@ -21,7 +20,6 @@ const icons = {
   trash: Trash,
   palette: Palette,
   briefcase: Briefcase,
-  info: Info,
   check: Check,
   play: Play,
 };

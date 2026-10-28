@@ -1,3 +1,4 @@
+import { summarizeTransactions } from '../../features/summary/summary';
 import React from 'react';
 import { DailySummarySkeleton } from '../../components/DailySummary/DailySummarySkeleton';
 import type { CashTransaction } from '../../features/transactions/types';
@@ -578,9 +579,9 @@ test('daily loading/error never render fake zero totals and retry loads genuine 
   const pendingRead = new Promise<never>((_, rejectRead) => {
     reject = rejectRead;
   });
-  const list = services.transactions.list;
+  const list = services.transactions.summarizeCompatible;
   jest
-    .spyOn(services.transactions, 'list')
+    .spyOn(services.transactions, 'summarizeCompatible')
     .mockImplementationOnce(() => pendingRead)
     .mockImplementation(list);
   await mount();
@@ -601,8 +602,8 @@ test('daily loading/error never render fake zero totals and retry loads genuine 
     finishRefresh = resolve;
   });
   jest
-    .spyOn(services.transactions, 'list')
-    .mockImplementationOnce(() => refreshRead);
+    .spyOn(services.transactions, 'summarizeCompatible')
+    .mockImplementationOnce(() => refreshRead.then(summarizeTransactions));
   await act(async () => services.changes.notify('transactions'));
   expect(app.root.findAllByType(DailySummarySkeleton)).toHaveLength(0);
   expect(JSON.stringify(app.toJSON())).toContain('Actualizando');
@@ -625,7 +626,9 @@ test('daily refresh failure retains labeled totals and payment draft through Ret
   const pending = new Promise<CashTransaction[]>((_resolve, reject) => {
     failRefresh = reject;
   });
-  jest.spyOn(services.transactions, 'list').mockReturnValueOnce(pending);
+  jest
+    .spyOn(services.transactions, 'summarizeCompatible')
+    .mockReturnValueOnce(pending.then(summarizeTransactions));
   await act(async () => services.changes.notify('transactions'));
   expect(text('fareTotal')).toMatch(/20,00/);
   expect(app.root.findAllByType(DailySummarySkeleton)).toHaveLength(0);
@@ -658,10 +661,10 @@ test.each(['success', 'error'])(
       resolveOld = resolve;
       rejectOld = reject;
     });
-    const list = services.transactions.list;
+    const list = services.transactions.summarizeCompatible;
     jest
-      .spyOn(services.transactions, 'list')
-      .mockImplementationOnce(() => oldRead)
+      .spyOn(services.transactions, 'summarizeCompatible')
+      .mockImplementationOnce(() => oldRead.then(summarizeTransactions))
       .mockImplementation(list);
     await mount();
     await enter('20', '20');

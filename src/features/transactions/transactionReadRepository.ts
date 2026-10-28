@@ -6,7 +6,11 @@ import {
   getCalendarMonthDays,
   PeriodBounds,
 } from '../summary/periods';
-import { averageFareCents, CashSummary } from '../summary/summary';
+import {
+  averageFareCents,
+  CashSummary,
+  summarizeTransactions,
+} from '../summary/summary';
 import { MAX_INPUT_CENTS } from './money';
 import { decodeTransaction } from './transactionDecoder';
 import {
@@ -154,7 +158,7 @@ export function createTransactionReadRepository(db: SqlConnection) {
     }
   }
 
-  return {
+  const repository = {
     // Repository writes invalidate cursors. Canonical writes cannot introduce
     // timestamp incompatibility; unsupported raw/external writes need reopening.
     invalidate(record?: CashTransaction) {
@@ -359,5 +363,66 @@ export function createTransactionReadRepository(db: SqlConnection) {
       );
       return result.rows.length !== 0;
     },
+    async summarizeCompatible(
+      bounds: Readonly<PeriodBounds>,
+    ): Promise<CashSummary> {
+      // Preserve Home's legacy Date.parse and whole-store corruption checks.
+      // Canonical stores use compact SQL; legacy stores decode bounded batches.
+      rangeValues(bounds);
+      const exceptional = await db.execute(
+        `SELECT id FROM transactions WHERE NOT ${validRowSql}
+         OR (updated_at IS NOT NULL AND NOT ${canonicalTimestampSql(
+           'updated_at',
+         )}) LIMIT 1`,
+      );
+      if (!exceptional.rows.length) return repository.summarize(bounds);
+      const total = summarizeTransactions([]);
+      let after: string | undefined;
+      await db.transaction(async tx => {
+        while (true) {
+          const result = await tx.execute(
+            `SELECT * FROM transactions ${
+              after === undefined ? '' : 'WHERE id > ?'
+            } ORDER BY id ASC LIMIT ?`,
+            [...(after === undefined ? [] : [after]), HISTORY_PAGE_SIZE],
+          );
+          const decoded = result.rows.map(decodeTransaction);
+          const part = summarizeTransactions(
+            decoded.filter(row => {
+              const time = new Date(row.createdAt).getTime();
+              return (
+                time >= bounds.start.getTime() && time < bounds.end.getTime()
+              );
+            }),
+          );
+          total.operationCount += part.operationCount;
+          total.fareTotalCents += part.fareTotalCents;
+          total.tipTotalCents += part.tipTotalCents;
+          total.netCashTotalCents += part.netCashTotalCents;
+          for (const platform of ['uber', 'cabify', 'bolt', 'other'] as const) {
+            total.fareByPlatformCents[platform] +=
+              part.fareByPlatformCents[platform];
+          }
+          if (decoded.length < HISTORY_PAGE_SIZE) break;
+          after = decoded[decoded.length - 1].id;
+        }
+      });
+      if (
+        ![
+          total.operationCount,
+          total.fareTotalCents,
+          total.tipTotalCents,
+          total.netCashTotalCents,
+          ...Object.values(total.fareByPlatformCents),
+        ].every(Number.isSafeInteger)
+      )
+        throw new RangeError('Unsafe summary integer');
+      total.averageFareCents = averageFareCents(
+        total.fareTotalCents,
+        total.operationCount,
+      );
+      return total;
+    },
   };
+  return repository;
 }
