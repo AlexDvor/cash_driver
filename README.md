@@ -1,137 +1,173 @@
 # CashDriver
 
-CashDriver is an offline cash calculator and payment log for drivers. Enter the fare and the cash received, add an optional tip, and see the change immediately. Confirmed payments are stored locally and included in daily, weekly, and monthly summaries.
+**English** · [Español](README.es.md) · [Українська](README.uk.md)
 
-Platform labels — Uber, Cabify, Bolt, and Otro — are selected manually. The app does not connect to these services.
+### Cash payments for drivers — change, tips, and history in one app.
 
-## Features
+**CashDriver** is an Android app for taxi and ride-hailing drivers. It helps you calculate change, record tips, and review cash payments by day, week, or month. It works **offline**, without registration or a required backend.
 
-- Exact EUR calculations using integer cents, with comma or period decimal input.
-- Quick received-amount buttons and an exact-payment action.
-- Collapsible tip section: add a specific amount or use all change as a tip. A positive tip stays visible in the header when collapsed; removing it clears the amount.
-- Local SQLite history with payment details, editing, period/platform filters, and confirmed deletion with an undo opportunity for individual payments.
-- Separate fare, tip, and retained-cash totals; average fare and fare totals by platform.
-- Spanish (default) and English interface languages.
-- Light, dark, and automatic system themes; saved language, theme, and default-platform preferences.
+Choose a platform → enter the fare and cash received → check the change → confirm the payment. The saved payment automatically appears in your history and summaries.
 
-For example, a **20 €** fare, **50 €** received, and **5 €** tip produces **25 €** change and **25 €** retained cash. Received cash is not counted as revenue; retained cash is not a profit calculation.
+> Supported platform: **Android 7.0+**. App languages: **Español / English**. Currency: **EUR**. iOS is not currently supported; APK files cannot be installed on an iPhone.
 
-## Screens
+## What CashDriver helps you do
 
-| Screen | Purpose |
-| --- | --- |
-| Inicio | Record a payment and view today's totals |
-| Historial | Browse, inspect, edit, and delete saved payments |
-| Resumen | View daily, weekly, and monthly totals |
-| Ajustes | Choose language, theme, default platform, and haptic feedback; manage local data |
+- **Calculate change immediately.** Use comma or period decimal input, quick cash amounts, and “Exacto” for exact payment.
+- **Track tips separately.** Enter a specific tip or keep all the change as a tip.
+- **Keep a useful payment history.** Find a period through the calendar, filter by platform, view details, edit, and delete individual payments with an Undo opportunity.
+- **Understand your totals.** Review fares, tips, retained cash, payment count, average fare, and fare totals by platform.
+- **Adapt the app to your work.** Choose Uber, Cabify, Bolt, and Taxi; light, dark, or automatic appearance; separate sound and vibration switches with a preview button.
 
-Data stays on the device. Uninstalling the app or clearing its storage can erase payment history. Backup and restoration are outside the current scope.
+**Example:** the fare is **€20**, the customer hands over **€50**, and the tip is **€5**. Return **€25**; retained cash is **€25**: the fare plus the tip.
 
-## Technology
+Platforms are manually selected labels. CashDriver does not connect to their accounts. Cash totals exclude expenses and commissions and are not a profit calculation.
 
-React Native CLI **0.87.1**, React **19.2.3**, TypeScript, React Navigation, and SQLite through `@op-engineering/op-sqlite`. The application has no required backend or account registration. Internet access is needed to install development dependencies, not to record payments.
+## Screenshots
 
-## Development setup
+Actual Android emulator screenshots using synthetic demo data and the Spanish interface. No personal payment records were used.
 
-Run commands from the repository root unless stated otherwise.
+| Screen                                                                                          | Light theme                                                                                                                | Dark theme                                                                                                               |
+| ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **Inicio / Home** — new payment, tips, and change                                               | <img src="assets/readme/home-light.png" width="240" alt="CashDriver Home in the light theme">                              | <img src="assets/readme/home-dark.png" width="240" alt="CashDriver Home in the dark theme">                              |
+| **Resumen / Summary** — totals for the selected period                                          | <img src="assets/readme/summary-light.png" width="240" alt="CashDriver monthly summary in the light theme">                | <img src="assets/readme/summary-dark.png" width="240" alt="CashDriver monthly summary in the dark theme">                |
+| **Calendar** — choose a day, month, or year; dots mark dates with payments across all platforms | <img src="assets/readme/calendar-light.png" width="240" alt="CashDriver calendar with payment markers in the light theme"> | <img src="assets/readme/calendar-dark.png" width="240" alt="CashDriver calendar with payment markers in the dark theme"> |
 
-- Node.js **22.11.0 or newer**, as specified in `package.json`.
-- Android: JDK 17, Android SDK/Android Studio, and a running emulator or USB-connected device. The project sets `minSdkVersion` to **24** (Android 7.0).
-- iOS: macOS, Xcode, Ruby/Bundler, and CocoaPods dependencies from the project's `Gemfile`.
+Four tabs: **Inicio / Home** for payments, **Historial / History** for saved records, **Resumen / Summary** for totals, and **Ajustes / Settings** for preferences. The calendar is available in History and Summary. Browsing another month remains a draft until you apply it. The close button and “Cancelar / Cancel” dismiss it without changing the applied period.
 
-Install JavaScript dependencies:
+## Technical approach
 
-```sh
+| Area            | Implementation                                                                                 |
+| --------------- | ---------------------------------------------------------------------------------------------- |
+| Application     | React Native CLI 0.87.1, React 19.2.3, TypeScript                                              |
+| Navigation      | React Navigation tabs and details/edit screens                                                 |
+| Storage         | Local SQLite through `@op-engineering/op-sqlite`, versioned migrations                         |
+| Money           | Integer cents; shared rules for payment creation, editing, and summaries                       |
+| Large histories | SQL pagination, aggregated summaries, and compact calendar activity markers                    |
+| Dates           | Local calendar boundaries that account for time zones and daylight-saving changes              |
+| Appearance      | Shared components and theme tokens; solar automatic theme with device appearance as a fallback |
+| Feedback        | Bundled offline sound and native vibration after a successful save                             |
+| Verification    | Jest, TypeScript, ESLint, Prettier, and isolated native acceptance scenarios                   |
+
+SQL lives in repositories, money rules in domain functions, and React hooks coordinate loading and screen state. Test seeding never uses the personal database. Production code does not import test entrypoints.
+
+**Data is stored only on the device.** Cloud sync, backup, and restoration are not currently included. Uninstalling the app or clearing its storage can permanently erase your history. Recording payments does not require internet access. Automatic appearance may request approximate location after you explicitly select that mode.
+
+## Build the APK
+
+These instructions use **Windows / PowerShell**. Run commands from the root of the downloaded or cloned project unless a step says otherwise.
+
+### 1. Prepare the environment
+
+You need:
+
+- Node.js **22.11.0+** and npm.
+- **JDK 17** with `JAVA_HOME` configured.
+- Android Studio / Android SDK: **Platform 37**, **Build-Tools 37.0.0**, **NDK 27.1.12297006** — the versions are declared in `android/build.gradle`.
+- The SDK available through `ANDROID_HOME` or a local `android/local.properties` file containing `sdk.dir`.
+
+Internet access is needed for the initial dependency downloads. **A phone, emulator, and Metro are not required to build a release APK.**
+
+### 2. Install dependencies
+
+```powershell
 npm ci
 ```
 
-Start Metro in one terminal:
+### 3. Configure release signing
 
-```sh
-npm start
+Updating an existing CashDriver installation requires **the same signing key** used for the previous release. Use the project's existing key; do not generate a replacement for an ordinary rebuild.
+
+Gradle reads:
+
+```text
+%USERPROFILE%\.cashdriver\signing\release.properties
 ```
 
-Build and launch Android in another terminal:
+Example file structure — replace the placeholders with your own values and never publish passwords:
 
-```sh
-npm run android
+```properties
+storeFile=C:/path/outside/repository/cashdriver-release.p12
+storePassword=YOUR_STORE_PASSWORD
+keyAlias=YOUR_KEY_ALIAS
+keyPassword=YOUR_KEY_PASSWORD
 ```
 
-### Android rebuild and Metro cache
+The keystore format is **PKCS12**. To use a different properties file for the current PowerShell session:
 
-The existing clean/rebuild scripts use `gradlew.bat` and are intended for Windows:
-
-```sh
-npm run android:rebuild
+```powershell
+$env:CASHDRIVER_SIGNING_PROPERTIES = 'C:\path\outside\repository\release.properties'
 ```
 
-This runs Gradle clean and then the Android build. It does not reset Metro's cache or remove the installed app's data. To reset Metro's cache, stop the running Metro process and start it with:
+Keep the key and properties file outside Git and retain a backup. A release build fails if signing is not configured; it never falls back to debug signing. The project owner may already have signing configured, in which case this step does not need repeating.
 
-```sh
-npm run start:reset
+### 4. Check and build
+
+```powershell
+npm run typecheck
+npm run lint
+npm run format:check
+npm test -- --runInBand
 ```
 
-Metro reload requires a connected, running development app. If it reports "No apps connected", launch the app with `npm run android` and check the device connection.
-
-### iOS
-
-On macOS, install the native dependencies, then launch iOS with Metro running in another terminal:
-
-```sh
-bundle install
-cd ios
-bundle exec pod install
-cd ..
-npm run ios
-```
-
-The repository includes an iOS target, but native iOS build and acceptance have not been verified in the current Windows environment.
-
-## Android release APK
-
-The Android application ID is `com.alexm.cashdriver`. It installs separately from the historical `com.tempapp` development app. The internal native namespace remains `com.tempapp`; it does not identify the installed app.
-
-Release signing reads an external Java properties file from `~/.cashdriver/signing/release.properties`, or the path in `CASHDRIVER_SIGNING_PROPERTIES`. Required properties are `storeFile`, `storePassword`, `keyAlias`, and `keyPassword`; the keystore format is PKCS12. Keep this file and the keystore outside the repository. Release builds fail when signing credentials are missing and never fall back to debug signing. Back up the keystore and keep its password separately.
-
-From the project root on Windows:
+If the checks pass:
 
 ```powershell
 cd android
 .\gradlew.bat assembleRelease
+cd ..
 ```
 
-The APK is written to `android/app/build/outputs/apk/release/CashDriver.apk`. For Google Play, use `bundleRelease` to produce an AAB after configuring the store release separately.
+Wait for **BUILD SUCCESSFUL**. The signed APK is written to:
 
-Before each distributed Android release, increase `versionCode` in `android/app/build.gradle` (first release: `1`, next release: `2`) and set the user-visible `versionName` as appropriate (initial release: `1.0.0`). Do not increase the code on every local test build. Preserve the application ID and signing key for updates. The JavaScript package version is separate from the native Android version displayed by the app.
-
-## Checks
-
-```sh
-npm run typecheck
-npm run lint
-npm run format:check
-npm test -- --runInBand --watch=false
+```text
+android/app/build/outputs/apk/release/CashDriver.apk
 ```
 
-`npm run format` applies the project's formatting rules to source, tests, and supported root files.
+Open its folder from the project root:
 
-## Project structure
+```powershell
+explorer.exe .\android\app\build\outputs\apk\release
+```
 
-| Path | Contents |
-| --- | --- |
-| `src/screens/`, `src/components/`, `src/ui/` | Screens, shared form components, and UI primitives |
-| `src/hooks/`, `src/providers/`, `src/navigation/` | Form/data hooks, application state providers, and navigation |
-| `src/features/`, `src/database/` | Domain calculations, services, repositories, and SQLite setup/migrations |
-| `src/i18n/`, `src/constants/`, `src/theme/` | Translations, shared constants, and theme helpers |
-| `src/**/*.test.ts`, `src/**/*.test.tsx` | Tests beside their components, screens, hooks, providers, and domain modules; cross-cutting integration tests live in `src/test/` |
-| `src/test/` | Shared Jest setup, SVG mock, real SQLite test adapter, and calendar fixtures/checks |
-| `src/test/native/` | Eight isolated native acceptance entrypoints; never imported by the production entry |
-| `android/`, `ios/` | Native projects |
+After making further changes, repeat the checks and `assembleRelease`. The `CashDriver.apk` file will be updated. Running `clean` on every build is unnecessary.
 
-## Test organization and native acceptance entries
+## Transfer and install on an Android phone
 
-Jest discovers only `*.test.ts` and `*.test.tsx` under `src/` (including `src/test/`). Shared helpers and native entries are not Jest suites. Tests keep relative imports; no module aliases are required.
+1. **Get the file.** Use your built `CashDriver.apk`. If someone provides an APK for installation, download that file from a trusted source onto your phone. This README does not include a published APK download link.
+2. **Transfer by USB** if the APK is on your computer: connect your Android phone, select “File transfer,” and copy the APK to a folder such as `Download` on the phone.
+3. **Open the APK** in “My Files” or another file manager. If Android asks, allow that file manager to install apps from this source.
+4. Tap **Install** or **Update**, wait for completion, and open **CashDriver**. You can disable the file manager's permission to install unknown apps afterward.
 
-The former root `__tests__/` directory has been removed. Historical validation records retain their original paths and results. For current runs, native entry names are unchanged but their directory is now `src/test/native/`. Shared `sqliteTestDatabase.ts`, `calendarVolumeFixture.ts`, and `calendarNativeChecks.ts` live in `src/test/`.
+If ADB is available and USB debugging is enabled, you can install from your computer:
 
-For an existing isolated native acceptance workflow, use the new entry path, for example `ENTRY_FILE=src/test/native/nativeAjustesEntry.tsx`. If using temporary Metro middleware, map `index.bundle` to `src/test/native/nativePersistenceEntry.bundle` instead of its former `__tests__` path. Keep the workflow's separate package/database, temporary configuration, and cleanup rules; never replace the production `index.js` or reset the user's database. Moving these entries does not establish new native acceptance results.
+```powershell
+adb devices
+adb install -r .\android\app\build\outputs\apk\release\CashDriver.apk
+```
+
+This example assumes one connected Android device. If several are connected, select the intended device explicitly with `adb -s SERIAL install -r ...`.
+
+### Updates and your history
+
+- Application ID: **`com.alexm.cashdriver`**. Preserve it and the existing signing key for normal updates.
+- Before a new distributed release, increase `versionCode` in `android/app/build.gradle` and set `versionName` as appropriate. You do not need to change the version for every local build attempt.
+- **If Android reports an incompatible signature, do not uninstall the old app.** This can happen when installing a release over a debug version. Uninstalling the old version or clearing its data erases local history; first determine which key signed the installed app.
+- ADB's `-r` flag requests reinstallation while retaining data. It does not bypass signature verification or replace backups.
+
+## Development
+
+Debug mode requires an Android emulator or a phone with USB debugging. From the project root, use two terminals:
+
+```powershell
+# Terminal 1 — Metro
+npm start
+```
+
+```powershell
+# Terminal 2 — build and launch the debug app
+npm run android
+```
+
+Debug builds are for development. Use a **release APK** for standalone installation and operation without Metro. iOS files remain in the repository for possible future development, but iOS builds and support are not currently offered.
+
+For isolated large-database checks, run `assembleAcceptance` separately from the `android` folder. It creates `com.alexm.cashdriver.acceptance` with test data. **This is not the APK for everyday use.** Build acceptance and release in separate commands.

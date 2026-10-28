@@ -3,3 +3,6 @@
 *.ts text eol=lf
 *.tsx text eol=lf
 *.json text eol=lf
+
+# Preserve generated PDF bytes and avoid text diffs for presentation files.
+*.pdf binary
