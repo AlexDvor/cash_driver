@@ -1,6 +1,5 @@
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
-import { ActivityIndicator } from 'react-native';
 import { useLocalClock } from '../../hooks/app/useLocalClock';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
@@ -16,17 +15,19 @@ import { useCalendarSelection } from '../../hooks/summary/useCalendarSelection';
 import { CalendarNavigation } from '../../components/CalendarNavigation/CalendarNavigation';
 import { calendarFullDateLabel } from '../../components/CalendarModal/calendarPresentation';
 import { SummaryContent } from '../../components/SummaryMetrics/SummaryContent';
+import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
 
 export function SummaryScreen() {
   const { t, locale } = useTranslation();
   const { colors } = useAppTheme();
+  const { services } = usePersistence();
   const [period, setPeriod] = useState<SummaryPeriod>('day');
   const clock = useLocalClock();
   const calendar = useCalendarSelection(clock);
   const cancelCalendar = useRef(calendar.cancelCalendar);
   cancelCalendar.current = calendar.cancelCalendar;
   useFocusEffect(useCallback(() => () => cancelCalendar.current(), []));
-  const { state, bounds, refresh, retainedSummary, refreshing, refreshError } =
+  const { state, bounds, refresh, retainedSummary, refreshError } =
     usePeriodSummary(
       period,
       clock,
@@ -34,13 +35,33 @@ export function SummaryScreen() {
         ? calendar.selection.date
         : calendar.month,
     );
-  const summary = state.summary ?? retainedSummary;
+  const current = {
+    summary: state.summary ?? retainedSummary,
+    bounds,
+    period,
+    selection: calendar.selection,
+    timeZone: clock.timeZone,
+    services,
+  };
+  const completed = useRef<typeof current | null>(null);
+  useLayoutEffect(() => {
+    if (state.status === 'ready') {
+      completed.current = current;
+    }
+  });
+  // Keep date and totals from the same completed read until the next read is
+  // ready. Never retain data across persistence service replacement.
+  const displayed =
+    state.status === 'loading' && completed.current?.services === services
+      ? completed.current
+      : current;
+  const { summary } = displayed;
   const periodLabel =
-    period === 'month' &&
-    calendar.selection.kind === 'day' &&
-    bounds.start.getTime() === bounds.end.getTime()
-      ? calendarFullDateLabel(calendar.selection.date, locale)
-      : formatPeriodRange(bounds, locale, clock.timeZone);
+    displayed.period === 'month' &&
+    displayed.selection.kind === 'day' &&
+    displayed.bounds.start.getTime() === displayed.bounds.end.getTime()
+      ? calendarFullDateLabel(displayed.selection.date, locale)
+      : formatPeriodRange(displayed.bounds, locale, displayed.timeZone);
   return (
     <ScreenContainer>
       <AppText variant="title" accessibilityRole="header">
@@ -84,18 +105,15 @@ export function SummaryScreen() {
       ) : (
         <SummaryContent
           summary={summary}
-          showEmpty={state.status === 'ready' && summary?.operationCount === 0}
+          showEmpty={summary?.operationCount === 0}
         />
       )}
-      {(refreshing || refreshError) && (
+      {refreshError && (
         <Card>
-          {refreshing && <ActivityIndicator color={colors.primary} />}
           <AppText accessibilityLiveRegion="polite">
-            {t(refreshing ? 'dataRefreshing' : 'dataRefreshFailed')}
+            {t('dataRefreshFailed')}
           </AppText>
-          {refreshError && (
-            <ActionButton label={t('retry')} onPress={refresh} />
-          )}
+          <ActionButton label={t('retry')} onPress={refresh} />
         </Card>
       )}
     </ScreenContainer>

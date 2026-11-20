@@ -229,7 +229,7 @@ test('historical year/month and day drive SQLite totals, draft cancel and period
   });
 });
 
-test('switching calendar month hides old values while loading; errors never fabricate zero totals and retry shows genuine empty', async () => {
+test('switching calendar month retains the completed date and totals while loading; errors never fabricate zero totals and retry shows genuine empty', async () => {
   await seed('2025-02-03T12:00:00Z');
   await mount();
   await historicalFebruary();
@@ -240,10 +240,12 @@ test('switching calendar month hides old values while loading; errors never fabr
   jest
     .spyOn(services.transactions, 'summarize')
     .mockImplementationOnce(() => pending);
+  const previousRange = text('summary-range');
   await press('Mes siguiente');
-  expect(content()).toContain('Cargando resumen');
-  expect(text('summary-fareTotal')).toBe('undefined');
-  expect(text('summary-count')).toBe('undefined');
+  expect(content()).not.toContain('Cargando resumen');
+  expect(text('summary-fareTotal')).toContain('18,00');
+  expect(text('summary-count')).toBe('Operaciones: 1');
+  expect(text('summary-range')).toBe(previousRange);
   expect(content()).not.toContain('No hay operaciones en este período');
   await act(async () => reject(Error('test read failure')));
   expect(content()).toContain('No se pudo cargar el resumen');
@@ -272,7 +274,7 @@ test('same-period refresh identifies retained values during loading and error, t
       tipCents: 400,
     });
   });
-  expect(content()).toContain('Actualizando');
+  expect(content()).not.toContain('Actualizando');
   expect(text('summary-fareTotal')).toContain('18,00');
   await act(async () => reject(Error('test refresh failure')));
   expect(content()).toContain('Datos anteriores; actualización fallida');

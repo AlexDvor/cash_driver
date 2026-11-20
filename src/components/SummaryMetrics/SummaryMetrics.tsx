@@ -12,14 +12,12 @@ import {
   SummaryStatCardsProps,
 } from './SummaryMetrics.interface';
 import { styles } from './SummaryMetrics.styles';
-import { SkeletonText } from '../../ui/Skeleton/SkeletonText';
 import { SummaryHeroBackground } from './SummaryHeroBackground';
 
 export function RetainedCashCard({
   label,
   amount,
   countLabel,
-  loading = false,
 }: RetainedCashCardProps) {
   const { colors, appearance } = useAppTheme();
   const coinSize = iconSizing.summaryHero;
@@ -27,26 +25,26 @@ export function RetainedCashCard({
     color: appearance === 'dark' ? colors.text : colors.onPrimary,
   };
   const money = (
-    <SkeletonText
-      loading={loading}
+    <AppText
       testID="summary-retained"
       style={[
         styles.money,
         { color: appearance === 'dark' ? colors.primary : colors.onPrimary },
       ]}
-      sizingText={amount}
-    />
+    >
+      {amount || ' '}
+    </AppText>
   );
   const count = (
-    <SkeletonText
-      loading={loading}
+    <AppText
       testID="summary-count"
       style={textColor}
-      sizingText={countLabel}
       numberOfLines={1}
       adjustsFontSizeToFit
       minimumFontScale={summaryLayout.countMinimumFontScale}
-    />
+    >
+      {countLabel || ' '}
+    </AppText>
   );
   return (
     <Card
@@ -78,7 +76,6 @@ export function SummaryStatCards({
   fareAmount,
   tipLabel,
   tipAmount,
-  loading = false,
 }: SummaryStatCardsProps) {
   const { width, fontScale } = useWindowDimensions();
   const [measuredWidth, setMeasuredWidth] = useState(0);
@@ -127,12 +124,9 @@ export function SummaryStatCards({
               </View>
             </View>
             <ScrollView horizontal style={styles.statAmountScroll}>
-              <SkeletonText
-                loading={loading}
-                testID={metric.testID}
-                style={styles.statAmount}
-                sizingText={metric.amount}
-              />
+              <AppText testID={metric.testID} style={styles.statAmount}>
+                {metric.amount || ' '}
+              </AppText>
             </ScrollView>
           </Card>
         );
@@ -146,19 +140,15 @@ export function SummaryMetric({
   amount,
   testID,
   icon,
-  loading = false,
 }: SummaryMetricProps) {
   return (
     <View style={styles.row}>
       <View style={styles.statText}>
         <AppText variant="supporting">{label}</AppText>
         <ScrollView horizontal>
-          <SkeletonText
-            loading={loading}
-            testID={testID}
-            style={styles.statAmount}
-            sizingText={amount}
-          />
+          <AppText testID={testID} style={styles.statAmount}>
+            {amount || ' '}
+          </AppText>
         </ScrollView>
       </View>
       {icon && <SummaryIcon name={icon} size={iconSizing.summaryMetric} />}

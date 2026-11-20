@@ -2,7 +2,6 @@ import { StyleSheet } from 'react-native';
 import { spacing, typography } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
-  hidden: { opacity: 0 },
   heroCard: { overflow: 'hidden', gap: spacing.md },
   heroLabel: { fontWeight: '600' },
   heroBackdrop: {
