@@ -17,6 +17,17 @@ import { calendarFullDateLabel } from '../../components/CalendarModal/calendarPr
 import { SummaryContent } from '../../components/SummaryMetrics/SummaryContent';
 import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
 
+import { useDailyNetCash } from '../../hooks/summary/useDailyNetCash';
+import type { SummaryChartData } from '../../components/SummaryMetrics/SummaryMetrics.interface';
+
+function formatChartDay(date: Date, locale: string, timeZone: string) {
+  return new Intl.DateTimeFormat(locale, {
+    day: 'numeric',
+    month: 'short',
+    timeZone,
+  }).format(date);
+}
+
 export function SummaryScreen() {
   const { t, locale } = useTranslation();
   const { colors } = useAppTheme();
@@ -35,6 +46,32 @@ export function SummaryScreen() {
         ? calendar.selection.date
         : calendar.month,
     );
+  // Daily bars only for Semana and Mes, never Hoy or a single selected day.
+  const daily = useDailyNetCash(
+    bounds,
+    clock.timeZone,
+    clock.now,
+    clock.dayKey,
+    period !== 'day',
+  );
+  const chart: SummaryChartData | null =
+    period !== 'day' && daily.days.length > 1 && daily.status !== 'error'
+      ? {
+          values: daily.totals ?? [],
+          loading: daily.totals === null,
+          todayIndex: daily.todayIndex,
+          startLabel: formatChartDay(
+            daily.days[0].start,
+            locale,
+            clock.timeZone,
+          ),
+          endLabel: formatChartDay(
+            daily.days[daily.days.length - 1].start,
+            locale,
+            clock.timeZone,
+          ),
+        }
+      : null;
   const current = {
     summary: state.summary ?? retainedSummary,
     bounds,
@@ -106,6 +143,7 @@ export function SummaryScreen() {
         <SummaryContent
           summary={summary}
           showEmpty={summary?.operationCount === 0}
+          chart={chart}
         />
       )}
       {refreshError && (

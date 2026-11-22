@@ -27,7 +27,7 @@ export const typography = {
   overline: 11, // Підписи великими літерами (Overline).
   money: 32, // Розмір цифр у грошових полях.
   paymentMoney: 24, // Максимальна сума в парному полі без зменшення системного масштабу.
-  summaryMoney: 40,
+  summaryMoney: 36, // Money/Large (36/40).
   summaryStatMoney: 24,
   change: 52, // Розмір суми решти (Money/Hero).
 };
@@ -73,8 +73,6 @@ export const iconSizing = {
   historyPlatform: 40, // Розмір логотипа платформи в історії, dp.
   detailsPlatform: 60, // Розмір логотипа платформи в деталях операції, dp.
   summary: 44, // Звичайний розмір ілюстрації підсумків, dp.
-  summaryHero: 80, // Розмір великої ілюстрації монет у підсумках, dp.
-  summaryMetric: 32, // Розмір іконок показників підсумків, dp.
   calendar: 32, // Розмір іконки календаря, dp.
   chevronStroke: 2, // Товщина ліній маленьких стрілок, dp.
   calendarChevron: 10, // Розмір стрілки у вікні календаря, dp.
@@ -94,10 +92,6 @@ export const iconSizing = {
   },
 } as const;
 export interface Palette {
-  summaryHeroStart: string;
-  summaryHeroEnd: string;
-  summaryHeroGlow: string;
-  summaryIcon: string;
   transparent: string; // Прозорий колір без заливки.
   disabledSurface: string; // Фон недоступних кнопок.
   disabledText: string; // Текст недоступних кнопок.
@@ -122,10 +116,6 @@ export interface Palette {
 export const palettes: Record<'light' | 'dark', Palette> = {
   // Кольори світлої теми.
   light: {
-    summaryHeroStart: '#136C46',
-    summaryHeroEnd: '#095231',
-    summaryHeroGlow: '#65E5A9',
-    summaryIcon: '#43B982',
     transparent: 'transparent', // Прозорий колір без заливки.
     disabledSurface: '#E3E5E0', // Фон недоступних кнопок.
     disabledText: '#8E9592', // Текст недоступних кнопок.
@@ -148,10 +138,6 @@ export const palettes: Record<'light' | 'dark', Palette> = {
   },
   // Кольори темної теми.
   dark: {
-    summaryHeroStart: '#204735',
-    summaryHeroEnd: '#10261B',
-    summaryHeroGlow: '#4D8068',
-    summaryIcon: '#62C698',
     transparent: 'transparent', // Прозорий колір без заливки.
     disabledSurface: '#1C1F1E', // Фон недоступних кнопок.
     disabledText: '#5F6663', // Текст недоступних кнопок.
@@ -176,8 +162,4 @@ export const palettes: Record<'light' | 'dark', Palette> = {
 export const surfaceDepth = {
   leadingOpacity: 0.1,
   trailingOpacity: 0.035,
-} as const;
-export const summaryHeroLighting = {
-  lightOpacity: 0.44,
-  darkOpacity: 0.27,
 } as const;
