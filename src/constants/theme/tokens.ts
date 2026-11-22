@@ -147,7 +147,3 @@ export const palettes: Record<'light' | 'dark', Palette> = {
     onAccent: '#0A0B0B',
   },
 };
-export const surfaceDepth = {
-  leadingOpacity: 0.1,
-  trailingOpacity: 0.035,
-} as const;
