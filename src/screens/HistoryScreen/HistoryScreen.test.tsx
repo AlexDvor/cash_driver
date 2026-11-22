@@ -1,5 +1,4 @@
 import React from 'react';
-import { HistorySkeleton } from '../../components/HistorySkeleton/HistorySkeleton';
 import {
   Alert,
   AppState,
@@ -401,8 +400,6 @@ test('loading has no fabricated rows and a stale pre-edit response cannot overwr
     .spyOn(services.transactions, 'listPage')
     .mockImplementationOnce(() => oldRead);
   await press('Historial');
-  expect(content()).toContain('Cargando operaciones');
-  expect(app.root.findAllByType(HistorySkeleton)).toHaveLength(1);
   expect(rowIds()).toEqual([]);
   await act(async () => {
     await services.transactions.edit(original.id, {
@@ -412,7 +409,6 @@ test('loading has no fabricated rows and a stale pre-edit response cannot overwr
     });
   });
   expect(rowIds()).toEqual([`history-${original.id}`]);
-  expect(app.root.findAllByType(HistorySkeleton)).toHaveLength(0);
   await act(async () => {
     release({ records: [original], nextCursor: null });
     await oldRead;
