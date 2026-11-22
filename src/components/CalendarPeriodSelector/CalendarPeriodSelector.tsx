@@ -10,8 +10,7 @@ import {
 } from '../CalendarModal/calendarPresentation';
 import { CalendarPeriodSelectorProps } from './CalendarPeriodSelector.interface';
 import { styles } from './CalendarPeriodSelector.styles';
-import { sizing, spacing } from '../../constants/theme/tokens';
-import ChevronDown from '../../assets/icons/line/chevron-down.svg';
+import { spacing } from '../../constants/theme/tokens';
 import { CalendarChevron, CalendarIcon } from '../CalendarModal/CalendarIcon';
 
 export function CalendarPeriodSelector({
@@ -99,13 +98,6 @@ export function CalendarPeriodSelector({
             {dateLabel}
           </AppText>
         </View>
-      </View>
-      <View accessible={false} importantForAccessibility="no-hide-descendants">
-        <ChevronDown
-          width={sizing.icon - 4}
-          height={sizing.icon - 4}
-          color={colors.secondaryText}
-        />
       </View>
     </Pressable>
   );
