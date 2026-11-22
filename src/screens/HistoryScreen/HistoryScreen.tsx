@@ -39,10 +39,9 @@ import { spacing, sizing, iconSizing } from '../../constants/theme/tokens';
 import { TransactionLoadState } from '../../components/TransactionLoadState/TransactionLoadState';
 import { styles } from './HistoryScreen.styles';
 import { HistorySkeleton } from '../../components/HistorySkeleton/HistorySkeleton';
+import ChevronRight from '../../assets/icons/line/chevron-right.svg';
+import EmptyWallet from '../../assets/illustrations/empty-wallet.svg';
 
-function HistorySeparator() {
-  return <View style={styles.separator} />;
-}
 
 export function HistoryScreen() {
   const { t, locale } = useTranslation();
@@ -145,7 +144,9 @@ export function HistoryScreen() {
         <AppText variant="title" accessibilityRole="header">
           {t('history')}
         </AppText>
-        <AppText secondary>{t('historySubtitle')}</AppText>
+        <AppText variant="supporting" secondary>
+          {t('historySubtitle')}
+        </AppText>
       </View>
       <CollapsibleFilter
         label={t('period')}
@@ -232,8 +233,14 @@ export function HistoryScreen() {
         </View>
       )}
       {empty && existence.state.status === 'ready' && (
-        <>
-          <AppText>
+        <View style={styles.empty}>
+          <EmptyWallet
+            width={160}
+            height={140}
+            color={colors.primary}
+            accessible={false}
+          />
+          <AppText variant="heading" style={styles.emptyTitle}>
             {t(
               existence.state.hasAny === false
                 ? 'historyEmpty'
@@ -241,14 +248,16 @@ export function HistoryScreen() {
             )}
           </AppText>
           {existence.state.hasAny === false && (
-            <ActionButton
-              label={t('registerPayment')}
-              onPress={() =>
-                navigation.navigate(routes.Tabs, { screen: routes.Home })
-              }
-            />
+            <View style={styles.emptyAction}>
+              <ActionButton
+                label={t('registerPayment')}
+                onPress={() =>
+                  navigation.navigate(routes.Tabs, { screen: routes.Home })
+                }
+              />
+            </View>
           )}
-        </>
+        </View>
       )}
     </View>
   );
@@ -285,7 +294,6 @@ export function HistoryScreen() {
           },
         ]}
         ListHeaderComponent={header}
-        ItemSeparatorComponent={HistorySeparator}
         renderSectionHeader={({ section: group }) => (
           <View style={styles.groupHeading}>
             <AppText variant="heading" accessibilityRole="header">
@@ -294,7 +302,10 @@ export function HistoryScreen() {
             </AppText>
           </View>
         )}
-        renderItem={({ item: record }) => {
+        renderItem={({ item: record, index, section }) => {
+          // Rows of one day form a single grouped card (Figma DayCard).
+          const first = index === 0;
+          const last = index === section.data.length - 1;
           return (
             <Pressable
               testID={`history-${record.id}`}
@@ -311,10 +322,19 @@ export function HistoryScreen() {
               }
               style={({ pressed }) => [
                 styles.row,
-                { backgroundColor: colors.card, borderColor: colors.border },
-                pressed && styles.pressed,
+                first && styles.rowFirst,
+                last && styles.rowLast,
+                {
+                  backgroundColor: pressed ? colors.surfaceRaised : colors.card,
+                  borderColor: colors.border,
+                },
               ]}
             >
+              {!first && (
+                <View
+                  style={[styles.rowDivider, { backgroundColor: colors.border }]}
+                />
+              )}
               <View style={styles.rowContent}>
                 <View style={styles.platformHeading}>
                   <PlatformIcon
@@ -322,10 +342,10 @@ export function HistoryScreen() {
                     size={iconSizing.historyPlatform}
                   />
                   <View style={styles.heading}>
-                    <AppText variant="heading">
+                    <AppText style={styles.platformName}>
                       {platformLabels[record.platform]}
                     </AppText>
-                    <AppText secondary variant="supporting">
+                    <AppText secondary variant="supporting" style={styles.time}>
                       {record.timeLabel}
                     </AppText>
                     {deletion.state.id === record.id && (
@@ -339,19 +359,24 @@ export function HistoryScreen() {
                   </View>
                 </View>
                 <View style={styles.amounts}>
-                  <AppText variant="heading" style={styles.money}>
+                  <AppText style={[styles.money, styles.fare]}>
                     {record.fareLabel}
                   </AppText>
                   {record.tipCents > 0 && (
                     <AppText
-                      secondary
                       variant="supporting"
-                      style={styles.money}
+                      style={[styles.money, styles.tip, { color: colors.primary }]}
                     >
                       {record.tipLabel}
                     </AppText>
                   )}
                 </View>
+                <ChevronRight
+                  width={18}
+                  height={18}
+                  color={colors.tertiaryText}
+                  accessible={false}
+                />
               </View>
             </Pressable>
           );
