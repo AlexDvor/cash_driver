@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "penpot": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["scripts/penpot-mcp.js"]
+    }
+  }
+}
