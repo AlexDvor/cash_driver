@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { ActivityIndicator, Pressable, SectionList, View } from 'react-native';
+import { Pressable, SectionList, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -38,10 +38,8 @@ import {
 import { spacing, sizing, iconSizing } from '../../constants/theme/tokens';
 import { TransactionLoadState } from '../../components/TransactionLoadState/TransactionLoadState';
 import { styles } from './HistoryScreen.styles';
-import { HistorySkeleton } from '../../components/HistorySkeleton/HistorySkeleton';
 import ChevronRight from '../../assets/icons/line/chevron-right.svg';
 import EmptyWallet from '../../assets/illustrations/empty-wallet.svg';
-
 
 export function HistoryScreen() {
   const { t, locale } = useTranslation();
@@ -218,12 +216,6 @@ export function HistoryScreen() {
       {state.status === 'error' && (
         <TransactionLoadState status={state.status} retry={refresh} />
       )}
-      {empty && existence.state.status === 'loading' && (
-        <ActivityIndicator
-          accessibilityLabel={t('operationsLoading')}
-          color={colors.primary}
-        />
-      )}
       {empty && existence.state.status === 'error' && (
         <View style={styles.feedback}>
           <AppText accessibilityRole="alert">
@@ -332,7 +324,10 @@ export function HistoryScreen() {
             >
               {!first && (
                 <View
-                  style={[styles.rowDivider, { backgroundColor: colors.border }]}
+                  style={[
+                    styles.rowDivider,
+                    { backgroundColor: colors.border },
+                  ]}
                 />
               )}
               <View style={styles.rowContent}>
@@ -365,7 +360,11 @@ export function HistoryScreen() {
                   {record.tipCents > 0 && (
                     <AppText
                       variant="supporting"
-                      style={[styles.money, styles.tip, { color: colors.primary }]}
+                      style={[
+                        styles.money,
+                        styles.tip,
+                        { color: colors.primary },
+                      ]}
                     >
                       {record.tipLabel}
                     </AppText>
@@ -381,15 +380,11 @@ export function HistoryScreen() {
             </Pressable>
           );
         }}
-        ListEmptyComponent={
-          state.status === 'loading' ? <HistorySkeleton /> : undefined
-        }
         ListFooterComponent={
           state.status === 'ready' ? (
             <View style={styles.footer}>
               {state.refreshing && (
                 <View style={styles.feedback}>
-                  <ActivityIndicator color={colors.primary} />
                   <AppText accessibilityLiveRegion="polite">
                     {t('dataRefreshing')}
                   </AppText>
@@ -408,7 +403,6 @@ export function HistoryScreen() {
                 !state.refreshError &&
                 (state.loadingMore ? (
                   <View style={styles.feedback}>
-                    <ActivityIndicator color={colors.primary} />
                     <AppText accessibilityLiveRegion="polite">
                       {t('historyLoadingMore')}
                     </AppText>
