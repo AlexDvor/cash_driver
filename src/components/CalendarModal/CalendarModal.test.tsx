@@ -101,10 +101,10 @@ test.each([false, true])(
       1,
     );
     expect(StyleSheet.flatten(tile(10).props.style).backgroundColor).toBe(
-      colors.primary,
+      colors.accentFill,
     );
     expect(StyleSheet.flatten(tile(3).props.style).backgroundColor).toBe(
-      colors.background,
+      colors.surfaceRaised,
     );
     expect(tile(2).props.accessibilityHint).toBe(
       mockTranslate('en', 'calendarActivityLegend'),
@@ -112,7 +112,7 @@ test.each([false, true])(
     props = { ...props, monthActivityStatus: 'error' };
     await act(async () => app.update(<CalendarModal {...props} />));
     expect(StyleSheet.flatten(tile(2).props.style).backgroundColor).toBe(
-      colors.background,
+      colors.surfaceRaised,
     );
     expect(tile(2).props.accessibilityHint).toBe(
       mockTranslate('en', 'calendarActivityUnknown'),
@@ -1164,13 +1164,13 @@ test.each([false, true])(
       true,
     );
     expect(
-      surfaces.some(style => style?.backgroundColor === colors.primary),
+      surfaces.some(style => style?.backgroundColor === colors.accentFill),
     ).toBe(true);
     const dot = selected.findAll(
       node => node.props.testID === 'calendar-activity-2026-10-10',
     )[0];
     expect(StyleSheet.flatten(dot.props.style).backgroundColor).toBe(
-      colors.onPrimary,
+      colors.onAccent,
     );
   },
 );

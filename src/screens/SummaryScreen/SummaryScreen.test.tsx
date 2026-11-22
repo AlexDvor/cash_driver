@@ -1,7 +1,7 @@
 import React from 'react';
 import { SummaryContent } from '../../components/SummaryMetrics/SummaryContent';
 import { RetainedCashCard } from '../../components/SummaryMetrics/SummaryMetrics';
-import { Alert, AppState, AppStateStatus, View } from 'react-native';
+import { Alert, AppState, AppStateStatus } from 'react-native';
 import { SkeletonText } from '../../ui/Skeleton/SkeletonText';
 import { AppText } from '../../ui/AppText/AppText';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -109,6 +109,9 @@ function text(id: string) {
   const matches = app.root.findAllByProps({ testID: id });
   const children = matches[matches.length - 1]?.props.children;
   return Array.isArray(children) ? children.join('') : String(children);
+}
+function loadingSkeletons() {
+  return app.root.findByType(SummaryContent).findAllByType(SkeletonText);
 }
 function content() {
   return JSON.stringify(app.toJSON());
@@ -315,11 +318,12 @@ test.each(['success', 'error'])(
       .spyOn(services.transactions, 'summarize')
       .mockImplementationOnce(() => old);
     await press('Semana');
-    expect(content()).toContain('Cargando resumen');
+    expect(content()).not.toContain('Cargando resumen');
+    expect(loadingSkeletons()).toHaveLength(0);
     const loadingContent = app.root.findByType(SummaryContent);
-    expect(loadingContent.props.summary).toBeNull();
+    expect(loadingContent.props.summary).not.toBeNull();
     expect(app.root.findByType(RetainedCashCard)).toBe(originalHero);
-    expect(text('summary-fareTotal')).toBe('undefined');
+    expect(text('summary-fareTotal')).toMatch(/0,00/);
     await press('Mes');
     expect(app.root.findByType(SummaryContent)).toBe(loadingContent);
     expect(loadingContent.props.summary).not.toBeNull();
@@ -466,7 +470,7 @@ test('large saved totals stay complete across ES/EN and all branded platform row
   }
 });
 
-test('period loading preserves long hero sizing without presenting previous-period values', async () => {
+test('period switches retain the completed date and totals until the new result is ready', async () => {
   await seed('2026-10-08T08:00:00Z', {
     ...validInput,
     fareAmountCents: 999999,
@@ -475,18 +479,11 @@ test('period loading preserves long hero sizing without presenting previous-peri
   });
   await mount();
   const hero = app.root.findByType(RetainedCashCard);
-  const amount = hero.props.amount;
-  const countLabel = hero.props.countLabel;
-  await act(async () =>
-    hero
-      .findAllByType(View)
-      .find(node => node.props.onLayout)
-      ?.props.onLayout({ nativeEvent: { layout: { width: 320 } } }),
-  );
   const originalMoney = hero
-    .findAllByType(SkeletonText)
+    .findAllByType(AppText)
     .find(node => node.props.testID === 'summary-retained')!;
-  const nativeMoney = originalMoney.findAllByType(AppText).slice(-1)[0];
+  const previousRange = text('summary-range');
+  const previousAmount = text('summary-retained');
   let resolve!: (summary: CashSummary) => void;
   jest.spyOn(services.transactions, 'summarize').mockImplementationOnce(
     () =>
@@ -495,26 +492,29 @@ test('period loading preserves long hero sizing without presenting previous-peri
       }),
   );
   await press('Semana');
-  expect(hero.props.loading).toBe(true);
-  expect(hero.props.amount).toBe(amount);
-  expect(hero.props.countLabel).toBe(countLabel);
-  expect(text('summary-retained')).toBe('undefined');
-  expect(text('summary-count')).toBe('undefined');
-  const money = hero
-    .findAllByType(SkeletonText)
-    .find(node => node.props.sizingText === amount)!;
-  expect(money.props.adjustsFontSizeToFit).toBeUndefined();
-  let scroll = money.parent;
-  while (scroll && !scroll.props.horizontal) scroll = scroll.parent;
-  expect(scroll?.props.horizontal).toBe(true);
-  expect(money).toBe(originalMoney);
-  expect(money.findAllByType(AppText).slice(-1)[0]).toBe(nativeMoney);
-  await act(async () => resolve(summarizeTransactions([])));
-  expectCount(0);
+  expect(app.root.findByType(RetainedCashCard)).toBe(hero);
+  expect(loadingSkeletons()).toHaveLength(0);
+  expect(text('summary-retained')).toBe(previousAmount);
+  expectCount(1);
+  expect(text('summary-range')).toBe(previousRange);
+  expect(content()).not.toContain('Actualizando');
+  expect(app.root.findByType(SummaryContent).props.showEmpty).toBe(false);
   expect(
     hero
-      .findAllByType(SkeletonText)
+      .findAllByType(AppText)
       .find(node => node.props.testID === 'summary-retained'),
   ).toBe(originalMoney);
-  expect(originalMoney.findAllByType(AppText).slice(-1)[0]).toBe(nativeMoney);
+  let scroll = originalMoney.parent;
+  while (scroll && !scroll.props.horizontal) scroll = scroll.parent;
+  expect(scroll?.props.horizontal).toBe(true);
+  await act(async () => resolve(summarizeTransactions([])));
+  expectCount(0);
+  expect(text('summary-range')).not.toBe(previousRange);
+  expect(text('summary-retained')).toMatch(/0,00/);
+  expect(
+    hero
+      .findAllByType(AppText)
+      .find(node => node.props.testID === 'summary-retained'),
+  ).toBe(originalMoney);
+  expect(loadingSkeletons()).toHaveLength(0);
 });

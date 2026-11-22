@@ -35,17 +35,21 @@ export const styles = StyleSheet.create({
   equalChoice: { paddingHorizontal: spacing.xs },
   inline: { flexDirection: 'row', gap: spacing.sm },
   inlineLabel: { flexShrink: 1 },
+  // Card-like radii (not pills) so the control still looks right when large
+  // text makes the segments wrap onto a second row.
   segment: {
     flexBasis: 'auto',
     flexGrow: 1,
-    borderRadius: radii.button,
+    borderRadius: radii.input,
   },
   segmentTray: {
     borderWidth: sizing.borderWidth,
-    borderRadius: radii.input,
+    borderRadius: radii.card,
     padding: spacing.xs,
     gap: spacing.xs,
   },
+  // Selected chips get a slightly heavier accent border (layout size unchanged).
+  selectedChoice: { borderWidth: 1.5 },
   pressed: { opacity: opacity.choicePressed },
   selected: { fontWeight: '700' },
 });

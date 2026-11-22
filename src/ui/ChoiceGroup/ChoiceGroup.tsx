@@ -163,18 +163,22 @@ export function ChoiceGroup<Value extends string>({
                   backgroundColor:
                     appearance === 'segmented'
                       ? selected
-                        ? colors.primary
-                        : colors.transparent
+                        ? colors.surfaceRaised
+                        : // Opaque tray colour keeps Android rounded corners on reselection.
+                          colors.card
                       : selected
                       ? colors.softGreen
-                      : colors.card,
+                      : colors.surfaceRaised,
                   borderColor:
                     appearance === 'segmented'
-                      ? colors.transparent
+                      ? selected
+                        ? colors.borderStrong
+                        : colors.transparent
                       : selected || pressed
                       ? colors.primary
                       : colors.border,
                 },
+                selected && appearance !== 'segmented' && styles.selectedChoice,
                 pressed && appearance === 'segmented' && styles.pressed,
               ]}
             >
@@ -212,9 +216,9 @@ export function ChoiceGroup<Value extends string>({
                   selected && styles.selected,
                   {
                     color: selected
-                      ? appearance === 'segmented'
-                        ? colors.onPrimary
-                        : colors.primary
+                      ? colors.text
+                      : appearance === 'segmented'
+                      ? colors.secondaryText
                       : colors.text,
                   },
                 ]}

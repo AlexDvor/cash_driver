@@ -213,6 +213,32 @@ export function getPeriodBounds(
   };
 }
 
+const HALF_DAY_MS = 12 * 60 * 60 * 1000;
+
+// Local calendar days covered by a period, each with its own DST-aware bounds.
+// Probing at midday keeps 23/25-hour days from slipping into a neighbour.
+export function getDayRanges(
+  bounds: Readonly<PeriodBounds>,
+  timeZone: string,
+): PeriodBounds[] {
+  const days: PeriodBounds[] = [];
+  let cursor = bounds.start.getTime();
+  const limit = bounds.end.getTime();
+  while (cursor < limit && days.length < 366) {
+    const day = getPeriodBounds(
+      new Date(cursor + HALF_DAY_MS),
+      'day',
+      timeZone,
+    );
+    if (day.end.getTime() <= cursor) {
+      break;
+    }
+    days.push(day);
+    cursor = day.end.getTime();
+  }
+  return days;
+}
+
 export function isWithinPeriod(
   instant: Date,
   bounds: Readonly<PeriodBounds>,

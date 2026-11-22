@@ -11,8 +11,6 @@ import { styles } from './DailySummary.styles';
 import { TabIcon } from '../../ui/TabIcon/TabIcon';
 import { routes } from '../../navigation/routes';
 import { DailySummarySkeleton } from './DailySummarySkeleton';
-import { SurfaceDepth } from '../../ui/SurfaceDepth/SurfaceDepth';
-import { radii } from '../../constants/theme/tokens';
 
 export function DailySummary({
   daily,
@@ -47,8 +45,12 @@ export function DailySummary({
     expanded ? 'hideTotals' : 'showTotals',
   )}`;
   return (
-    <View style={[styles.container, { backgroundColor: colors.softGreen }]}>
-      <SurfaceDepth radius={radii.input} />
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colors.card, borderColor: colors.border },
+      ]}
+    >
       <Pressable
         testID="daily-summary-toggle"
         accessibilityRole="button"
@@ -87,13 +89,13 @@ export function DailySummary({
           importantForAccessibility="no-hide-descendants"
         >
           <View
-            style={[styles.circleFill, { backgroundColor: colors.primary }]}
+            style={[styles.circleFill, { backgroundColor: colors.softGreen }]}
           />
           <View
             style={[
               styles.chevron,
               {
-                borderColor: colors.text,
+                borderColor: colors.primary,
                 transform: [{ rotate: expanded ? '225deg' : '45deg' }],
               },
             ]}

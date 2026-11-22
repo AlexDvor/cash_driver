@@ -1,17 +1,28 @@
 import React from 'react';
-import { Image, View } from 'react-native';
+import { View } from 'react-native';
+import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
+import { sizing } from '../../constants/theme/tokens';
 import { styles } from './CalendarModal.styles';
+import CalendarSvg from '../../assets/icons/duotone/calendar.svg';
+import ChevronLeft from '../../assets/icons/line/chevron-left.svg';
+import ChevronRight from '../../assets/icons/line/chevron-right.svg';
+
+const decorative = {
+  accessible: false,
+  accessibilityElementsHidden: true,
+  importantForAccessibility: 'no-hide-descendants',
+} as const;
 
 export function CalendarIcon() {
+  const { colors } = useAppTheme();
   return (
-    <Image
-      source={require('../../assets/icons/calendar-3d.png')}
-      resizeMode="contain"
-      accessible={false}
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-      style={styles.icon}
-    />
+    <View {...decorative} style={styles.icon}>
+      <CalendarSvg
+        width={sizing.icon}
+        height={sizing.icon}
+        color={colors.primary}
+      />
+    </View>
   );
 }
 
@@ -22,16 +33,10 @@ export function CalendarChevron({
   color: string;
   previous?: boolean;
 }) {
+  const Chevron = previous ? ChevronLeft : ChevronRight;
   return (
-    <View
-      accessible={false}
-      style={[
-        styles.chevron,
-        {
-          borderColor: color,
-          transform: [{ rotate: previous ? '225deg' : '45deg' }],
-        },
-      ]}
-    />
+    <View {...decorative} style={styles.chevron}>
+      <Chevron width={sizing.icon} height={sizing.icon} color={color} />
+    </View>
   );
 }

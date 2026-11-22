@@ -566,7 +566,7 @@ test('language/theme changes preserve raw draft, platform and tip while mounted'
   expect(field('Cash received').props.value).toBe('20');
   expect(button('Cabify').props.accessibilityState.selected).toBe(true);
   expect(tipValue()).toBe('1,50');
-  expect(JSON.stringify(app.toJSON())).toContain('#101714');
+  expect(JSON.stringify(app.toJSON())).toContain('#0A0B0B');
   await press('Settings');
   await press('Español');
   await press('Inicio');

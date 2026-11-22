@@ -1,26 +1,12 @@
 import React from 'react';
 import { View } from 'react-native';
-import Sun from '../../assets/settings/sun.svg';
-import Moon from '../../assets/settings/moon.svg';
-import Phone from '../../assets/settings/phone.svg';
-import Database from '../../assets/settings/database.svg';
 import Trash from '../../assets/settings/trash.svg';
-import Palette from '../../assets/settings/palette.svg';
-import Briefcase from '../../assets/settings/briefcase.svg';
-import Check from '../../assets/settings/check.svg';
 import Play from '../../assets/settings/play.svg';
 import { sizing } from '../../constants/theme/tokens';
 import { styles } from './SettingsIcon.styles';
 
 const icons = {
-  sun: Sun,
-  moon: Moon,
-  phone: Phone,
-  database: Database,
   trash: Trash,
-  palette: Palette,
-  briefcase: Briefcase,
-  check: Check,
   play: Play,
 };
 

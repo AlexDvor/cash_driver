@@ -42,6 +42,15 @@ export function CalendarPeriodSelector({
       ),
     [selection.month.year, locale],
   );
+  // A month label stays on one line (shrinks slightly); a full date may wrap.
+  const fitProps =
+    selection.kind === 'month'
+      ? ({
+          numberOfLines: 1,
+          adjustsFontSizeToFit: true,
+          minimumFontScale: 0.75,
+        } as const)
+      : {};
   const monthButton = (
     <Pressable
       ref={calendarButtonRef}
@@ -52,7 +61,9 @@ export function CalendarPeriodSelector({
       style={({ pressed }) => [
         styles.monthButton,
         stacked && styles.fullWidth,
-        pressed && { backgroundColor: colors.softGreen },
+        {
+          backgroundColor: pressed ? colors.softGreen : colors.surfaceRaised,
+        },
       ]}
     >
       <CalendarIcon />
@@ -70,6 +81,7 @@ export function CalendarPeriodSelector({
               <AppText
                 key={sample}
                 accessible={false}
+                {...fitProps}
                 style={[styles.label, styles.labelSample]}
               >
                 {sample}
@@ -78,16 +90,15 @@ export function CalendarPeriodSelector({
           )}
         </View>
         <View style={styles.labelOverlay} pointerEvents="none">
-          <AppText testID="calendar-period-visible-label" style={styles.label}>
+          <AppText
+            testID="calendar-period-visible-label"
+            {...fitProps}
+            style={styles.label}
+          >
             {dateLabel}
           </AppText>
         </View>
       </View>
-      <View
-        accessible={false}
-        importantForAccessibility="no-hide-descendants"
-        style={[styles.dropdown, { borderColor: colors.text }]}
-      />
     </Pressable>
   );
   return (
@@ -107,7 +118,7 @@ export function CalendarPeriodSelector({
           onPress={() => onMoveMonth(-1)}
           style={({ pressed }) => [
             styles.button,
-            { backgroundColor: colors.softGreen },
+            { backgroundColor: colors.surfaceRaised },
             pressed && styles.pressed,
           ]}
         >
@@ -120,7 +131,7 @@ export function CalendarPeriodSelector({
           onPress={() => onMoveMonth(1)}
           style={({ pressed }) => [
             styles.button,
-            { backgroundColor: colors.softGreen },
+            { backgroundColor: colors.surfaceRaised },
             pressed && styles.pressed,
           ]}
         >

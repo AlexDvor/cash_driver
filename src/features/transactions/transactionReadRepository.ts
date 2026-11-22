@@ -318,6 +318,31 @@ export function createTransactionReadRepository(db: SqlConnection) {
       });
       return occupied;
     },
+    // Retained cash (integer cents) for each given local day, in one snapshot.
+    // Used by the Resumen mini chart: at most one aggregate per day, no rows.
+    async dailyNetCash(
+      days: readonly Readonly<PeriodBounds>[],
+    ): Promise<number[]> {
+      const ranges = days.map(rangeValues);
+      const totals: number[] = [];
+      await db.transaction(async tx => {
+        await checkTimestamps(tx);
+        for (const range of ranges) {
+          const result = await tx.execute(
+            `SELECT COALESCE(SUM(net_cash_cents), 0) AS net_total,
+              COALESCE(SUM(CASE WHEN ${validRowSql} THEN 0 ELSE 1 END), 0) AS invalid_count
+              FROM transactions WHERE created_at >= ? AND created_at < ?`,
+            range,
+          );
+          const row = result.rows[0];
+          if (!row || nonnegativeInteger(row.invalid_count) !== 0) {
+            throw new Error('Corrupt matched transaction values');
+          }
+          totals.push(nonnegativeInteger(row.net_total));
+        }
+      });
+      return totals;
+    },
     async occupiedMonths(year: number, timeZone: string): Promise<number[]> {
       const ranges = Array.from({ length: 12 }, (_, index) => ({
         month: index + 1,

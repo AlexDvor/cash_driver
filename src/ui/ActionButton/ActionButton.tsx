@@ -5,13 +5,12 @@ import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../AppText/AppText';
 import { styles } from './ActionButton.styles';
 import { ActionButtonProps } from './ActionButton.interface';
-import { SurfaceDepth } from '../SurfaceDepth/SurfaceDepth';
-import { radii } from '../../constants/theme/tokens';
 
+// Pill buttons (redesign 2026-11): flat fills, no gradient depth.
+// `depth` stays in the props for call-site compatibility and has no visual effect.
 export function ActionButton({
   compact = false,
   renderIcon,
-  depth = false,
   label,
   onPress,
   disabled = false,
@@ -20,25 +19,32 @@ export function ActionButton({
 }: ActionButtonProps) {
   const { colors } = useAppTheme();
   const blocked = disabled || loading;
-  const backgroundColor =
-    variant === 'outline' || variant === 'destructive-outline'
+  const backgroundColor = blocked
+    ? variant === 'outline' || variant === 'destructive-outline'
       ? colors.transparent
-      : blocked
-      ? colors.disabledSurface
-      : variant === 'destructive'
-      ? colors.transparent
-      : variant === 'secondary'
-      ? colors.softGreen
-      : colors.primary;
+      : colors.disabledSurface
+    : variant === 'primary'
+    ? colors.accentFill
+    : variant === 'secondary'
+    ? colors.surfaceRaised
+    : variant === 'destructive'
+    ? colors.errorSurface
+    : colors.transparent;
   const textColor = blocked
     ? colors.disabledText
     : variant === 'destructive' || variant === 'destructive-outline'
     ? colors.errorText
     : variant === 'secondary'
-    ? colors.primary
+    ? colors.text
     : variant === 'outline'
     ? colors.secondaryText
-    : colors.onPrimary;
+    : colors.onAccent;
+  const restingBorder =
+    variant === 'secondary' || variant === 'outline'
+      ? colors.borderStrong
+      : variant === 'destructive-outline'
+      ? colors.errorText
+      : colors.transparent;
   return (
     <Pressable
       accessibilityRole="button"
@@ -49,21 +55,10 @@ export function ActionButton({
       style={({ pressed }) => [
         styles.button,
         compact && styles.compact,
-        {
-          backgroundColor,
-          borderColor: pressed
-            ? textColor
-            : variant === 'destructive-outline'
-            ? textColor
-            : variant === 'outline'
-            ? colors.border
-            : colors.transparent,
-        },
+        { backgroundColor, borderColor: restingBorder },
+        pressed && styles.pressed,
       ]}
     >
-      {depth && !blocked && variant === 'primary' && (
-        <SurfaceDepth radius={radii.button} action />
-      )}
       {loading && <ActivityIndicator color={textColor} />}
       {!loading && renderIcon?.(textColor)}
       <AppText style={[styles.label, { color: textColor }]}>{label}</AppText>

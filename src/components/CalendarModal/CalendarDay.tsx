@@ -73,19 +73,22 @@ export function CalendarDay({ date }: { date?: DateData }) {
   ]
     .filter(Boolean)
     .join(', ');
+  // Opaque fills only: Android drops rounded corners when a background
+  // switches from transparent to colored.
   const selectionStyle = {
-    borderColor: today ? colors.primary : colors.transparent,
+    borderColor: today ? colors.primary : colors.card,
   };
+  const circleFill = selected ? colors.accentFill : colors.card;
   const activityStyle = {
-    backgroundColor: selected ? colors.primary : colors.transparent,
-    borderColor: colors.transparent,
+    backgroundColor: circleFill,
+    borderColor: circleFill,
   };
   const dotStyle = {
     backgroundColor: occupied
       ? selected
-        ? colors.onPrimary
+        ? colors.onAccent
         : colors.primary
-      : colors.transparent,
+      : circleFill,
   };
   return (
     <Pressable
@@ -97,7 +100,7 @@ export function CalendarDay({ date }: { date?: DateData }) {
     >
       <View style={[styles.ring, selectionStyle]}>
         <View style={[styles.circle, activityStyle]}>
-          <AppText style={{ color: selected ? colors.onPrimary : colors.text }}>
+          <AppText style={{ color: selected ? colors.onAccent : colors.text }}>
             {date.day}
           </AppText>
           <View

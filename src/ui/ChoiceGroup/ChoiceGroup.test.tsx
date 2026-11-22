@@ -157,7 +157,7 @@ test('selection indicators are opt-in, decorative, and follow the controlled sel
   await act(async () => app!.unmount());
 });
 
-test('platform checkboxes reflow with marker space while preserving the applied list', async () => {
+test('platform checkboxes render as full-width switch rows preserving the applied list', async () => {
   const dimensions = jest
     .spyOn(
       jest.requireActual<typeof import('react-native')>('react-native'),
@@ -191,24 +191,17 @@ test('platform checkboxes reflow with marker space while preserving the applied 
         node.props.accessibilityRole === 'checkbox' &&
         typeof node.props.onPress === 'function',
     );
-  const container = app!.root
-    .findAllByType(View)
-    .find(node => node.props.onLayout)!;
-  await act(async () =>
-    container.props.onLayout({ nativeEvent: { layout: { width: 360 } } }),
-  );
-  expect(
-    StyleSheet.flatten(buttons()[0].props.style({ pressed: false })).width,
-  ).toBe(176);
-  expect(
-    app!.root.findAllByType(SelectionIndicator).map(node => node.props.checked),
-  ).toEqual([true, false, true, false]);
-  await act(async () =>
-    container.props.onLayout({ nativeEvent: { layout: { width: 220 } } }),
-  );
-  expect(
-    StyleSheet.flatten(buttons()[0].props.style({ pressed: false })).width,
-  ).toBe(220);
+  // Redesign 2026-11: one full-width row per platform with a decorative switch.
+  expect(buttons()).toHaveLength(4);
+  for (const button of buttons()) {
+    const style = StyleSheet.flatten(button.props.style({ pressed: false }));
+    expect(style.width).toBeUndefined();
+    const decoration = button.findAll(
+      node => node.props.accessibilityElementsHidden === true,
+    );
+    expect(decoration.length).toBeGreaterThan(0);
+  }
+  expect(app!.root.findAllByType(SelectionIndicator)).toHaveLength(0);
   expect(buttons().map(node => node.props.accessibilityState.checked)).toEqual([
     true,
     false,

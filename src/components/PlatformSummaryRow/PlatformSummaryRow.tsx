@@ -8,18 +8,18 @@ import { PlatformIcon } from '../PlatformIcon/PlatformIcon';
 import { AppText } from '../../ui/AppText/AppText';
 import { styles } from './PlatformSummaryRow.styles';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
-import { SkeletonText } from '../../ui/Skeleton/SkeletonText';
 
 export function PlatformSummaryRow({
   platform,
   amount,
+  share = 0,
   divided = false,
-  loading = false,
 }: {
   platform: Platform;
   amount: string;
+  // Whole percent of the period's fare total, 0-100.
+  share?: number;
   divided?: boolean;
-  loading?: boolean;
 }) {
   const { colors } = useAppTheme();
   return (
@@ -30,21 +30,46 @@ export function PlatformSummaryRow({
           style={[styles.divider, { backgroundColor: colors.border }]}
         />
       )}
-      <View style={styles.labelRow}>
-        <View style={styles.iconSlot}>
-          <PlatformIcon platform={platform} size={sizing.icon} />
+      <View style={styles.main}>
+        <View style={styles.labelRow}>
+          <View style={styles.iconSlot}>
+            <PlatformIcon platform={platform} size={sizing.icon} />
+          </View>
+          <AppText style={styles.label}>{platformLabels[platform]}</AppText>
         </View>
-        <AppText style={styles.label}>{platformLabels[platform]}</AppText>
+        <View style={styles.valueColumn}>
+          <AppText
+            testID={`summary-${platform}`}
+            style={styles.value}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={summaryLayout.labelMinimumFontScale}
+          >
+            {amount || ' '}
+          </AppText>
+          <AppText
+            testID={`summary-${platform}-share`}
+            variant="supporting"
+            secondary
+            style={styles.percent}
+            numberOfLines={1}
+          >
+            {amount ? `${share}%` : ' '}
+          </AppText>
+        </View>
       </View>
-      <SkeletonText
-        loading={loading}
-        testID={`summary-${platform}`}
-        style={styles.value}
-        sizingText={amount}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={summaryLayout.labelMinimumFontScale}
-      />
+      <View
+        accessible={false}
+        importantForAccessibility="no-hide-descendants"
+        style={[styles.track, { backgroundColor: colors.border }]}
+      >
+        <View
+          style={[
+            styles.fill,
+            { width: `${share}%`, backgroundColor: colors.accentFill },
+          ]}
+        />
+      </View>
     </View>
   );
 }

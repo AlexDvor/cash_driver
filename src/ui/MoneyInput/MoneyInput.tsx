@@ -30,13 +30,18 @@ export function MoneyInput({
       collapsable={groupRef ? false : undefined}
       style={styles.group}
     >
-      {!hideLabel && <AppText>{label}</AppText>}
+      {!hideLabel && (
+        <AppText variant="supporting" secondary style={styles.label}>
+          {label}
+        </AppText>
+      )}
       <View
         style={[
           styles.field,
           compact && styles.compactField,
+          (focused || Boolean(error)) && styles.emphasisedField,
           {
-            backgroundColor: colors.background,
+            backgroundColor: colors.fieldSurface,
             borderColor: error
               ? colors.errorText
               : focused
@@ -62,7 +67,7 @@ export function MoneyInput({
           editable={!disabled}
           keyboardType="decimal-pad"
           placeholder="0,00"
-          placeholderTextColor={colors.secondaryText}
+          placeholderTextColor={colors.tertiaryText}
           selectionColor={colors.primary}
           autoCorrect={false}
           style={[
@@ -80,7 +85,7 @@ export function MoneyInput({
             importantForAccessibility="no-hide-descendants"
             pointerEvents="none"
           >
-            <AppText style={styles.suffix} secondary>
+            <AppText style={[styles.suffix, { color: colors.tertiaryText }]}>
               €
             </AppText>
           </View>

@@ -21,6 +21,8 @@ import {
 import { CalendarModalProps } from './CalendarModal.interface';
 import { styles } from './CalendarModal.styles';
 import { CalendarGrid } from '../CalendarGrid/CalendarGrid';
+import RetryIcon from '../../assets/icons/line/retry.svg';
+import CloseIcon from '../../assets/icons/line/close.svg';
 import { CalendarChevron, CalendarIcon } from './CalendarIcon';
 import { useCalendarMotion } from '../../hooks/app/useCalendarMotion';
 import { resolveHeadingSwipe } from '../../constants/calendarGestures';
@@ -236,9 +238,11 @@ function CalendarSession({
                       : styles.hiddenFeedback,
                   ]}
                 >
-                  <AppText variant="heading" style={{ color: colors.primary }}>
-                    ↻
-                  </AppText>
+                  <RetryIcon
+                    width={sizing.icon}
+                    height={sizing.icon}
+                    color={colors.primary}
+                  />
                 </Pressable>
               </View>
               <Pressable
@@ -248,9 +252,11 @@ function CalendarSession({
                 style={styles.control}
                 onPress={onCancel}
               >
-                <AppText variant="heading" secondary>
-                  ×
-                </AppText>
+                <CloseIcon
+                  width={sizing.icon}
+                  height={sizing.icon}
+                  color={colors.secondaryText}
+                />
               </Pressable>
             </View>
             <View testID="calendar-month-navigation" style={styles.row}>
@@ -381,6 +387,7 @@ function CalendarSession({
                     {
                       borderWidth: sizing.borderWidth,
                       borderColor: colors.border,
+                      backgroundColor: colors.surfaceRaised,
                     },
                   ]}
                   onPress={() => setPickingMonth(value => !value)}
@@ -450,8 +457,8 @@ function CalendarSession({
                         {
                           backgroundColor:
                             month === draftMonth.month
-                              ? colors.primary
-                              : colors.background,
+                              ? colors.accentFill
+                              : colors.surfaceRaised,
                         },
                       ]}
                       onPress={() => {
@@ -468,7 +475,7 @@ function CalendarSession({
                           {
                             color:
                               month === draftMonth.month
-                                ? colors.onPrimary
+                                ? colors.onAccent
                                 : colors.text,
                           },
                         ]}

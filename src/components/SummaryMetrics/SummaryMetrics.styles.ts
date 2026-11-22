@@ -2,16 +2,8 @@ import { StyleSheet } from 'react-native';
 import { spacing, typography } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
-  hidden: { opacity: 0 },
-  heroCard: { overflow: 'hidden', gap: spacing.md },
-  heroLabel: { fontWeight: '600' },
-  heroBackdrop: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-  },
+  heroCard: { gap: spacing.lg },
+  plate: { alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   statCards: {
     width: '100%',
     flexDirection: 'row',
@@ -23,10 +15,9 @@ export const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.sm,
   },
-  statIllustration: { flexShrink: 0 },
   statAmountScroll: { flexGrow: 0 },
   statContent: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  statText: { flex: 1, minWidth: 0, gap: spacing.sm },
+  statText: { flex: 1, minWidth: 0, gap: spacing.xs },
   statAmount: {
     fontSize: typography.summaryStatMoney,
     fontWeight: '700',
@@ -35,18 +26,14 @@ export const styles = StyleSheet.create({
   heroRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.lg,
+    gap: spacing.md,
   },
-  heroText: { flex: 1, minWidth: 0, gap: spacing.sm },
-  heroIllustration: {
-    flexShrink: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  heroText: { flex: 1, minWidth: 0, gap: spacing.xs },
   money: {
     fontSize: typography.summaryMoney,
+    lineHeight: 44,
     fontWeight: '700',
+    letterSpacing: -1.5,
     fontVariant: ['tabular-nums'],
   },
   row: {

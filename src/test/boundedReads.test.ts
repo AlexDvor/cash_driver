@@ -2,6 +2,8 @@ import { SqlConnection, SqlExecutor } from '../database/sqlite';
 import {
   getCalendarDayBounds,
   getCalendarMonthBounds,
+  getDayRanges,
+  getPeriodBounds,
 } from '../features/summary/periods';
 import { summarizeTransactions } from '../features/summary/summary';
 import { Platform } from '../features/transactions/types';
@@ -37,6 +39,47 @@ test('occupied months include all platforms and zero tips, honor local year boun
   expect(await f.transactions.occupiedMonths(2026, 'Europe/Madrid')).toEqual([
     10,
   ]);
+});
+
+test('daily net cash sums integer cents per local day, including DST days and empty days', async () => {
+  const f = await fixture();
+  await f.save('2026-10-24T22:00:00.000Z', 'uber', 1000, 50); // 25 Oct, Madrid
+  await f.save('2026-10-25T22:59:00.000Z', 'bolt', 200); // 25 Oct, Madrid
+  await f.save('2026-10-25T23:00:00.000Z', 'uber', 300); // 26 Oct, Madrid
+  const week = getPeriodBounds(
+    new Date('2026-10-25T10:00:00.000Z'),
+    'week',
+    'Europe/Madrid',
+  );
+  const days = getDayRanges(week, 'Europe/Madrid');
+  expect(days).toHaveLength(7);
+  // Sunday 25 Oct has 25 hours; 26 Oct (300) falls outside this week.
+  expect(await f.transactions.dailyNetCash(days)).toEqual([
+    0, 0, 0, 0, 0, 0, 1250,
+  ]);
+  const month = getDayRanges(
+    getPeriodBounds(new Date('2026-10-08T10:00:00.000Z'), 'month', 'UTC'),
+    'UTC',
+  );
+  expect(month).toHaveLength(31);
+  expect(await f.transactions.dailyNetCash([])).toEqual([]);
+});
+
+test('day ranges tile the period without gaps across 23 and 25 hour days', () => {
+  for (const [reference, period, zone, count] of [
+    ['2026-03-29T10:00:00Z', 'week', 'Europe/Madrid', 7],
+    ['2026-10-25T10:00:00Z', 'month', 'Europe/Madrid', 31],
+    ['2026-02-10T10:00:00Z', 'month', 'UTC', 28],
+  ] as const) {
+    const bounds = getPeriodBounds(new Date(reference), period, zone);
+    const days = getDayRanges(bounds, zone);
+    expect(days).toHaveLength(count);
+    expect(days[0].start).toEqual(bounds.start);
+    expect(days[days.length - 1].end).toEqual(bounds.end);
+    days.slice(1).forEach((day, index) => {
+      expect(day.start).toEqual(days[index].end);
+    });
+  }
 });
 
 async function fixture(connection = db) {

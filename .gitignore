@@ -2,6 +2,7 @@
 
 # OSX
 #
+.claude
 .DS_Store
 node-compile-cache
 
@@ -44,6 +45,11 @@ local.properties
 
 # Local documentation, plans, reference images and acceptance evidence.
 /docs/
+
+# Local secrets (keys for MCP servers etc.). Template: .env.example
+.env
+.env.*
+!.env.example
 
 # node.js
 #

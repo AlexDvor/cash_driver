@@ -59,6 +59,7 @@ export function createTransactionService(
     summarizeCompatible: repository.summarizeCompatible,
     occupiedDates: repository.occupiedDates,
     occupiedMonths: repository.occupiedMonths,
+    dailyNetCash: repository.dailyNetCash,
     hasAny: repository.hasAny,
     save(
       pending: PendingOperation,
