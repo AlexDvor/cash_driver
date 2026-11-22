@@ -200,6 +200,7 @@ export function AppNavigator({ navigationRef }: AppNavigatorProps) {
               animation: reduced ? 'none' : 'default',
               statusBarStyle: appearance === 'dark' ? 'light' : 'dark',
               headerTintColor: colors.primary,
+              headerTitleStyle: { color: colors.text },
               headerBackTitle: t('back'),
               headerBackVisible: false,
               headerLeft: renderHeaderBack,

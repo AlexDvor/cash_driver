@@ -43,6 +43,15 @@ export function CalendarPeriodSelector({
       ),
     [selection.month.year, locale],
   );
+  // A month label stays on one line (shrinks slightly); a full date may wrap.
+  const fitProps =
+    selection.kind === 'month'
+      ? ({
+          numberOfLines: 1,
+          adjustsFontSizeToFit: true,
+          minimumFontScale: 0.75,
+        } as const)
+      : {};
   const monthButton = (
     <Pressable
       ref={calendarButtonRef}
@@ -73,6 +82,7 @@ export function CalendarPeriodSelector({
               <AppText
                 key={sample}
                 accessible={false}
+                {...fitProps}
                 style={[styles.label, styles.labelSample]}
               >
                 {sample}
@@ -81,7 +91,11 @@ export function CalendarPeriodSelector({
           )}
         </View>
         <View style={styles.labelOverlay} pointerEvents="none">
-          <AppText testID="calendar-period-visible-label" style={styles.label}>
+          <AppText
+            testID="calendar-period-visible-label"
+            {...fitProps}
+            style={styles.label}
+          >
             {dateLabel}
           </AppText>
         </View>
