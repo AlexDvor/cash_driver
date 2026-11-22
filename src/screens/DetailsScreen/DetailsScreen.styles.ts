@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { radii, sizing, spacing } from '../../constants/theme/tokens';
+import { spacing, typography } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   platformHeading: {
@@ -8,6 +8,15 @@ export const styles = StyleSheet.create({
     gap: spacing.md,
   },
   headingText: { flex: 1, gap: spacing.xs },
+  hero: { gap: spacing.xs },
+  heroMain: { gap: spacing.xs },
+  heroAmount: {
+    fontSize: typography.summaryMoney,
+    lineHeight: 44,
+    fontWeight: '700',
+    letterSpacing: -1.5,
+    fontVariant: ['tabular-nums'],
+  },
   value: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -15,8 +24,8 @@ export const styles = StyleSheet.create({
     gap: spacing.sm,
     alignItems: 'center',
     paddingVertical: spacing.md,
-    borderBottomWidth: sizing.borderWidth,
   },
+  valueLabel: { flexShrink: 1 },
   amount: {
     marginLeft: 'auto',
     textAlign: 'right',
@@ -24,14 +33,4 @@ export const styles = StyleSheet.create({
     fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
-  total: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.sm,
-    padding: spacing.md,
-    borderRadius: radii.input,
-  },
-  totalLabel: { fontWeight: '600' },
 });

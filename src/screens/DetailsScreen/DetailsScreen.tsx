@@ -1,4 +1,5 @@
-import { iconSizing } from '../../constants/theme/tokens';
+import { iconSizing, sizing } from '../../constants/theme/tokens';
+import { summaryLayout } from '../../constants/theme/layout';
 import React from 'react';
 import { Alert, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -47,6 +48,18 @@ export function DetailsScreen({
       },
     ]);
   }
+  const rows = record
+    ? [
+        { label: t('fareInput'), cents: record.fareAmountCents },
+        { label: t('receivedInput'), cents: record.cashReceivedCents },
+        { label: t('changeGiven'), cents: record.changeGivenCents },
+        {
+          label: t('tipsTotal'),
+          cents: record.tipCents,
+          accent: record.tipCents > 0,
+        },
+      ]
+    : [];
   return (
     <ScreenContainer hasHeader>
       {state.status !== 'ready' && (
@@ -75,32 +88,53 @@ export function DetailsScreen({
               </AppText>
             </View>
           </View>
-          <Card>
-            {[
-              { label: t('fareInput'), cents: record.fareAmountCents },
-              { label: t('receivedInput'), cents: record.cashReceivedCents },
-              { label: t('changeGiven'), cents: record.changeGivenCents },
-              { label: t('tipsTotal'), cents: record.tipCents },
-            ].map(value => (
-              <View
-                key={value.label}
-                style={[styles.value, { borderBottomColor: colors.border }]}
-              >
-                <AppText secondary>{value.label}</AppText>
-                <AppText style={styles.amount}>
-                  {formatMoney(value.cents, locale)}
-                </AppText>
-              </View>
-            ))}
-            <View style={[styles.total, { backgroundColor: colors.softGreen }]}>
-              <AppText style={styles.totalLabel}>{t('retainedCash')}</AppText>
+          <Card depth style={styles.hero}>
+            <View style={styles.heroMain}>
+              <AppText variant="supporting" secondary>
+                {t('retainedCash')}
+              </AppText>
               <AppText
-                variant="heading"
-                style={[styles.amount, { color: colors.primary }]}
+                style={styles.heroAmount}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={summaryLayout.countMinimumFontScale}
               >
                 {formatMoney(record.netCashCents, locale)}
               </AppText>
             </View>
+            {record.tipCents > 0 && (
+              <AppText variant="supporting" style={{ color: colors.primary }}>
+                {t('tipAmount', {
+                  amount: formatMoney(record.tipCents, locale),
+                })}
+              </AppText>
+            )}
+          </Card>
+          <Card>
+            {rows.map((value, index) => (
+              <View
+                key={value.label}
+                style={[
+                  styles.value,
+                  index > 0 && {
+                    borderTopWidth: sizing.borderWidth,
+                    borderTopColor: colors.border,
+                  },
+                ]}
+              >
+                <AppText secondary style={styles.valueLabel}>
+                  {value.label}
+                </AppText>
+                <AppText
+                  style={[
+                    styles.amount,
+                    value.accent && { color: colors.primary },
+                  ]}
+                >
+                  {formatMoney(value.cents, locale)}
+                </AppText>
+              </View>
+            ))}
           </Card>
           <ActionButton
             variant="primary"

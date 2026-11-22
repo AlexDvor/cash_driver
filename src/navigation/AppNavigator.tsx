@@ -31,7 +31,8 @@ import { RootStackParamList, TabParamList } from './navigationTypes';
 import { DeletionProvider } from '../providers/DeletionProvider/DeletionProvider';
 import { useDeletion } from '../providers/DeletionProvider/DeletionProvider';
 import { DeletionNotice } from '../components/DeletionNotice/DeletionNotice';
-import { spacing } from '../constants/theme/tokens';
+import { sizing, spacing } from '../constants/theme/tokens';
+import ArrowLeft from '../assets/icons/line/arrow-left.svg';
 import { AppNavigatorProps } from './AppNavigator.interface';
 import { styles } from './AppNavigator.styles';
 import { routes } from './routes';
@@ -77,12 +78,18 @@ function HeaderBackButton() {
       style={styles.back}
     >
       <View
-        style={styles.backIcon}
+        style={[
+          styles.backCircle,
+          { backgroundColor: colors.surfaceRaised, borderColor: colors.border },
+        ]}
         accessible={false}
         importantForAccessibility="no-hide-descendants"
       >
-        <View style={[styles.backShaft, { backgroundColor: colors.primary }]} />
-        <View style={[styles.backHead, { borderColor: colors.primary }]} />
+        <ArrowLeft
+          width={sizing.icon}
+          height={sizing.icon}
+          color={colors.text}
+        />
       </View>
     </Pressable>
   );
@@ -196,7 +203,8 @@ export function AppNavigator({ navigationRef }: AppNavigatorProps) {
               headerBackTitle: t('back'),
               headerBackVisible: false,
               headerLeft: renderHeaderBack,
-              headerStyle: { backgroundColor: colors.card },
+              headerShadowVisible: false,
+              headerStyle: { backgroundColor: colors.background },
               contentStyle: { backgroundColor: colors.background },
             }}
           >
