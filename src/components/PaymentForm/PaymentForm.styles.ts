@@ -80,17 +80,6 @@ export const styles = StyleSheet.create({
   tipTitle: { fontWeight: '600' },
   tipHint: { fontSize: typography.caption },
   tipBadge: { fontWeight: '700', fontVariant: ['tabular-nums'] },
-  // 52×32 track with a 26dp knob, matching the Figma Toggle component.
-  switchTrack: {
-    width: 52,
-    height: 32,
-    borderRadius: 16,
-    padding: 3,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  switchTrackOn: { alignItems: 'flex-end' },
-  switchKnob: { width: 26, height: 26, borderRadius: 13 },
   tipEditor: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
   tipField: { flex: 1, minWidth: 0 },
   removeTip: {

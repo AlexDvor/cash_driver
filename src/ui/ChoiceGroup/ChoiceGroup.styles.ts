@@ -35,14 +35,16 @@ export const styles = StyleSheet.create({
   equalChoice: { paddingHorizontal: spacing.xs },
   inline: { flexDirection: 'row', gap: spacing.sm },
   inlineLabel: { flexShrink: 1 },
+  // Card-like radii (not pills) so the control still looks right when large
+  // text makes the segments wrap onto a second row.
   segment: {
     flexBasis: 'auto',
     flexGrow: 1,
-    borderRadius: radii.pill,
+    borderRadius: radii.input,
   },
   segmentTray: {
     borderWidth: sizing.borderWidth,
-    borderRadius: radii.pill,
+    borderRadius: radii.card,
     padding: spacing.xs,
     gap: spacing.xs,
   },

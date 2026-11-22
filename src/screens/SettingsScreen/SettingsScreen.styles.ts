@@ -1,5 +1,10 @@
 import { StyleSheet } from 'react-native';
-import { sizing, spacing } from '../../constants/theme/tokens';
+import {
+  letterSpacing,
+  sizing,
+  spacing,
+  typography,
+} from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   saveProgress: {
@@ -8,31 +13,43 @@ export const styles = StyleSheet.create({
     right: 0,
     bottom: -spacing.sm,
   },
+  // Group = uppercase title above a flat card (Figma "Group/…").
+  group: { gap: spacing.sm },
+  groupTitle: {
+    paddingHorizontal: spacing.xs,
+    fontSize: typography.overline,
+    fontWeight: '600',
+    letterSpacing: letterSpacing.overline,
+    textTransform: 'uppercase',
+  },
   section: { gap: spacing.md },
+  help: { fontSize: typography.caption },
   footer: {
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.xs,
     paddingVertical: spacing.md,
   },
-  sectionHeading: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  hapticsRow: {
+  footerText: { fontSize: typography.caption },
+  switchRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
     minHeight: sizing.touchTarget,
   },
-  hapticsText: { flex: 1, gap: spacing.xs },
-  storageTitle: { fontWeight: '600' },
-  storageRow: {
+  switchText: { flex: 1, gap: spacing.xs },
+  // Read-only label/value row: no touch-target minimum height.
+  infoRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.md,
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
   },
-  storageText: { flex: 1, gap: spacing.sm },
-  toggleLabel: { flexShrink: 1 },
+  valueLabel: { flexShrink: 1 },
+  // Content placed under a card (preview / delete actions).
+  after: { gap: spacing.sm, marginTop: spacing.xs },
+  value: { marginLeft: 'auto', fontVariant: ['tabular-nums'] },
+  storageTitle: { fontWeight: '600' },
+  storageText: { gap: spacing.xs },
   divider: { height: sizing.borderWidth },
 });

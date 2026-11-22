@@ -4,7 +4,6 @@ import {
   AppState,
   Platform,
   TextInput,
-  Switch,
   NativeModules,
   View,
 } from 'react-native';
@@ -152,9 +151,10 @@ const feedback = jest.requireMock('react-native-haptic-feedback') as {
   triggerPattern: jest.Mock;
 };
 function switchValue() {
+  // Redesign 2026-11: decorative Toggle (testID kept) replaces the native Switch.
   return app.root
-    .findAllByType(Switch)
-    .find(node => node.props.testID === 'settings-haptics-switch')?.props.value;
+    .findAll(node => node.props.testID === 'settings-haptics-switch')
+    .find(node => typeof node.props.value === 'boolean')?.props.value;
 }
 async function toggle(enabled: boolean) {
   if (switchValue() !== enabled) {
@@ -198,21 +198,12 @@ test('initial EUR/Spanish/system/Uber/disabled haptics and installed metadata; a
   expect(await services.preferences.read()).toEqual(saved);
 });
 
-test('section and control icons are decorative and theme icons follow the selected option', async () => {
+test('control icons are decorative and the theme segment follows the selected option', async () => {
   await mount();
   await press('Ajustes');
   const icons = () => app.root.findAllByType(SettingsIcon);
-  expect(icons().map(icon => icon.props.name)).toEqual([
-    'briefcase',
-    'check',
-    'play',
-    'palette',
-    'sun',
-    'moon',
-    'phone',
-    'database',
-    'trash',
-  ]);
+  // Redesign 2026-11: no icons on group titles or theme segments (Figma Ajustes).
+  expect(icons().map(icon => icon.props.name)).toEqual(['play', 'trash']);
   for (const icon of icons()) {
     const wrapper = icon.findByType(View);
     expect(wrapper.props.accessible).toBe(false);
@@ -221,12 +212,8 @@ test('section and control icons are decorative and theme icons follow the select
     expect(wrapper.props.pointerEvents).toBe('none');
   }
   await press('Oscuro');
-  const moon = icons().find(icon => icon.props.name === 'moon')!;
-  const sun = icons().find(icon => icon.props.name === 'sun')!;
-  const trash = icons().find(icon => icon.props.name === 'trash')!;
-  expect(moon.props.color).not.toBe(sun.props.color);
-  expect(trash.props.color).not.toBe(moon.props.color);
   expect(button('Oscuro').props.accessibilityState.selected).toBe(true);
+  expect(button('Claro').props.accessibilityState.selected).toBe(false);
 });
 
 test('theme explanation follows the committed mode and a failed write keeps the prior explanation', async () => {
@@ -285,9 +272,12 @@ test('sound has one accessible switch, toggles once and stays disabled after rem
   await press('Sonido al guardar');
   expect(update).toHaveBeenCalledTimes(1);
   expect((await services.preferences.read()).soundEnabled).toBe(false);
+  // The decorative Toggle's host view is hidden from accessibility.
   expect(
-    app.root.findByProps({ testID: 'settings-sound-switch' }).props.accessible,
-  ).toBe(false);
+    app.root
+      .findAll(node => node.props.testID === 'settings-sound-switch')
+      .some(node => node.props.accessible === false),
+  ).toBe(true);
   await act(async () => app.unmount());
   await mount();
   await press('Ajustes');

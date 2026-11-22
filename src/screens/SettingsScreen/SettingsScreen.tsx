@@ -1,6 +1,6 @@
 import { opacity } from '../../constants/theme/tokens';
 import React, { useState } from 'react';
-import { Alert, AppState, Pressable, Switch, View } from 'react-native';
+import { Alert, AppState, Pressable, View } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { CalendarActivityFeedback } from '../../components/CalendarModal/CalendarActivityFeedback';
 import { useCalendarMotion } from '../../hooks/app/useCalendarMotion';
@@ -8,7 +8,7 @@ import { usePersistence } from '../../providers/PersistenceProvider/PersistenceP
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
 import { Card } from '../../ui/Card/Card';
-import { ChoiceGroup } from '../../ui/ChoiceGroup/ChoiceGroup';
+import { SelectRow } from '../../ui/SelectRow/SelectRow';
 import { MultiChoiceGroup } from '../../ui/MultiChoiceGroup/MultiChoiceGroup';
 import { PlatformIcon } from '../../components/PlatformIcon/PlatformIcon';
 import { SettingsIcon } from '../../components/SettingsIcon/SettingsIcon';
@@ -21,6 +21,7 @@ import { platforms, platformLabels } from '../../constants/platforms';
 import { confirmationHaptics } from '../../features/settings/confirmationHaptics';
 import { confirmationSound } from '../../features/settings/confirmationSound';
 import { readAppVersion } from '../../features/settings/appVersion';
+import { Toggle } from '../../ui/Toggle/Toggle';
 import { styles } from './SettingsScreen.styles';
 
 export function SettingsScreen() {
@@ -49,6 +50,28 @@ export function SettingsScreen() {
       },
     ]);
   }
+  // Grouped-list layout (Figma Screen/Ajustes, first version): uppercase group
+  // title above a flat card. Content, handlers and labels are unchanged.
+  const group = (
+    title: string,
+    children: React.ReactNode,
+    after?: React.ReactNode,
+  ) => (
+    <View style={styles.group}>
+      <AppText
+        variant="supporting"
+        accessibilityRole="header"
+        style={[styles.groupTitle, { color: colors.tertiaryText }]}
+      >
+        {title}
+      </AppText>
+      <Card style={styles.section}>{children}</Card>
+      {after}
+    </View>
+  );
+  const divider = (
+    <View style={[styles.divider, { backgroundColor: colors.border }]} />
+  );
   return (
     <ScreenContainer>
       <View>
@@ -65,7 +88,7 @@ export function SettingsScreen() {
         </View>
       </View>
       {errorKey && (
-        <Card depth style={styles.section}>
+        <Card style={styles.section}>
           <AppText
             accessibilityRole="alert"
             style={{ color: colors.errorText }}
@@ -80,17 +103,64 @@ export function SettingsScreen() {
           />
         </Card>
       )}
-      <Card depth style={styles.section}>
-        <View style={styles.sectionHeading}>
-          <SettingsIcon name="briefcase" color={colors.primary} />
-          <AppText
-            variant="heading"
-            accessibilityRole="header"
-            style={styles.toggleLabel}
-          >
-            {t('workSection')}
+      {group(
+        t('appearanceSection'),
+        <>
+          {/* Figma rows "Idioma · Español ⌄" / "Tema · Oscuro ⌄": full-width
+              option lists fit any font scale and screen width. */}
+          <SelectRow
+            testID="settings-language"
+            label={t('language')}
+            options={languageOptions}
+            value={language}
+            onChange={value => {
+              updatePreferences({ language: value });
+            }}
+            disabled={disabled}
+          />
+          {divider}
+          <SelectRow
+            testID="settings-theme"
+            label={t('theme')}
+            options={[
+              { value: 'light', label: t('light') },
+              { value: 'dark', label: t('dark') },
+              { value: 'system', label: t('system') },
+            ]}
+            value={preferences.themeMode}
+            onChange={setMode}
+            disabled={disabled}
+          />
+          <AppText variant="supporting" secondary style={styles.help}>
+            {t(
+              preferences.themeMode === 'system'
+                ? automaticThemeStatus === 'solar'
+                  ? 'solarThemeShort'
+                  : automaticThemeStatus === 'locating'
+                  ? 'solarThemeLocatingShort'
+                  : 'solarThemeFallbackShort'
+                : preferences.themeMode === 'dark'
+                ? 'darkThemeHelp'
+                : 'lightThemeHelp',
+            )}
           </AppText>
-        </View>
+          {preferences.themeMode === 'system' && (
+            <ActionButton
+              compact
+              variant="outline"
+              label={t('moreInformation')}
+              onPress={() =>
+                Alert.alert(
+                  t('system'),
+                  t('solarThemeHelp') + '\n\n' + t('solarThemeFallback'),
+                )
+              }
+            />
+          )}
+        </>,
+      )}
+      {group(
+        t('workingPlatforms'),
         <MultiChoiceGroup
           compact
           hideLabel
@@ -116,85 +186,64 @@ export function SettingsScreen() {
             }
           }}
           disabled={disabled}
-        />
-      </Card>
-      <Card depth style={styles.section}>
-        <View style={styles.sectionHeading}>
-          <SettingsIcon name="check" color={colors.primary} />
-          <AppText
-            variant="heading"
-            accessibilityRole="header"
-            style={styles.toggleLabel}
-          >
-            {t('paymentFeedbackSection')}
+        />,
+      )}
+      {group(
+        t('paymentFeedbackSection'),
+        <>
+          <AppText variant="supporting" secondary style={styles.help}>
+            {t('paymentFeedbackHelp')}
           </AppText>
-        </View>
-        <AppText variant="supporting" secondary>
-          {t('paymentFeedbackHelp')}
-        </AppText>
-        <Pressable
-          accessibilityRole="switch"
-          accessibilityLabel={t('confirmationSound')}
-          accessibilityState={{ checked: preferences.soundEnabled, disabled }}
-          disabled={disabled}
-          onPress={() => {
-            updatePreferences({ soundEnabled: !preferences.soundEnabled });
-          }}
-          style={({ pressed }) => [
-            styles.hapticsRow,
-            pressed && { opacity: opacity.pressed },
-          ]}
-        >
-          <View style={styles.hapticsText}>
-            <AppText>{t('soundSettingLabel')}</AppText>
-          </View>
-          <View
-            pointerEvents="none"
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
+          <Pressable
+            accessibilityRole="switch"
+            accessibilityLabel={t('confirmationSound')}
+            accessibilityState={{ checked: preferences.soundEnabled, disabled }}
+            disabled={disabled}
+            onPress={() => {
+              updatePreferences({ soundEnabled: !preferences.soundEnabled });
+            }}
+            style={({ pressed }) => [
+              styles.switchRow,
+              pressed && { opacity: opacity.pressed },
+            ]}
           >
-            <Switch
-              accessible={false}
-              importantForAccessibility="no"
+            <View style={styles.switchText}>
+              <AppText>{t('soundSettingLabel')}</AppText>
+            </View>
+            <Toggle
               testID="settings-sound-switch"
               value={preferences.soundEnabled}
-              disabled={disabled}
-              trackColor={{ false: colors.border, true: colors.primary }}
             />
-          </View>
-        </Pressable>
-        <View style={[styles.divider, { backgroundColor: colors.border }]} />
-        <Pressable
-          accessibilityRole="switch"
-          accessibilityLabel={t('confirmationHaptics')}
-          accessibilityState={{ checked: preferences.hapticsEnabled, disabled }}
-          disabled={disabled}
-          onPress={() => {
-            updatePreferences({ hapticsEnabled: !preferences.hapticsEnabled });
-          }}
-          style={({ pressed }) => [
-            styles.hapticsRow,
-            pressed && { opacity: opacity.pressed },
-          ]}
-        >
-          <View style={styles.hapticsText}>
-            <AppText>{t('vibrationSettingLabel')}</AppText>
-          </View>
-          <View
-            pointerEvents="none"
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
+          </Pressable>
+          {divider}
+          <Pressable
+            accessibilityRole="switch"
+            accessibilityLabel={t('confirmationHaptics')}
+            accessibilityState={{
+              checked: preferences.hapticsEnabled,
+              disabled,
+            }}
+            disabled={disabled}
+            onPress={() => {
+              updatePreferences({
+                hapticsEnabled: !preferences.hapticsEnabled,
+              });
+            }}
+            style={({ pressed }) => [
+              styles.switchRow,
+              pressed && { opacity: opacity.pressed },
+            ]}
           >
-            <Switch
-              accessible={false}
-              importantForAccessibility="no"
+            <View style={styles.switchText}>
+              <AppText>{t('vibrationSettingLabel')}</AppText>
+            </View>
+            <Toggle
               testID="settings-haptics-switch"
               value={preferences.hapticsEnabled}
-              disabled={disabled}
-              trackColor={{ false: colors.border, true: colors.primary }}
             />
-          </View>
-        </Pressable>
+          </Pressable>
+        </>,
+        // Figma: the preview action sits below the card.
         <ActionButton
           compact
           variant="secondary"
@@ -210,188 +259,83 @@ export function SettingsScreen() {
             confirmationSound(preferences.soundEnabled);
             confirmationHaptics(preferences.hapticsEnabled);
           }}
-        />
-      </Card>
-      <Card depth style={styles.section}>
-        <View style={styles.sectionHeading}>
-          <SettingsIcon name="palette" color={colors.primary} />
-          <AppText
-            variant="heading"
-            accessibilityRole="header"
-            style={styles.toggleLabel}
-          >
-            {t('appearanceSection')}
-          </AppText>
-        </View>
-        <ChoiceGroup
-          compact
-          appearance="segmented"
-          label={t('language')}
-          headingVariant="body"
-          options={languageOptions}
-          value={language}
-          onChange={value => {
-            updatePreferences({ language: value });
-          }}
-          disabled={disabled}
-        />
-        <View style={[styles.divider, { backgroundColor: colors.border }]} />
-        <ChoiceGroup
-          compact
-          columns="filters"
-          iconLayout="inline"
-          label={t('theme')}
-          headingVariant="body"
-          value={preferences.themeMode}
-          onChange={setMode}
-          disabled={disabled}
-          options={[
-            {
-              value: 'light',
-              label: t('light'),
-              icon: (
-                <SettingsIcon
-                  name="sun"
-                  color={
-                    preferences.themeMode === 'light'
-                      ? colors.primary
-                      : colors.text
-                  }
-                />
-              ),
-            },
-            {
-              value: 'dark',
-              label: t('dark'),
-              icon: (
-                <SettingsIcon
-                  name="moon"
-                  color={
-                    preferences.themeMode === 'dark'
-                      ? colors.primary
-                      : colors.text
-                  }
-                />
-              ),
-            },
-            {
-              value: 'system',
-              label: t('system'),
-              icon: (
-                <SettingsIcon
-                  name="phone"
-                  color={
-                    preferences.themeMode === 'system'
-                      ? colors.primary
-                      : colors.text
-                  }
-                />
-              ),
-            },
-          ]}
-        />
-        <AppText variant="supporting" secondary>
-          {t(
-            preferences.themeMode === 'system'
-              ? automaticThemeStatus === 'solar'
-                ? 'solarThemeShort'
-                : automaticThemeStatus === 'locating'
-                ? 'solarThemeLocatingShort'
-                : 'solarThemeFallbackShort'
-              : preferences.themeMode === 'dark'
-              ? 'darkThemeHelp'
-              : 'lightThemeHelp',
+        />,
+      )}
+      {group(
+        t('deviceDataSection'),
+        <>
+          {version ? (
+            <View style={styles.infoRow}>
+              <AppText style={styles.valueLabel}>{t('appVersion')}</AppText>
+              <AppText secondary testID="app-version" style={styles.value}>
+                {version.version} ({version.build})
+              </AppText>
+            </View>
+          ) : (
+            <View style={styles.section}>
+              <AppText accessibilityRole="alert">
+                {t('versionUnavailable')}
+              </AppText>
+              <ActionButton
+                compact
+                label={t('retryVersion')}
+                onPress={() => setVersion(readAppVersion())}
+              />
+            </View>
           )}
-        </AppText>
-        {preferences.themeMode === 'system' && (
-          <ActionButton
-            compact
-            variant="outline"
-            label={t('moreInformation')}
-            onPress={() =>
-              Alert.alert(
-                t('system'),
-                t('solarThemeHelp') + '\n\n' + t('solarThemeFallback'),
-              )
-            }
-          />
-        )}
-      </Card>
-      <Card depth style={styles.section}>
-        <View style={styles.sectionHeading}>
-          <SettingsIcon name="database" color={colors.primary} />
-          <AppText
-            variant="heading"
-            accessibilityRole="header"
-            style={styles.toggleLabel}
-          >
-            {t('deviceDataSection')}
-          </AppText>
-        </View>
-        <View style={styles.storageRow}>
+          {divider}
           <View style={styles.storageText}>
             <AppText style={styles.storageTitle}>
               {t('localStorageTitle')}
             </AppText>
-            <AppText variant="supporting" secondary>
+            <AppText variant="supporting" secondary style={styles.help}>
               {t('localStorageShort')}
             </AppText>
           </View>
-        </View>
-        <View style={[styles.divider, { backgroundColor: colors.border }]} />
-        {deletion.allStatus === 'error' && (
-          <AppText
-            accessibilityRole="alert"
-            style={{ color: colors.errorText }}
-          >
-            {t('deleteAllFailed')}
-          </AppText>
-        )}
-        {deletion.allStatus === 'success' && (
-          <AppText accessibilityLiveRegion="polite">
-            {t('deleteAllSuccess')}
-          </AppText>
-        )}
-        <ActionButton
-          compact
-          variant="destructive-outline"
-          renderIcon={color => <SettingsIcon name="trash" color={color} />}
-          label={deleting ? t('deletingAll') : t('deleteAll')}
-          loading={deleting}
-          disabled={disabled || deletion.state.status !== 'idle'}
-          onPress={confirmClear}
-        />
-        {deletion.allStatus === 'error' && (
+        </>,
+        // Figma: deletion feedback and the destructive action sit below the card.
+        <View style={styles.after}>
+          {deletion.allStatus === 'error' && (
+            <AppText
+              accessibilityRole="alert"
+              style={{ color: colors.errorText }}
+            >
+              {t('deleteAllFailed')}
+            </AppText>
+          )}
+          {deletion.allStatus === 'success' && (
+            <AppText accessibilityLiveRegion="polite">
+              {t('deleteAllSuccess')}
+            </AppText>
+          )}
           <ActionButton
             compact
-            variant="destructive-outline"
+            variant="destructive"
             renderIcon={color => <SettingsIcon name="trash" color={color} />}
-            label={t('retryDeleteAll')}
+            label={deleting ? t('deletingAll') : t('deleteAll')}
+            loading={deleting}
             disabled={disabled || deletion.state.status !== 'idle'}
             onPress={confirmClear}
           />
-        )}
-      </Card>
-      <View style={styles.footer}>
-        <AppText variant="supporting" secondary>
-          {t('currency')}: EUR (€)
-        </AppText>
-        {version ? (
-          <AppText variant="supporting" secondary testID="app-version">
-            CashDriver · {t('appVersion')} {version.version} ({version.build})
-          </AppText>
-        ) : (
-          <View style={styles.section}>
-            <AppText accessibilityRole="alert">
-              {t('versionUnavailable')}
-            </AppText>
+          {deletion.allStatus === 'error' && (
             <ActionButton
               compact
-              label={t('retryVersion')}
-              onPress={() => setVersion(readAppVersion())}
+              variant="destructive"
+              renderIcon={color => <SettingsIcon name="trash" color={color} />}
+              label={t('retryDeleteAll')}
+              disabled={disabled || deletion.state.status !== 'idle'}
+              onPress={confirmClear}
             />
-          </View>
-        )}
+          )}
+        </View>,
+      )}
+      <View style={styles.footer}>
+        <AppText
+          variant="supporting"
+          style={[styles.footerText, { color: colors.tertiaryText }]}
+        >
+          {t('currency')}: EUR (€)
+        </AppText>
       </View>
     </ScreenContainer>
   );

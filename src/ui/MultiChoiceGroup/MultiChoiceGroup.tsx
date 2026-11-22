@@ -1,16 +1,9 @@
-import { choiceLayout } from '../../constants/theme/layout';
-import React, { useState, type ReactNode } from 'react';
-import { Pressable, useWindowDimensions, View } from 'react-native';
-import {
-  sizing,
-  spacing,
-  typography,
-  iconSizing,
-} from '../../constants/theme/tokens';
+import React, { type ReactNode } from 'react';
+import { Pressable, View } from 'react-native';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../AppText/AppText';
+import { Toggle } from '../Toggle/Toggle';
 import { styles } from './MultiChoiceGroup.styles';
-import { SelectionIndicator } from '../SelectionIndicator/SelectionIndicator';
 
 interface MultiChoiceGroupProps<Value extends string> {
   compact?: boolean;
@@ -24,6 +17,8 @@ interface MultiChoiceGroupProps<Value extends string> {
   onToggle: (value: Value) => void;
 }
 
+// One row per option with a decorative switch (Figma Ajustes "PlatformToggle").
+// Semantics stay a checkbox group: checked state, last-choice protection and hint.
 export function MultiChoiceGroup<Value extends string>({
   compact = false,
   hideLabel = false,
@@ -36,32 +31,16 @@ export function MultiChoiceGroup<Value extends string>({
   onToggle,
 }: MultiChoiceGroupProps<Value>) {
   const { colors } = useAppTheme();
-  const { fontScale } = useWindowDimensions();
-  const [width, setWidth] = useState(0);
-  // Brand icon, checkbox, padding and gaps stay fixed; reserve scaled label width.
-  const minimumChoiceWidth =
-    iconSizing.platform +
-    sizing.icon +
-    spacing.md * 2 +
-    spacing.sm * 2 +
-    Math.max(...options.map(option => option.label.length), 0) *
-      typography.body *
-      choiceLayout.multiChoiceLabelCharacterWidthFactor *
-      fontScale;
-  const columns = width >= minimumChoiceWidth * 2 + spacing.sm ? 2 : 1;
   return (
     <View style={styles.group}>
       {!hideLabel && <AppText accessibilityRole="header">{label}</AppText>}
       {description && (
-        <AppText variant="supporting" secondary>
+        <AppText variant="supporting" secondary style={styles.description}>
           {description}
         </AppText>
       )}
-      <View
-        style={styles.choices}
-        onLayout={event => setWidth(event.nativeEvent.layout.width)}
-      >
-        {options.map(option => {
+      <View>
+        {options.map((option, index) => {
           const checked = values.includes(option.value);
           const lastChoice = checked && values.length === 1;
           const choiceDisabled = disabled || lastChoice;
@@ -77,33 +56,16 @@ export function MultiChoiceGroup<Value extends string>({
               style={({ pressed }) => [
                 styles.choice,
                 compact && styles.compact,
-                {
-                  width:
-                    width > 0
-                      ? Math.floor(
-                          (width - spacing.sm * (columns - 1)) / columns,
-                        )
-                      : '100%',
-                  flexGrow: 1,
-                },
-                {
-                  backgroundColor: checked ? colors.softGreen : colors.card,
-                  borderColor: checked ? colors.primary : colors.border,
-                },
+                index > 0 && [
+                  styles.divided,
+                  { borderTopColor: colors.border },
+                ],
                 pressed && styles.pressed,
               ]}
             >
               {option.icon}
-              <AppText
-                style={[
-                  styles.choiceLabel,
-                  checked && styles.checked,
-                  { color: checked ? colors.primary : colors.text },
-                ]}
-              >
-                {option.label}
-              </AppText>
-              <SelectionIndicator checked={checked} />
+              <AppText style={styles.choiceLabel}>{option.label}</AppText>
+              <Toggle value={checked} />
             </Pressable>
           );
         })}

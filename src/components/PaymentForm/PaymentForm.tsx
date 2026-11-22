@@ -24,6 +24,7 @@ import { platformLabels } from '../../constants/platforms';
 import type { PaymentFormProps } from './PaymentForm.interface';
 import { styles } from './PaymentForm.styles';
 import { PaymentOutcome } from '../PaymentOutcome/PaymentOutcome';
+import { Toggle } from '../../ui/Toggle/Toggle';
 import GiftIcon from '../../assets/icons/duotone/gift.svg';
 import TrashIcon from '../../assets/icons/line/trash.svg';
 
@@ -412,30 +413,7 @@ export function PaymentForm({
               )}
             </View>
             {/* Decorative switch mirrors the existing expand/collapse state. */}
-            <View
-              accessible={false}
-              importantForAccessibility="no-hide-descendants"
-              style={[
-                styles.switchTrack,
-                tipActive && styles.switchTrackOn,
-                {
-                  backgroundColor: tipActive
-                    ? colors.accentFill
-                    : colors.borderStrong,
-                },
-              ]}
-            >
-              <View
-                style={[
-                  styles.switchKnob,
-                  {
-                    backgroundColor: tipActive
-                      ? colors.onAccent
-                      : colors.secondaryText,
-                  },
-                ]}
-              />
-            </View>
+            <Toggle value={tipActive} />
           </Pressable>
           <CollapsibleTipContent
             expanded={form.tipExpanded}
