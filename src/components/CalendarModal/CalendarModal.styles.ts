@@ -63,7 +63,7 @@ export const styles = StyleSheet.create({
   panel: {
     width: '100%',
     maxWidth: sizing.contentMaxWidth,
-    borderRadius: radii.card,
+    borderRadius: radii.cardLarge,
     borderWidth: sizing.borderWidth,
     overflow: 'hidden',
   },
@@ -102,18 +102,12 @@ export const styles = StyleSheet.create({
   month: { flexGrow: 1, flexBasis: '30%' },
   selectedMonth: { fontWeight: '700' },
   pickerPreview: { textAlign: 'center', marginTop: spacing.sm },
-  // Transparent artwork needs a larger image inside the existing touch target.
   icon: {
-    width: iconSizing.calendar,
-    height: iconSizing.calendar,
+    width: sizing.icon,
+    height: sizing.icon,
     flexShrink: 0,
   },
-  chevron: {
-    width: iconSizing.calendarChevron,
-    height: iconSizing.calendarChevron,
-    borderTopWidth: iconSizing.chevronStroke,
-    borderRightWidth: iconSizing.chevronStroke,
-  },
+  chevron: { width: sizing.icon, height: sizing.icon },
   day: {
     minWidth: sizing.touchTarget,
     minHeight: sizing.touchTarget,

@@ -1,11 +1,5 @@
 import { StyleSheet } from 'react-native';
-import {
-  radii,
-  sizing,
-  spacing,
-  opacity,
-  iconSizing,
-} from '../../constants/theme/tokens';
+import { radii, sizing, spacing, opacity } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   labelFrame: { flex: 1 },
@@ -44,25 +38,18 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
     paddingVertical: spacing.sm,
-    borderRadius: radii.chip,
+    borderRadius: radii.pill,
   },
   fullWidth: { flexBasis: '100%', flexGrow: 0, flexShrink: 0 },
   label: { flexShrink: 1, textAlign: 'center', fontWeight: '600' },
-  dropdown: {
-    width: iconSizing.periodChevron,
-    height: iconSizing.periodChevron,
-    borderRightWidth: iconSizing.chevronStroke,
-    borderBottomWidth: iconSizing.chevronStroke,
-    transform: [{ rotate: '45deg' }],
-  },
   pressed: { opacity: opacity.pressed },
   button: {
-    minHeight: sizing.primaryButton,
-    minWidth: sizing.primaryButton,
+    minHeight: sizing.touchTarget,
+    minWidth: sizing.touchTarget,
     flexShrink: 0,
     padding: spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: radii.chip,
+    borderRadius: radii.pill,
   },
 });

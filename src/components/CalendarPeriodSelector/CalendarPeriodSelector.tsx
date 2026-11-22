@@ -10,7 +10,8 @@ import {
 } from '../CalendarModal/calendarPresentation';
 import { CalendarPeriodSelectorProps } from './CalendarPeriodSelector.interface';
 import { styles } from './CalendarPeriodSelector.styles';
-import { spacing } from '../../constants/theme/tokens';
+import { sizing, spacing } from '../../constants/theme/tokens';
+import ChevronDown from '../../assets/icons/line/chevron-down.svg';
 import { CalendarChevron, CalendarIcon } from '../CalendarModal/CalendarIcon';
 
 export function CalendarPeriodSelector({
@@ -52,7 +53,9 @@ export function CalendarPeriodSelector({
       style={({ pressed }) => [
         styles.monthButton,
         stacked && styles.fullWidth,
-        pressed && { backgroundColor: colors.softGreen },
+        {
+          backgroundColor: pressed ? colors.softGreen : colors.surfaceRaised,
+        },
       ]}
     >
       <CalendarIcon />
@@ -83,11 +86,13 @@ export function CalendarPeriodSelector({
           </AppText>
         </View>
       </View>
-      <View
-        accessible={false}
-        importantForAccessibility="no-hide-descendants"
-        style={[styles.dropdown, { borderColor: colors.text }]}
-      />
+      <View accessible={false} importantForAccessibility="no-hide-descendants">
+        <ChevronDown
+          width={sizing.icon - 4}
+          height={sizing.icon - 4}
+          color={colors.secondaryText}
+        />
+      </View>
     </Pressable>
   );
   return (
@@ -107,7 +112,7 @@ export function CalendarPeriodSelector({
           onPress={() => onMoveMonth(-1)}
           style={({ pressed }) => [
             styles.button,
-            { backgroundColor: colors.softGreen },
+            { backgroundColor: colors.surfaceRaised },
             pressed && styles.pressed,
           ]}
         >
@@ -120,7 +125,7 @@ export function CalendarPeriodSelector({
           onPress={() => onMoveMonth(1)}
           style={({ pressed }) => [
             styles.button,
-            { backgroundColor: colors.softGreen },
+            { backgroundColor: colors.surfaceRaised },
             pressed && styles.pressed,
           ]}
         >

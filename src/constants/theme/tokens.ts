@@ -74,10 +74,7 @@ export const iconSizing = {
   historyPlatform: 40, // Розмір логотипа платформи в історії, dp.
   detailsPlatform: 60, // Розмір логотипа платформи в деталях операції, dp.
   summary: 44, // Звичайний розмір ілюстрації підсумків, dp.
-  calendar: 32, // Розмір іконки календаря, dp.
   chevronStroke: 2, // Товщина ліній маленьких стрілок, dp.
-  calendarChevron: 10, // Розмір стрілки у вікні календаря, dp.
-  periodChevron: 7, // Розмір стрілки вибору періоду, dp.
   summaryChevron: 9, // Розмір стрілки підсумку дня, dp.
   calendarActivityDot: 4, // Діаметр крапки дня з операціями, dp.
   calendarSelectionStroke: 2, // Товщина обведення вибраного дня, dp.
