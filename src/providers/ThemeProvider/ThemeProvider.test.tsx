@@ -145,7 +145,7 @@ test('reacts to system changes, keeps explicit override, and unsubscribes on unm
     expect(root.findByProps({ testID: 'appearance' }).props.children).toBe(
       'light',
     );
-    expect(setBars).toHaveBeenLastCalledWith(false, '#FFFFFF');
+    expect(setBars).toHaveBeenLastCalledWith(false, '#F3F4F1');
     await act(async () => {
       systemAppearance = 'dark';
       notify();
@@ -153,7 +153,7 @@ test('reacts to system changes, keeps explicit override, and unsubscribes on unm
     expect(root.findByProps({ testID: 'appearance' }).props.children).toBe(
       'dark',
     );
-    expect(setBars).toHaveBeenLastCalledWith(true, '#1A2520');
+    expect(setBars).toHaveBeenLastCalledWith(true, '#0A0B0B');
     const light = root
       .findAll(node => typeof node.props.onPress === 'function')
       .find(
@@ -168,7 +168,7 @@ test('reacts to system changes, keeps explicit override, and unsubscribes on unm
     );
     setBars.mockClear();
     await act(async () => resume());
-    expect(setBars).toHaveBeenCalledWith(false, '#FFFFFF');
+    expect(setBars).toHaveBeenCalledWith(false, '#F3F4F1');
     await act(async () => {
       systemAppearance = 'light';
       notify();

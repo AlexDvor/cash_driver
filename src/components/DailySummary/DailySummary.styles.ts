@@ -10,7 +10,8 @@ import {
 
 export const styles = StyleSheet.create({
   container: {
-    borderRadius: radii.input,
+    borderRadius: radii.card,
+    borderWidth: sizing.borderWidth,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
   },
@@ -38,9 +39,9 @@ export const styles = StyleSheet.create({
   refreshText: { flex: 1 },
   totals: { gap: spacing.md },
   toggleCircle: {
-    width: sizing.icon,
-    height: sizing.icon,
-    borderRadius: sizing.icon / 2,
+    width: sizing.iconButton,
+    height: sizing.iconButton,
+    borderRadius: sizing.iconButton / 2,
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
@@ -52,7 +53,6 @@ export const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     left: 0,
-    opacity: opacity.summaryCircleFill,
   },
   chevron: {
     width: iconSizing.summaryChevron,

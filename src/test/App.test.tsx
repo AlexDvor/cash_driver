@@ -149,7 +149,7 @@ test('language and theme changes preserve navigation and localize the mounted UI
     JSON.stringify(app.toJSON(), (_key, value: unknown) =>
       React.isValidElement(value) ? undefined : value,
     ),
-  ).toContain('#101714');
+  ).toContain('#0A0B0B');
   await press(app, 'radio', 'Español');
   expect(ref.getCurrentRoute()?.key).toBe(routeKey);
   expect(

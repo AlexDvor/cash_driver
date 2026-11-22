@@ -8,11 +8,12 @@ export const styles = StyleSheet.create({
     minHeight: sizing.primaryButton,
     borderRadius: radii.button,
     borderWidth: sizing.borderWidth,
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.xxl,
     paddingVertical: spacing.md,
     justifyContent: 'center',
     alignItems: 'center',
   },
   compact: { minHeight: sizing.touchTarget, paddingVertical: spacing.sm },
+  pressed: { opacity: 0.85, transform: [{ scale: 0.98 }] },
   label: { fontWeight: '600', textAlign: 'center', flexShrink: 1 },
 });

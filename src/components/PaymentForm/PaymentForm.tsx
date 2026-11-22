@@ -24,6 +24,8 @@ import { platformLabels } from '../../constants/platforms';
 import type { PaymentFormProps } from './PaymentForm.interface';
 import { styles } from './PaymentForm.styles';
 import { PaymentOutcome } from '../PaymentOutcome/PaymentOutcome';
+import GiftIcon from '../../assets/icons/duotone/gift.svg';
+import TrashIcon from '../../assets/icons/line/trash.svg';
 
 export function PaymentForm({
   form,
@@ -39,8 +41,6 @@ export function PaymentForm({
   const { fontScale } = useWindowDimensions();
   const [quickWidth, setQuickWidth] = useState(0);
   const [fieldsWidth, setFieldsWidth] = useState(0);
-  const stackedTipActions =
-    fieldsWidth / fontScale < paymentLayout.tipActionsStackWidth;
   const [moneyMeasure, setMoneyMeasure] = useState({ key: '', width: 0 });
   const measureKey = `${fontScale}:${locale}`;
   const pairedFields =
@@ -111,6 +111,8 @@ export function PaymentForm({
       : t('addTip');
   const positiveTip =
     form.tipParsed.status === 'valid' && form.tipParsed.cents > 0 && !tipError;
+  // Visual "on" state of the tip switch: editor open or a valid tip applied.
+  const tipActive = form.tipExpanded || positiveTip;
   return (
     <>
       <Card depth style={styles.card}>
@@ -285,14 +287,19 @@ export function PaymentForm({
                 style={({ pressed }) => [
                   styles.quick,
                   quickStyle,
-                  {
-                    borderColor: colors.transparent,
-                    backgroundColor:
-                      form.receivedParsed.status === 'valid' &&
-                      form.receivedParsed.cents === cents
-                        ? colors.primary
-                        : colors.softGreen,
-                  },
+                  form.receivedParsed.status === 'valid' &&
+                    form.receivedParsed.cents === cents
+                    ? [
+                        styles.quickSelected,
+                        {
+                          borderColor: colors.primary,
+                          backgroundColor: colors.softGreen,
+                        },
+                      ]
+                    : {
+                        borderColor: colors.border,
+                        backgroundColor: colors.surfaceRaised,
+                      },
                   pressed && styles.pressed,
                 ]}
               >
@@ -304,8 +311,8 @@ export function PaymentForm({
                       color:
                         form.receivedParsed.status === 'valid' &&
                         form.receivedParsed.cents === cents
-                          ? colors.onPrimary
-                          : colors.primary,
+                          ? colors.primary
+                          : colors.text,
                     },
                   ]}
                 >
@@ -326,7 +333,7 @@ export function PaymentForm({
                   styles.quick,
                   quickStyle,
                   {
-                    backgroundColor: colors.card,
+                    backgroundColor: colors.transparent,
                     borderColor: colors.primary,
                     borderWidth: sizing.borderWidth,
                   },
@@ -369,123 +376,162 @@ export function PaymentForm({
             }}
             style={({ pressed }) => [
               styles.tipHeader,
-              { borderColor: colors.border, backgroundColor: colors.card },
+              {
+                borderColor: tipActive ? colors.primary : colors.border,
+                backgroundColor: colors.surfaceRaised,
+              },
+              tipActive && styles.tipHeaderActive,
               (pressed || disabled) && styles.pressed,
             ]}
           >
-            <AppText
+            <View
               accessible={false}
-              importantForAccessibility="no"
-              style={{ color: colors.primary }}
+              importantForAccessibility="no-hide-descendants"
+              style={[styles.tipPlate, { backgroundColor: colors.softGreen }]}
             >
-              +
-            </AppText>
-            <AppText style={styles.tipLabel}>
-              {positiveTip || form.tipExpanded
-                ? t('tipInput')
-                : t('addTip').replace(/^\+\s*/, '')}
-            </AppText>
-            {positiveTip && form.tipParsed.status === 'valid' && (
-              <AppText
-                testID="tip-amount-badge"
-                variant="supporting"
-                style={[
-                  styles.tipBadge,
-                  { color: colors.primary, backgroundColor: colors.softGreen },
-                ]}
-              >
-                {formatMoney(form.tipParsed.cents, locale)}
-              </AppText>
-            )}
+              <GiftIcon
+                width={sizing.icon - 4}
+                height={sizing.icon - 4}
+                color={colors.primary}
+              />
+            </View>
+            <View style={styles.tipText}>
+              <AppText style={styles.tipTitle}>{t('tipInput')}</AppText>
+              {positiveTip && form.tipParsed.status === 'valid' ? (
+                <AppText
+                  testID="tip-amount-badge"
+                  variant="supporting"
+                  style={[styles.tipBadge, { color: colors.primary }]}
+                >
+                  {formatMoney(form.tipParsed.cents, locale)}
+                </AppText>
+              ) : (
+                <AppText variant="supporting" secondary style={styles.tipHint}>
+                  {t('optionalTip')}
+                </AppText>
+              )}
+            </View>
+            {/* Decorative switch mirrors the existing expand/collapse state. */}
             <View
               accessible={false}
               importantForAccessibility="no-hide-descendants"
               style={[
-                styles.tipChevron,
+                styles.switchTrack,
+                tipActive && styles.switchTrackOn,
                 {
-                  borderColor: colors.primary,
-                  transform: [
-                    { rotate: form.tipExpanded ? '225deg' : '45deg' },
-                  ],
+                  backgroundColor: tipActive
+                    ? colors.accentFill
+                    : colors.borderStrong,
                 },
               ]}
-            />
+            >
+              <View
+                style={[
+                  styles.switchKnob,
+                  {
+                    backgroundColor: tipActive
+                      ? colors.onAccent
+                      : colors.secondaryText,
+                  },
+                ]}
+              />
+            </View>
           </Pressable>
           <CollapsibleTipContent
             expanded={form.tipExpanded}
             resetCount={form.tipResetCount}
           >
-            <MoneyInput
-              compact
-              showCurrency
-              inputRef={tipInput}
-              label={t('tipInput')}
-              hideLabel
-              value={form.tip}
-              error={tipError}
-              disabled={disabled || !form.tipExpanded}
-              onChange={raw => form.changeField('tip', raw)}
-              onFocus={() => {
-                entryNavigation?.focus('tip');
-                tipFocused.current = true;
-                form.focus('tip');
-              }}
-              onBlur={() => {
-                entryNavigation?.blur('tip');
-                tipFocused.current = false;
-                form.blur('tip');
-              }}
-            />
-            <View
-              style={[
-                styles.quickRow,
-                stackedTipActions && styles.stackedActions,
-              ]}
-            >
-              {[
-                {
-                  label: t('removeTip'),
-                  onPress: () => {
-                    form.removeTip();
-                    finishTipFocus();
-                  },
+            <View style={styles.tipEditor}>
+              <View style={styles.tipField}>
+                <MoneyInput
+                  compact
+                  showCurrency
+                  inputRef={tipInput}
+                  label={t('tipInput')}
+                  hideLabel
+                  value={form.tip}
+                  error={tipError}
+                  disabled={disabled || !form.tipExpanded}
+                  onChange={raw => form.changeField('tip', raw)}
+                  onFocus={() => {
+                    entryNavigation?.focus('tip');
+                    tipFocused.current = true;
+                    form.focus('tip');
+                  }}
+                  onBlur={() => {
+                    entryNavigation?.blur('tip');
+                    tipFocused.current = false;
+                    form.blur('tip');
+                  }}
+                />
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('removeTip')}
+                accessibilityState={{
                   disabled: disabled || !form.tipExpanded,
-                },
-                {
-                  label: t('allChangeAsTip'),
-                  onPress: form.allChangeAsTip,
-                  disabled:
-                    disabled ||
-                    !form.tipExpanded ||
-                    form.availableChangeCents === null ||
-                    form.availableChangeCents === 0,
-                },
-              ].map(action => (
+                }}
+                disabled={disabled || !form.tipExpanded}
+                onPress={() => {
+                  entryNavigation?.cancel();
+                  form.removeTip();
+                  finishTipFocus();
+                }}
+                style={({ pressed }) => [
+                  styles.removeTip,
+                  { backgroundColor: colors.errorSurface },
+                  (pressed || disabled || !form.tipExpanded) && styles.pressed,
+                ]}
+              >
+                <TrashIcon
+                  width={sizing.icon - 2}
+                  height={sizing.icon - 2}
+                  color={colors.errorText}
+                  accessible={false}
+                />
+              </Pressable>
+            </View>
+            {(() => {
+              const allDisabled =
+                disabled ||
+                !form.tipExpanded ||
+                form.availableChangeCents === null ||
+                form.availableChangeCents === 0;
+              return (
                 <Pressable
-                  key={action.label}
                   accessibilityRole="button"
-                  accessibilityLabel={action.label}
-                  accessibilityState={{ disabled: action.disabled }}
-                  disabled={action.disabled}
+                  accessibilityLabel={t('allChangeAsTip')}
+                  accessibilityState={{ disabled: allDisabled }}
+                  disabled={allDisabled}
                   onPress={() => {
                     entryNavigation?.cancel();
-                    action.onPress();
+                    form.allChangeAsTip();
                   }}
                   style={({ pressed }) => [
                     styles.quick,
-                    styles.tipAction,
-                    stackedTipActions && styles.fullWidthAction,
+                    styles.allChange,
                     {
-                      borderColor: colors.border,
-                      backgroundColor: colors.background,
+                      borderColor: colors.borderStrong,
+                      backgroundColor: colors.card,
                     },
-                    (pressed || action.disabled) && styles.pressed,
+                    (pressed || allDisabled) && styles.pressed,
                   ]}
                 >
-                  <AppText style={styles.actionLabel}>{action.label}</AppText>
+                  <AppText style={styles.actionLabel}>
+                    {t('allChangeAsTip')}
+                  </AppText>
+                  {form.availableChangeCents !== null &&
+                    form.availableChangeCents > 0 && (
+                      <AppText
+                        variant="supporting"
+                        style={[styles.actionAmount, { color: colors.primary }]}
+                      >
+                        {formatMoney(form.availableChangeCents, locale)}
+                      </AppText>
+                    )}
                 </Pressable>
-              ))}
-            </View>
+              );
+            })()}
           </CollapsibleTipContent>
         </View>
       </Card>

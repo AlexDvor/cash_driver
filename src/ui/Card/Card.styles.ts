@@ -8,4 +8,5 @@ export const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.md,
   },
+  large: { borderRadius: radii.cardLarge },
 });

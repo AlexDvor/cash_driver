@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Keyboard, Pressable, View } from 'react-native';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
@@ -8,7 +8,7 @@ import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { formatMoney } from '../../i18n/formatting';
 import type { PaymentOutcomeProps } from './PaymentOutcome.interface';
 import { styles } from './PaymentOutcome.styles';
-import { CashIcon, ReceiptSurface } from './ReceiptSurface';
+import { CashIcon } from './CashIcon';
 import { CollapsibleContent } from '../CollapsibleContent/CollapsibleContent';
 
 export function PaymentOutcome({
@@ -29,14 +29,8 @@ export function PaymentOutcome({
     form.fare.trim() === '' &&
     form.received.trim() === '' &&
     form.tip.trim() === '';
-  const [receiptSize, setReceiptSize] = useState({ width: 0, height: 0 });
-  const [dividerY, setDividerY] = useState(0);
   const receiptColor =
-    result?.status === 'insufficient'
-      ? colors.errorSurface
-      : result?.status === 'valid'
-      ? colors.softGreen
-      : colors.card;
+    result?.status === 'insufficient' ? colors.errorSurface : colors.card;
   return (
     <View
       ref={outcomeRef}
@@ -46,17 +40,17 @@ export function PaymentOutcome({
     >
       <View style={styles.card}>
         <View
-          style={styles.result}
-          onLayout={event => {
-            const { width, height } = event.nativeEvent.layout;
-            setReceiptSize({ width, height });
-          }}
+          style={[
+            styles.result,
+            {
+              backgroundColor: receiptColor,
+              borderColor:
+                result?.status === 'insufficient'
+                  ? colors.errorText
+                  : colors.border,
+            },
+          ]}
         >
-          <ReceiptSurface
-            {...receiptSize}
-            dividerY={result?.status === 'valid' ? dividerY : 0}
-            fill={receiptColor}
-          />
           <View style={styles.receiptHeading}>
             <CashIcon
               color={
@@ -65,7 +59,11 @@ export function PaymentOutcome({
                   : colors.primary
               }
             />
-            <AppText style={styles.receiptTitle}>{t('changeToReturn')}</AppText>
+            <AppText
+              style={[styles.receiptTitle, { color: colors.secondaryText }]}
+            >
+              {t('changeToReturn')}
+            </AppText>
           </View>
           <AppText
             testID="change-result"
@@ -105,8 +103,7 @@ export function PaymentOutcome({
             form.receivedParsed.status === 'valid' && (
               <View
                 testID="payment-receipt-details"
-                onLayout={event => setDividerY(event.nativeEvent.layout.y)}
-                style={[styles.details, { borderTopColor: colors.border }]}
+                style={[styles.details, { borderTopColor: colors.borderStrong }]}
               >
                 {[
                   {

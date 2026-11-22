@@ -1,5 +1,9 @@
 import { StyleSheet } from 'react-native';
-import { spacing, typography } from '../../constants/theme/tokens';
+import {
+  letterSpacing,
+  spacing,
+  typography,
+} from '../../constants/theme/tokens';
 export const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
@@ -9,5 +13,9 @@ export const styles = StyleSheet.create({
     columnGap: spacing.md,
     rowGap: spacing.xs,
   },
-  title: { fontSize: typography.homeTitle, fontWeight: '700' },
+  title: {
+    fontSize: typography.homeTitle,
+    fontWeight: '700',
+    letterSpacing: letterSpacing.title,
+  },
 });

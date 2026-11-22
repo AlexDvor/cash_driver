@@ -52,7 +52,8 @@ export function ThemeProvider({ children }: React.PropsWithChildren) {
       : resolveTheme(mode, systemAppearance);
   const colors = palettes[appearance];
   useEffect(() => {
-    const apply = () => updateSystemBars(appearance, colors.card);
+    // System bars match the screen/tab-bar canvas (redesign 2026-11).
+    const apply = () => updateSystemBars(appearance, colors.background);
     apply();
     const subscription = AppState.addEventListener('change', state => {
       if (state === 'active') {
@@ -60,7 +61,7 @@ export function ThemeProvider({ children }: React.PropsWithChildren) {
       }
     });
     return () => subscription.remove();
-  }, [appearance, colors.card]);
+  }, [appearance, colors.background]);
   return (
     <ThemeContext.Provider
       value={{

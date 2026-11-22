@@ -38,14 +38,16 @@ export const styles = StyleSheet.create({
   segment: {
     flexBasis: 'auto',
     flexGrow: 1,
-    borderRadius: radii.button,
+    borderRadius: radii.pill,
   },
   segmentTray: {
     borderWidth: sizing.borderWidth,
-    borderRadius: radii.input,
+    borderRadius: radii.pill,
     padding: spacing.xs,
     gap: spacing.xs,
   },
+  // Selected chips get a slightly heavier accent border (layout size unchanged).
+  selectedChoice: { borderWidth: 1.5 },
   pressed: { opacity: opacity.choicePressed },
   selected: { fontWeight: '700' },
 });

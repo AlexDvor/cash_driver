@@ -2,9 +2,9 @@ import React from 'react';
 import { StyleProp, View, ViewStyle } from 'react-native';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { styles } from './Card.styles';
-import { SurfaceDepth } from '../SurfaceDepth/SurfaceDepth';
-import { radii } from '../../constants/theme/tokens';
 
+// Flat surface with a hairline border (redesign 2026-11: no gradient depth).
+// `depth` is kept for call-site compatibility and only selects the larger radius.
 export function Card({
   children,
   style,
@@ -15,11 +15,11 @@ export function Card({
     <View
       style={[
         styles.card,
+        depth && styles.large,
         { backgroundColor: colors.card, borderColor: colors.border },
         style,
       ]}
     >
-      {depth && <SurfaceDepth radius={radii.card} />}
       {children}
     </View>
   );

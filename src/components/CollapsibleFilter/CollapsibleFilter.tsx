@@ -17,7 +17,7 @@ export function CollapsibleFilter({
 }: CollapsibleFilterProps) {
   const { colors } = useAppTheme();
   return (
-    <Card depth style={styles.card}>
+    <Card style={styles.card}>
       <Pressable
         testID={`${testID}-toggle`}
         accessibilityRole="button"
@@ -28,10 +28,10 @@ export function CollapsibleFilter({
         style={({ pressed }) => [styles.header, pressed && styles.pressed]}
       >
         <View style={styles.text}>
-          <AppText style={styles.label}>{label}</AppText>
-          <AppText variant="supporting" secondary>
-            {value}
+          <AppText variant="supporting" secondary style={styles.label}>
+            {label}
           </AppText>
+          <AppText style={styles.value}>{value}</AppText>
         </View>
         <View
           style={styles.circle}
@@ -40,13 +40,13 @@ export function CollapsibleFilter({
           importantForAccessibility="no-hide-descendants"
         >
           <View
-            style={[styles.circleFill, { backgroundColor: colors.primary }]}
+            style={[styles.circleFill, { backgroundColor: colors.softGreen }]}
           />
           <View
             style={[
               styles.chevron,
               {
-                borderColor: colors.text,
+                borderColor: colors.primary,
                 transform: [{ rotate: expanded ? '225deg' : '45deg' }],
               },
             ]}

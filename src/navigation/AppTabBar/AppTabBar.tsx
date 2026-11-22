@@ -31,7 +31,7 @@ export function AppTabBar({ state, navigation, insets }: BottomTabBarProps) {
       style={[
         styles.bar,
         {
-          backgroundColor: colors.card,
+          backgroundColor: colors.background,
           borderTopColor: colors.border,
           paddingBottom: Math.max(insets.bottom, spacing.sm),
           paddingLeft: insets.left,
@@ -44,7 +44,7 @@ export function AppTabBar({ state, navigation, insets }: BottomTabBarProps) {
           return null;
         }
         const selected = state.index === index;
-        const color = selected ? colors.primary : colors.secondaryText;
+        const color = selected ? colors.primary : colors.tertiaryText;
         const label = t(labels[route.name]);
         return (
           <Pressable
@@ -67,13 +67,30 @@ export function AppTabBar({ state, navigation, insets }: BottomTabBarProps) {
             }
             style={({ pressed }) => [styles.tab, pressed && styles.pressed]}
           >
-            <TabIcon name={route.name} color={color} />
+            <View
+              style={[
+                styles.indicator,
+                {
+                  // Opaque in both states: switching from transparent dropped the
+                  // rounded corners on Android after a tab change.
+                  backgroundColor: selected
+                    ? colors.softGreen
+                    : colors.background,
+                },
+              ]}
+            >
+              <TabIcon name={route.name} color={color} />
+            </View>
             <AppText
               variant="supporting"
               numberOfLines={1}
               adjustsFontSizeToFit
               minimumFontScale={navigationLayout.labelMinimumFontScale}
-              style={[styles.label, { color }, selected && styles.selected]}
+              style={[
+                styles.label,
+                { color: selected ? colors.text : colors.tertiaryText },
+                selected && styles.selected,
+              ]}
             >
               {label}
             </AppText>

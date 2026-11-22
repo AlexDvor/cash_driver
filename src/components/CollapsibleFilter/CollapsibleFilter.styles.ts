@@ -4,22 +4,29 @@ import {
   opacity,
   sizing,
   spacing,
+  typography,
 } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
-  card: { padding: spacing.md, gap: 0 },
+  card: {
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    gap: 0,
+  },
   header: {
     minHeight: sizing.touchTarget,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
   },
-  text: { flex: 1, gap: spacing.xs },
-  label: { fontWeight: '600' },
+  text: { flex: 1, gap: 2 },
+  label: { fontSize: typography.caption },
+  value: { fontWeight: '600' },
+  // Same round accent chevron button as the daily summary.
   circle: {
-    width: sizing.icon,
-    height: sizing.icon,
-    borderRadius: sizing.icon / 2,
+    width: sizing.iconButton,
+    height: sizing.iconButton,
+    borderRadius: sizing.iconButton / 2,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -30,7 +37,6 @@ export const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     left: 0,
-    opacity: opacity.summaryCircleFill,
   },
   chevron: {
     width: iconSizing.summaryChevron,
@@ -38,6 +44,6 @@ export const styles = StyleSheet.create({
     borderRightWidth: iconSizing.chevronStroke,
     borderBottomWidth: iconSizing.chevronStroke,
   },
-  content: { paddingTop: spacing.md, gap: spacing.md },
+  content: { paddingTop: spacing.sm, paddingBottom: spacing.sm, gap: spacing.md },
   pressed: { opacity: opacity.pressed },
 });

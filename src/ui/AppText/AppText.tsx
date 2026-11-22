@@ -15,6 +15,7 @@ export function AppText({
     <Text
       {...props}
       style={[
+        styles.font,
         styles[variant],
         { color: secondary ? colors.secondaryText : colors.text },
         style,
