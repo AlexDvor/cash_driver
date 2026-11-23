@@ -436,15 +436,14 @@ function CalendarSession({
             />
             {pickingMonth ? (
               <View style={styles.grid}>
-                {Array.from({ length: 12 }, (_, index) => index + 1)
-                  .filter(month =>
-                    isMonthInRange(
+                {Array.from({ length: 12 }, (_, index) => index + 1).map(
+                  month => {
+                    // Months outside the browsable range stay listed but inactive.
+                    const inRange = isMonthInRange(
                       { year: draftMonth.year, month },
                       minMonth,
                       maxMonth,
-                    ),
-                  )
-                  .map(month => {
+                    );
                     const occupied =
                       hasMonths && occupiedMonths.includes(month);
                     const monthLabel = new Intl.DateTimeFormat(locale, {
@@ -483,12 +482,15 @@ function CalendarSession({
                           .filter(Boolean)
                           .join(', ')}
                         testID={`calendar-month-${month}`}
+                        disabled={!inRange}
                         accessibilityState={{
                           selected: month === draftMonth.month,
+                          disabled: !inRange,
                         }}
                         style={[
                           styles.control,
                           styles.month,
+                          !inRange && styles.disabledControl,
                           {
                             backgroundColor:
                               month === draftMonth.month
@@ -521,7 +523,8 @@ function CalendarSession({
                         </AppText>
                       </Pressable>
                     );
-                  })}
+                  },
+                )}
               </View>
             ) : (
               <CalendarGrid

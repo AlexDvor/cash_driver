@@ -170,7 +170,10 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
         const next = offsetCalendarMonth(current.draftMonth, page > 1 ? 1 : -1);
         if (!isMonthInRange(next, current.minMonth, current.maxMonth)) {
           // Outside the browsable range: spring back to the current page.
-          pageScroll.current?.scrollTo({ x: viewportWidth, animated: false });
+          pageScroll.current?.scrollTo({
+            x: viewportWidth,
+            animated: !reducedMotion,
+          });
           lastOffset.current = viewportWidth;
           showPreview(0);
           onPagingChange(false);
@@ -179,7 +182,7 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
         pendingMonth.current = `${next.year}/${next.month}`;
         current.onBrowseMonth(next);
       },
-      [viewportWidth, onPagingChange, showPreview],
+      [viewportWidth, reducedMotion, onPagingChange, showPreview],
     );
     // Restart after every native offset: elapsed time alone does not prove a
     // page reached its destination. Some Android slow snaps omit momentum-end.
@@ -349,7 +352,14 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
             {months.map((coordinate, index) => {
               const offset = index - 1;
               const preview = offset !== 0;
-              const page = (
+              // A month outside the browsable range slides in as an empty page
+              // (no days), so a swipe past the bound reads as a soft stop.
+              const reachable = isMonthInRange(
+                coordinate,
+                props.minMonth,
+                props.maxMonth,
+              );
+              const page = !reachable ? null : (
                 <CalendarMonthPage
                   calendarWidth={calendarWidth}
                   props={{
