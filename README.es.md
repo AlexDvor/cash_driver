@@ -25,7 +25,7 @@ Las plataformas son etiquetas seleccionadas manualmente. CashDriver no se conect
 
 ## Capturas de pantalla
 
-Capturas reales de un teléfono Android (versión release 1.1.0) con datos sintéticos de demostración y la interfaz en español. No se utilizaron operaciones personales.
+Capturas reales de un emulador Android (versión 1.1.0) con datos sintéticos de demostración y la interfaz en español. No se utilizaron operaciones personales.
 
 | Pantalla                                                                                                       | Tema claro                                                                                                                         | Tema oscuro                                                                                                                        |
 | -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |

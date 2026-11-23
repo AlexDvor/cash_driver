@@ -25,7 +25,7 @@ Platforms are manually selected labels. CashDriver does not connect to their acc
 
 ## Screenshots
 
-Real screenshots from an Android phone (release build 1.1.0) using synthetic demo data and the Spanish interface. No personal payment records were used.
+Real screenshots from an Android emulator (build 1.1.0) using synthetic demo data and the Spanish interface. No personal payment records were used.
 
 | Screen                                                                                          | Light theme                                                                                                                | Dark theme                                                                                                               |
 | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
