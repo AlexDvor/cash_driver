@@ -1,8 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path d="M16.2 6.8A7 7 0 1 1 6.8 16.2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-opacity="0.55"/>
-  <circle cx="10" cy="10" r="7" fill="currentColor" fill-opacity="0.22"/>
-  <circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/>
-  <path d="M12.4 7.9a3 3 0 1 0 0 4.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
-  <path d="M7.4 9.2h4M7.4 10.8h4" fill="none" stroke="currentColor" stroke-width="1.6"/>
-  <path d="M20 2v3.2M18.4 3.6h3.2" fill="none" stroke="currentColor" stroke-width="1.6"/>
+  <defs>
+    <mask id="coinCut">
+      <rect width="24" height="24" fill="#fff"/>
+      <path d="M15.6 8.4a4.9 4.9 0 1 0 0 7.2M6.9 10.7h6.6M6.9 13.3h6.6" fill="none" stroke="#000" stroke-width="1.7"/>
+    </mask>
+  </defs>
+  <circle cx="12" cy="12" r="9.4" fill="currentColor" mask="url(#coinCut)"/>
 </svg>

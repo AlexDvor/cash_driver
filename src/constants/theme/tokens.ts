@@ -103,6 +103,10 @@ export interface Palette {
   onAccent: string; // Текст та іконки на лаймовій заливці (accent/on).
   indicator: string; // Заливка індикаторів і вибраного: стовпчики, смужки, перемикач, вибраний день (у світлій темі темніший олив для контрасту).
   onIndicator: string; // Текст та іконки на заливці індикатора.
+  plateStart: string; // Верх градієнта плашки під іконку.
+  plateEnd: string; // Низ градієнта плашки під іконку.
+  plateBorder: string; // Тонка рамка плашки під іконку.
+  plateGlow: string; // Колір світіння акцентної плашки (прозорий, де світіння не потрібне).
 }
 export const palettes: Record<'light' | 'dark', Palette> = {
   // Кольори світлої теми.
@@ -128,6 +132,10 @@ export const palettes: Record<'light' | 'dark', Palette> = {
     onAccent: '#0A0B0B',
     indicator: '#5E7F00',
     onIndicator: '#FFFFFF',
+    plateStart: '#EEF5CF',
+    plateEnd: '#DDE8AA',
+    plateBorder: 'rgba(79, 107, 0, 0.28)',
+    plateGlow: 'transparent',
   },
   // Кольори темної теми.
   dark: {
@@ -152,5 +160,9 @@ export const palettes: Record<'light' | 'dark', Palette> = {
     onAccent: '#0A0B0B',
     indicator: '#C8F04A',
     onIndicator: '#0A0B0B',
+    plateStart: '#242B14',
+    plateEnd: '#12150C',
+    plateBorder: 'rgba(200, 240, 74, 0.28)',
+    plateGlow: '#C8F04A',
   },
 };

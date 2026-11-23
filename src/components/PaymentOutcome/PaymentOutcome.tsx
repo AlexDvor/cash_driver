@@ -56,6 +56,7 @@ export function PaymentOutcome({
             <IconPlate
               icon={BanknoteIcon}
               size={36}
+              glow
               tone={result?.status === 'insufficient' ? 'danger' : 'accent'}
             />
             <AppText
