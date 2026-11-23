@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+ system splash icon: the full logo (car + name + tagline) centered
+     in the 288dp icon canvas, kept well inside the 192dp circle the system shows.
+     Insets are fractions so the logo keeps its proportions at any size. -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="28.5%"
+    android:insetRight="28.5%"
+    android:insetTop="25.5%"
+    android:insetBottom="25.5%">
+    <bitmap
+        android:gravity="fill"
+        android:src="@drawable/splash_logo" />
+</inset>
