@@ -2,13 +2,13 @@
 
 **English** · [Español](README.es.md) · [Українська](README.uk.md)
 
-### Cash payments for drivers — change, tips, and history in one app.
+### Cash payments for drivers — change, tips, history, and monthly reports in one app.
 
 **CashDriver** is an Android app for taxi and ride-hailing drivers. It helps you calculate change, record tips, and review cash payments by day, week, or month. It works **offline**, without registration or a required backend.
 
 Choose a platform → enter the fare and cash received → check the change → confirm the payment. The saved payment automatically appears in your history and summaries.
 
-> Supported platform: **Android 7.0+**. App languages: **Español / English**. Currency: **EUR**. iOS is not currently supported; APK files cannot be installed on an iPhone.
+> Supported platform: **Android 7.0+**. App languages: **Español / English**. Currency: **EUR**. Current version: **1.1.0**. iOS is not currently supported; APK files cannot be installed on an iPhone.
 
 ## What CashDriver helps you do
 
@@ -16,6 +16,7 @@ Choose a platform → enter the fare and cash received → check the change → 
 - **Track tips separately.** Enter a specific tip or keep all the change as a tip.
 - **Keep a useful payment history.** Find a period through the calendar, filter by platform, view details, edit, and delete individual payments with an Undo opportunity.
 - **Understand your totals.** Review fares, tips, retained cash, payment count, average fare, and fare totals by platform.
+- **Export and back up your data.** Save a month as a **PDF report** or **CSV file** for your accountant, create a **backup file** of all operations, and restore it later (Settings → Data).
 - **Adapt the app to your work.** Choose Uber, Cabify, Bolt, and Taxi; light, dark, or automatic appearance; separate sound and vibration switches with a preview button.
 
 **Example:** the fare is **€20**, the customer hands over **€50**, and the tip is **€5**. Return **€25**; retained cash is **€25**: the fare plus the tip.
@@ -24,33 +25,48 @@ Platforms are manually selected labels. CashDriver does not connect to their acc
 
 ## Screenshots
 
-Actual Android emulator screenshots using synthetic demo data and the Spanish interface. No personal payment records were used.
+Real screenshots from an Android phone (release build 1.1.0) using synthetic demo data and the Spanish interface. No personal payment records were used.
 
 | Screen                                                                                          | Light theme                                                                                                                | Dark theme                                                                                                               |
 | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | **Inicio / Home** — new payment, tips, and change                                               | <img src="assets/readme/home-light.png" width="240" alt="CashDriver Home in the light theme">                              | <img src="assets/readme/home-dark.png" width="240" alt="CashDriver Home in the dark theme">                              |
-| **Resumen / Summary** — totals for the selected period                                          | <img src="assets/readme/summary-light.png" width="240" alt="CashDriver monthly summary in the light theme">                | <img src="assets/readme/summary-dark.png" width="240" alt="CashDriver monthly summary in the dark theme">                |
+| **Resumen / Summary** — totals and daily bars for the month                                     | <img src="assets/readme/summary-light.png" width="240" alt="CashDriver monthly summary in the light theme">                | <img src="assets/readme/summary-dark.png" width="240" alt="CashDriver monthly summary in the dark theme">                |
+| **Historial / History** — payments grouped by day with the daily total                          | <img src="assets/readme/history-light.png" width="240" alt="CashDriver history in the light theme">                        | <img src="assets/readme/history-dark.png" width="240" alt="CashDriver history in the dark theme">                        |
 | **Calendar** — choose a day, month, or year; dots mark dates with payments across all platforms | <img src="assets/readme/calendar-light.png" width="240" alt="CashDriver calendar with payment markers in the light theme"> | <img src="assets/readme/calendar-dark.png" width="240" alt="CashDriver calendar with payment markers in the dark theme"> |
+| **Ajustes · Datos / Settings · Data** — export a month, back up, restore                        | <img src="assets/readme/data-light.png" width="240" alt="CashDriver data settings in the light theme">                     | <img src="assets/readme/data-dark.png" width="240" alt="CashDriver data settings in the dark theme">                     |
+| **Export** — choose a month that has payments, then PDF or CSV                                  | <img src="assets/readme/export-light.png" width="240" alt="CashDriver month picker for export in the light theme">         | <img src="assets/readme/export-dark.png" width="240" alt="CashDriver month picker for export in the dark theme">         |
 
-Four tabs: **Inicio / Home** for payments, **Historial / History** for saved records, **Resumen / Summary** for totals, and **Ajustes / Settings** for preferences. The calendar is available in History and Summary. Browsing another month remains a draft until you apply it. The close button and “Cancelar / Cancel” dismiss it without changing the applied period.
+Four tabs: **Inicio / Home** for payments, **Historial / History** for saved records, **Resumen / Summary** for totals, and **Ajustes / Settings** for preferences and data (export, backup, restore). The calendar is available in History and Summary. Browsing another month remains a draft until you apply it. The close button and “Cancelar / Cancel” dismiss it without changing the applied period.
+
+## Export, backup, and restore
+
+Open **Ajustes / Settings → Datos / Data**.
+
+- **Export a month.** Choose a month that has payments, then **PDF report** or **CSV file**. The PDF contains the month totals (payments, fares, tips, retained cash, average fare), a breakdown by platform, and a table by day. The CSV lists every payment of the month (date, time, platform, fare, cash received, change, tip, retained cash) with a totals row; Spanish uses `;` and decimal commas, English uses `,` and decimal points, so it opens correctly in Excel.
+- **Backup.** Saves every payment into one `.json` file.
+- **Restore.** Choose a backup file. The app validates it, shows how many payments and which dates it contains, and asks for confirmation. Only payments that are not already in the app are added; existing payments are never overwritten.
+
+Android shows its normal “save as” and file-picker dialogs, so you choose where files go (Files, Drive, and so on). Nothing is sent anywhere automatically. Backups contain payments only, not settings (language, theme, platforms). Android’s automatic backup is turned off, so save a backup before uninstalling the app or updating with a different signing key.
 
 ## Technical approach
 
-| Area            | Implementation                                                                                 |
-| --------------- | ---------------------------------------------------------------------------------------------- |
-| Application     | React Native CLI 0.87.1, React 19.2.3, TypeScript                                              |
-| Navigation      | React Navigation tabs and details/edit screens                                                 |
-| Storage         | Local SQLite through `@op-engineering/op-sqlite`, versioned migrations                         |
-| Money           | Integer cents; shared rules for payment creation, editing, and summaries                       |
-| Large histories | SQL pagination, aggregated summaries, and compact calendar activity markers                    |
-| Dates           | Local calendar boundaries that account for time zones and daylight-saving changes              |
-| Appearance      | Shared components and theme tokens; solar automatic theme with device appearance as a fallback |
-| Feedback        | Bundled offline sound and native vibration after a successful save                             |
-| Verification    | Jest, TypeScript, ESLint, Prettier, and isolated native acceptance scenarios                   |
+| Area              | Implementation                                                                                                                                                                                        |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Application       | React Native CLI 0.87.1, React 19.2.3, TypeScript                                                                                                                                                     |
+| Navigation        | React Navigation tabs and details/edit screens                                                                                                                                                        |
+| Storage           | Local SQLite through `@op-engineering/op-sqlite`, versioned migrations                                                                                                                                |
+| Money             | Integer cents; shared rules for payment creation, editing, and summaries                                                                                                                              |
+| Large histories   | SQL pagination, aggregated summaries, and compact calendar activity markers                                                                                                                           |
+| Dates             | Local calendar boundaries that account for time zones and daylight-saving changes                                                                                                                     |
+| Appearance        | Shared components and theme tokens; dark premium “Lime night” design with a light theme; solid duotone icons; solar automatic theme with device appearance as a fallback                              |
+| Feedback          | Bundled offline sound and native vibration after a successful save                                                                                                                                    |
+| Export and backup | CSV and a dependency-free PDF writer in TypeScript; JSON backups with strict validation; system save and open dialogs through `@react-native-documents/picker` and `react-native-blob-util` (Android) |
+| Stability         | A root error boundary shows a retry screen instead of closing the app on an unexpected error                                                                                                          |
+| Verification      | Jest, TypeScript, ESLint, Prettier, and isolated native acceptance scenarios                                                                                                                          |
 
 SQL lives in repositories, money rules in domain functions, and React hooks coordinate loading and screen state. Test seeding never uses the personal database. Production code does not import test entrypoints.
 
-**Data is stored only on the device.** Cloud sync, backup, and restoration are not currently included. Uninstalling the app or clearing its storage can permanently erase your history. Recording payments does not require internet access. Automatic appearance may request approximate location after you explicitly select that mode.
+**Data is stored only on the device.** There is no cloud sync. You can save and restore a backup file manually (see _Export, backup, and restore_), but Android’s automatic backup is disabled. Uninstalling the app or clearing its storage can permanently erase your history unless you saved a backup. Recording payments does not require internet access. Automatic appearance may request approximate location after you explicitly select that mode.
 
 ## Build the APK
 
@@ -109,13 +125,13 @@ npm run format:check
 npm test -- --runInBand
 ```
 
-If the checks pass:
+If the checks pass, build the release APK:
 
 ```powershell
-cd android
-.\gradlew.bat assembleRelease
-cd ..
+npm run android:apk
 ```
+
+This packages the **arm64-v8a** and **armeabi-v7a** architectures (about 49 MB), which covers practically all current Android phones; x86 is only for emulators. The script is equivalent to running `.\gradlew.bat :app:assembleRelease -PreactNativeArchitectures=arm64-v8a,armeabi-v7a` in the `android` folder. A plain `assembleRelease` packages the same two architectures but compiles all four, so it takes longer.
 
 Wait for **BUILD SUCCESSFUL**. The signed APK is written to:
 
@@ -129,7 +145,7 @@ Open its folder from the project root:
 explorer.exe .\android\app\build\outputs\apk\release
 ```
 
-After making further changes, repeat the checks and `assembleRelease`. The `CashDriver.apk` file will be updated. Running `clean` on every build is unnecessary.
+After making further changes, repeat the checks and `npm run android:apk`. The `CashDriver.apk` file will be updated. Running `clean` on every build is unnecessary.
 
 ## Transfer and install on an Android phone
 
@@ -150,8 +166,8 @@ This example assumes one connected Android device. If several are connected, sel
 ### Updates and your history
 
 - Application ID: **`com.alexm.cashdriver`**. Preserve it and the existing signing key for normal updates.
-- Before a new distributed release, increase `versionCode` in `android/app/build.gradle` and set `versionName` as appropriate. You do not need to change the version for every local build attempt.
-- **If Android reports an incompatible signature, do not uninstall the old app.** This can happen when installing a release over a debug version. Uninstalling the old version or clearing its data erases local history; first determine which key signed the installed app.
+- The current release is **1.1.0** (`versionCode` 2). Before a new distributed release, increase `versionCode` in `android/app/build.gradle` and set `versionName` as appropriate. You do not need to change the version for every local build attempt.
+- **If Android reports an incompatible signature, do not uninstall the old app yet.** This happens when installing a release over a debug version. Uninstalling or clearing data erases the local history, so first save a backup (Settings → Data → Backup), then uninstall, install the new APK, and restore the backup.
 - ADB's `-r` flag requests reinstallation while retaining data. It does not bypass signature verification or replace backups.
 
 ## Development
