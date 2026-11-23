@@ -25,6 +25,7 @@ import { confirmationHaptics } from '../../features/settings/confirmationHaptics
 import { confirmationSound } from '../../features/settings/confirmationSound';
 import { readAppVersion } from '../../features/settings/appVersion';
 import { Toggle } from '../../ui/Toggle/Toggle';
+import { DataSection } from '../../components/DataSection/DataSection';
 import { styles } from './SettingsScreen.styles';
 
 export function SettingsScreen() {
@@ -264,6 +265,7 @@ export function SettingsScreen() {
           }}
         />,
       )}
+      <DataSection />
       {group(
         t('deviceDataSection'),
         <>

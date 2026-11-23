@@ -103,6 +103,31 @@ export function createTransactionService(
       changes.notify('transactions');
       return saved;
     },
+    // Restore from a backup: adds records that are not present yet, keeping
+    // their ids and timestamps. Existing operations are never overwritten.
+    async importRecords(
+      records: readonly CashTransaction[],
+    ): Promise<{ inserted: number; skipped: number; conflicts: number }> {
+      let inserted = 0;
+      let skipped = 0;
+      let conflicts = 0;
+      for (const record of records) {
+        try {
+          const result = await repository.create(record);
+          if (result.inserted) {
+            inserted += 1;
+          } else {
+            skipped += 1;
+          }
+        } catch {
+          conflicts += 1;
+        }
+      }
+      if (inserted > 0) {
+        changes.notify('transactions');
+      }
+      return { inserted, skipped, conflicts };
+    },
     async remove(id: string): Promise<void> {
       if (await repository.remove(id)) {
         changes.notify('transactions');
