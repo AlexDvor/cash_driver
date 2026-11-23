@@ -8,7 +8,7 @@ import React, {
   useState,
 } from 'react';
 import { AppState } from 'react-native';
-import { usePersistence } from '../PersistenceProvider/PersistenceProvider';
+import { usePersistenceServices } from '../PersistenceProvider/PersistenceProvider';
 import { DELETION_UNDO_SECONDS } from '../../features/transactions/deletionConstants';
 
 type DeletionState =
@@ -29,7 +29,7 @@ const DeletionContext = createContext<DeletionContextValue | undefined>(
 );
 
 export function DeletionProvider({ children }: React.PropsWithChildren) {
-  const { services } = usePersistence();
+  const { services } = usePersistenceServices();
   const [allStatus, setAllStatus] =
     useState<DeletionContextValue['allStatus']>('idle');
   const allWriting = useRef(false);

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
+import { usePersistenceServices } from '../../providers/PersistenceProvider/PersistenceProvider';
 import { useDataChanges } from '../app/useDataChanges';
 import { useCoalescedRefresh } from '../app/useCoalescedRefresh';
 import {
@@ -34,7 +34,7 @@ const initialState: PagedTransactionsState = {
 
 // History only: useTransactions(id, false) continues to own edit/detail loading.
 export function usePagedTransactions(filter: HistoryReadFilter) {
-  const { services } = usePersistence();
+  const { services } = usePersistenceServices();
   const start = filter.bounds?.start.getTime();
   const end = filter.bounds?.end.getTime();
   const platform = filter.platform;

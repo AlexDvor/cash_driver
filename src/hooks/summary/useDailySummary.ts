@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
-import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
+import { usePersistenceServices } from '../../providers/PersistenceProvider/PersistenceProvider';
 import { useDataChanges } from '../app/useDataChanges';
 import { useLocalClock } from '../app/useLocalClock';
 import { useCoalescedRefresh } from '../app/useCoalescedRefresh';
@@ -13,7 +13,7 @@ type DailyState =
   | { status: 'ready'; summary: CashSummary };
 
 export function useDailySummary(clock: ReturnType<typeof useLocalClock>) {
-  const { services } = usePersistence();
+  const { services } = usePersistenceServices();
   const bounds = getPeriodBounds(clock.now, 'day', clock.timeZone);
   const start = bounds.start.getTime();
   const end = bounds.end.getTime();

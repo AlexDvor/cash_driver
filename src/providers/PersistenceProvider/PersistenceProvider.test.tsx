@@ -1,7 +1,11 @@
 import React from 'react';
 import { Text } from 'react-native';
 import ReactTestRenderer, { act } from 'react-test-renderer';
-import { PersistenceProvider, usePersistence } from './PersistenceProvider';
+import {
+  PersistenceProvider,
+  usePersistence,
+  usePersistenceStatus,
+} from './PersistenceProvider';
 import {
   LanguageProvider,
   useTranslation,
@@ -27,7 +31,8 @@ afterEach(async () => {
 });
 
 function Probe() {
-  const { preferences, updatePreferences, saving, errorKey } = usePersistence();
+  const { preferences, updatePreferences } = usePersistence();
+  const { saving, errorKey } = usePersistenceStatus();
   const { language } = useTranslation();
   const { mode, appearance } = useAppTheme();
   return (

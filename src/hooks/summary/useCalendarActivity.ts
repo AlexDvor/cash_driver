@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
-import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
+import { usePersistenceServices } from '../../providers/PersistenceProvider/PersistenceProvider';
 import { useDataChanges } from '../app/useDataChanges';
 
 export type ActivityStatus = 'idle' | 'loading' | 'error' | 'ready';
@@ -11,10 +11,10 @@ export function useCalendarActivity<T>(
   enabled: boolean,
   limit: number,
   read: (
-    services: ReturnType<typeof usePersistence>['services'],
+    services: ReturnType<typeof usePersistenceServices>['services'],
   ) => Promise<T[]>,
 ) {
-  const { services } = usePersistence();
+  const { services } = usePersistenceServices();
   const store = useRef({ services, entries: new Map<string, T[]>() });
   if (store.current.services !== services)
     store.current = { services, entries: new Map() };

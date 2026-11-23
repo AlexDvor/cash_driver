@@ -3,7 +3,10 @@ import { AppState, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { AppText } from '../../ui/AppText/AppText';
 import { ScreenContainer } from '../../ui/ScreenContainer/ScreenContainer';
-import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
+import {
+  usePersistence,
+  usePersistenceStatus,
+} from '../../providers/PersistenceProvider/PersistenceProvider';
 import { useLocalClock } from '../../hooks/app/useLocalClock';
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { formatLocalDate } from '../../i18n/formatting';
@@ -19,8 +22,8 @@ import { styles } from './HomeScreen.styles';
 export function HomeScreen() {
   const { t, locale } = useTranslation();
   const { colors } = useAppTheme();
-  const { services, preferences, updatePreferences, saving, errorKey } =
-    usePersistence();
+  const { services, preferences, updatePreferences } = usePersistence();
+  const { saving, errorKey } = usePersistenceStatus();
   const [summaryExpanded, setSummaryExpanded] = useState(false);
   const [draftGeneration, setDraftGeneration] = useState(0);
   const [summaryResetCount, setSummaryResetCount] = useState(0);

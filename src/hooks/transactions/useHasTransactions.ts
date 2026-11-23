@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
+import { usePersistenceServices } from '../../providers/PersistenceProvider/PersistenceProvider';
 import { useDataChanges } from '../app/useDataChanges';
 
 type ExistenceState =
@@ -10,7 +10,7 @@ type ExistenceState =
 
 // A filtered empty page cannot establish that the database has no operations.
 export function useHasTransactions() {
-  const { services } = usePersistence();
+  const { services } = usePersistenceServices();
   const currentServices = useRef(services);
   currentServices.current = services;
   const generation = useRef(0);

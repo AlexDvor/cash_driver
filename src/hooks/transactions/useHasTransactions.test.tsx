@@ -6,6 +6,7 @@ import { useHasTransactions } from './useHasTransactions';
 
 jest.mock('../../providers/PersistenceProvider/PersistenceProvider', () => ({
   usePersistence: () => ({ services: mockServices }),
+  usePersistenceServices: () => ({ services: mockServices }),
 }));
 jest.mock('@react-navigation/native', () => ({
   useFocusEffect: (callback: () => void | (() => void)) =>

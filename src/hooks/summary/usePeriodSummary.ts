@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
+import { usePersistenceServices } from '../../providers/PersistenceProvider/PersistenceProvider';
 import { useDataChanges } from '../app/useDataChanges';
 import { useCoalescedRefresh } from '../app/useCoalescedRefresh';
 import { useLocalClock } from '../app/useLocalClock';
@@ -25,7 +25,7 @@ export function usePeriodSummary(
   clock: ReturnType<typeof useLocalClock>,
   selection?: Readonly<CalendarMonth | CalendarDate>,
 ) {
-  const { services } = usePersistence();
+  const { services } = usePersistenceServices();
   let bounds = getPeriodBounds(clock.now, period, clock.timeZone);
   if (period === 'month' && selection) {
     bounds =

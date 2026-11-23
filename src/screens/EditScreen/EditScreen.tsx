@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/navigationTypes';
 import { routes } from '../../navigation/routes';
-import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
+import { usePersistenceServices } from '../../providers/PersistenceProvider/PersistenceProvider';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
 import { ScreenContainer } from '../../ui/ScreenContainer/ScreenContainer';
@@ -26,7 +26,7 @@ function LoadedEdit({
   cancel: () => void;
   entryNavigation: ReturnType<typeof useHomePaymentScroll>;
 }) {
-  const { services } = usePersistence();
+  const { services } = usePersistenceServices();
   const { t } = useTranslation();
   const deletion = useDeletion();
   const onSubmit = useCallback(

@@ -7,6 +7,7 @@ const mockChanges = createChangeNotifier();
 let mockServices = { changes: mockChanges };
 jest.mock('../../providers/PersistenceProvider/PersistenceProvider', () => ({
   usePersistence: () => ({ services: mockServices }),
+  usePersistenceServices: () => ({ services: mockServices }),
 }));
 let app: Renderer.ReactTestRenderer;
 afterEach(async () => {

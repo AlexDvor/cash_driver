@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -22,14 +23,26 @@ import { styles } from './PersistenceProvider.styles';
 interface PersistenceContextValue {
   services: Persistence;
   preferences: Preferences;
-  saving: boolean;
-  errorKey: TranslationKey | null;
   updatePreferences: (patch: Partial<Preferences>) => Promise<boolean>;
   retryPreferences: () => Promise<boolean>;
+}
+// Saving state changes twice on every preference write. Keeping it in its own
+// context means only the screens that show it re-render, not the whole app.
+interface PersistenceStatusValue {
+  saving: boolean;
+  errorKey: TranslationKey | null;
 }
 const PersistenceContext = createContext<PersistenceContextValue | undefined>(
   undefined,
 );
+// Most hooks only need the services, which never change after startup. Their
+// own context keeps them from re-rendering when preferences are written.
+const PersistenceServicesContext = createContext<
+  { services: Persistence } | undefined
+>(undefined);
+const PersistenceStatusContext = createContext<
+  PersistenceStatusValue | undefined
+>(undefined);
 
 export function PersistenceProvider({
   children,
@@ -44,6 +57,8 @@ export function PersistenceProvider({
   const [saving, setSaving] = useState(false);
   const [errorKey, setErrorKey] = useState<TranslationKey | null>(null);
   const mounted = useRef(false);
+  const readyRef = useRef(ready);
+  readyRef.current = ready;
   const savingRef = useRef(false);
   const failedPatch = useRef<Partial<Preferences> | null>(null);
   const bootstrapColors =
@@ -72,7 +87,8 @@ export function PersistenceProvider({
 
   const updatePreferences = useCallback(
     async (patch: Partial<Preferences>): Promise<boolean> => {
-      if (!ready || savingRef.current) {
+      const current = readyRef.current;
+      if (!current || savingRef.current) {
         return false;
       }
       setSaving(true);
@@ -80,7 +96,7 @@ export function PersistenceProvider({
       setErrorKey(null);
       failedPatch.current = null;
       try {
-        const preferences = await ready.services.preferences.update(patch);
+        const preferences = await current.services.preferences.update(patch);
         if (mounted.current) {
           setReady(previous => previous && { ...previous, preferences });
         }
@@ -102,10 +118,34 @@ export function PersistenceProvider({
         }
       }
     },
-    [ready],
+    // Stable on purpose: the latest `ready` is read through the ref, so a
+    // preference write never changes this function's identity.
+    [],
   );
+  const retryPreferences = useCallback(
+    () =>
+      failedPatch.current
+        ? updatePreferences(failedPatch.current)
+        : Promise.resolve(false),
+    [updatePreferences],
+  );
+  const value = useMemo(
+    () =>
+      ready && {
+        services: ready.services,
+        preferences: ready.preferences,
+        updatePreferences,
+        retryPreferences,
+      },
+    [ready, updatePreferences, retryPreferences],
+  );
+  const servicesValue = useMemo(
+    () => (ready ? { services: ready.services } : undefined),
+    [ready?.services], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const status = useMemo(() => ({ saving, errorKey }), [saving, errorKey]);
 
-  if (!ready) {
+  if (!ready || !value) {
     // Do not render main screens with guessed settings before their read succeeds.
     // Spanish is the documented initial language; no corrupt-read fallback DB.
     return (
@@ -126,7 +166,7 @@ export function PersistenceProvider({
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={translate('es', 'retry')}
-              onPress={() => setAttempt(value => value + 1)}
+              onPress={() => setAttempt(previous => previous + 1)}
               style={styles.retry}
             >
               <Text
@@ -146,20 +186,13 @@ export function PersistenceProvider({
     );
   }
   return (
-    <PersistenceContext.Provider
-      value={{
-        ...ready,
-        saving,
-        errorKey,
-        updatePreferences,
-        retryPreferences: () =>
-          failedPatch.current
-            ? updatePreferences(failedPatch.current)
-            : Promise.resolve(false),
-      }}
-    >
-      {children}
-    </PersistenceContext.Provider>
+    <PersistenceServicesContext.Provider value={servicesValue}>
+      <PersistenceContext.Provider value={value}>
+        <PersistenceStatusContext.Provider value={status}>
+          {children}
+        </PersistenceStatusContext.Provider>
+      </PersistenceContext.Provider>
+    </PersistenceServicesContext.Provider>
   );
 }
 
@@ -167,6 +200,26 @@ export function usePersistence(): PersistenceContextValue {
   const context = useContext(PersistenceContext);
   if (!context) {
     throw new Error('usePersistence must be used inside PersistenceProvider');
+  }
+  return context;
+}
+
+export function usePersistenceStatus(): PersistenceStatusValue {
+  const context = useContext(PersistenceStatusContext);
+  if (!context) {
+    throw new Error(
+      'usePersistenceStatus must be used inside PersistenceProvider',
+    );
+  }
+  return context;
+}
+
+export function usePersistenceServices(): { services: Persistence } {
+  const context = useContext(PersistenceServicesContext);
+  if (!context) {
+    throw new Error(
+      'usePersistenceServices must be used inside PersistenceProvider',
+    );
   }
   return context;
 }

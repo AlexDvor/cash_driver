@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useDataChanges } from '../app/useDataChanges';
-import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
+import { usePersistenceServices } from '../../providers/PersistenceProvider/PersistenceProvider';
 import { CashTransaction } from '../../features/transactions/types';
 
 type RecordsState =
@@ -11,7 +11,7 @@ type RecordsState =
 
 // Edit loads once: refreshing its parent during a commit must not remount a draft.
 export function useTransactions(id?: string, live = true) {
-  const { services } = usePersistence();
+  const { services } = usePersistenceServices();
   const [state, setState] = useState<RecordsState>({
     status: 'loading',
     records: null,

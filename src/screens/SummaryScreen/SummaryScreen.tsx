@@ -15,7 +15,7 @@ import { useCalendarSelection } from '../../hooks/summary/useCalendarSelection';
 import { CalendarNavigation } from '../../components/CalendarNavigation/CalendarNavigation';
 import { calendarFullDateLabel } from '../../components/CalendarModal/calendarPresentation';
 import { SummaryContent } from '../../components/SummaryMetrics/SummaryContent';
-import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
+import { usePersistenceServices } from '../../providers/PersistenceProvider/PersistenceProvider';
 
 import { useDailyNetCash } from '../../hooks/summary/useDailyNetCash';
 import type { SummaryChartData } from '../../components/SummaryMetrics/SummaryMetrics.interface';
@@ -32,7 +32,7 @@ function formatChartDay(date: Date, locale: string, timeZone: string) {
 export function SummaryScreen() {
   const { t, locale } = useTranslation();
   const { colors } = useAppTheme();
-  const { services } = usePersistence();
+  const { services } = usePersistenceServices();
   const [period, setPeriod] = useState<SummaryPeriod>('day');
   const clock = useLocalClock();
   const calendar = useCalendarSelection(clock);

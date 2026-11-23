@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useCallback, useContext, useMemo } from 'react';
 import {
   Language,
   locales,
@@ -19,18 +19,26 @@ const LanguageContext = createContext<LanguageContextValue | undefined>(
 export function LanguageProvider({ children }: React.PropsWithChildren) {
   const { preferences, updatePreferences } = usePersistence();
   const language = preferences.language;
-  const setLanguage = (nextLanguage: Language) => {
-    updatePreferences({ language: nextLanguage });
-  };
+  const setLanguage = useCallback(
+    (nextLanguage: Language) => {
+      updatePreferences({ language: nextLanguage });
+    },
+    [updatePreferences],
+  );
+  // Memoized: every text in the app reads this context, so it must change only
+  // when the language does (not on unrelated preference writes).
+  const value = useMemo(
+    () => ({
+      language,
+      setLanguage,
+      locale: locales[language],
+      t: (key: TranslationKey, params?: TranslationParams) =>
+        translate(language, key, params),
+    }),
+    [language, setLanguage],
+  );
   return (
-    <LanguageContext.Provider
-      value={{
-        language,
-        setLanguage,
-        locale: locales[language],
-        t: (key, params) => translate(language, key, params),
-      }}
-    >
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );

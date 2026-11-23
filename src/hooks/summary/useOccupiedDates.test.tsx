@@ -8,6 +8,7 @@ const changes = createChangeNotifier();
 const occupiedDates = jest.fn();
 jest.mock('../../providers/PersistenceProvider/PersistenceProvider', () => ({
   usePersistence: () => ({ services: mockServices }),
+  usePersistenceServices: () => ({ services: mockServices }),
 }));
 let mockServices = { changes, transactions: { occupiedDates } };
 function deferred() {

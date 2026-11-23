@@ -1,7 +1,9 @@
 import React, {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -36,10 +38,13 @@ export function ThemeProvider({ children }: React.PropsWithChildren) {
   } = useSolarTheme(mode);
   const [accessRequest, setAccessRequest] = useState(0);
   const handledAccessRequest = useRef(0);
-  const setMode = async (nextMode: ThemeMode) => {
-    const saved = await updatePreferences({ themeMode: nextMode });
-    if (saved && nextMode === 'system') setAccessRequest(value => value + 1);
-  };
+  const setMode = useCallback(
+    async (nextMode: ThemeMode) => {
+      const saved = await updatePreferences({ themeMode: nextMode });
+      if (saved && nextMode === 'system') setAccessRequest(value => value + 1);
+    },
+    [updatePreferences],
+  );
   useEffect(() => {
     if (accessRequest === handledAccessRequest.current) return;
     handledAccessRequest.current = accessRequest;
@@ -62,16 +67,14 @@ export function ThemeProvider({ children }: React.PropsWithChildren) {
     });
     return () => subscription.remove();
   }, [appearance, colors.background]);
+  // Memoized: nearly every component reads the theme, so the value must change
+  // only when the theme itself does (not on unrelated preference writes).
+  const value = useMemo(
+    () => ({ mode, setMode, appearance, colors, automaticThemeStatus }),
+    [mode, setMode, appearance, colors, automaticThemeStatus],
+  );
   return (
-    <ThemeContext.Provider
-      value={{
-        mode,
-        setMode,
-        appearance,
-        colors,
-        automaticThemeStatus,
-      }}
-    >
+    <ThemeContext.Provider value={value}>
       <StatusBar
         barStyle={appearance === 'dark' ? 'light-content' : 'dark-content'}
       />

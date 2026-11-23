@@ -8,6 +8,7 @@ import { summarizeTransactions } from '../../features/summary/summary';
 
 jest.mock('../../providers/PersistenceProvider/PersistenceProvider', () => ({
   usePersistence: () => ({ services: mockServices }),
+  usePersistenceServices: () => ({ services: mockServices }),
 }));
 
 function services() {

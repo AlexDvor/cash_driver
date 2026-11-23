@@ -2,7 +2,10 @@ import React, { useEffect as mockUseEffect } from 'react';
 import ReactTestRenderer, { act } from 'react-test-renderer';
 import { AppState, AppStateStatus } from 'react-native';
 import { usePagedTransactions } from './usePagedTransactions';
-import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
+import {
+  usePersistence,
+  usePersistenceServices,
+} from '../../providers/PersistenceProvider/PersistenceProvider';
 import {
   HistoryPage,
   HistoryReadFilter,
@@ -16,6 +19,7 @@ import {
 
 jest.mock('../../providers/PersistenceProvider/PersistenceProvider', () => ({
   usePersistence: jest.fn(),
+  usePersistenceServices: jest.fn(),
 }));
 jest.mock('@react-navigation/native', () => ({
   useFocusEffect: (callback: () => void | (() => void)) =>
@@ -57,11 +61,10 @@ function page(ids: string[], more = false): HistoryPage {
 async function fixture(filter: HistoryReadFilter = {}) {
   const db = openTestDatabase();
   const services = await testPersistence(db);
+  jest.mocked(usePersistenceServices).mockReturnValue({ services });
   jest.mocked(usePersistence).mockReturnValue({
     services,
     preferences: await services.preferences.read(),
-    saving: false,
-    errorKey: null,
     updatePreferences: async () => true,
     retryPreferences: async () => true,
   });

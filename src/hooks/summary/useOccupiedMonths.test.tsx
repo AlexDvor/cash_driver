@@ -11,6 +11,7 @@ const mockServices = {
 };
 jest.mock('../../providers/PersistenceProvider/PersistenceProvider', () => ({
   usePersistence: () => ({ services: mockServices }),
+  usePersistenceServices: () => ({ services: mockServices }),
 }));
 
 test('month activity loads on demand, rejects stale years, coalesces commits and retries errors', async () => {

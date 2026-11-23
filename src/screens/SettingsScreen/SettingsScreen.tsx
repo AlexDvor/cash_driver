@@ -4,7 +4,10 @@ import { Alert, AppState, Pressable, View } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { CalendarActivityFeedback } from '../../components/CalendarModal/CalendarActivityFeedback';
 import { useCalendarMotion } from '../../hooks/app/useCalendarMotion';
-import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
+import {
+  usePersistence,
+  usePersistenceStatus,
+} from '../../providers/PersistenceProvider/PersistenceProvider';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import { AppText } from '../../ui/AppText/AppText';
 import { Card } from '../../ui/Card/Card';
@@ -29,8 +32,8 @@ export function SettingsScreen() {
   const focused = useIsFocused();
   const { t, language } = useTranslation();
   const { colors, setMode, automaticThemeStatus } = useAppTheme();
-  const { preferences, saving, errorKey, updatePreferences, retryPreferences } =
-    usePersistence();
+  const { preferences, updatePreferences, retryPreferences } = usePersistence();
+  const { saving, errorKey } = usePersistenceStatus();
   const deletion = useDeletion();
   const [version, setVersion] = useState(readAppVersion);
   const deleting = deletion.allStatus === 'writing';

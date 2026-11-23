@@ -16,6 +16,7 @@ import { createChangeNotifier } from '../../app/changeNotifier';
 
 jest.mock('../../providers/PersistenceProvider/PersistenceProvider', () => ({
   usePersistence: () => ({ services: mockServices }),
+  usePersistenceServices: () => ({ services: mockServices }),
 }));
 jest.mock('@react-navigation/native', () => {
   const { useEffect } = jest.requireActual<typeof React>('react');

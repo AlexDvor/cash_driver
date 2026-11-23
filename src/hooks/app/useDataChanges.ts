@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { DataChange } from '../../app/changeNotifier';
-import { usePersistence } from '../../providers/PersistenceProvider/PersistenceProvider';
+import { usePersistenceServices } from '../../providers/PersistenceProvider/PersistenceProvider';
 
 export function useDataChanges(onChange: (change: DataChange) => void): void {
-  const { services } = usePersistence();
+  const { services } = usePersistenceServices();
   useEffect(() => services.changes.subscribe(onChange), [services, onChange]);
 }
