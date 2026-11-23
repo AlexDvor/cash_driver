@@ -47,7 +47,7 @@ export function CalendarPeriodSelector({
   );
   // A month label stays on one line (shrinks slightly); a full date may wrap.
   const fitProps =
-    selection.kind === 'month'
+    selection.kind !== 'day'
       ? ({
           numberOfLines: 1,
           adjustsFontSizeToFit: true,
@@ -74,29 +74,23 @@ export function CalendarPeriodSelector({
       ]}
     >
       <CalendarIcon />
-      <View style={styles.labelFrame}>
-        <View
-          testID="calendar-period-label-measure"
-          style={styles.labelMeasure}
-          accessible={false}
-          accessibilityElementsHidden
-          importantForAccessibility="no-hide-descendants"
-          pointerEvents="none"
-        >
-          {(selection.kind === 'day' ? [dateLabel] : monthLabels).map(
-            sample => (
-              <AppText
-                key={sample}
-                accessible={false}
-                {...fitProps}
-                style={[styles.label, styles.labelSample]}
-              >
+      {selection.kind !== 'day' ? (
+        // One line, icon and label grouped and centered in the button.
+        <View style={styles.monthGroup}>
+          <View
+            testID="calendar-period-label-measure"
+            style={styles.labelMeasureHidden}
+            accessible={false}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+            pointerEvents="none"
+          >
+            {monthLabels.map(sample => (
+              <AppText key={sample} accessible={false} style={styles.label}>
                 {sample}
               </AppText>
-            ),
-          )}
-        </View>
-        <View style={styles.labelOverlay} pointerEvents="none">
+            ))}
+          </View>
           <AppText
             testID="calendar-period-visible-label"
             {...fitProps}
@@ -105,7 +99,39 @@ export function CalendarPeriodSelector({
             {dateLabel}
           </AppText>
         </View>
-      </View>
+      ) : (
+        <View style={styles.labelFrame}>
+          <View
+            testID="calendar-period-label-measure"
+            style={styles.labelMeasure}
+            accessible={false}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+            pointerEvents="none"
+          >
+            {(selection.kind === 'day' ? [dateLabel] : monthLabels).map(
+              sample => (
+                <AppText
+                  key={sample}
+                  accessible={false}
+                  {...fitProps}
+                  style={[styles.label, styles.labelSample]}
+                >
+                  {sample}
+                </AppText>
+              ),
+            )}
+          </View>
+          <View style={styles.labelOverlay} pointerEvents="none">
+            <AppText
+              testID="calendar-period-visible-label"
+              style={styles.label}
+            >
+              {dateLabel}
+            </AppText>
+          </View>
+        </View>
+      )}
     </Pressable>
   );
   return (

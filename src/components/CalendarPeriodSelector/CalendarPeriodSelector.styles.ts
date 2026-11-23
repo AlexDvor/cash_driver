@@ -1,8 +1,23 @@
 import { StyleSheet } from 'react-native';
-import { radii, sizing, spacing, opacity } from '../../constants/theme/tokens';
+import {
+  radii,
+  sizing,
+  spacing,
+  opacity,
+  typography,
+} from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   labelFrame: { flex: 1 },
+  // Month label: icon and text sit together in the middle of the button.
+  monthGroup: { flexShrink: 1, minWidth: 0 },
+  labelMeasureHidden: {
+    position: 'absolute',
+    width: 0,
+    height: 0,
+    opacity: 0,
+    overflow: 'hidden',
+  },
   labelMeasure: {
     width: '100%',
     flexDirection: 'row',
@@ -38,10 +53,16 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
     paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
     borderRadius: radii.pill,
   },
   fullWidth: { flexBasis: '100%', flexGrow: 0, flexShrink: 0 },
-  label: { flexShrink: 1, textAlign: 'center', fontWeight: '600' },
+  label: {
+    flexShrink: 1,
+    textAlign: 'center',
+    fontWeight: '600',
+    fontSize: typography.supporting + 1, // 15: a touch smaller so month and year fit.
+  },
   pressed: { opacity: opacity.pressed },
   disabled: { opacity: opacity.disabled },
   button: {
