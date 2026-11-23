@@ -7,6 +7,7 @@
     "android": "react-native run-android",
     "android:clean": "cd android && gradlew.bat clean",
     "android:rebuild": "npm run android:clean && npm run android",
+    "android:apk": "cd android && gradlew.bat :app:assembleRelease -PreactNativeArchitectures=arm64-v8a,armeabi-v7a",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.{ts,tsx,js}\" \"*.{js,ts,tsx,json}\"",
