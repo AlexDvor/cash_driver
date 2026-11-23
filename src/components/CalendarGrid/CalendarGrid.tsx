@@ -74,8 +74,19 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
         if (previewDirection.current === direction) return;
         previewDirection.current = direction;
         const month = latest.current.draftMonth;
+        const target =
+          month && direction ? offsetCalendarMonth(month, direction) : null;
+        // The heading previews the month being swiped to; a month outside the
+        // browsable range is never announced, so it cannot flash and jump back.
         onPreviewMonth(
-          month && direction ? offsetCalendarMonth(month, direction) : null,
+          target &&
+            isMonthInRange(
+              target,
+              latest.current.minMonth,
+              latest.current.maxMonth,
+            )
+            ? target
+            : null,
         );
       },
       [onPreviewMonth],
