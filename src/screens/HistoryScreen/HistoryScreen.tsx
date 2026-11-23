@@ -383,13 +383,6 @@ export function HistoryScreen() {
         ListFooterComponent={
           state.status === 'ready' ? (
             <View style={styles.footer}>
-              {state.refreshing && (
-                <View style={styles.feedback}>
-                  <AppText accessibilityLiveRegion="polite">
-                    {t('dataRefreshing')}
-                  </AppText>
-                </View>
-              )}
               {state.refreshError && (
                 <View style={styles.feedback}>
                   <AppText accessibilityRole="alert">
@@ -401,13 +394,7 @@ export function HistoryScreen() {
 
               {!state.refreshing &&
                 !state.refreshError &&
-                (state.loadingMore ? (
-                  <View style={styles.feedback}>
-                    <AppText accessibilityLiveRegion="polite">
-                      {t('historyLoadingMore')}
-                    </AppText>
-                  </View>
-                ) : state.loadMoreError ? (
+                (state.loadingMore ? null : state.loadMoreError ? (
                   <View style={styles.feedback}>
                     <AppText accessibilityRole="alert">
                       {t('historyLoadMoreFailed')}
