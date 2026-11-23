@@ -66,7 +66,7 @@ export function PlatformSummaryRow({
         <View
           style={[
             styles.fill,
-            { width: `${share}%`, backgroundColor: colors.accentFill },
+            { width: `${share}%`, backgroundColor: colors.indicator },
           ]}
         />
       </View>

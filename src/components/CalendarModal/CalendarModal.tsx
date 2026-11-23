@@ -494,7 +494,7 @@ function CalendarSession({
                           {
                             backgroundColor:
                               month === draftMonth.month
-                                ? colors.accentFill
+                                ? colors.indicator
                                 : colors.surfaceRaised,
                           },
                         ]}
@@ -512,7 +512,7 @@ function CalendarSession({
                             {
                               color:
                                 month === draftMonth.month
-                                  ? colors.onAccent
+                                  ? colors.onIndicator
                                   : hasMonths && !occupied
                                   ? colors.secondaryText
                                   : colors.text,

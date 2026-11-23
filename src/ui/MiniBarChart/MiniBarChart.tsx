@@ -22,7 +22,7 @@ export function MiniBarChart({
 }: MiniBarChartProps) {
   const { colors } = useAppTheme();
   const max = Math.max(...values, 0);
-  const soft = mixColor(colors.accentFill, colors.card, 0.38);
+  const soft = mixColor(colors.indicator, colors.card, 0.38);
   return (
     <View
       testID="summary-chart"
@@ -45,7 +45,7 @@ export function MiniBarChart({
                     : { height: `${Math.max(8, (value / max) * 100)}%` },
                   {
                     backgroundColor: today
-                      ? colors.accentFill
+                      ? colors.indicator
                       : empty
                       ? colors.borderStrong
                       : soft,

@@ -17,13 +17,15 @@ export function Toggle({ value, testID }: { value: boolean; testID?: string }) {
       style={[
         styles.track,
         value && styles.trackOn,
-        { backgroundColor: value ? colors.accentFill : colors.borderStrong },
+        { backgroundColor: value ? colors.indicator : colors.borderStrong },
       ]}
     >
       <View
         style={[
           styles.knob,
-          { backgroundColor: value ? colors.onAccent : colors.secondaryText },
+          {
+            backgroundColor: value ? colors.onIndicator : colors.secondaryText,
+          },
         ]}
       />
     </View>

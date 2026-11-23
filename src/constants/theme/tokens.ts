@@ -101,6 +101,8 @@ export interface Palette {
   tertiaryText: string; // Підказки, неактивні вкладки, шеврони (text/tertiary).
   accentFill: string; // Лаймова заливка: основна кнопка, увімкнений перемикач (accent/fill).
   onAccent: string; // Текст та іконки на лаймовій заливці (accent/on).
+  indicator: string; // Заливка індикаторів і вибраного: стовпчики, смужки, перемикач, вибраний день (у світлій темі темніший олив для контрасту).
+  onIndicator: string; // Текст та іконки на заливці індикатора.
 }
 export const palettes: Record<'light' | 'dark', Palette> = {
   // Кольори світлої теми.
@@ -108,22 +110,24 @@ export const palettes: Record<'light' | 'dark', Palette> = {
     transparent: 'transparent', // Прозорий колір без заливки.
     disabledSurface: '#E3E5E0', // Фон недоступних кнопок.
     disabledText: '#8E9592', // Текст недоступних кнопок.
-    background: '#F3F4F1', // Загальний фон екранів (bg/canvas).
+    background: '#ECEEE9', // Загальний фон екранів (bg/canvas).
     card: '#FFFFFF', // Фон карток (bg/surface).
     primary: '#4F6B00', // Акцентний текст і рамки на світлому фоні (accent/text).
     onPrimary: '#FFFFFF', // Текст на темно-оливковій заливці primary.
-    softGreen: '#EEF6D6', // accent/soft.
+    softGreen: '#E2EEB5', // accent/soft.
     text: '#0C0E0D', // Основний текст.
     secondaryText: '#5A615E', // Пояснення й другорядний текст.
-    border: '#E3E5E0', // Рамки та роздільники.
+    border: '#CBD0C8', // Рамки та роздільники.
     errorText: '#C62828', // Текст помилок і небезпечних дій.
     errorSurface: '#FCEBEB', // Фон помилок і небезпечних дій.
-    surfaceRaised: '#F7F8F5',
-    fieldSurface: '#F0F1EE',
-    borderStrong: '#CDD1CB',
-    tertiaryText: '#8E9592',
+    surfaceRaised: '#E7EAE2',
+    fieldSurface: '#EEF0EA',
+    borderStrong: '#B3B9B0',
+    tertiaryText: '#6B726F',
     accentFill: '#C8F04A',
     onAccent: '#0A0B0B',
+    indicator: '#5E7F00',
+    onIndicator: '#FFFFFF',
   },
   // Кольори темної теми.
   dark: {
@@ -146,5 +150,7 @@ export const palettes: Record<'light' | 'dark', Palette> = {
     tertiaryText: '#5F6663',
     accentFill: '#C8F04A',
     onAccent: '#0A0B0B',
+    indicator: '#C8F04A',
+    onIndicator: '#0A0B0B',
   },
 };

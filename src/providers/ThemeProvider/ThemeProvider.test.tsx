@@ -145,7 +145,7 @@ test('reacts to system changes, keeps explicit override, and unsubscribes on unm
     expect(root.findByProps({ testID: 'appearance' }).props.children).toBe(
       'light',
     );
-    expect(setBars).toHaveBeenLastCalledWith(false, '#F3F4F1');
+    expect(setBars).toHaveBeenLastCalledWith(false, '#ECEEE9');
     await act(async () => {
       systemAppearance = 'dark';
       notify();
@@ -168,7 +168,7 @@ test('reacts to system changes, keeps explicit override, and unsubscribes on unm
     );
     setBars.mockClear();
     await act(async () => resume());
-    expect(setBars).toHaveBeenCalledWith(false, '#F3F4F1');
+    expect(setBars).toHaveBeenCalledWith(false, '#ECEEE9');
     await act(async () => {
       systemAppearance = 'light';
       notify();

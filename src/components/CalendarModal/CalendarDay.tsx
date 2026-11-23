@@ -78,7 +78,7 @@ export function CalendarDay({ date }: { date?: DateData }) {
   const selectionStyle = {
     borderColor: today ? colors.primary : colors.card,
   };
-  const circleFill = selected ? colors.accentFill : colors.card;
+  const circleFill = selected ? colors.indicator : colors.card;
   const activityStyle = {
     backgroundColor: circleFill,
     borderColor: circleFill,
@@ -86,7 +86,7 @@ export function CalendarDay({ date }: { date?: DateData }) {
   const dotStyle = {
     backgroundColor: occupied
       ? selected
-        ? colors.onAccent
+        ? colors.onIndicator
         : colors.primary
       : circleFill,
   };
@@ -100,7 +100,9 @@ export function CalendarDay({ date }: { date?: DateData }) {
     >
       <View style={[styles.ring, selectionStyle]}>
         <View style={[styles.circle, activityStyle]}>
-          <AppText style={{ color: selected ? colors.onAccent : colors.text }}>
+          <AppText
+            style={{ color: selected ? colors.onIndicator : colors.text }}
+          >
             {date.day}
           </AppText>
           <View

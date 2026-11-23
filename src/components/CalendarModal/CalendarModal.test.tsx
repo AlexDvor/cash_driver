@@ -101,7 +101,7 @@ test.each([false, true])(
       1,
     );
     expect(StyleSheet.flatten(tile(10).props.style).backgroundColor).toBe(
-      colors.accentFill,
+      colors.indicator,
     );
     expect(StyleSheet.flatten(tile(3).props.style).backgroundColor).toBe(
       colors.surfaceRaised,
@@ -1164,13 +1164,13 @@ test.each([false, true])(
       true,
     );
     expect(
-      surfaces.some(style => style?.backgroundColor === colors.accentFill),
+      surfaces.some(style => style?.backgroundColor === colors.indicator),
     ).toBe(true);
     const dot = selected.findAll(
       node => node.props.testID === 'calendar-activity-2026-10-10',
     )[0];
     expect(StyleSheet.flatten(dot.props.style).backgroundColor).toBe(
-      colors.onAccent,
+      colors.onIndicator,
     );
   },
 );
