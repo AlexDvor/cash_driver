@@ -7,6 +7,7 @@ import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import {
   calendarFullDateLabel,
   calendarMonthLabel,
+  compareCalendarMonths,
 } from '../CalendarModal/calendarPresentation';
 import { CalendarPeriodSelectorProps } from './CalendarPeriodSelector.interface';
 import { styles } from './CalendarPeriodSelector.styles';
@@ -20,6 +21,8 @@ export function CalendarPeriodSelector({
   onReturnToMonth,
   calendarButtonRef,
   embedded = false,
+  minMonth,
+  maxMonth,
 }: CalendarPeriodSelectorProps) {
   const { t, locale } = useTranslation();
   const { colors } = useAppTheme();
@@ -51,6 +54,10 @@ export function CalendarPeriodSelector({
           minimumFontScale: 0.75,
         } as const)
       : {};
+  const canMovePrev =
+    !minMonth || compareCalendarMonths(selection.month, minMonth) > 0;
+  const canMoveNext =
+    !maxMonth || compareCalendarMonths(selection.month, maxMonth) < 0;
   const monthButton = (
     <Pressable
       ref={calendarButtonRef}
@@ -115,11 +122,14 @@ export function CalendarPeriodSelector({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('calendarPreviousMonth')}
+          disabled={!canMovePrev}
+          accessibilityState={{ disabled: !canMovePrev }}
           onPress={() => onMoveMonth(-1)}
           style={({ pressed }) => [
             styles.button,
             { backgroundColor: colors.surfaceRaised },
             pressed && styles.pressed,
+            !canMovePrev && styles.disabled,
           ]}
         >
           <CalendarChevron color={colors.text} previous />
@@ -128,11 +138,14 @@ export function CalendarPeriodSelector({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('calendarNextMonth')}
+          disabled={!canMoveNext}
+          accessibilityState={{ disabled: !canMoveNext }}
           onPress={() => onMoveMonth(1)}
           style={({ pressed }) => [
             styles.button,
             { backgroundColor: colors.surfaceRaised },
             pressed && styles.pressed,
+            !canMoveNext && styles.disabled,
           ]}
         >
           <CalendarChevron color={colors.text} />

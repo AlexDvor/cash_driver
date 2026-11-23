@@ -4,6 +4,8 @@ import { CalendarMonth } from '../../features/summary/periods';
 export type CalendarGridProps = Pick<
   CalendarModalProps,
   | 'draftMonth'
+  | 'minMonth'
+  | 'maxMonth'
   | 'selectedDate'
   | 'todayDateKey'
   | 'occupiedDates'

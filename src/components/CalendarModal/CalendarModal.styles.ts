@@ -99,7 +99,9 @@ export const styles = StyleSheet.create({
     borderRadius: radii.chip,
   },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  month: { flexGrow: 1, flexBasis: '30%' },
+  // Fixed width keeps a short last row from stretching to the full width.
+  month: { width: '31.5%' },
+  disabledControl: { opacity: opacity.disabled },
   selectedMonth: { fontWeight: '700' },
   pickerPreview: { textAlign: 'center', marginTop: spacing.sm },
   icon: {

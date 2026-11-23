@@ -44,3 +44,23 @@ export function offsetCalendarMonth(
   });
   return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1 };
 }
+
+export function compareCalendarMonths(
+  left: CalendarMonth,
+  right: CalendarMonth,
+): number {
+  return left.year * 12 + left.month - (right.year * 12 + right.month);
+}
+
+// Missing bounds mean "unbounded", so a calendar without range data keeps
+// working exactly as before.
+export function isMonthInRange(
+  month: CalendarMonth,
+  min?: CalendarMonth | null,
+  max?: CalendarMonth | null,
+): boolean {
+  return (
+    (!min || compareCalendarMonths(month, min) >= 0) &&
+    (!max || compareCalendarMonths(month, max) <= 0)
+  );
+}

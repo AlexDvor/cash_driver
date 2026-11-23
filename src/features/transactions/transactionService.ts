@@ -60,6 +60,7 @@ export function createTransactionService(
     occupiedDates: repository.occupiedDates,
     occupiedMonths: repository.occupiedMonths,
     dailyNetCash: repository.dailyNetCash,
+    earliestOperation: repository.earliestOperation,
     hasAny: repository.hasAny,
     save(
       pending: PendingOperation,

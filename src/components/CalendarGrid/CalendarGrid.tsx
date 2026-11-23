@@ -22,7 +22,10 @@ import {
 import { useTranslation } from '../../providers/LanguageProvider/LanguageProvider';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../../ui/AppText/AppText';
-import { offsetCalendarMonth } from '../CalendarModal/calendarPresentation';
+import {
+  isMonthInRange,
+  offsetCalendarMonth,
+} from '../CalendarModal/calendarPresentation';
 import { styles } from '../CalendarModal/CalendarModal.styles';
 import {
   CalendarGridHandle,
@@ -165,6 +168,14 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
         const current = latest.current;
         if (!current.draftMonth) return;
         const next = offsetCalendarMonth(current.draftMonth, page > 1 ? 1 : -1);
+        if (!isMonthInRange(next, current.minMonth, current.maxMonth)) {
+          // Outside the browsable range: spring back to the current page.
+          pageScroll.current?.scrollTo({ x: viewportWidth, animated: false });
+          lastOffset.current = viewportWidth;
+          showPreview(0);
+          onPagingChange(false);
+          return;
+        }
         pendingMonth.current = `${next.year}/${next.month}`;
         current.onBrowseMonth(next);
       },
@@ -188,6 +199,16 @@ export const CalendarGrid = forwardRef<CalendarGridHandle, CalendarPagerProps>(
     const forcePage = useCallback(
       (direction: -1 | 1) => {
         if (!viewportWidth || pendingMonth.current || !active) return;
+        const draft = latest.current.draftMonth;
+        if (
+          draft &&
+          !isMonthInRange(
+            offsetCalendarMonth(draft, direction),
+            latest.current.minMonth,
+            latest.current.maxMonth,
+          )
+        )
+          return;
         scrolling.current = true;
         dragging.current = false;
         onPagingChange(true);

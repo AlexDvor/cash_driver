@@ -15,9 +15,12 @@ import { AppText } from '../../ui/AppText/AppText';
 import { ActionButton } from '../../ui/ActionButton/ActionButton';
 import {
   calendarDisplayDate,
+  compareCalendarMonths,
+  isMonthInRange,
   calendarMonthLabel,
   offsetCalendarMonth,
 } from './calendarPresentation';
+import { CalendarMonth } from '../../features/summary/periods';
 import { CalendarModalProps } from './CalendarModal.interface';
 import { styles } from './CalendarModal.styles';
 import { CalendarGrid } from '../CalendarGrid/CalendarGrid';
@@ -51,6 +54,8 @@ function CalendarSession({
   monthActivityStatus = 'loading',
   onRetryMonthActivity,
   onMonthPickerChange,
+  minMonth,
+  maxMonth,
   draftMonth,
   selectedDate,
   todayDateKey,
@@ -134,6 +139,25 @@ function CalendarSession({
       ),
     [draftMonth.year, locale],
   );
+
+  // Year arrows keep the month number but never leave the browsable range.
+  function clampToRange(month: CalendarMonth): CalendarMonth {
+    if (minMonth && compareCalendarMonths(month, minMonth) < 0) return minMonth;
+    if (maxMonth && compareCalendarMonths(month, maxMonth) > 0) return maxMonth;
+    return month;
+  }
+  const previousTarget: CalendarMonth = pickingMonth
+    ? { ...draftMonth, year: draftMonth.year - 1 }
+    : offsetCalendarMonth(draftMonth, -1);
+  const nextTarget: CalendarMonth = pickingMonth
+    ? { ...draftMonth, year: draftMonth.year + 1 }
+    : offsetCalendarMonth(draftMonth, 1);
+  const canGoPrevious = pickingMonth
+    ? !minMonth || previousTarget.year >= minMonth.year
+    : isMonthInRange(previousTarget, minMonth, maxMonth);
+  const canGoNext = pickingMonth
+    ? !maxMonth || nextTarget.year <= maxMonth.year
+    : isMonthInRange(nextTarget, minMonth, maxMonth);
 
   return (
     <Modal
@@ -261,19 +285,23 @@ function CalendarSession({
             </View>
             <View testID="calendar-month-navigation" style={styles.row}>
               <Pressable
-                disabled={gridPaging}
+                disabled={gridPaging || !canGoPrevious}
                 accessibilityRole="button"
+                accessibilityState={{ disabled: gridPaging || !canGoPrevious }}
                 accessibilityLabel={t(
                   pickingMonth
                     ? 'calendarPreviousYear'
                     : 'calendarPreviousMonth',
                 )}
-                style={styles.control}
+                style={[
+                  styles.control,
+                  !canGoPrevious && styles.disabledControl,
+                ]}
                 onPress={() =>
                   onBrowseMonth(
                     pickingMonth
-                      ? { ...draftMonth, year: draftMonth.year - 1 }
-                      : offsetCalendarMonth(draftMonth, -1),
+                      ? clampToRange(previousTarget)
+                      : previousTarget,
                   )
                 }
               >
@@ -356,17 +384,16 @@ function CalendarSession({
                 </View>
               </View>
               <Pressable
-                disabled={gridPaging}
+                disabled={gridPaging || !canGoNext}
                 accessibilityRole="button"
+                accessibilityState={{ disabled: gridPaging || !canGoNext }}
                 accessibilityLabel={t(
                   pickingMonth ? 'calendarNextYear' : 'calendarNextMonth',
                 )}
-                style={styles.control}
+                style={[styles.control, !canGoNext && styles.disabledControl]}
                 onPress={() =>
                   onBrowseMonth(
-                    pickingMonth
-                      ? { ...draftMonth, year: draftMonth.year + 1 }
-                      : offsetCalendarMonth(draftMonth, 1),
+                    pickingMonth ? clampToRange(nextTarget) : nextTarget,
                   )
                 }
               >
@@ -409,82 +436,92 @@ function CalendarSession({
             />
             {pickingMonth ? (
               <View style={styles.grid}>
-                {Array.from({ length: 12 }, (_, index) => {
-                  const month = index + 1;
-                  const occupied = hasMonths && occupiedMonths.includes(month);
-                  const monthLabel = new Intl.DateTimeFormat(locale, {
-                    month: 'long',
-                    timeZone: 'UTC',
-                  }).format(
-                    calendarDisplayDate({ year: draftMonth.year, month }),
-                  );
-                  const shortMonthLabel = new Intl.DateTimeFormat(locale, {
-                    month: 'short',
-                    timeZone: 'UTC',
-                  }).format(
-                    calendarDisplayDate({ year: draftMonth.year, month }),
-                  );
-                  return (
-                    <Pressable
-                      key={`${draftMonth.year}/${month}`}
-                      accessibilityRole="button"
-                      accessibilityLabel={monthLabel}
-                      accessibilityHint={[
-                        t(
-                          !hasMonths
-                            ? 'calendarActivityUnknown'
-                            : occupied
-                            ? 'calendarActivityLegend'
-                            : 'calendarNoActivity',
-                        ),
-                        hasMonths && monthActivityStatus !== 'ready'
-                          ? t(
-                              monthActivityStatus === 'error'
-                                ? 'dataRefreshFailed'
-                                : 'dataRefreshing',
-                            )
-                          : '',
-                      ]
-                        .filter(Boolean)
-                        .join(', ')}
-                      testID={`calendar-month-${month}`}
-                      accessibilityState={{
-                        selected: month === draftMonth.month,
-                      }}
-                      style={[
-                        styles.control,
-                        styles.month,
-                        {
-                          backgroundColor:
-                            month === draftMonth.month
-                              ? colors.accentFill
-                              : colors.surfaceRaised,
-                        },
-                      ]}
-                      onPress={() => {
-                        onBrowseMonth({ year: draftMonth.year, month });
-                      }}
-                    >
-                      <CalendarMonthActivity
-                        occupied={occupied && month !== draftMonth.month}
-                        motion={motion}
-                      />
-                      <AppText
+                {Array.from({ length: 12 }, (_, index) => index + 1)
+                  .filter(month =>
+                    isMonthInRange(
+                      { year: draftMonth.year, month },
+                      minMonth,
+                      maxMonth,
+                    ),
+                  )
+                  .map(month => {
+                    const occupied =
+                      hasMonths && occupiedMonths.includes(month);
+                    const monthLabel = new Intl.DateTimeFormat(locale, {
+                      month: 'long',
+                      timeZone: 'UTC',
+                    }).format(
+                      calendarDisplayDate({ year: draftMonth.year, month }),
+                    );
+                    const shortMonthLabel = new Intl.DateTimeFormat(locale, {
+                      month: 'short',
+                      timeZone: 'UTC',
+                    }).format(
+                      calendarDisplayDate({ year: draftMonth.year, month }),
+                    );
+                    return (
+                      <Pressable
+                        key={`${draftMonth.year}/${month}`}
+                        accessibilityRole="button"
+                        accessibilityLabel={monthLabel}
+                        accessibilityHint={[
+                          t(
+                            !hasMonths
+                              ? 'calendarActivityUnknown'
+                              : occupied
+                              ? 'calendarActivityLegend'
+                              : 'calendarNoActivity',
+                          ),
+                          hasMonths && monthActivityStatus !== 'ready'
+                            ? t(
+                                monthActivityStatus === 'error'
+                                  ? 'dataRefreshFailed'
+                                  : 'dataRefreshing',
+                              )
+                            : '',
+                        ]
+                          .filter(Boolean)
+                          .join(', ')}
+                        testID={`calendar-month-${month}`}
+                        accessibilityState={{
+                          selected: month === draftMonth.month,
+                        }}
                         style={[
-                          month === draftMonth.month && styles.selectedMonth,
+                          styles.control,
+                          styles.month,
                           {
-                            color:
+                            backgroundColor:
                               month === draftMonth.month
-                                ? colors.onAccent
-                                : colors.text,
+                                ? colors.accentFill
+                                : colors.surfaceRaised,
                           },
                         ]}
+                        onPress={() => {
+                          onBrowseMonth({ year: draftMonth.year, month });
+                        }}
                       >
-                        {shortMonthLabel}
-                      </AppText>
-                    </Pressable>
-                  );
-                })}
+                        <CalendarMonthActivity
+                          occupied={occupied && month !== draftMonth.month}
+                          motion={motion}
+                        />
+                        <AppText
+                          style={[
+                            month === draftMonth.month && styles.selectedMonth,
+                            {
+                              color:
+                                month === draftMonth.month
+                                  ? colors.onAccent
+                                  : hasMonths && !occupied
+                                  ? colors.secondaryText
+                                  : colors.text,
+                            },
+                          ]}
+                        >
+                          {shortMonthLabel}
+                        </AppText>
+                      </Pressable>
+                    );
+                  })}
               </View>
             ) : (
               <CalendarGrid
@@ -499,6 +536,8 @@ function CalendarSession({
                 draftMonth={draftMonth}
                 selectedDate={selectedDate}
                 todayDateKey={todayDateKey}
+                minMonth={minMonth}
+                maxMonth={maxMonth}
                 occupiedDates={occupiedDates}
                 activityStatus={activityStatus}
                 activityHasData={hasDates}

@@ -2,6 +2,7 @@ import { SqlConnection, SqlExecutor } from '../database/sqlite';
 import {
   getCalendarDayBounds,
   getCalendarMonthBounds,
+  getCalendarMonthOf,
   getDayRanges,
   getPeriodBounds,
 } from '../features/summary/periods';
@@ -80,6 +81,25 @@ test('day ranges tile the period without gaps across 23 and 25 hour days', () =>
       expect(day.start).toEqual(days[index].end);
     });
   }
+});
+
+test('earliest operation is the oldest timestamp, null when empty, and maps to a local month', async () => {
+  const f = await fixture();
+  expect(await f.transactions.earliestOperation()).toBeNull();
+  await f.save('2026-10-08T10:00:00.000Z');
+  await f.save('2025-12-31T23:30:00.000Z');
+  await f.save('2026-11-01T00:00:00.000Z');
+  const earliest = await f.transactions.earliestOperation();
+  expect(earliest).toBe('2025-12-31T23:30:00.000Z');
+  expect(getCalendarMonthOf(new Date(earliest!), 'UTC')).toEqual({
+    year: 2025,
+    month: 12,
+  });
+  // Same instant is already January in Madrid.
+  expect(getCalendarMonthOf(new Date(earliest!), 'Europe/Madrid')).toEqual({
+    year: 2026,
+    month: 1,
+  });
 });
 
 async function fixture(connection = db) {

@@ -19,6 +19,10 @@ const mockMonthActivity = jest.fn().mockReturnValue({
 jest.mock('../../hooks/summary/useOccupiedMonths', () => ({
   useOccupiedMonths: (...args: unknown[]) => mockMonthActivity(...args),
 }));
+// This test covers composition, not the browsable range (see boundedReads).
+jest.mock('../../hooks/summary/useCalendarRange', () => ({
+  useCalendarRange: () => ({ min: null, max: { year: 2099, month: 12 } }),
+}));
 let mockFocused = true;
 jest.mock('@react-navigation/native', () => ({
   useIsFocused: () => mockFocused,

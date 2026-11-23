@@ -10,6 +10,9 @@ export interface CalendarModalProps {
   monthActivityStatus?: 'loading' | 'error' | 'ready';
   onRetryMonthActivity?: () => void;
   onMonthPickerChange?: (visible: boolean) => void;
+  // Browsable range; a missing bound means unbounded.
+  minMonth?: CalendarMonth | null;
+  maxMonth?: CalendarMonth | null;
   draftMonth: CalendarMonth | null;
   selectedDate?: CalendarDate | null;
   todayDateKey: string;

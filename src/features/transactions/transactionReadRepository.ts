@@ -343,6 +343,26 @@ export function createTransactionReadRepository(db: SqlConnection) {
       });
       return totals;
     },
+    // Timestamp of the oldest operation, or null for an empty store. One
+    // indexed MIN over created_at; the calendar uses it as its lower bound.
+    async earliestOperation(): Promise<string | null> {
+      let earliest: string | null = null;
+      await db.transaction(async tx => {
+        await checkTimestamps(tx);
+        const result = await tx.execute(
+          'SELECT MIN(created_at) AS earliest FROM transactions',
+        );
+        const value = result.rows[0]?.earliest;
+        if (value == null) {
+          return;
+        }
+        if (typeof value !== 'string' || !canonicalTimestamp(value)) {
+          throw new TimestampCompatibilityError();
+        }
+        earliest = value;
+      });
+      return earliest;
+    },
     async occupiedMonths(year: number, timeZone: string): Promise<number[]> {
       const ranges = Array.from({ length: 12 }, (_, index) => ({
         month: index + 1,

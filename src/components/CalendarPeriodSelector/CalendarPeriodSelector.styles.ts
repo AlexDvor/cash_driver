@@ -43,6 +43,7 @@ export const styles = StyleSheet.create({
   fullWidth: { flexBasis: '100%', flexGrow: 0, flexShrink: 0 },
   label: { flexShrink: 1, textAlign: 'center', fontWeight: '600' },
   pressed: { opacity: opacity.pressed },
+  disabled: { opacity: opacity.disabled },
   button: {
     minHeight: sizing.touchTarget,
     minWidth: sizing.touchTarget,

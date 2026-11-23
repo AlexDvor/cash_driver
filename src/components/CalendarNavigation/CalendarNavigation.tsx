@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, View } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { useOccupiedDates } from '../../hooks/summary/useOccupiedDates';
 import { useOccupiedMonths } from '../../hooks/summary/useOccupiedMonths';
+import { useCalendarRange } from '../../hooks/summary/useCalendarRange';
 import { CalendarModal } from '../CalendarModal/CalendarModal';
 import { CalendarPeriodSelector } from '../CalendarPeriodSelector/CalendarPeriodSelector';
 import { CalendarNavigationProps } from './CalendarNavigation.interface';
@@ -22,6 +23,21 @@ export function CalendarNavigation({
     timeZone,
     open && pickingMonth,
   );
+  const currentMonth = useMemo(
+    () => ({
+      year: Number(todayDateKey.slice(0, 4)),
+      month: Number(todayDateKey.slice(5, 7)),
+    }),
+    [todayDateKey],
+  );
+  const keep = useMemo(
+    () =>
+      calendar.draftMonth
+        ? [calendar.selection.month, calendar.draftMonth]
+        : [calendar.selection.month],
+    [calendar.selection.month, calendar.draftMonth],
+  );
+  const range = useCalendarRange(timeZone, currentMonth, keep);
   const wasOpen = useRef(false);
   const activity = useOccupiedDates(
     calendar.draftMonth ?? calendar.month,
@@ -50,6 +66,8 @@ export function CalendarNavigation({
         onOpenCalendar={calendar.openCalendar}
         onReturnToMonth={calendar.returnToMonth}
         calendarButtonRef={trigger}
+        minMonth={range.min}
+        maxMonth={range.max}
       />
       <CalendarModal
         activityHasData={activity.state.dates !== null}
@@ -65,6 +83,8 @@ export function CalendarNavigation({
         onRetryMonthActivity={monthActivity.retry}
         onMonthPickerChange={setPickingMonth}
         draftMonth={calendar.draftMonth}
+        minMonth={range.min}
+        maxMonth={range.max}
         selectedDate={
           calendar.selection.kind === 'day' ? calendar.selection.date : null
         }

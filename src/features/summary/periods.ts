@@ -104,6 +104,26 @@ function resolveCalendarBounds(
   return { start, end };
 }
 
+// Local calendar month containing an instant, in the given time zone.
+export function getCalendarMonthOf(
+  instant: Date,
+  timeZone: string,
+): CalendarMonth {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone,
+    calendar: 'gregory',
+    numberingSystem: 'latn',
+    year: 'numeric',
+    month: 'numeric',
+  }).formatToParts(instant);
+  const year = Number(parts.find(part => part.type === 'year')?.value);
+  const month = Number(parts.find(part => part.type === 'month')?.value);
+  if (!Number.isInteger(year) || !Number.isInteger(month)) {
+    throw new RangeError('Cannot resolve calendar month');
+  }
+  return { year, month };
+}
+
 export function getCalendarMonthBounds(
   month: Readonly<CalendarMonth>,
   timeZone: string,
