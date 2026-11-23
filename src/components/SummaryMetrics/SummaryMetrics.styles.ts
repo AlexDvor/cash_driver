@@ -3,6 +3,14 @@ import { spacing, typography } from '../../constants/theme/tokens';
 
 export const styles = StyleSheet.create({
   heroCard: { gap: spacing.lg },
+  medallionHalo: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    flexShrink: 0,
+  },
+  medallionCore: { alignItems: 'center', justifyContent: 'center' },
   plate: { alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   statCards: {
     width: '100%',

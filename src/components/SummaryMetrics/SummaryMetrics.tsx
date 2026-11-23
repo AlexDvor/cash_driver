@@ -5,6 +5,7 @@ import { sizing, spacing } from '../../constants/theme/tokens';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../../ui/AppText/AppText';
 import { Card } from '../../ui/Card/Card';
+import { mixColor } from '../../ui/MiniBarChart/mixColor';
 import { MiniBarChart } from '../../ui/MiniBarChart/MiniBarChart';
 import { chartHeight } from '../../ui/MiniBarChart/MiniBarChart.styles';
 import CarIcon from '../../assets/icons/duotone/car.svg';
@@ -38,7 +39,7 @@ function IconPlate({
 }) {
   const { colors } = useAppTheme();
   const Icon = icons[name];
-  const iconSize = Math.round(size * 0.55);
+  const iconSize = Math.round(size * 0.62);
   return (
     <View
       testID={testID ?? `summary-icon-${name}`}
@@ -56,6 +57,47 @@ function IconPlate({
       ]}
     >
       <Icon width={iconSize} height={iconSize} color={colors.primary} />
+    </View>
+  );
+}
+
+// Hero icon: coins on a round plate with a dashed halo, echoing the empty-state art.
+function CoinMedallion({ size }: { size: number }) {
+  const { colors } = useAppTheme();
+  const inner = size - 10;
+  return (
+    <View
+      testID="summary-icon-coins"
+      accessible={false}
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={[
+        styles.medallionHalo,
+        {
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          borderColor: mixColor(colors.indicator, colors.card, 0.5),
+        },
+      ]}
+    >
+      <View
+        style={[
+          styles.medallionCore,
+          {
+            width: inner,
+            height: inner,
+            borderRadius: inner / 2,
+            backgroundColor: colors.softGreen,
+          },
+        ]}
+      >
+        <CoinsIcon
+          width={Math.round(inner * 0.76)}
+          height={Math.round(inner * 0.76)}
+          color={colors.primary}
+        />
+      </View>
     </View>
   );
 }
@@ -85,7 +127,7 @@ export function RetainedCashCard({
   return (
     <Card depth style={styles.heroCard}>
       <View style={styles.heroRow}>
-        <IconPlate name="coins" size={52} />
+        <CoinMedallion size={68} />
         <View style={styles.heroText}>
           <AppText variant="supporting" secondary>
             {label}
