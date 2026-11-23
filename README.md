@@ -136,7 +136,7 @@ This packages the **arm64-v8a** and **armeabi-v7a** architectures (about 49 MB),
 Wait for **BUILD SUCCESSFUL**. The signed APK is written to:
 
 ```text
-android/app/build/outputs/apk/release/CashDriver.apk
+android/app/build/outputs/apk/release/CashDriver-1.1.0.apk
 ```
 
 Open its folder from the project root:
@@ -145,11 +145,11 @@ Open its folder from the project root:
 explorer.exe .\android\app\build\outputs\apk\release
 ```
 
-After making further changes, repeat the checks and `npm run android:apk`. The `CashDriver.apk` file will be updated. Running `clean` on every build is unnecessary.
+After making further changes, repeat the checks and `npm run android:apk`. A new `CashDriver-<version>.apk` file is created; APKs of earlier versions stay in the folder. Running `clean` on every build is unnecessary.
 
 ## Transfer and install on an Android phone
 
-1. **Get the file.** Use your built `CashDriver.apk`. If someone provides an APK for installation, download that file from a trusted source onto your phone. This README does not include a published APK download link.
+1. **Get the file.** Use your built `CashDriver-1.1.0.apk` (the file name includes the version from `versionName`). If someone provides an APK for installation, download that file from a trusted source onto your phone. This README does not include a published APK download link.
 2. **Transfer by USB** if the APK is on your computer: connect your Android phone, select “File transfer,” and copy the APK to a folder such as `Download` on the phone.
 3. **Open the APK** in “My Files” or another file manager. If Android asks, allow that file manager to install apps from this source.
 4. Tap **Install** or **Update**, wait for completion, and open **CashDriver**. You can disable the file manager's permission to install unknown apps afterward.
@@ -158,7 +158,7 @@ If ADB is available and USB debugging is enabled, you can install from your comp
 
 ```powershell
 adb devices
-adb install -r .\android\app\build\outputs\apk\release\CashDriver.apk
+adb install -r .\android\app\build\outputs\apk\release\CashDriver-1.1.0.apk
 ```
 
 This example assumes one connected Android device. If several are connected, select the intended device explicitly with `adb -s SERIAL install -r ...`.

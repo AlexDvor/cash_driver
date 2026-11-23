@@ -136,7 +136,7 @@ npm run android:apk
 Дочекайся **BUILD SUCCESSFUL**. Готовий підписаний файл:
 
 ```text
-android/app/build/outputs/apk/release/CashDriver.apk
+android/app/build/outputs/apk/release/CashDriver-1.1.0.apk
 ```
 
 Відкрити його папку з кореня проєкту:
@@ -145,11 +145,11 @@ android/app/build/outputs/apk/release/CashDriver.apk
 explorer.exe .\android\app\build\outputs\apk\release
 ```
 
-Після наступних змін повтори перевірки та `npm run android:apk`: файл `CashDriver.apk` буде оновлений. `clean` щоразу не потрібен.
+Після наступних змін повтори перевірки та `npm run android:apk`: створиться новий файл `CashDriver-<версія>.apk`; APK попередніх версій залишаються в папці. `clean` щоразу не потрібен.
 
 ## Як перенести APK і встановити на телефон
 
-1. **Отримай файл.** Використай зібраний `CashDriver.apk`. Якщо файл надано тобі для встановлення, завантаж саме APK із довіреного джерела на телефон. Цей README не містить посилання на опублікований APK.
+1. **Отримай файл.** Використай зібраний `CashDriver-1.1.0.apk` (у назві файлу — версія з `versionName`). Якщо файл надано тобі для встановлення, завантаж саме APK із довіреного джерела на телефон. Цей README не містить посилання на опублікований APK.
 2. **Перенеси через USB**, якщо APK на комп’ютері: підключи Android, вибери режим «Передавання файлів» і скопіюй APK, наприклад, у папку `Download` телефона.
 3. **Відкрий APK** через «Мої файли» / файловий менеджер. За запитом Android дозволь цьому файловому менеджеру встановлення з цього джерела.
 4. Натисни **«Встановити»** або **«Оновити»**, дочекайся завершення й відкрий **CashDriver**. Після встановлення дозвіл на невідомі застосунки для файлового менеджера можна вимкнути.
@@ -158,7 +158,7 @@ explorer.exe .\android\app\build\outputs\apk\release
 
 ```powershell
 adb devices
-adb install -r .\android\app\build\outputs\apk\release\CashDriver.apk
+adb install -r .\android\app\build\outputs\apk\release\CashDriver-1.1.0.apk
 ```
 
 Цей приклад передбачає один підключений Android-пристрій. Якщо їх кілька, явно вкажи потрібний через `adb -s SERIAL install -r ...`.

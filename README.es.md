@@ -136,7 +136,7 @@ Incluye las arquitecturas **arm64-v8a** y **armeabi-v7a** (unos 49 MB), que cubr
 Espera a que aparezca **BUILD SUCCESSFUL**. El APK firmado se genera en:
 
 ```text
-android/app/build/outputs/apk/release/CashDriver.apk
+android/app/build/outputs/apk/release/CashDriver-1.1.0.apk
 ```
 
 Para abrir su carpeta desde la raíz del proyecto:
@@ -145,11 +145,11 @@ Para abrir su carpeta desde la raíz del proyecto:
 explorer.exe .\android\app\build\outputs\apk\release
 ```
 
-Después de realizar más cambios, repite las comprobaciones y `npm run android:apk`. El archivo `CashDriver.apk` se actualizará. No es necesario ejecutar `clean` en cada compilación.
+Después de realizar más cambios, repite las comprobaciones y `npm run android:apk`. Se crea un archivo nuevo `CashDriver-<versión>.apk`; los APK de versiones anteriores permanecen en la carpeta. No es necesario ejecutar `clean` en cada compilación.
 
 ## Cómo transferir el APK e instalarlo en Android
 
-1. **Obtén el archivo.** Utiliza el `CashDriver.apk` que has generado. Si recibes un APK para instalarlo, descárgalo en el teléfono desde una fuente de confianza. Este README no incluye un enlace a un APK publicado.
+1. **Obtén el archivo.** Utiliza el `CashDriver-1.1.0.apk` que has generado (el nombre incluye la versión de `versionName`). Si recibes un APK para instalarlo, descárgalo en el teléfono desde una fuente de confianza. Este README no incluye un enlace a un APK publicado.
 2. **Transfiérelo por USB** si el APK está en el ordenador: conecta el teléfono Android, selecciona «Transferencia de archivos» y copia el APK, por ejemplo, a la carpeta `Download` del teléfono.
 3. **Abre el APK** desde «Mis archivos» u otro gestor de archivos. Si Android lo solicita, permite que ese gestor instale aplicaciones desde esa fuente.
 4. Pulsa **Instalar** o **Actualizar**, espera a que termine y abre **CashDriver**. Después puedes desactivar el permiso del gestor para instalar aplicaciones desconocidas.
@@ -158,7 +158,7 @@ Si tienes ADB y la depuración USB está activada, también puedes instalarlo de
 
 ```powershell
 adb devices
-adb install -r .\android\app\build\outputs\apk\release\CashDriver.apk
+adb install -r .\android\app\build\outputs\apk\release\CashDriver-1.1.0.apk
 ```
 
 Este ejemplo supone que hay un solo dispositivo Android conectado. Si hay varios, selecciona el correcto con `adb -s SERIAL install -r ...`.
