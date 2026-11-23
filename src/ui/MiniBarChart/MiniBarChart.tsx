@@ -20,9 +20,14 @@ export function MiniBarChart({
   startLabel,
   endLabel,
 }: MiniBarChartProps) {
-  const { colors } = useAppTheme();
+  const { colors, appearance } = useAppTheme();
   const max = Math.max(...values, 0);
-  const soft = mixColor(colors.indicator, colors.card, 0.38);
+  const soft = mixColor(
+    colors.indicator,
+    colors.card,
+    // A pale olive on white needs more weight than lime on near-black.
+    appearance === 'dark' ? 0.38 : 0.6,
+  );
   return (
     <View
       testID="summary-chart"
