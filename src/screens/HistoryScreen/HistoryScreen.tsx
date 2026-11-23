@@ -40,6 +40,7 @@ import { TransactionLoadState } from '../../components/TransactionLoadState/Tran
 import { styles } from './HistoryScreen.styles';
 import ChevronRight from '../../assets/icons/line/chevron-right.svg';
 import EmptyWallet from '../../assets/illustrations/empty-wallet.svg';
+import { dateTimeFormat } from '../../i18n/intlCache';
 
 export function HistoryScreen() {
   const { t, locale } = useTranslation();
@@ -87,13 +88,13 @@ export function HistoryScreen() {
     [state.records, clock.timeZone],
   );
   const sections = useMemo(() => {
-    const dateFormat = new Intl.DateTimeFormat(locale, {
+    const dateFormat = dateTimeFormat(locale, {
       timeZone: clock.timeZone,
       day: 'numeric',
       month: 'short',
       year: 'numeric',
     });
-    const timeFormat = new Intl.DateTimeFormat(locale, {
+    const timeFormat = dateTimeFormat(locale, {
       timeZone: clock.timeZone,
       hour: '2-digit',
       minute: '2-digit',

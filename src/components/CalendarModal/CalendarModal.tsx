@@ -34,6 +34,7 @@ import {
   CalendarActivityFeedback,
   CalendarMonthActivity,
 } from './CalendarActivityFeedback';
+import { dateTimeFormat, numberFormat } from '../../i18n/intlCache';
 
 export function CalendarModal(props: CalendarModalProps) {
   const { draftMonth } = props;
@@ -128,9 +129,7 @@ function CalendarSession({
   const horizontalPadding = compact && !monthOnly ? spacing.xs : spacing.lg;
   const label = calendarMonthLabel(draftMonth, locale);
   const headingLabel = pickingMonth
-    ? new Intl.NumberFormat(locale, { useGrouping: false }).format(
-        draftMonth.year,
-      )
+    ? numberFormat(locale, { useGrouping: false }).format(draftMonth.year)
     : calendarMonthLabel(previewMonth ?? draftMonth, locale);
   const headingSamples = useMemo(
     () =>
@@ -446,13 +445,13 @@ function CalendarSession({
                     );
                     const occupied =
                       hasMonths && occupiedMonths.includes(month);
-                    const monthLabel = new Intl.DateTimeFormat(locale, {
+                    const monthLabel = dateTimeFormat(locale, {
                       month: 'long',
                       timeZone: 'UTC',
                     }).format(
                       calendarDisplayDate({ year: draftMonth.year, month }),
                     );
-                    const shortMonthLabel = new Intl.DateTimeFormat(locale, {
+                    const shortMonthLabel = dateTimeFormat(locale, {
                       month: 'short',
                       timeZone: 'UTC',
                     }).format(

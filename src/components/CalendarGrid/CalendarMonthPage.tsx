@@ -14,6 +14,7 @@ import {
 import { styles } from '../CalendarModal/CalendarModal.styles';
 import { CalendarGridProps } from './CalendarGrid.interface';
 import { CalendarDate } from '../../features/summary/periods';
+import { dateTimeFormat } from '../../i18n/intlCache';
 
 // Remove even the library's hidden adjustable header; navigation is controlled.
 function EmptyCalendarHeader() {
@@ -37,7 +38,7 @@ export const CalendarMonthPage = memo(
     // localized date labels instead of formatting every day again on each read.
     const dateLabels = useMemo(() => {
       if (year == null || month == null) return [];
-      const formatter = new Intl.DateTimeFormat(locale, {
+      const formatter = dateTimeFormat(locale, {
         dateStyle: 'full',
         timeZone: 'UTC',
       });
@@ -54,7 +55,7 @@ export const CalendarMonthPage = memo(
       [dateLabels],
     );
     const weekdays = useMemo(() => {
-      const formatter = new Intl.DateTimeFormat(locale, {
+      const formatter = dateTimeFormat(locale, {
         weekday: 'short',
         timeZone: 'UTC',
       });

@@ -6,6 +6,7 @@ import {
   getCalendarMonthBounds,
 } from '../../features/summary/periods';
 import { useLocalClock } from '../app/useLocalClock';
+import { dateTimeFormat } from '../../i18n/intlCache';
 
 export type CalendarSelection =
   | { kind: 'automatic'; month: CalendarMonth }
@@ -19,7 +20,7 @@ export function useCalendarSelection(clock: ReturnType<typeof useLocalClock>) {
   > | null>(null);
   const [draftMonth, setDraftMonth] = useState<CalendarMonth | null>(null);
   const automaticMonth = (() => {
-    const parts = new Intl.DateTimeFormat('en-GB', {
+    const parts = dateTimeFormat('en-GB', {
       timeZone: clock.timeZone,
       calendar: 'gregory',
       numberingSystem: 'latn',

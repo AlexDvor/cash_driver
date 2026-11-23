@@ -4,12 +4,13 @@ import {
   SummaryPeriod,
 } from '../summary/periods';
 import { CashTransaction, Platform } from './types';
+import { dateTimeFormat } from '../../i18n/intlCache';
 
 export type HistoryPeriod = SummaryPeriod | 'all';
 export type HistoryPlatform = Platform | 'all';
 
 export function localDateKey(date: Date, timeZone: string): string {
-  return new Intl.DateTimeFormat('en-CA', {
+  return dateTimeFormat('en-CA', {
     timeZone,
     year: 'numeric',
     month: '2-digit',

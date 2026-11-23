@@ -1,3 +1,4 @@
+import { dateTimeFormat } from '../../i18n/intlCache';
 export type SummaryPeriod = 'day' | 'week' | 'month';
 export interface PeriodBounds {
   start: Date;
@@ -44,7 +45,7 @@ function wallTimestamp(
 }
 
 function calendarFormatter(timeZone: string): Intl.DateTimeFormat {
-  return new Intl.DateTimeFormat('en-GB', {
+  return dateTimeFormat('en-GB', {
     timeZone,
     calendar: 'gregory',
     numberingSystem: 'latn',
@@ -109,7 +110,7 @@ export function getCalendarMonthOf(
   instant: Date,
   timeZone: string,
 ): CalendarMonth {
-  const parts = new Intl.DateTimeFormat('en-GB', {
+  const parts = dateTimeFormat('en-GB', {
     timeZone,
     calendar: 'gregory',
     numberingSystem: 'latn',
@@ -199,7 +200,7 @@ export function getPeriodBounds(
   if (!Number.isFinite(reference.getTime())) {
     throw new RangeError('Invalid reference date');
   }
-  const formatter = new Intl.DateTimeFormat('en-GB', {
+  const formatter = dateTimeFormat('en-GB', {
     timeZone,
     calendar: 'gregory',
     numberingSystem: 'latn',

@@ -1,11 +1,12 @@
 import { clockTiming } from '../../constants/timing';
 import { useEffect, useState } from 'react';
 import { AppState } from 'react-native';
+import { dateTimeFormat } from '../../i18n/intlCache';
 
 function readClock() {
   const now = new Date();
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const dayKey = new Intl.DateTimeFormat('en-CA', {
+  const dayKey = dateTimeFormat('en-CA', {
     timeZone,
     year: 'numeric',
     month: '2-digit',

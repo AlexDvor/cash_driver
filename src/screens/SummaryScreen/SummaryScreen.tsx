@@ -19,9 +19,10 @@ import { usePersistence } from '../../providers/PersistenceProvider/PersistenceP
 
 import { useDailyNetCash } from '../../hooks/summary/useDailyNetCash';
 import type { SummaryChartData } from '../../components/SummaryMetrics/SummaryMetrics.interface';
+import { dateTimeFormat } from '../../i18n/intlCache';
 
 function formatChartDay(date: Date, locale: string, timeZone: string) {
-  return new Intl.DateTimeFormat(locale, {
+  return dateTimeFormat(locale, {
     day: 'numeric',
     month: 'short',
     timeZone,

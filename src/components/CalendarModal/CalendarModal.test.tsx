@@ -13,6 +13,7 @@ import {
   Language,
   locales as mockLocales,
 } from '../../i18n/translations';
+import { clearIntlCache } from '../../i18n/intlCache';
 
 let mockLanguage: Language = 'en';
 let mockDark = false;
@@ -627,6 +628,7 @@ test.each(['en', 'es'] as Language[])(
 );
 
 test('warms three pages before dragging and promotes the prepared Calendar without remounting', async () => {
+  clearIntlCache(); // formatters are shared; start cold to count constructions
   const formatters = jest.spyOn(Intl, 'DateTimeFormat');
   try {
     await mount();
@@ -670,16 +672,18 @@ test('warms three pages before dragging and promotes the prepared Calendar witho
     await act(async () => app.update(<CalendarModal {...props} />));
     expect(currentPage().findByType(Calendar)).toBe(prepared);
     expect(app.root.findAllByType(Calendar)).toHaveLength(3);
+    // Formatters now come from the shared cache: a month change reuses them
+    // instead of constructing new ones (it used to build one of each).
     expect(
       formatters.mock.calls.filter(
         ([, options]) => options?.dateStyle === 'full',
       ),
-    ).toHaveLength(1);
+    ).toHaveLength(0);
     expect(
       formatters.mock.calls.filter(
         ([, options]) => options?.weekday === 'short',
       ),
-    ).toHaveLength(1);
+    ).toHaveLength(0);
   } finally {
     formatters.mockRestore();
   }

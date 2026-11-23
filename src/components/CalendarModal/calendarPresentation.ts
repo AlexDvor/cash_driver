@@ -1,4 +1,5 @@
 import { CalendarDate, CalendarMonth } from '../../features/summary/periods';
+import { dateTimeFormat } from '../../i18n/intlCache';
 
 export function calendarDateKey(date: CalendarDate): string {
   return `${String(date.year).padStart(4, '0')}-${String(date.month).padStart(
@@ -17,7 +18,7 @@ export function calendarMonthLabel(
   month: CalendarMonth,
   locale: string,
 ): string {
-  return new Intl.DateTimeFormat(locale, {
+  return dateTimeFormat(locale, {
     month: 'long',
     year: 'numeric',
     timeZone: 'UTC',
@@ -28,7 +29,7 @@ export function calendarFullDateLabel(
   date: CalendarDate,
   locale: string,
 ): string {
-  return new Intl.DateTimeFormat(locale, {
+  return dateTimeFormat(locale, {
     dateStyle: 'full',
     timeZone: 'UTC',
   }).format(calendarDisplayDate(date, date.day));

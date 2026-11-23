@@ -1,3 +1,4 @@
+import { dateTimeFormat, numberFormat } from './intlCache';
 // Formatting never feeds decimal euros back into arithmetic or editable inputs.
 export function formatMoney(
   cents: number,
@@ -10,7 +11,7 @@ export function formatMoney(
   const whole = Math.floor(cents / 100);
   const fraction = String(cents % 100).padStart(2, '0');
   const fractionDigits = hideZeroFraction && cents % 100 === 0 ? 0 : 2;
-  return new Intl.NumberFormat(locale, {
+  return numberFormat(locale, {
     style: 'currency',
     currency: 'EUR',
     currencyDisplay: 'narrowSymbol',
@@ -34,7 +35,7 @@ export function formatLocalDateTime(
   locale: string,
   timeZone: string,
 ): string {
-  return new Intl.DateTimeFormat(locale, {
+  return dateTimeFormat(locale, {
     timeZone,
     day: 'numeric',
     month: 'short',
@@ -50,7 +51,7 @@ export function formatPeriodRange(
   locale: string,
   timeZone: string,
 ): string {
-  const formatter = new Intl.DateTimeFormat(locale, {
+  const formatter = dateTimeFormat(locale, {
     timeZone,
     day: 'numeric',
     month: 'short',
@@ -67,7 +68,7 @@ export function formatLocalDate(
   locale: string,
   timeZone: string,
 ): string {
-  return new Intl.DateTimeFormat(locale, {
+  return dateTimeFormat(locale, {
     timeZone,
     day: 'numeric',
     month: 'short',
