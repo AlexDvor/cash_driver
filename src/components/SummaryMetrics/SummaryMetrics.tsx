@@ -122,7 +122,7 @@ export function RetainedCashCard({
     </AppText>
   );
   return (
-    <Card depth style={styles.heroCard}>
+    <Card depth accent style={styles.heroCard}>
       <View style={styles.heroRow}>
         <CoinMedallion size={68} />
         <View style={styles.heroText}>

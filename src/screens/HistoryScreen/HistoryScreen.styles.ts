@@ -17,7 +17,21 @@ export const styles = StyleSheet.create({
   },
   controls: { gap: spacing.md },
   feedback: { gap: spacing.md },
-  groupHeading: { paddingTop: spacing.xl, paddingBottom: spacing.sm },
+  groupHeading: {
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+  },
+  groupTitle: { flexShrink: 1 },
+  groupTotal: { fontVariant: ['tabular-nums'], fontWeight: '600' },
+  tipChip: {
+    borderRadius: radii.pill,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 1,
+  },
   footer: { paddingTop: spacing.xxl },
   heading: { gap: 2, flexShrink: 1 },
   platformHeading: {

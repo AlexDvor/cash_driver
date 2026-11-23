@@ -1,5 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <ellipse cx="12" cy="12" rx="9" ry="9" fill="currentColor" fill-opacity="0.22"/>
-  <ellipse cx="12" cy="12" rx="9" ry="9" fill="none" stroke="currentColor" stroke-width="1.8"/>
-  <path d="M12 11L12 16M12 8L12 8.01" fill="none" stroke="currentColor" stroke-width="1.8"/>
+  <defs>
+    <mask id="infoCut">
+      <rect width="24" height="24" fill="#fff"/>
+      <path d="M12 11v5.2M12 7.9v.1" stroke="#000" stroke-width="2"/>
+    </mask>
+  </defs>
+  <circle cx="12" cy="12" r="9.4" fill="currentColor" mask="url(#infoCut)"/>
 </svg>

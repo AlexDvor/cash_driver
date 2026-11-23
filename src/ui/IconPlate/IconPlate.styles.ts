@@ -7,19 +7,14 @@ export const styles = StyleSheet.create({
     flexShrink: 0,
     borderWidth: 1,
   },
-  clip: {
+  // Accent glow for the key money icon: a soft translucent halo behind the plate
+  // (no elevation shadow, which would ghost during screen transitions).
+  glowHalo: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    overflow: 'hidden',
-  },
-  // Accent glow for the key money icon (colored shadows need Android 9+).
-  glow: {
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 6,
+    top: -5,
+    left: -5,
+    right: -5,
+    bottom: -5,
+    opacity: 0.16,
   },
 });

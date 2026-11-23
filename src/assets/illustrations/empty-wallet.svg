@@ -1,9 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="160" height="140" viewBox="0 0 160 140" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <circle cx="80" cy="70" r="66" fill="none" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.5"/>
+  <defs>
+    <mask id="walletCut">
+      <rect width="160" height="140" fill="#fff"/>
+      <rect x="86" y="66" width="30" height="20" rx="8" fill="#000"/>
+      <circle cx="98" cy="76" r="3.4" fill="#fff"/>
+    </mask>
+  </defs>
+  <circle cx="80" cy="70" r="66" fill="none" stroke="currentColor" stroke-opacity="0.3" stroke-width="1.5" stroke-dasharray="3 7"/>
   <circle cx="80" cy="70" r="52" fill="currentColor" fill-opacity="0.12"/>
-  <path d="M50 56C50 52.686 52.686 50 56 50L100 50C102.209 50 104 51.791 104 54L104 58" fill="none" stroke="currentColor" stroke-width="2.5"/>
-  <rect x="50" y="56" width="62" height="40" rx="7" fill="currentColor" fill-opacity="0.12" stroke="currentColor" stroke-width="2.5"/>
-  <path d="M112 68L100 68C95.582 68 92 71.582 92 76C92 80.418 95.582 84 100 84L112 84L112 68" fill="none" stroke="currentColor" stroke-width="2.5"/>
-  <circle cx="101" cy="76" r="2.2" fill="currentColor"/>
-  <path d="M118 40L122 36M124 50L130 50M112 34L112 28" fill="none" stroke="currentColor" stroke-width="2"/>
+  <path d="M50 56C50 52.7 52.7 50 56 50H100C102.2 50 104 51.8 104 54V60H50Z" fill="currentColor" fill-opacity="0.55"/>
+  <rect x="48" y="56" width="68" height="44" rx="9" fill="currentColor" mask="url(#walletCut)"/>
+  <path d="M120 38l3-3M127 48h5M114 32v-5" stroke="currentColor" stroke-width="2.4"/>
 </svg>

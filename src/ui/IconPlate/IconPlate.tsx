@@ -1,12 +1,10 @@
 import React from 'react';
 import { View } from 'react-native';
-import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import type { SvgProps } from 'react-native-svg';
 import { sizing } from '../../constants/theme/tokens';
 import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
+import { GradientFill } from '../GradientFill/GradientFill';
 import { styles } from './IconPlate.styles';
-
-const GRADIENT_ID = 'iconPlateGradient';
 
 // Solid duotone icon on a glassy plate: soft gradient, hairline accent border
 // and, for the key money icon only, a subtle accent glow.
@@ -42,21 +40,27 @@ export function IconPlate({
           backgroundColor: danger ? colors.card : colors.plateEnd,
           borderColor: danger ? colors.border : colors.plateBorder,
         },
-        glow && !danger && { shadowColor: colors.plateGlow, ...styles.glow },
       ]}
     >
+      {glow && !danger && (
+        <View
+          pointerEvents="none"
+          style={[
+            styles.glowHalo,
+            {
+              borderRadius: Math.round(size * 0.3) + 5,
+              backgroundColor: colors.plateGlow,
+            },
+          ]}
+        />
+      )}
       {!danger && (
-        <View style={[styles.clip, { borderRadius: Math.round(size * 0.3) }]}>
-          <Svg width={size} height={size}>
-            <Defs>
-              <LinearGradient id={GRADIENT_ID} x1="0" y1="0" x2="0.4" y2="1">
-                <Stop offset="0" stopColor={colors.plateStart} />
-                <Stop offset="1" stopColor={colors.plateEnd} />
-              </LinearGradient>
-            </Defs>
-            <Rect width={size} height={size} fill={`url(#${GRADIENT_ID})`} />
-          </Svg>
-        </View>
+        <GradientFill
+          id="iconPlateGradient"
+          from={colors.plateStart}
+          to={colors.plateEnd}
+          radius={Math.round(size * 0.3)}
+        />
       )}
       <Icon
         width={iconSize}

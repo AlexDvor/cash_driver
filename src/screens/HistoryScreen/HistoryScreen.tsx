@@ -103,6 +103,10 @@ export function HistoryScreen() {
     return groups.map(group => ({
       ...group,
       dateLabel: dateFormat.format(group.date),
+      totalLabel: formatMoney(
+        group.records.reduce((sum, record) => sum + record.netCashCents, 0),
+        locale,
+      ),
       data: group.records.map(record => {
         const timeLabel = timeFormat.format(new Date(record.createdAt));
         const fareLabel = formatMoney(record.fareAmountCents, locale);
@@ -289,9 +293,21 @@ export function HistoryScreen() {
         ListHeaderComponent={header}
         renderSectionHeader={({ section: group }) => (
           <View style={styles.groupHeading}>
-            <AppText variant="heading" accessibilityRole="header">
+            <AppText
+              variant="heading"
+              accessibilityRole="header"
+              style={styles.groupTitle}
+            >
               {clock.dayKey === group.key ? `${t('today')} · ` : ''}
               {group.dateLabel}
+            </AppText>
+            <AppText
+              variant="supporting"
+              secondary
+              testID={`history-total-${group.key}`}
+              style={styles.groupTotal}
+            >
+              {group.totalLabel}
             </AppText>
           </View>
         )}
@@ -359,16 +375,23 @@ export function HistoryScreen() {
                     {record.fareLabel}
                   </AppText>
                   {record.tipCents > 0 && (
-                    <AppText
-                      variant="supporting"
+                    <View
                       style={[
-                        styles.money,
-                        styles.tip,
-                        { color: colors.primary },
+                        styles.tipChip,
+                        { backgroundColor: colors.softGreen },
                       ]}
                     >
-                      {record.tipLabel}
-                    </AppText>
+                      <AppText
+                        variant="supporting"
+                        style={[
+                          styles.money,
+                          styles.tip,
+                          { color: colors.primary },
+                        ]}
+                      >
+                        {record.tipLabel}
+                      </AppText>
+                    </View>
                   )}
                 </View>
                 <ChevronRight
