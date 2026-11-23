@@ -10,5 +10,4 @@
   <circle cx="80" cy="70" r="52" fill="currentColor" fill-opacity="0.12"/>
   <path d="M50 56C50 52.7 52.7 50 56 50H100C102.2 50 104 51.8 104 54V60H50Z" fill="currentColor" fill-opacity="0.55"/>
   <rect x="48" y="56" width="68" height="44" rx="9" fill="currentColor" mask="url(#walletCut)"/>
-  <path d="M120 38l3-3M127 48h5M114 32v-5" stroke="currentColor" stroke-width="2.4"/>
 </svg>
