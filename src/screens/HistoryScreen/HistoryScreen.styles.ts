@@ -36,6 +36,8 @@ export const styles = StyleSheet.create({
     minHeight: sizing.touchTarget,
     justifyContent: 'center',
   },
+  // Overlap by the hairline so fractional heights never leave a seam between rows.
+  rowOverlap: { marginTop: -sizing.borderWidth },
   rowFirst: {
     borderTopWidth: sizing.borderWidth,
     borderTopLeftRadius: radii.card,

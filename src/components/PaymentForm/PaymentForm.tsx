@@ -25,6 +25,7 @@ import type { PaymentFormProps } from './PaymentForm.interface';
 import { styles } from './PaymentForm.styles';
 import { PaymentOutcome } from '../PaymentOutcome/PaymentOutcome';
 import { Toggle } from '../../ui/Toggle/Toggle';
+import CheckIcon from '../../assets/icons/line/check.svg';
 import GiftIcon from '../../assets/icons/duotone/gift.svg';
 import TrashIcon from '../../assets/icons/line/trash.svg';
 
@@ -161,23 +162,22 @@ export function PaymentForm({
               style={({ pressed }) => [
                 styles.singlePlatform,
                 {
-                  backgroundColor: colors.background,
-                  borderColor: colors.border,
+                  backgroundColor: colors.surfaceRaised,
+                  borderColor: colors.borderStrong,
                 },
                 pressed && styles.pressed,
               ]}
             >
               <PlatformIcon platform={platformOptions[0]} />
-              <AppText
-                style={{
-                  color:
-                    form.platform === platformOptions[0]
-                      ? colors.primary
-                      : colors.text,
-                }}
-              >
-                {platformLabels[platformOptions[0]]}
-              </AppText>
+              <AppText>{platformLabels[platformOptions[0]]}</AppText>
+              {form.platform === platformOptions[0] && (
+                <CheckIcon
+                  width={sizing.icon - 6}
+                  height={sizing.icon - 6}
+                  color={colors.primary}
+                  accessible={false}
+                />
+              )}
             </Pressable>
           </View>
         ) : (
@@ -289,7 +289,7 @@ export function PaymentForm({
                   styles.quick,
                   quickStyle,
                   form.receivedParsed.status === 'valid' &&
-                    form.receivedParsed.cents === cents
+                  form.receivedParsed.cents === cents
                     ? [
                         styles.quickSelected,
                         {

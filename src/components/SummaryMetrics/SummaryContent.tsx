@@ -46,6 +46,8 @@ export function SummaryContent({
           summary ? `${t('operationCount')}: ${summary.operationCount}` : ''
         }
         chart={chart}
+        amountCents={summary ? summary.netCashTotalCents : null}
+        formatAmount={cents => formatMoney(cents, locale)}
       />
       <SummaryStatCards
         fareLabel={t('fareTotal')}

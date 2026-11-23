@@ -12,6 +12,9 @@ export interface RetainedCashCardProps {
   amount: string;
   countLabel: string;
   chart?: SummaryChartData | null;
+  // When given, the hero amount counts up to this value (formatted by `formatAmount`).
+  amountCents?: number | null;
+  formatAmount?: (cents: number) => string;
 }
 
 export interface SummaryMetricProps {

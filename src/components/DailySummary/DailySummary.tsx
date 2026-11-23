@@ -8,8 +8,9 @@ import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import type { useDailySummary } from '../../hooks/summary/useDailySummary';
 import { CollapsibleContent } from '../CollapsibleContent/CollapsibleContent';
 import { styles } from './DailySummary.styles';
-import { TabIcon } from '../../ui/TabIcon/TabIcon';
-import { routes } from '../../navigation/routes';
+import { IconPlate } from '../../ui/IconPlate/IconPlate';
+import { sizing } from '../../constants/theme/tokens';
+import BarsIcon from '../../assets/icons/duotone/bars.svg';
 import { DailySummarySkeleton } from './DailySummarySkeleton';
 
 export function DailySummary({
@@ -60,7 +61,7 @@ export function DailySummary({
         onPress={onToggle}
         style={({ pressed }) => [styles.header, pressed && styles.pressed]}
       >
-        <TabIcon name={routes.Summary} color={colors.primary} />
+        <IconPlate icon={BarsIcon} size={sizing.iconPlate} />
         <View style={styles.headerText}>
           <AppText testID="daily-summary-title" style={styles.headerTitle}>
             {t('dailySummaryTitle')}

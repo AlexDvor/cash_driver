@@ -12,7 +12,7 @@ export const styles = StyleSheet.create({
     gap: 2,
   },
   slot: { flex: 1, height: '100%', justifyContent: 'flex-end' },
-  bar: { width: '100%', borderRadius: 2 },
+  bar: { width: '100%', borderRadius: 2, transformOrigin: 'bottom' },
   line: { height: 2 },
   axis: {
     flexDirection: 'row',

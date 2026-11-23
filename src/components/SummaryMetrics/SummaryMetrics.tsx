@@ -6,6 +6,9 @@ import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { AppText } from '../../ui/AppText/AppText';
 import { Card } from '../../ui/Card/Card';
 import { mixColor } from '../../ui/MiniBarChart/mixColor';
+import { useCountUp } from '../../hooks/app/useCountUp';
+import { useMotionPreference } from '../../hooks/app/useMotionPreference';
+import { IconPlate } from '../../ui/IconPlate/IconPlate';
 import { MiniBarChart } from '../../ui/MiniBarChart/MiniBarChart';
 import { chartHeight } from '../../ui/MiniBarChart/MiniBarChart.styles';
 import CarIcon from '../../assets/icons/duotone/car.svg';
@@ -27,37 +30,10 @@ const icons = {
   coins: CoinsIcon,
 };
 
-// Duotone icon on a soft accent plate. Decorative, hidden from accessibility.
-function IconPlate({
-  name,
-  size,
-  testID,
-}: {
-  name: SummaryIconName | 'coins';
-  size: number;
-  testID?: string;
-}) {
-  const { colors } = useAppTheme();
-  const Icon = icons[name];
-  const iconSize = Math.round(size * 0.62);
+// Duotone icon on a soft accent plate (shared look, see ui/IconPlate).
+function MetricPlate({ name, size }: { name: SummaryIconName; size: number }) {
   return (
-    <View
-      testID={testID ?? `summary-icon-${name}`}
-      accessible={false}
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-      style={[
-        styles.plate,
-        {
-          width: size,
-          height: size,
-          borderRadius: Math.round(size * 0.3),
-          backgroundColor: colors.softGreen,
-        },
-      ]}
-    >
-      <Icon width={iconSize} height={iconSize} color={colors.primary} />
-    </View>
+    <IconPlate testID={`summary-icon-${name}`} icon={icons[name]} size={size} />
   );
 }
 
@@ -107,11 +83,32 @@ export function RetainedCashCard({
   amount,
   countLabel,
   chart,
+  amountCents = null,
+  formatAmount,
 }: RetainedCashCardProps) {
+  const motion = useMotionPreference();
+  const counting = useCountUp(amountCents, motion === 'full');
+  // The real amount stays in place (tests and screen readers read it); while
+  // counting, a decorative copy is shown on top and the real one is hidden.
   const money = (
-    <AppText testID="summary-retained" style={styles.money}>
-      {amount || ' '}
-    </AppText>
+    <View>
+      <AppText
+        testID="summary-retained"
+        style={[styles.money, counting !== null && styles.moneyHidden]}
+      >
+        {amount || ' '}
+      </AppText>
+      {counting !== null && formatAmount && (
+        <AppText
+          accessible={false}
+          importantForAccessibility="no-hide-descendants"
+          numberOfLines={1}
+          style={[styles.money, styles.moneyOverlay]}
+        >
+          {formatAmount(counting)}
+        </AppText>
+      )}
+    </View>
   );
   const count = (
     <AppText
@@ -196,7 +193,7 @@ export function SummaryStatCards({
             <AppText variant="supporting" secondary style={styles.statText}>
               {metric.label}
             </AppText>
-            <IconPlate name={metric.icon} size={sizing.iconPlate} />
+            <MetricPlate name={metric.icon} size={sizing.iconPlate} />
           </View>
           <ScrollView horizontal style={styles.statAmountScroll}>
             <StatAmount testID={metric.testID} accent={metric.accent}>
@@ -245,7 +242,7 @@ export function SummaryMetric({
           <StatAmount testID={testID}>{amount}</StatAmount>
         </ScrollView>
       </View>
-      {icon && <IconPlate name={icon} size={sizing.iconPlate} />}
+      {icon && <MetricPlate name={icon} size={sizing.iconPlate} />}
     </View>
   );
 }

@@ -8,7 +8,8 @@ import { useAppTheme } from '../../providers/ThemeProvider/ThemeProvider';
 import { formatMoney } from '../../i18n/formatting';
 import type { PaymentOutcomeProps } from './PaymentOutcome.interface';
 import { styles } from './PaymentOutcome.styles';
-import { CashIcon } from './CashIcon';
+import { IconPlate } from '../../ui/IconPlate/IconPlate';
+import BanknoteIcon from '../../assets/icons/duotone/banknote.svg';
 import { CollapsibleContent } from '../CollapsibleContent/CollapsibleContent';
 
 export function PaymentOutcome({
@@ -52,12 +53,10 @@ export function PaymentOutcome({
           ]}
         >
           <View style={styles.receiptHeading}>
-            <CashIcon
-              color={
-                result?.status === 'insufficient'
-                  ? colors.errorText
-                  : colors.primary
-              }
+            <IconPlate
+              icon={BanknoteIcon}
+              size={36}
+              tone={result?.status === 'insufficient' ? 'danger' : 'accent'}
             />
             <AppText
               style={[styles.receiptTitle, { color: colors.secondaryText }]}
@@ -103,7 +102,10 @@ export function PaymentOutcome({
             form.receivedParsed.status === 'valid' && (
               <View
                 testID="payment-receipt-details"
-                style={[styles.details, { borderTopColor: colors.borderStrong }]}
+                style={[
+                  styles.details,
+                  { borderTopColor: colors.borderStrong },
+                ]}
               >
                 {[
                   {

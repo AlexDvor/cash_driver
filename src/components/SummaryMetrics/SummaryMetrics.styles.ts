@@ -44,6 +44,9 @@ export const styles = StyleSheet.create({
     letterSpacing: -1.5,
     fontVariant: ['tabular-nums'],
   },
+  moneyHidden: { opacity: 0 },
+  // Wide on purpose: the in-flight number may be wider than the real one and must not wrap.
+  moneyOverlay: { position: 'absolute', left: 0, top: 0, width: 1200 },
   row: {
     flexDirection: 'row',
     flexWrap: 'wrap',

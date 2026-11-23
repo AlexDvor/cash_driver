@@ -50,6 +50,6 @@ export const styles = StyleSheet.create({
   },
   // Selected chips get a slightly heavier accent border (layout size unchanged).
   selectedChoice: { borderWidth: 1.5 },
-  pressed: { opacity: opacity.choicePressed },
+  pressed: { opacity: opacity.choicePressed, transform: [{ scale: 0.98 }] },
   selected: { fontWeight: '700' },
 });

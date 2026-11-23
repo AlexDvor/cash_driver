@@ -80,7 +80,11 @@ export const styles = StyleSheet.create({
   tipTitle: { fontWeight: '600' },
   tipHint: { fontSize: typography.caption },
   tipBadge: { fontWeight: '700', fontVariant: ['tabular-nums'] },
-  tipEditor: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
+  tipEditor: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+  },
   tipField: { flex: 1, minWidth: 0 },
   removeTip: {
     width: sizing.primaryButton,

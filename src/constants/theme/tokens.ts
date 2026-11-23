@@ -108,8 +108,8 @@ export const palettes: Record<'light' | 'dark', Palette> = {
   // Кольори світлої теми.
   light: {
     transparent: 'transparent', // Прозорий колір без заливки.
-    disabledSurface: '#E3E5E0', // Фон недоступних кнопок.
-    disabledText: '#8E9592', // Текст недоступних кнопок.
+    disabledSurface: '#DDE0D9', // Фон недоступних кнопок.
+    disabledText: '#5E6561', // Текст недоступних кнопок.
     background: '#ECEEE9', // Загальний фон екранів (bg/canvas).
     card: '#FFFFFF', // Фон карток (bg/surface).
     primary: '#4F6B00', // Акцентний текст і рамки на світлому фоні (accent/text).
@@ -133,7 +133,7 @@ export const palettes: Record<'light' | 'dark', Palette> = {
   dark: {
     transparent: 'transparent', // Прозорий колір без заливки.
     disabledSurface: '#1C1F1E', // Фон недоступних кнопок.
-    disabledText: '#5F6663', // Текст недоступних кнопок.
+    disabledText: '#7C8380', // Текст недоступних кнопок.
     background: '#0A0B0B', // Загальний фон екранів (bg/canvas).
     card: '#141615', // Фон карток (bg/surface).
     primary: '#C8F04A', // Лаймовий акцент (accent/text).

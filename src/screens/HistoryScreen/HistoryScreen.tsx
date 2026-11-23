@@ -314,7 +314,7 @@ export function HistoryScreen() {
               }
               style={({ pressed }) => [
                 styles.row,
-                first && styles.rowFirst,
+                first ? styles.rowFirst : styles.rowOverlap,
                 last && styles.rowLast,
                 {
                   backgroundColor: pressed ? colors.surfaceRaised : colors.card,
