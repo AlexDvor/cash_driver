@@ -154,6 +154,19 @@ test('restore asks for confirmation and only then writes', async () => {
   expect(mockData.restore).toHaveBeenCalledWith(records);
 });
 
+test('a single operation uses the singular wording', async () => {
+  mockData.chooseBackup.mockResolvedValue({
+    records: [{ id: 'x' }],
+    from: '20 nov 2026',
+    to: '20 nov 2026',
+  });
+  await mount();
+  await press('data-backup-restore');
+  expect((Alert.alert as jest.Mock).mock.calls[0][1]).toBe(
+    'restoreFoundOne:{"from":"20 nov 2026"}',
+  );
+});
+
 test('cancelling the restore confirmation writes nothing', async () => {
   mockData.chooseBackup.mockResolvedValue({
     records: [{ id: 'x' }],

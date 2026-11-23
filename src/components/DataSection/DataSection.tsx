@@ -85,6 +85,10 @@ export function DataSection() {
   const [months, setMonths] = useState<MonthWithData[] | null>(null);
   const [month, setMonth] = useState<MonthWithData | null>(null);
   const sheetOpen = months !== null;
+  const operationsLabel = (count: number) =>
+    count === 1
+      ? t('monthOperationsOne')
+      : t('monthOperations', { count: String(count) });
 
   async function openExport() {
     const found = await data.loadMonths();
@@ -119,11 +123,13 @@ export function DataSection() {
     }
     Alert.alert(
       t('backupRestore'),
-      t('restoreFound', {
-        count: String(preview.records.length),
-        from: preview.from,
-        to: preview.to,
-      }),
+      preview.records.length === 1
+        ? t('restoreFoundOne', { from: preview.from })
+        : t('restoreFound', {
+            count: String(preview.records.length),
+            from: preview.from,
+            to: preview.to,
+          }),
       [
         { text: t('cancel'), style: 'cancel' },
         {
@@ -246,10 +252,9 @@ export function DataSection() {
                   key={`${item.year}-${item.month}`}
                   testID={`data-month-${item.year}-${item.month}`}
                   accessibilityRole="button"
-                  accessibilityLabel={`${data.monthLabel(item)}. ${t(
-                    'monthOperations',
-                    { count: String(item.count) },
-                  )}`}
+                  accessibilityLabel={`${data.monthLabel(
+                    item,
+                  )}. ${operationsLabel(item.count)}`}
                   onPress={() => setMonth(item)}
                   style={({ pressed }) => [
                     styles.monthRow,
@@ -261,7 +266,7 @@ export function DataSection() {
                     {data.monthLabel(item)}
                   </AppText>
                   <AppText variant="supporting" secondary>
-                    {t('monthOperations', { count: String(item.count) })}
+                    {operationsLabel(item.count)}
                   </AppText>
                 </Pressable>
               ))}

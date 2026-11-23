@@ -199,6 +199,7 @@ export const es = {
   backupRestoreHint: 'Añadir operaciones desde un archivo',
   chooseMonth: 'Elige un mes',
   monthOperations: '{count} operaciones',
+  monthOperationsOne: '1 operación',
   exportPdf: 'Informe PDF',
   exportPdfHint: 'Resumen del mes listo para imprimir o enviar',
   exportCsv: 'Archivo CSV',
@@ -209,6 +210,8 @@ export const es = {
   exportFailed: 'No se pudo crear el archivo. Inténtalo de nuevo.',
   restoreFound:
     'Se encontraron {count} operaciones ({from} – {to}). Se añadirán las que todavía no existen; las actuales no se modifican.',
+  restoreFoundOne:
+    'Se encontró 1 operación ({from}). Se añadirá si todavía no existe; las actuales no se modifican.',
   restoreConfirm: 'Restaurar',
   restoreDone: 'Copia restaurada: {inserted} añadidas, {skipped} ya existían.',
   restoreConflicts: '{conflicts} no se pudieron añadir.',
@@ -423,6 +426,7 @@ export const en: Dictionary = {
   backupRestoreHint: 'Add operations from a file',
   chooseMonth: 'Choose a month',
   monthOperations: '{count} operations',
+  monthOperationsOne: '1 operation',
   exportPdf: 'PDF report',
   exportPdfHint: 'Month summary ready to print or send',
   exportCsv: 'CSV file',
@@ -433,6 +437,8 @@ export const en: Dictionary = {
   exportFailed: 'Could not create the file. Try again.',
   restoreFound:
     'Found {count} operations ({from} – {to}). Those that do not exist yet will be added; current ones are not changed.',
+  restoreFoundOne:
+    'Found 1 operation ({from}). It will be added if it does not exist yet; current ones are not changed.',
   restoreConfirm: 'Restore',
   restoreDone: 'Backup restored: {inserted} added, {skipped} already existed.',
   restoreConflicts: '{conflicts} could not be added.',
