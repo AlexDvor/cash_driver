@@ -5,6 +5,7 @@ import { LanguageProvider } from './src/providers/LanguageProvider/LanguageProvi
 import { ThemeProvider } from './src/providers/ThemeProvider/ThemeProvider';
 import { PersistenceProvider } from './src/providers/PersistenceProvider/PersistenceProvider';
 import { Persistence } from './src/app/persistence';
+import { ErrorBoundary } from './src/components/ErrorBoundary/ErrorBoundary';
 
 export default function App({
   initialize,
@@ -13,13 +14,15 @@ export default function App({
 }) {
   return (
     <SafeAreaProvider>
-      <PersistenceProvider initialize={initialize}>
-        <LanguageProvider>
-          <ThemeProvider>
-            <AppNavigator />
-          </ThemeProvider>
-        </LanguageProvider>
-      </PersistenceProvider>
+      <ErrorBoundary>
+        <PersistenceProvider initialize={initialize}>
+          <LanguageProvider>
+            <ThemeProvider>
+              <AppNavigator />
+            </ThemeProvider>
+          </LanguageProvider>
+        </PersistenceProvider>
+      </ErrorBoundary>
     </SafeAreaProvider>
   );
 }
